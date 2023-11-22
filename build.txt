@@ -1,0 +1,4 @@
+displayName = Zenith
+author = Oli
+version = 0.1
+dllReferences = Microsoft.DotNet.PlatformAbstractions, Microsoft.Extensions.DependencyModel, Silk.NET.Core, Silk.NET.Direct3D11, Silk.NET.DXGI, Silk.NET.GLFW, Silk.NET.Input.Common, Silk.NET.Input.Glfw, Silk.NET.Input.Sdl, Silk.NET.Maths, Silk.NET.OpenAL, Silk.NET.OpenGL, Silk.NET.SDL, Silk.NET.Vulkan, Silk.NET.Vulkan.Extensions.KHR, Silk.NET.Windowing.Common, Silk.NET.Windowing.Glfw, Silk.NET.Windowing.Sdl, System.Text.Encodings.Web, System.Text.Json

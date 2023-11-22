@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\tModLoader.targets" />
+  <PropertyGroup>
+    <AssemblyName>Zenith</AssemblyName>
+    <TargetFramework>net6.0</TargetFramework>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Assets\Effects\ParticleRenderer.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="tModLoader.CodeAssist" Version="0.1.*" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.DotNet.PlatformAbstractions">
+      <HintPath>lib\Microsoft.DotNet.PlatformAbstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.DependencyModel">
+      <HintPath>lib\Microsoft.Extensions.DependencyModel.dll</HintPath>
+    </Reference>
+    <Reference Include="Silk.NET.Core">
+      <HintPath>lib\Silk.NET.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Silk.NET.Direct3D11">
+      <HintPath>lib\Silk.NET.Direct3D11.dll</HintPath>
+    </Reference>
+    <Reference Include="Silk.NET.DXGI">
+      <HintPath>lib\Silk.NET.DXGI.dll</HintPath>
+    </Reference>
+    <Reference Include="Silk.NET.GLFW">
+      <HintPath>lib\Silk.NET.GLFW.dll</HintPath>
+    </Reference>
+    <Reference Include="Silk.NET.Input.Common">
+      <HintPath>lib\Silk.NET.Input.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Silk.NET.Input.Glfw">
+      <HintPath>lib\Silk.NET.Input.Glfw.dll</HintPath>
+    </Reference>
+    <Reference Include="Silk.NET.Input.Sdl">
+      <HintPath>lib\Silk.NET.Input.Sdl.dll</HintPath>
+    </Reference>
+    <Reference Include="Silk.NET.Maths">
+      <HintPath>lib\Silk.NET.Maths.dll</HintPath>
+    </Reference>
+    <Reference Include="Silk.NET.OpenAL">
+      <HintPath>lib\Silk.NET.OpenAL.dll</HintPath>
+    </Reference>
+    <Reference Include="Silk.NET.OpenGL">
+      <HintPath>lib\Silk.NET.OpenGL.dll</HintPath>
+    </Reference>
+    <Reference Include="Silk.NET.SDL">
+      <HintPath>lib\Silk.NET.SDL.dll</HintPath>
+    </Reference>
+    <Reference Include="Silk.NET.Vulkan">
+      <HintPath>lib\Silk.NET.Vulkan.dll</HintPath>
+    </Reference>
+    <Reference Include="Silk.NET.Vulkan.Extensions.KHR">
+      <HintPath>lib\Silk.NET.Vulkan.Extensions.KHR.dll</HintPath>
+    </Reference>
+    <Reference Include="Silk.NET.Windowing.Common">
+      <HintPath>lib\Silk.NET.Windowing.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Silk.NET.Windowing.Glfw">
+      <HintPath>lib\Silk.NET.Windowing.Glfw.dll</HintPath>
+    </Reference>
+    <Reference Include="Silk.NET.Windowing.Sdl">
+      <HintPath>lib\Silk.NET.Windowing.Sdl.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Text.Encodings.Web">
+      <HintPath>lib\System.Text.Encodings.Web.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Text.Json">
+      <HintPath>lib\System.Text.Json.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>
