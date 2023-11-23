@@ -1,11 +1,14 @@
+using JetBrains.Annotations;
 using Terraria.ModLoader;
+using Zenith.Core.Features.PrimitiveRendering;
 
 namespace Zenith;
 
-public class ZenithMod : Mod
+[UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
+public sealed class ZenithMod : Mod
 {
     public override void PostSetupContent()
     {
-        ModContent.GetInstance<PrimitiveSystem>().RegisterRenderTarget("ScreenTarget");
+        ModContent.GetInstance<PrimitiveRenderingSystem>().RegisterRenderTarget("ScreenTarget");
     }
 }

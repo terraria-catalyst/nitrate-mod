@@ -1,15 +1,27 @@
 {
   "profiles": {
-    "Terraria": {
+    "Terraria (Client) (dotnet)": {
       "commandName": "Executable",
       "executablePath": "dotnet",
       "commandLineArgs": "$(tMLPath) -unsafe true",
       "workingDirectory": "$(tMLSteamPath)"
     },
-    "TerrariaServer": {
+    "Terraria (Server) (dotnet)": {
       "commandName": "Executable",
       "executablePath": "dotnet",
-      "commandLineArgs": "$(tMLServerPath)",
+      "commandLineArgs": "$(tMLServerPath) -unsafe true",
+      "workingDirectory": "$(tMLSteamPath)"
+    },
+    "Terraria (Client) (dotnet.exe)": {
+      "commandName": "Executable",
+      "executablePath": "dotnet.exe",
+      "commandLineArgs": "$(tMLPath) -unsafe true",
+      "workingDirectory": "$(tMLSteamPath)"
+    },
+    "Terraria (Server) (dotnet.exe)": {
+      "commandName": "Executable",
+      "executablePath": "dotnet.exe",
+      "commandLineArgs": "$(tMLServerPath) -unsafe true",
       "workingDirectory": "$(tMLSteamPath)"
     }
   }
