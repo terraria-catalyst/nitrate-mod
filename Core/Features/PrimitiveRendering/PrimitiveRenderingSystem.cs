@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace Zenith;
+namespace Zenith.Core.Features.PrimitiveRendering;
 
-public class PrimitiveSystem : ModSystem
+public class PrimitiveRenderingSystem : ModSystem
 {
     private readonly Dictionary<string, RenderingStepData> renderData = new();
 
@@ -22,13 +22,18 @@ public class PrimitiveSystem : ModSystem
     {
         Main.OnResolutionChanged -= OnResolutionChangedTargetsNeedResizing;
 
-        foreach (RenderingStepData data in renderData.Values)
+        Main.RunOnMainThread(() =>
         {
-            Main.RunOnMainThread(() =>
+            foreach (RenderingStepData data in renderData.Values)
             {
                 data.RenderTarget.Dispose();
-            });
-        }
+            }
+        });
+    }
+
+    private void OnResolutionChangedTargetsNeedResizing(Vector2 _)
+    {
+        TargetsNeedResizing();
     }
 
     public override void PostUpdateEverything()
@@ -56,11 +61,6 @@ public class PrimitiveSystem : ModSystem
 
             Finish(id);
         }
-    }
-
-    private void OnResolutionChangedTargetsNeedResizing(Vector2 _)
-    {
-        TargetsNeedResizing();
     }
 
     private void DrawRenderTargets(On_Main.orig_DrawProjectiles orig, Main self)
