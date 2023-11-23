@@ -14,6 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="JetBrains.Annotations" Version="2023.3.0"/>
         <PackageReference Include="Krafs.Publicizer" Version="2.2.1" PrivateAssets="all"/>
         <PackageReference Include="tModLoader.CodeAssist" Version="0.1.*"/>
 

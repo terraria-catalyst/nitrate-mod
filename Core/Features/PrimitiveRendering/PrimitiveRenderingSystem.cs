@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using JetBrains.Annotations;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -7,7 +8,8 @@ using Terraria.ModLoader;
 
 namespace Zenith.Core.Features.PrimitiveRendering;
 
-public class PrimitiveRenderingSystem : ModSystem
+[UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
+internal sealed class PrimitiveRenderingSystem : ModSystem
 {
     private readonly Dictionary<string, RenderingStepData> renderData = new();
 

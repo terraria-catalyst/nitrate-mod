@@ -5,7 +5,7 @@ using System.Diagnostics;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace Zenith;
+namespace Zenith.Content.Optimizations.ParticleRendering;
 
 public class ParticleSystem : ModSystem
 {
@@ -120,7 +120,6 @@ public class ParticleSystem : ModSystem
         }
 
         device.SetRenderTargets(bindings);
-
 
         (particlePositionVelocityMap, particlePositionVelocityMapCopy) = (particlePositionVelocityMapCopy, particlePositionVelocityMap);
     }
