@@ -14,7 +14,15 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Krafs.Publicizer" Version="2.2.1" PrivateAssets="all"/>
         <PackageReference Include="tModLoader.CodeAssist" Version="0.1.*"/>
+
+        <Publicize Include="tModLoader;FNA"/>
+
+        <!-- Certain members should not be publicized, mostly in cases of
+             accidental overlap. -->
+        <DoNotPublicize Include="FNA:Microsoft.Xna.Framework.Graphics.VertexPositionTexture"/>
+        <DoNotPublicize Include="tModLoader:Terraria.Main.OnResolutionChanged"/>
     </ItemGroup>
 
     <ItemGroup>

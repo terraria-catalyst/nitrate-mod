@@ -73,10 +73,9 @@ public class ParticleSystem : ModSystem
 
             vector4Buffer = new DynamicVertexBuffer(device, Vector4Buffer, 2048 * 2048, BufferUsage.None);
 
-            deviceHandle = (nint)typeof(GraphicsDevice).GetField("GLDevice", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(Main.instance.GraphicsDevice);
-
-            textureHandle = (nint)typeof(RenderTarget2D).GetField("texture", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(particlePositionVelocityMap);
-            bufferHandle = (nint)typeof(DynamicVertexBuffer).GetField("buffer", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(vector4Buffer);
+            deviceHandle = Main.instance.GraphicsDevice.GLDevice;
+            textureHandle = particlePositionVelocityMap.texture;
+            bufferHandle = vector4Buffer.buffer;
         });
     }
 
