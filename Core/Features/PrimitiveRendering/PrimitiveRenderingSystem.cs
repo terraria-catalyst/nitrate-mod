@@ -11,31 +11,46 @@ namespace Zenith.Core.Features.PrimitiveRendering;
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class PrimitiveRenderingSystem : ModSystem
 {
-    private readonly Dictionary<string, RenderingStepData> renderData = new();
+    private readonly struct RenderingStepData
+    {
+        public List<Action> RenderEntries { get; } = new();
+
+        public RenderTarget2D RenderTarget { get; } = new(
+            Main.graphics.GraphicsDevice,
+            Main.screenWidth,
+            Main.screenHeight,
+            false,
+            SurfaceFormat.Color,
+            DepthFormat.None,
+            0,
+            RenderTargetUsage.PreserveContents
+        );
+
+        public RenderingStepData()
+        {
+        }
+    }
+
+    private readonly Dictionary<string, RenderingStepData> _renderData = new();
 
     public override void Load()
     {
         On_Main.DrawProjectiles += DrawRenderTargets;
-
-        Main.OnResolutionChanged += OnResolutionChangedTargetsNeedResizing;
+        Main.OnResolutionChanged += TargetsNeedResizing;
     }
 
     public override void Unload()
     {
-        Main.OnResolutionChanged -= OnResolutionChangedTargetsNeedResizing;
+        On_Main.DrawProjectiles -= DrawRenderTargets;
+        Main.OnResolutionChanged -= TargetsNeedResizing;
 
         Main.RunOnMainThread(() =>
         {
-            foreach (RenderingStepData data in renderData.Values)
+            foreach (RenderingStepData data in _renderData.Values)
             {
                 data.RenderTarget.Dispose();
             }
         });
-    }
-
-    private void OnResolutionChangedTargetsNeedResizing(Vector2 _)
-    {
-        TargetsNeedResizing();
     }
 
     public override void PostUpdateEverything()
@@ -45,22 +60,21 @@ internal sealed class PrimitiveRenderingSystem : ModSystem
             return;
         }
 
-        foreach (string id in renderData.Keys)
-        {
-            GraphicsDevice device = Main.graphics.GraphicsDevice;
+        GraphicsDevice device = Main.graphics.GraphicsDevice;
 
+        foreach (string id in _renderData.Keys)
+        {
             RenderTargetBinding[] bindings = device.GetRenderTargets();
 
-            device.SetRenderTarget(renderData[id].RenderTarget);
+            device.SetRenderTarget(_renderData[id].RenderTarget);
             device.Clear(Color.Transparent);
 
-            foreach (Action action in renderData[id].RenderEntries)
+            foreach (Action action in _renderData[id].RenderEntries)
             {
                 action.Invoke();
             }
 
             device.SetRenderTargets(bindings);
-
             Finish(id);
         }
     }
@@ -69,27 +83,36 @@ internal sealed class PrimitiveRenderingSystem : ModSystem
     {
         orig(self);
 
-        foreach (string id in renderData.Keys)
+        foreach (string id in _renderData.Keys)
         {
-            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointWrap,
-                DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+            Main.spriteBatch.Begin(
+                SpriteSortMode.Immediate,
+                BlendState.AlphaBlend,
+                SamplerState.PointWrap,
+                DepthStencilState.None,
+                RasterizerState.CullNone,
+                null,
+                Main.GameViewMatrix.TransformationMatrix
+            );
 
-            Main.spriteBatch.Draw(renderData[id].RenderTarget, Vector2.Zero, Color.White);
-
+            Main.spriteBatch.Draw(_renderData[id].RenderTarget, Vector2.Zero, Color.White);
             Main.spriteBatch.End();
         }
     }
 
-    public void TargetsNeedResizing()
+    public void TargetsNeedResizing(Vector2 _)
     {
-        foreach (RenderingStepData data in renderData.Values)
+        Main.RunOnMainThread(() =>
         {
-            Main.RunOnMainThread(data.RenderTarget.Dispose);
-        }
+            foreach (RenderingStepData data in _renderData.Values)
+            {
+                data.RenderTarget.Dispose();
+            }
+        });
 
-        foreach (string id in renderData.Keys)
+        foreach (string id in _renderData.Keys)
         {
-            renderData[id] = new RenderingStepData();
+            _renderData[id] = new RenderingStepData();
         }
     }
 
@@ -101,33 +124,17 @@ internal sealed class PrimitiveRenderingSystem : ModSystem
     {
         Main.RunOnMainThread(() =>
         {
-            renderData[id] = new RenderingStepData();
+            _renderData[id] = new RenderingStepData();
         });
     }
 
     public void QueueRenderAction(string id, Action renderAction)
     {
-        renderData[id].RenderEntries.Add(renderAction);
+        _renderData[id].RenderEntries.Add(renderAction);
     }
 
     private void Finish(string id)
     {
-        renderData[id].RenderEntries.Clear();
-    }
-
-    private class RenderingStepData
-    {
-        public List<Action> RenderEntries = new();
-
-        public RenderTarget2D RenderTarget = new(
-            Main.graphics.GraphicsDevice,
-            Main.screenWidth,
-            Main.screenHeight,
-            false,
-            SurfaceFormat.Color,
-            DepthFormat.None,
-            0,
-            RenderTargetUsage.PreserveContents
-        );
+        _renderData[id].RenderEntries.Clear();
     }
 }

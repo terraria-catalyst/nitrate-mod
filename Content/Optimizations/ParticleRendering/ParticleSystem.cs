@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using JetBrains.Annotations;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System.Diagnostics;
@@ -7,25 +8,15 @@ using Terraria.ModLoader;
 
 namespace Zenith.Content.Optimizations.ParticleRendering;
 
-public class ParticleSystem : ModSystem
+[UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
+internal sealed class ParticleSystem : ModSystem
 {
-    private DynamicVertexBuffer vertexBuffer;
-
-    private DynamicIndexBuffer indexBuffer;
-
-    private DynamicVertexBuffer vector4Buffer;
-
-    private Effect effect;
-
-    private RenderTarget2D particlePositionVelocityMap;
-
-    private RenderTarget2D particlePositionVelocityMapCopy;
-
-    private static nint deviceHandle;
-
-    private static nint textureHandle;
-
-    private static nint bufferHandle;
+    private DynamicVertexBuffer _vertexBuffer;
+    private DynamicIndexBuffer _indexBuffer;
+    private DynamicVertexBuffer _vector4Buffer;
+    private Effect _effect;
+    private RenderTarget2D _particlePositionVelocityMap;
+    private RenderTarget2D _particlePositionVelocityMapCopy;
 
     private static readonly VertexPositionTexture[] Particle =
     {
@@ -50,16 +41,16 @@ public class ParticleSystem : ModSystem
 
         Main.RunOnMainThread(() =>
         {
-            vertexBuffer = new DynamicVertexBuffer(device, typeof(VertexPositionTexture), Particle.Length, BufferUsage.None);
-            indexBuffer = new DynamicIndexBuffer(device, IndexElementSize.SixteenBits, ParticleIndices.Length, BufferUsage.None);
+            _vertexBuffer = new DynamicVertexBuffer(device, typeof(VertexPositionTexture), Particle.Length, BufferUsage.None);
+            _indexBuffer = new DynamicIndexBuffer(device, IndexElementSize.SixteenBits, ParticleIndices.Length, BufferUsage.None);
 
-            vertexBuffer.SetData(0, Particle, 0, Particle.Length, VertexPositionTexture.VertexDeclaration.VertexStride, SetDataOptions.Discard);
-            indexBuffer.SetData(0, ParticleIndices, 0, ParticleIndices.Length, SetDataOptions.Discard);
+            _vertexBuffer.SetData(0, Particle, 0, Particle.Length, VertexPositionTexture.VertexDeclaration.VertexStride, SetDataOptions.Discard);
+            _indexBuffer.SetData(0, ParticleIndices, 0, ParticleIndices.Length, SetDataOptions.Discard);
 
-            effect = Mod.Assets.Request<Effect>("Assets/Effects/ParticleRenderer", AssetRequestMode.ImmediateLoad).Value;
+            _effect = Mod.Assets.Request<Effect>("Assets/Effects/ParticleRenderer", AssetRequestMode.ImmediateLoad).Value;
 
-            particlePositionVelocityMap = new RenderTarget2D(device, 2048, 2048, false, SurfaceFormat.Vector4, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
-            particlePositionVelocityMapCopy = new RenderTarget2D(device, 2048, 2048, false, SurfaceFormat.Vector4, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
+            _particlePositionVelocityMap = new RenderTarget2D(device, 2048, 2048, false, SurfaceFormat.Vector4, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
+            _particlePositionVelocityMapCopy = new RenderTarget2D(device, 2048, 2048, false, SurfaceFormat.Vector4, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
 
             Vector4[] data = new Vector4[2048 * 2048];
 
@@ -68,14 +59,10 @@ public class ParticleSystem : ModSystem
                 data[i] = new Vector4(0, 0, 1, 1);
             }
 
-            particlePositionVelocityMap.SetData(data, 0, data.Length);
-            particlePositionVelocityMapCopy.SetData(data, 0, data.Length);
+            _particlePositionVelocityMap.SetData(data, 0, data.Length);
+            _particlePositionVelocityMapCopy.SetData(data, 0, data.Length);
 
-            vector4Buffer = new DynamicVertexBuffer(device, Vector4Buffer, 2048 * 2048, BufferUsage.None);
-
-            deviceHandle = Main.instance.GraphicsDevice.GLDevice;
-            textureHandle = particlePositionVelocityMap.texture;
-            bufferHandle = vector4Buffer.buffer;
+            _vector4Buffer = new DynamicVertexBuffer(device, Vector4Buffer, 2048 * 2048, BufferUsage.None);
         });
     }
 
@@ -83,11 +70,11 @@ public class ParticleSystem : ModSystem
     {
         Main.RunOnMainThread(() =>
         {
-            vertexBuffer?.Dispose();
-            indexBuffer?.Dispose();
+            _vertexBuffer?.Dispose();
+            _indexBuffer?.Dispose();
 
-            particlePositionVelocityMap?.Dispose();
-            particlePositionVelocityMapCopy?.Dispose();
+            _particlePositionVelocityMap?.Dispose();
+            _particlePositionVelocityMapCopy?.Dispose();
         });
     }
 
@@ -103,24 +90,24 @@ public class ParticleSystem : ModSystem
 
         Matrix transform = Matrix.CreateOrthographicOffCenter(0, Main.screenWidth, Main.screenHeight, 0, -1, 1);
 
-        effect.Parameters["transformMatrix"].SetValue(transform);
-        effect.Parameters["positionVelocityMap"].SetValue(particlePositionVelocityMap);
+        _effect.Parameters["transformMatrix"].SetValue(transform);
+        _effect.Parameters["positionVelocityMap"].SetValue(_particlePositionVelocityMap);
 
-        device.SetVertexBuffer(vertexBuffer);
-        device.Indices = indexBuffer;
+        device.SetVertexBuffer(_vertexBuffer);
+        device.Indices = _indexBuffer;
 
         RenderTargetBinding[] bindings = device.GetRenderTargets();
 
-        device.SetRenderTarget(particlePositionVelocityMapCopy);
+        device.SetRenderTarget(_particlePositionVelocityMapCopy);
 
-        foreach (EffectPass pass in effect.CurrentTechnique.Passes)
+        foreach (EffectPass pass in _effect.CurrentTechnique.Passes)
         {
             pass.Apply();
-            device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexBuffer.VertexCount, 0, indexBuffer.IndexCount / 3);
+            device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, _vertexBuffer.VertexCount, 0, _indexBuffer.IndexCount / 3);
         }
 
         device.SetRenderTargets(bindings);
 
-        (particlePositionVelocityMap, particlePositionVelocityMapCopy) = (particlePositionVelocityMapCopy, particlePositionVelocityMap);
+        (_particlePositionVelocityMap, _particlePositionVelocityMapCopy) = (_particlePositionVelocityMapCopy, _particlePositionVelocityMap);
     }
 }
