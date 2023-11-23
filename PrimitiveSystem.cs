@@ -1,5 +1,5 @@
-﻿using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using Terraria;
@@ -9,29 +9,18 @@ namespace Zenith;
 
 public class PrimitiveSystem : ModSystem
 {
-    private readonly Dictionary<string, RenderingStepData> renderData;
-
-    public PrimitiveSystem()
-    {
-        renderData = new Dictionary<string, RenderingStepData>();
-    }
+    private readonly Dictionary<string, RenderingStepData> renderData = new();
 
     public override void Load()
     {
         On_Main.DrawProjectiles += DrawRenderTargets;
 
-        Main.OnResolutionChanged += resolution =>
-        {
-            TargetsNeedResizing();
-        };
+        Main.OnResolutionChanged += OnResolutionChangedTargetsNeedResizing;
     }
 
     public override void Unload()
     {
-        Main.OnResolutionChanged -= resolution =>
-        {
-            TargetsNeedResizing();
-        };
+        Main.OnResolutionChanged -= OnResolutionChangedTargetsNeedResizing;
 
         foreach (RenderingStepData data in renderData.Values)
         {
@@ -58,15 +47,20 @@ public class PrimitiveSystem : ModSystem
             device.SetRenderTarget(renderData[id].RenderTarget);
             device.Clear(Color.Transparent);
 
-            for (int i = 0; i < renderData[id].RenderEntries.Count; i++)
+            foreach (Action action in renderData[id].RenderEntries)
             {
-                renderData[id].RenderEntries[i].Invoke();
+                action.Invoke();
             }
 
             device.SetRenderTargets(bindings);
 
             Finish(id);
         }
+    }
+
+    private void OnResolutionChangedTargetsNeedResizing(Vector2 _)
+    {
+        TargetsNeedResizing();
     }
 
     private void DrawRenderTargets(On_Main.orig_DrawProjectiles orig, Main self)
@@ -93,7 +87,7 @@ public class PrimitiveSystem : ModSystem
 
         foreach (string id in renderData.Keys)
         {
-            renderData[id] = new();
+            renderData[id] = new RenderingStepData();
         }
     }
 
@@ -121,16 +115,17 @@ public class PrimitiveSystem : ModSystem
 
     private class RenderingStepData
     {
-        public List<Action> RenderEntries;
+        public List<Action> RenderEntries = new();
 
-        public RenderTarget2D RenderTarget;
-
-        public RenderingStepData()
-        {
-            RenderEntries = new List<Action>();
-
-            RenderTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight, false,
-                SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
-        }
+        public RenderTarget2D RenderTarget = new(
+            Main.graphics.GraphicsDevice,
+            Main.screenWidth,
+            Main.screenHeight,
+            false,
+            SurfaceFormat.Color,
+            DepthFormat.None,
+            0,
+            RenderTargetUsage.PreserveContents
+        );
     }
 }

@@ -2,7 +2,7 @@ using Terraria.ModLoader;
 
 namespace Zenith;
 
-public class Zenith : Mod
+public class ZenithMod : Mod
 {
     public override void PostSetupContent()
     {

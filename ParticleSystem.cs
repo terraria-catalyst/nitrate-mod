@@ -2,8 +2,6 @@
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using Silk.NET.Direct3D11;
-using Silk.NET.Vulkan;
-using System;
 using System.Diagnostics;
 using System.Reflection;
 using Terraria;
@@ -31,16 +29,14 @@ public class ParticleSystem : ModSystem
 
     private static nint bufferHandle;
 
-    private static readonly VertexPositionTexture[] Particle = new[]
-    {
-        new VertexPositionTexture(new Vector3(0, 0, 0), Vector2.Zero),
-        new VertexPositionTexture(new Vector3(1920, 0, 0), Vector2.UnitX),
-        new VertexPositionTexture(new Vector3(1920, 1080, 0), Vector2.One),
-        new VertexPositionTexture(new Vector3(0, 1080, 0), Vector2.UnitY),
+    private static readonly VertexPositionTexture[] Particle = {
+        new(new Vector3(0, 0, 0), Vector2.Zero),
+        new(new Vector3(1920, 0, 0), Vector2.UnitX),
+        new(new Vector3(1920, 1080, 0), Vector2.One),
+        new(new Vector3(0, 1080, 0), Vector2.UnitY),
     };
 
-    private static readonly short[] ParticleIndices = new short[]
-    {
+    private static readonly short[] ParticleIndices = {
         0, 1, 2, 2, 3, 0
     };
 
@@ -54,7 +50,7 @@ public class ParticleSystem : ModSystem
 
         Main.RunOnMainThread(() =>
         {
-            vertexBuffer = new(device, typeof(VertexPositionTexture), Particle.Length, BufferUsage.None);
+            vertexBuffer = new DynamicVertexBuffer(device, typeof(VertexPositionTexture), Particle.Length, BufferUsage.None);
             indexBuffer = new DynamicIndexBuffer(device, IndexElementSize.SixteenBits, ParticleIndices.Length, BufferUsage.None);
 
             vertexBuffer.SetData(0, Particle, 0, Particle.Length, VertexPositionTexture.VertexDeclaration.VertexStride, SetDataOptions.Discard);
@@ -75,7 +71,7 @@ public class ParticleSystem : ModSystem
             particlePositionVelocityMap.SetData(data, 0, data.Length);
             particlePositionVelocityMapCopy.SetData(data, 0, data.Length);
 
-            vector4Buffer = new(device, Vector4Buffer, 2048 * 2048, BufferUsage.None);
+            vector4Buffer = new DynamicVertexBuffer(device, Vector4Buffer, 2048 * 2048, BufferUsage.None);
 
             deviceHandle = (nint)typeof(GraphicsDevice).GetField("GLDevice", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(Main.instance.GraphicsDevice);
 
