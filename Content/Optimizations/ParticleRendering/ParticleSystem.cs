@@ -2,28 +2,37 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
-using System.Diagnostics;
 using Terraria;
+using Terraria.GameContent;
 using Terraria.ModLoader;
+using Zenith.Core.Features.PrimitiveRendering;
 
 namespace Zenith.Content.Optimizations.ParticleRendering;
 
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class ParticleSystem : ModSystem
 {
-    private DynamicVertexBuffer _vertexBuffer;
-    private DynamicIndexBuffer _indexBuffer;
-    private DynamicVertexBuffer _vector4Buffer;
-    private Effect _effect;
-    private RenderTarget2D _particlePositionVelocityMap;
-    private RenderTarget2D _particlePositionVelocityMapCopy;
+    private VertexBuffer _vertexBuffer;
+    private IndexBuffer _indexBuffer;
+
+    private DynamicVertexBuffer _instanceBuffer;
+
+    private Texture2D _dustAtlas;
+
+    private Effect _instanceParticleRenderer;
+
+    private const int MaxInstances = 50_000;
+
+    private readonly DustInstance[] _instances;
+
+    private readonly Vector2[] _velocities;
 
     private static readonly VertexPositionTexture[] Particle =
     {
         new(new Vector3(0, 0, 0), Vector2.Zero),
-        new(new Vector3(1920, 0, 0), Vector2.UnitX),
-        new(new Vector3(1920, 1080, 0), Vector2.One),
-        new(new Vector3(0, 1080, 0), Vector2.UnitY),
+        new(new Vector3(1, 0, 0), Vector2.UnitX),
+        new(new Vector3(1, 1, 0), Vector2.One),
+        new(new Vector3(0, 1, 0), Vector2.UnitY),
     };
 
     private static readonly short[] ParticleIndices =
@@ -31,9 +40,20 @@ internal sealed class ParticleSystem : ModSystem
         0, 1, 2, 2, 3, 0
     };
 
-    private static readonly VertexDeclaration Vector4Buffer = new(
-        new VertexElement(0, VertexElementFormat.Vector4, VertexElementUsage.Position, 0)
+    private static readonly VertexDeclaration InstanceData = new(
+        new VertexElement(0, VertexElementFormat.Vector4, VertexElementUsage.Normal, 0),
+        new VertexElement(16, VertexElementFormat.Vector4, VertexElementUsage.Normal, 1),
+        new VertexElement(32, VertexElementFormat.Vector4, VertexElementUsage.Normal, 2),
+        new VertexElement(48, VertexElementFormat.Vector4, VertexElementUsage.Normal, 3),
+        new VertexElement(64, VertexElementFormat.Vector4, VertexElementUsage.TextureCoordinate, 1),
+        new VertexElement(80, VertexElementFormat.Vector4, VertexElementUsage.Color, 1)
     );
+
+    public ParticleSystem()
+    {
+        _instances = new DustInstance[MaxInstances];
+        _velocities = new Vector2[MaxInstances];
+    }
 
     public override void Load()
     {
@@ -41,28 +61,40 @@ internal sealed class ParticleSystem : ModSystem
 
         Main.RunOnMainThread(() =>
         {
-            _vertexBuffer = new DynamicVertexBuffer(device, typeof(VertexPositionTexture), Particle.Length, BufferUsage.None);
-            _indexBuffer = new DynamicIndexBuffer(device, IndexElementSize.SixteenBits, ParticleIndices.Length, BufferUsage.None);
+            _vertexBuffer = new VertexBuffer(device, typeof(VertexPositionTexture), Particle.Length, BufferUsage.None);
+            _indexBuffer = new IndexBuffer(device, IndexElementSize.SixteenBits, ParticleIndices.Length, BufferUsage.None);
 
-            _vertexBuffer.SetData(0, Particle, 0, Particle.Length, VertexPositionTexture.VertexDeclaration.VertexStride, SetDataOptions.Discard);
-            _indexBuffer.SetData(0, ParticleIndices, 0, ParticleIndices.Length, SetDataOptions.Discard);
+            _vertexBuffer.SetData(0, Particle, 0, Particle.Length, VertexPositionTexture.VertexDeclaration.VertexStride, SetDataOptions.None);
+            _indexBuffer.SetData(0, ParticleIndices, 0, ParticleIndices.Length);
 
-            _effect = Mod.Assets.Request<Effect>("Assets/Effects/ParticleRenderer", AssetRequestMode.ImmediateLoad).Value;
+            _instanceBuffer = new DynamicVertexBuffer(device, InstanceData, MaxInstances, BufferUsage.None);
 
-            _particlePositionVelocityMap = new RenderTarget2D(device, 2048, 2048, false, SurfaceFormat.Vector4, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
-            _particlePositionVelocityMapCopy = new RenderTarget2D(device, 2048, 2048, false, SurfaceFormat.Vector4, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
+            _instanceParticleRenderer = Mod.Assets.Request<Effect>("Assets/Effects/InstancedParticleRenderer", AssetRequestMode.ImmediateLoad).Value;
 
-            Vector4[] data = new Vector4[2048 * 2048];
+            _dustAtlas = TextureAssets.Heart.Value;
 
-            for (int i = 0; i < data.Length; i++)
+            for (int i = 0; i < MaxInstances; i++)
             {
-                data[i] = new Vector4(0, 0, 1, 1);
+                Vector2 initialOffset = new(-_dustAtlas.Width / 2, -_dustAtlas.Height / 2);
+
+                Matrix rotation = Matrix.CreateRotationZ(Main.rand.NextFloat(MathHelper.TwoPi));
+                Matrix offset = Matrix.CreateTranslation(initialOffset.X / 2, initialOffset.Y / 2, 0);
+                Matrix reset = Matrix.CreateTranslation(-initialOffset.X / 2, -initialOffset.Y / 2, 0);
+
+                Matrix rotationMatrix = offset * rotation * reset;
+
+                Vector2 translation = initialOffset + new Vector2(Main.rand.Next(Main.screenWidth), Main.rand.Next(Main.screenHeight));
+
+                _instances[i] = new DustInstance(
+                    Matrix.CreateScale(_dustAtlas.Width, _dustAtlas.Height, 1) *
+                    rotationMatrix *
+                    Matrix.CreateTranslation(new Vector3((int)translation.X, (int)translation.Y, 0)),
+                    new Vector4(0, 0, 1, 1),
+                    new Vector4(Main.rand.NextFloat(), Main.rand.NextFloat(), Main.rand.NextFloat(), 1)
+                );
+
+                _velocities[i] = Vector2.UnitX.RotatedBy(Main.rand.NextFloat(MathHelper.TwoPi)) * 0.25f;
             }
-
-            _particlePositionVelocityMap.SetData(data, 0, data.Length);
-            _particlePositionVelocityMapCopy.SetData(data, 0, data.Length);
-
-            _vector4Buffer = new DynamicVertexBuffer(device, Vector4Buffer, 2048 * 2048, BufferUsage.None);
         });
     }
 
@@ -73,41 +105,50 @@ internal sealed class ParticleSystem : ModSystem
             _vertexBuffer?.Dispose();
             _indexBuffer?.Dispose();
 
-            _particlePositionVelocityMap?.Dispose();
-            _particlePositionVelocityMapCopy?.Dispose();
+            _instanceBuffer?.Dispose();
         });
     }
 
-    Stopwatch sw = new();
-
     public override void PreUpdateDusts()
     {
-        sw.Start();
-
-        GraphicsDevice device = Main.graphics.GraphicsDevice;
-
-        device.RasterizerState = RasterizerState.CullNone;
-
-        Matrix transform = Matrix.CreateOrthographicOffCenter(0, Main.screenWidth, Main.screenHeight, 0, -1, 1);
-
-        _effect.Parameters["transformMatrix"].SetValue(transform);
-        _effect.Parameters["positionVelocityMap"].SetValue(_particlePositionVelocityMap);
-
-        device.SetVertexBuffer(_vertexBuffer);
-        device.Indices = _indexBuffer;
-
-        RenderTargetBinding[] bindings = device.GetRenderTargets();
-
-        device.SetRenderTarget(_particlePositionVelocityMapCopy);
-
-        foreach (EffectPass pass in _effect.CurrentTechnique.Passes)
+        ModContent.GetInstance<PrimitiveRenderingSystem>().QueueRenderAction("DustTarget", () =>
         {
-            pass.Apply();
-            device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, _vertexBuffer.VertexCount, 0, _indexBuffer.IndexCount / 3);
+            GraphicsDevice device = Main.graphics.GraphicsDevice;
+
+            device.RasterizerState = RasterizerState.CullNone;
+
+            Matrix world = Matrix.Identity;
+            Matrix view = Matrix.Identity;
+            Matrix projection = Matrix.CreateOrthographicOffCenter(0, Main.screenWidth, Main.screenHeight, 0, -1, 1);
+
+            _instanceParticleRenderer.Parameters["transformMatrix"].SetValue(world * view * projection);
+            _instanceParticleRenderer.Parameters["dustTexture"].SetValue(_dustAtlas);
+            _instanceParticleRenderer.Parameters["textureSize"].SetValue(new Vector2(_dustAtlas.Width, _dustAtlas.Height));
+
+            SetInstanceData();
+
+            // Instanced render all particles.
+            device.SetVertexBuffers(_vertexBuffer, new VertexBufferBinding(_instanceBuffer, 0, 1));
+            device.Indices = _indexBuffer;
+
+            foreach (EffectPass pass in _instanceParticleRenderer.CurrentTechnique.Passes)
+            {
+                pass.Apply();
+                device.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, _vertexBuffer.VertexCount, 0, _indexBuffer.IndexCount / 3, MaxInstances);
+            }
+        });
+    }
+
+    private void SetInstanceData()
+    {
+        for (int i = 0; i < MaxInstances; i++)
+        {
+            Vector2 velocity = _velocities[i];
+            Matrix delta = Matrix.CreateTranslation(velocity.X, velocity.Y, 0);
+
+            _instances[i].World *= delta;
         }
 
-        device.SetRenderTargets(bindings);
-
-        (_particlePositionVelocityMap, _particlePositionVelocityMapCopy) = (_particlePositionVelocityMapCopy, _particlePositionVelocityMap);
+        _instanceBuffer?.SetData(_instances, 0, MaxInstances, SetDataOptions.None);
     }
 }

@@ -9,6 +9,6 @@ public sealed class ZenithMod : Mod
 {
     public override void PostSetupContent()
     {
-        ModContent.GetInstance<PrimitiveRenderingSystem>().RegisterRenderTarget("ScreenTarget");
+        ModContent.GetInstance<PrimitiveRenderingSystem>().RegisterRenderTarget("DustTarget");
     }
 }
