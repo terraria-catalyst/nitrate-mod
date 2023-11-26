@@ -8,9 +8,23 @@ using Terraria.ModLoader;
 
 namespace Zenith.Core.Features.PrimitiveRendering;
 
+/// <summary>
+///     Handles the registration of and rendering of render targets working with
+///     primitive rendering data.
+/// </summary>
+/// <remarks>
+///     This system splits rendering logic into two parts: updating that occurs
+///     in <see cref="PostUpdateEverything"/> and rendering (drawing of the
+///     render target), which occurs in a detour targeting
+///     <see cref="Main.DrawProjectiles"/>.
+/// </remarks>
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class PrimitiveRenderingSystem : ModSystem
 {
+    /// <summary>
+    ///     Data pertaining to a rendering step; contains the render target and
+    ///     the list of rendering actions to execute on the next rendering step.
+    /// </summary>
     private readonly struct RenderingStepData : IDisposable
     {
         public List<Action> RenderEntries { get; } = new();
@@ -36,16 +50,24 @@ internal sealed class PrimitiveRenderingSystem : ModSystem
         }
     }
 
+    /// <summary>
+    ///     The dictionary of render targets and their associated rendering
+    ///     data.
+    /// </summary>
     private readonly Dictionary<string, RenderingStepData> _renderData = new();
 
     public override void Load()
     {
+        base.Load();
+        
         On_Main.DrawProjectiles += DrawRenderTargets;
         Main.OnResolutionChanged += TargetsNeedResizing;
     }
 
     public override void Unload()
     {
+        base.Unload();
+        
         On_Main.DrawProjectiles -= DrawRenderTargets;
         Main.OnResolutionChanged -= TargetsNeedResizing;
 
@@ -60,6 +82,8 @@ internal sealed class PrimitiveRenderingSystem : ModSystem
 
     public override void PostUpdateEverything()
     {
+        base.PostUpdateEverything();
+        
         if (Main.gameMenu || Main.dedServ)
         {
             return;

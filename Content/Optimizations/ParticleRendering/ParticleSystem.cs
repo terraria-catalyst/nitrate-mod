@@ -47,6 +47,8 @@ internal sealed class ParticleSystem : ModSystem
 
     public override void Load()
     {
+        base.Load();
+
         GraphicsDevice device = Main.graphics.GraphicsDevice;
 
         Main.RunOnMainThread(() =>
@@ -54,7 +56,7 @@ internal sealed class ParticleSystem : ModSystem
             _vertexBuffer = new VertexBuffer(device, typeof(VertexPositionTexture), Particle.Length, BufferUsage.None);
             _indexBuffer = new IndexBuffer(device, IndexElementSize.SixteenBits, ParticleIndices.Length, BufferUsage.None);
 
-            _vertexBuffer.SetData(0, Particle, 0, Particle.Length, VertexPositionTexture.VertexDeclaration.VertexStride, SetDataOptions.None);
+            _vertexBuffer.SetData(0, Particle, 0, Particle.Length, VertexPositionTexture.VertexDeclaration.VertexStride);
             _indexBuffer.SetData(0, ParticleIndices, 0, ParticleIndices.Length);
 
             _instanceBuffer = new DynamicVertexBuffer(device, InstanceData, MaxInstances, BufferUsage.None);
@@ -97,6 +99,8 @@ internal sealed class ParticleSystem : ModSystem
 
     public override void Unload()
     {
+        base.Unload();
+
         Main.RunOnMainThread(() =>
         {
             _vertexBuffer?.Dispose();
@@ -108,6 +112,8 @@ internal sealed class ParticleSystem : ModSystem
 
     public override void PreUpdateDusts()
     {
+        base.PreUpdateDusts();
+
         ModContent.GetInstance<PrimitiveRenderingSystem>().QueueRenderAction(DustTarget, () =>
         {
             GraphicsDevice device = Main.graphics.GraphicsDevice;
