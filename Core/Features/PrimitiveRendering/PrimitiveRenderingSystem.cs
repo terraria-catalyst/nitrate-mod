@@ -11,7 +11,7 @@ namespace Zenith.Core.Features.PrimitiveRendering;
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class PrimitiveRenderingSystem : ModSystem
 {
-    private readonly struct RenderingStepData
+    private readonly struct RenderingStepData : IDisposable
     {
         public List<Action> RenderEntries { get; } = new();
 
@@ -28,6 +28,11 @@ internal sealed class PrimitiveRenderingSystem : ModSystem
 
         public RenderingStepData()
         {
+        }
+
+        public void Dispose()
+        {
+            RenderTarget.Dispose();
         }
     }
 
@@ -100,13 +105,13 @@ internal sealed class PrimitiveRenderingSystem : ModSystem
         }
     }
 
-    public void TargetsNeedResizing(Vector2 _)
+    private void TargetsNeedResizing(Vector2 _)
     {
         Main.RunOnMainThread(() =>
         {
             foreach (RenderingStepData data in _renderData.Values)
             {
-                data.RenderTarget.Dispose();
+                data.Dispose();
             }
         });
 
@@ -117,9 +122,10 @@ internal sealed class PrimitiveRenderingSystem : ModSystem
     }
 
     /// <summary>
-    /// Registers a rendertarget for use with a drawing action or list of drawing actions.
+    ///     Registers a render target for use with a drawing action or list of
+    ///     drawing actions.
     /// </summary>
-    /// <param name="id">ID of the rendertarget and its layer.</param>
+    /// <param name="id">The ID of the render target and its layer.</param>
     public void RegisterRenderTarget(string id)
     {
         Main.RunOnMainThread(() =>
@@ -128,6 +134,11 @@ internal sealed class PrimitiveRenderingSystem : ModSystem
         });
     }
 
+    /// <summary>
+    ///     Queues a render action to be executed on the next rendering step.
+    /// </summary>
+    /// <param name="id">The ID of the render target to render to.</param>
+    /// <param name="renderAction">The action to be executed.</param>
     public void QueueRenderAction(string id, Action renderAction)
     {
         _renderData[id].RenderEntries.Add(renderAction);

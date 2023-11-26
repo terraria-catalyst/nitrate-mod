@@ -12,6 +12,7 @@ namespace Zenith.Content.Optimizations.ParticleRendering;
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class ParticleSystem : ModSystem
 {
+    private const string DustTarget = "DustTarget";
     private const int MaxInstances = 50_000;
 
     private VertexBuffer _vertexBuffer;
@@ -87,6 +88,13 @@ internal sealed class ParticleSystem : ModSystem
         });
     }
 
+    public override void PostSetupContent()
+    {
+        base.PostSetupContent();
+
+        ModContent.GetInstance<PrimitiveRenderingSystem>().RegisterRenderTarget(DustTarget);
+    }
+
     public override void Unload()
     {
         Main.RunOnMainThread(() =>
@@ -100,7 +108,7 @@ internal sealed class ParticleSystem : ModSystem
 
     public override void PreUpdateDusts()
     {
-        ModContent.GetInstance<PrimitiveRenderingSystem>().QueueRenderAction("DustTarget", () =>
+        ModContent.GetInstance<PrimitiveRenderingSystem>().QueueRenderAction(DustTarget, () =>
         {
             GraphicsDevice device = Main.graphics.GraphicsDevice;
 
