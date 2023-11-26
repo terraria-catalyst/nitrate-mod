@@ -132,16 +132,13 @@ internal sealed class ActionableRenderTargetSystem : ModSystem
     {
         Main.RunOnMainThread(() =>
         {
-            foreach (IActionableRenderTarget target in _targets.Values)
+            foreach (string id in _targets.Keys)
             {
+                IActionableRenderTarget target = _targets[id];
                 target.Dispose();
+                _targets[id] = target.ReinitForResize();
             }
         });
-
-        foreach (string id in _targets.Keys)
-        {
-            _targets[id] = _targets[id].ReinitForResize();
-        }
     }
 
     /// <summary>
