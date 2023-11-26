@@ -2,8 +2,6 @@ matrix transformMatrix;
 
 texture dustTexture;
 
-float2 textureSize;
-
 sampler2D DustSampler = sampler_state
 {
     Texture = (dustTexture);
@@ -45,7 +43,12 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
 
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
-    return input.InstanceColor;
+    // The InstanceTexCoord parameter is a Vector4. The first 2 elements are the top-left of the desired region while the last two are the bottom-right.
+    // Using this and the VertexTexCoord argument (which is just a standard 0..1 UV) we can sample the desired region.
+    float sampleX = lerp(input.InstanceTexCoord.x, input.InstanceTexCoord.z, input.VertexTexCoord.x);
+    float sampleY = lerp(input.InstanceTexCoord.y, input.InstanceTexCoord.w, input.VertexTexCoord.y);
+
+    return tex2D(DustSampler, float2(sampleX, sampleY)) * input.InstanceColor;
 }
 
 technique Technique1

@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
+using System.Threading.Tasks;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
@@ -47,6 +48,9 @@ internal sealed class ParticleSystem : ModSystem
     {
         base.Load();
 
+        // Prevent vanilla dust drawing method from running.
+        On_Main.DrawDust += (orig, self) => { };
+
         GraphicsDevice device = Main.graphics.GraphicsDevice;
 
         Main.RunOnMainThread(() =>
@@ -61,7 +65,7 @@ internal sealed class ParticleSystem : ModSystem
 
             _instanceParticleRenderer = Mod.Assets.Request<Effect>("Assets/Effects/InstancedParticleRenderer", AssetRequestMode.ImmediateLoad).Value;
 
-            _dustAtlas = TextureAssets.Heart.Value;
+            _dustAtlas = TextureAssets.Dust.Value;
         });
     }
 
@@ -95,13 +99,10 @@ internal sealed class ParticleSystem : ModSystem
 
             device.RasterizerState = RasterizerState.CullNone;
 
-            Matrix world = Matrix.Identity;
-            Matrix view = Matrix.Identity;
             Matrix projection = Matrix.CreateOrthographicOffCenter(0, Main.screenWidth, Main.screenHeight, 0, -1, 1);
 
-            _instanceParticleRenderer.Parameters["transformMatrix"].SetValue(world * view * projection);
+            _instanceParticleRenderer.Parameters["transformMatrix"].SetValue(projection);
             _instanceParticleRenderer.Parameters["dustTexture"].SetValue(_dustAtlas);
-            _instanceParticleRenderer.Parameters["textureSize"].SetValue(new Vector2(_dustAtlas.Width, _dustAtlas.Height));
 
             SetInstanceData();
 
@@ -119,11 +120,88 @@ internal sealed class ParticleSystem : ModSystem
 
     private void SetInstanceData()
     {
-        for (int i = 0; i < _dusts.Length; i++)
+        Parallel.For(0, _dusts.Length, i =>
         {
-            // TODO: Set dust data here from Main.dust
-        }
+            Dust dust = Main.dust[i];
+
+            if (dust.active)
+            {
+                float halfWidth = dust.frame.Width / 2;
+                float halfHeight = dust.frame.Height / 2;
+
+                Vector2 initialOffset = new(-halfWidth, -halfHeight);
+
+                Matrix rotation = Matrix.CreateRotationZ(dust.rotation);
+                Matrix offset = Matrix.CreateTranslation(initialOffset.X / 2, initialOffset.Y / 2, 0);
+                Matrix reset = Matrix.CreateTranslation(-initialOffset.X / 2, -initialOffset.Y / 2, 0);
+
+                Matrix rotationMatrix = offset * rotation * reset;
+
+                Matrix world =
+                    Matrix.CreateScale(dust.scale * dust.frame.Width, dust.scale * dust.frame.Height, 1) *
+                    rotationMatrix *
+                    Matrix.CreateTranslation(
+                        (int)(dust.position.X - Main.screenPosition.X + initialOffset.X),
+                        (int)(dust.position.Y - Main.screenPosition.Y + initialOffset.Y),
+                    0);
+
+                float uvX = (float)dust.frame.X / _dustAtlas.Width;
+                float uvY = (float)dust.frame.Y / _dustAtlas.Height;
+                float uvW = (float)(dust.frame.X + dust.frame.Width) / _dustAtlas.Width;
+                float uvZ = (float)(dust.frame.Y + dust.frame.Height) / _dustAtlas.Height;
+
+                Color color = Lighting.GetColor((int)(dust.position.X + 4.0) / 16, (int)(dust.position.Y + 4.0) / 16);
+
+                Color dustColor = dust.GetAlpha(color);
+
+                _dusts[i] = new DustInstance(world, new Vector4(uvX, uvY, uvW, uvZ), dustColor.ToVector4());
+            }
+            else
+            {
+                _dusts[i] = new DustInstance();
+            }
+        });
 
         _instanceBuffer?.SetData(_dusts, 0, _dusts.Length, SetDataOptions.None);
+    }
+
+    private void Benchmark()
+    {
+        // Dust benchmark (spawns all 6000 dusts and positions them in a spot next to the player).
+        for (int i = 0; i < Main.maxDust; i++)
+        {
+            Dust dust = Main.dust[i];
+
+            int type = Terraria.ID.DustID.FlameBurst;
+
+            dust.fadeIn = 0f;
+            dust.active = true;
+            dust.type = type;
+            dust.noGravity = true;
+            dust.color = Color.White;
+            dust.alpha = 0;
+            dust.position = Main.LocalPlayer.position + new Vector2(100, 0);
+            dust.velocity = Vector2.Zero;
+            dust.frame.X = 10 * type;
+            dust.frame.Y = 10;
+            dust.shader = null;
+            dust.customData = null;
+            dust.noLightEmittence = false;
+            int num4 = type;
+
+            while (num4 >= 100)
+            {
+                num4 -= 100;
+                dust.frame.X -= 1000;
+                dust.frame.Y += 30;
+            }
+
+            dust.frame.Width = 8;
+            dust.frame.Height = 8;
+            dust.rotation = 0f;
+            dust.scale = 1;
+            dust.noLight = false;
+            dust.firstFrame = true;
+        }
     }
 }
