@@ -1,6 +1,8 @@
 ﻿using JetBrains.Annotations;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
 using ReLogic.Content;
 using System.Threading.Tasks;
 using Terraria;
@@ -48,8 +50,13 @@ internal sealed class ParticleSystem : ModSystem
     {
         base.Load();
 
-        // Prevent vanilla dust drawing method from running.
-        On_Main.DrawDust += (orig, self) => { };
+        // Prevent the original DrawDust method from running; we use an IL edit
+        // instead of a detour to allow mods' detours to still run while
+        // cancelling vanilla behavior.
+        IL_Main.DrawDust += il => {
+            ILCursor c = new(il);
+            c.Emit(OpCodes.Ret);
+        };
 
         GraphicsDevice device = Main.graphics.GraphicsDevice;
 
