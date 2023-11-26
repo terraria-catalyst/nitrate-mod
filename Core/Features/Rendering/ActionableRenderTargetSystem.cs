@@ -178,16 +178,6 @@ internal sealed class ActionableRenderTargetSystem : ModSystem
     /// <param name="renderAction">The action to be executed.</param>
     public void QueueRenderAction(string id, Action renderAction)
     {
-        QueueRenderAction(_targets[id], renderAction);
-    }
-
-    /// <summary>
-    ///     Queues a render action to be executed on the next rendering step.
-    /// </summary>
-    /// <param name="target">The target to render to.</param>
-    /// <param name="renderAction">The action to be executed.</param>
-    public void QueueRenderAction(IActionableRenderTarget target, Action renderAction)
-    {
-        target.Actions.Add(renderAction);
+        _targets[id].Actions.Add(renderAction);
     }
 }
