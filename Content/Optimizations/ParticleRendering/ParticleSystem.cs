@@ -58,6 +58,12 @@ internal sealed class ParticleSystem : AbstractParticleRenderer<DustInstance>
 
             SetInstanceData();
 
+            // Something has gone seriously wrong.
+            if (VertexBuffer is null || IndexBuffer is null)
+            {
+                return;
+            }
+
             // Instanced render all particles.
             device.SetVertexBuffers(VertexBuffer, new VertexBufferBinding(InstanceBuffer, 0, 1));
             device.Indices = IndexBuffer;
@@ -76,7 +82,8 @@ internal sealed class ParticleSystem : AbstractParticleRenderer<DustInstance>
         {
             Dust dust = Main.dust[i];
 
-            if (dust.active)
+            // Something has gone seriously wrong if the atlas is null.
+            if (dust.active && ParticleAtlas is not null)
             {
                 float halfWidth = (int)(dust.frame.Width / 2f);
                 float halfHeight = (int)(dust.frame.Height / 2f);

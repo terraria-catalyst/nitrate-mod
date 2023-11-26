@@ -9,10 +9,10 @@ namespace Zenith.Content.Optimizations.ParticleRendering;
 
 internal abstract class AbstractParticleRenderer<TParticle> : ModSystem where TParticle : unmanaged
 {
-    protected VertexBuffer VertexBuffer;
-    protected IndexBuffer IndexBuffer;
-    protected DynamicVertexBuffer InstanceBuffer;
-    protected Texture2D ParticleAtlas;
+    protected VertexBuffer? VertexBuffer;
+    protected IndexBuffer? IndexBuffer;
+    protected DynamicVertexBuffer? InstanceBuffer;
+    protected Texture2D? ParticleAtlas;
     protected readonly TParticle[] Particles;
     private readonly string targetName;
 
