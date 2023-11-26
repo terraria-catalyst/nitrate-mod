@@ -13,15 +13,13 @@ namespace Zenith.Content.Optimizations.ParticleRendering;
 internal sealed class ParticleSystem : ModSystem
 {
     private const string DustTarget = "DustTarget";
-    private const int MaxInstances = 50_000;
 
     private VertexBuffer _vertexBuffer;
     private IndexBuffer _indexBuffer;
     private DynamicVertexBuffer _instanceBuffer;
     private Texture2D _dustAtlas;
     private Effect _instanceParticleRenderer;
-    private readonly DustInstance[] _instances = new DustInstance[MaxInstances];
-    private readonly Vector2[] _velocities = new Vector2[MaxInstances];
+    private readonly DustInstance[] _dusts = new DustInstance[Main.maxDust];
 
     private static readonly VertexPositionTexture[] Particle =
     {
@@ -59,34 +57,11 @@ internal sealed class ParticleSystem : ModSystem
             _vertexBuffer.SetData(0, Particle, 0, Particle.Length, VertexPositionTexture.VertexDeclaration.VertexStride);
             _indexBuffer.SetData(0, ParticleIndices, 0, ParticleIndices.Length);
 
-            _instanceBuffer = new DynamicVertexBuffer(device, InstanceData, MaxInstances, BufferUsage.None);
+            _instanceBuffer = new DynamicVertexBuffer(device, InstanceData, _dusts.Length, BufferUsage.None);
 
             _instanceParticleRenderer = Mod.Assets.Request<Effect>("Assets/Effects/InstancedParticleRenderer", AssetRequestMode.ImmediateLoad).Value;
 
             _dustAtlas = TextureAssets.Heart.Value;
-
-            for (int i = 0; i < MaxInstances; i++)
-            {
-                Vector2 initialOffset = new((int)(-_dustAtlas.Width / 2f), (int)(-_dustAtlas.Height / 2f));
-
-                Matrix rotation = Matrix.CreateRotationZ(Main.rand.NextFloat(MathHelper.TwoPi));
-                Matrix offset = Matrix.CreateTranslation(initialOffset.X / 2, initialOffset.Y / 2, 0);
-                Matrix reset = Matrix.CreateTranslation(-initialOffset.X / 2, -initialOffset.Y / 2, 0);
-
-                Matrix rotationMatrix = offset * rotation * reset;
-
-                Vector2 translation = initialOffset + new Vector2(Main.rand.Next(Main.screenWidth), Main.rand.Next(Main.screenHeight));
-
-                _instances[i] = new DustInstance(
-                    Matrix.CreateScale(_dustAtlas.Width, _dustAtlas.Height, 1) *
-                    rotationMatrix *
-                    Matrix.CreateTranslation(new Vector3((int)translation.X, (int)translation.Y, 0)),
-                    new Vector4(0, 0, 1, 1),
-                    new Vector4(Main.rand.NextFloat(), Main.rand.NextFloat(), Main.rand.NextFloat(), 1)
-                );
-
-                _velocities[i] = Vector2.UnitX.RotatedBy(Main.rand.NextFloat(MathHelper.TwoPi)) * 0.25f;
-            }
         });
     }
 
@@ -144,14 +119,11 @@ internal sealed class ParticleSystem : ModSystem
 
     private void SetInstanceData()
     {
-        for (int i = 0; i < MaxInstances; i++)
+        for (int i = 0; i < _dusts.Length; i++)
         {
-            Vector2 velocity = _velocities[i];
-            Matrix delta = Matrix.CreateTranslation(velocity.X, velocity.Y, 0);
-
-            _instances[i].World *= delta;
+            // TODO: Set dust data here from Main.dust
         }
 
-        _instanceBuffer?.SetData(_instances, 0, MaxInstances, SetDataOptions.None);
+        _instanceBuffer?.SetData(_dusts, 0, _dusts.Length, SetDataOptions.None);
     }
 }

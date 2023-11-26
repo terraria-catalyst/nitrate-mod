@@ -10,7 +10,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Remove="Assets\**\*.fx"/>
+        <None Remove="Assets\**\*.xnb"/>
     </ItemGroup>
 
     <ItemGroup>
