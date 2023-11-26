@@ -5,7 +5,7 @@ using ReLogic.Content;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
-using Zenith.Core.Features.PrimitiveRendering;
+using Zenith.Core.Features.Rendering;
 
 namespace Zenith.Content.Optimizations.ParticleRendering;
 
@@ -94,7 +94,7 @@ internal sealed class ParticleSystem : ModSystem
     {
         base.PostSetupContent();
 
-        ModContent.GetInstance<PrimitiveRenderingSystem>().RegisterRenderTarget(DustTarget);
+        ModContent.GetInstance<ActionableRenderTargetSystem>().RegisterRenderTarget(DustTarget);
     }
 
     public override void Unload()
@@ -114,7 +114,7 @@ internal sealed class ParticleSystem : ModSystem
     {
         base.PreUpdateDusts();
 
-        ModContent.GetInstance<PrimitiveRenderingSystem>().QueueRenderAction(DustTarget, () =>
+        ModContent.GetInstance<ActionableRenderTargetSystem>().QueueRenderAction(DustTarget, () =>
         {
             GraphicsDevice device = Main.graphics.GraphicsDevice;
 

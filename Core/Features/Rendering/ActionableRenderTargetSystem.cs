@@ -6,28 +6,24 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace Zenith.Core.Features.PrimitiveRendering;
+namespace Zenith.Core.Features.Rendering;
 
 /// <summary>
-///     Handles the registration of and rendering of render targets working with
-///     primitive rendering data.
+///     Handles the registration of and rendering of render targets that deal
+///     with decentralized, arbitrary actions.
 /// </summary>
 /// <remarks>
-///     This system splits rendering logic into two parts: updating that occurs
-///     in <see cref="PostUpdateEverything"/> and rendering (drawing of the
-///     render target), which occurs in a detour targeting
-///     <see cref="Main.DrawProjectiles"/>.
+///     This system splits rendering logic into two parts: updating ([the
+///     execution] of actions) that occurs in <see cref="PostUpdateEverything"/>
+///     and rendering (drawing of the render target), which occurs in a detour
+///     targeting <see cref="Main.DrawProjectiles"/> (in post).
 /// </remarks>
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
-internal sealed class PrimitiveRenderingSystem : ModSystem
+internal sealed class ActionableRenderTargetSystem : ModSystem
 {
-    /// <summary>
-    ///     Data pertaining to a rendering step; contains the render target and
-    ///     the list of rendering actions to execute on the next rendering step.
-    /// </summary>
-    private readonly struct RenderingStepData : IDisposable
+    private sealed class DefaultActionableRenderTarget : IActionableRenderTarget
     {
-        public List<Action> RenderEntries { get; } = new();
+        public List<Action> Actions { get; } = new();
 
         public RenderTarget2D RenderTarget { get; } = new(
             Main.graphics.GraphicsDevice,
@@ -40,9 +36,12 @@ internal sealed class PrimitiveRenderingSystem : ModSystem
             RenderTargetUsage.PreserveContents
         );
 
-        public RenderingStepData()
+        public void Finish()
         {
+            Actions.Clear();
         }
+
+        public IActionableRenderTarget ReinitForResize() => new DefaultActionableRenderTarget();
 
         public void Dispose()
         {
@@ -54,12 +53,12 @@ internal sealed class PrimitiveRenderingSystem : ModSystem
     ///     The dictionary of render targets and their associated rendering
     ///     data.
     /// </summary>
-    private readonly Dictionary<string, RenderingStepData> _renderData = new();
+    private readonly Dictionary<string, IActionableRenderTarget> _targets = new();
 
     public override void Load()
     {
         base.Load();
-        
+
         On_Main.DrawProjectiles += DrawRenderTargets;
         Main.OnResolutionChanged += TargetsNeedResizing;
     }
@@ -67,15 +66,15 @@ internal sealed class PrimitiveRenderingSystem : ModSystem
     public override void Unload()
     {
         base.Unload();
-        
+
         On_Main.DrawProjectiles -= DrawRenderTargets;
         Main.OnResolutionChanged -= TargetsNeedResizing;
 
         Main.RunOnMainThread(() =>
         {
-            foreach (RenderingStepData data in _renderData.Values)
+            foreach (IActionableRenderTarget target in _targets.Values)
             {
-                data.RenderTarget.Dispose();
+                target.Dispose();
             }
         });
     }
@@ -83,7 +82,7 @@ internal sealed class PrimitiveRenderingSystem : ModSystem
     public override void PostUpdateEverything()
     {
         base.PostUpdateEverything();
-        
+
         if (Main.gameMenu || Main.dedServ)
         {
             return;
@@ -91,20 +90,20 @@ internal sealed class PrimitiveRenderingSystem : ModSystem
 
         GraphicsDevice device = Main.graphics.GraphicsDevice;
 
-        foreach (string id in _renderData.Keys)
+        foreach (IActionableRenderTarget target in _targets.Values)
         {
             RenderTargetBinding[] bindings = device.GetRenderTargets();
 
-            device.SetRenderTarget(_renderData[id].RenderTarget);
+            device.SetRenderTarget(target.RenderTarget);
             device.Clear(Color.Transparent);
 
-            foreach (Action action in _renderData[id].RenderEntries)
+            foreach (Action action in target.Actions)
             {
                 action.Invoke();
             }
 
             device.SetRenderTargets(bindings);
-            Finish(id);
+            target.Finish();
         }
     }
 
@@ -112,7 +111,7 @@ internal sealed class PrimitiveRenderingSystem : ModSystem
     {
         orig(self);
 
-        foreach (string id in _renderData.Keys)
+        foreach (string id in _targets.Keys)
         {
             Main.spriteBatch.Begin(
                 SpriteSortMode.Immediate,
@@ -124,7 +123,7 @@ internal sealed class PrimitiveRenderingSystem : ModSystem
                 Main.GameViewMatrix.TransformationMatrix
             );
 
-            Main.spriteBatch.Draw(_renderData[id].RenderTarget, Vector2.Zero, Color.White);
+            Main.spriteBatch.Draw(_targets[id].RenderTarget, Vector2.Zero, Color.White);
             Main.spriteBatch.End();
         }
     }
@@ -133,16 +132,26 @@ internal sealed class PrimitiveRenderingSystem : ModSystem
     {
         Main.RunOnMainThread(() =>
         {
-            foreach (RenderingStepData data in _renderData.Values)
+            foreach (IActionableRenderTarget target in _targets.Values)
             {
-                data.Dispose();
+                target.Dispose();
             }
         });
 
-        foreach (string id in _renderData.Keys)
+        foreach (string id in _targets.Keys)
         {
-            _renderData[id] = new RenderingStepData();
+            _targets[id] = _targets[id].ReinitForResize();
         }
+    }
+
+    /// <summary>
+    ///     Registers a default render target for use with a drawing action or
+    ///     list of drawing actions.
+    /// </summary>
+    /// <param name="id">The ID of the render target and its layer.</param>
+    public void RegisterRenderTarget(string id)
+    {
+        RegisterRenderTarget(id, static () => new DefaultActionableRenderTarget());
     }
 
     /// <summary>
@@ -150,11 +159,15 @@ internal sealed class PrimitiveRenderingSystem : ModSystem
     ///     drawing actions.
     /// </summary>
     /// <param name="id">The ID of the render target and its layer.</param>
-    public void RegisterRenderTarget(string id)
+    /// <param name="target">
+    ///     A function returning the target to render (to be executed on the
+    ///     main thread).
+    /// </param>
+    public void RegisterRenderTarget(string id, Func<IActionableRenderTarget> target)
     {
         Main.RunOnMainThread(() =>
         {
-            _renderData[id] = new RenderingStepData();
+            _targets[id] = target();
         });
     }
 
@@ -165,11 +178,16 @@ internal sealed class PrimitiveRenderingSystem : ModSystem
     /// <param name="renderAction">The action to be executed.</param>
     public void QueueRenderAction(string id, Action renderAction)
     {
-        _renderData[id].RenderEntries.Add(renderAction);
+        QueueRenderAction(_targets[id], renderAction);
     }
 
-    private void Finish(string id)
+    /// <summary>
+    ///     Queues a render action to be executed on the next rendering step.
+    /// </summary>
+    /// <param name="target">The target to render to.</param>
+    /// <param name="renderAction">The action to be executed.</param>
+    public void QueueRenderAction(IActionableRenderTarget target, Action renderAction)
     {
-        _renderData[id].RenderEntries.Clear();
+        target.Actions.Add(renderAction);
     }
 }
