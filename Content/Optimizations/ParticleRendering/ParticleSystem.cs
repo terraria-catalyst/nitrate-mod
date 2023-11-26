@@ -53,7 +53,8 @@ internal sealed class ParticleSystem : ModSystem
         // Prevent the original DrawDust method from running; we use an IL edit
         // instead of a detour to allow mods' detours to still run while
         // cancelling vanilla behavior.
-        IL_Main.DrawDust += il => {
+        IL_Main.DrawDust += il =>
+        {
             ILCursor c = new(il);
             c.Emit(OpCodes.Ret);
         };
@@ -150,7 +151,8 @@ internal sealed class ParticleSystem : ModSystem
                     Matrix.CreateTranslation(
                         (int)(dust.position.X - Main.screenPosition.X + initialOffset.X),
                         (int)(dust.position.Y - Main.screenPosition.Y + initialOffset.Y),
-                    0);
+                        0
+                    );
 
                 float uvX = (float)dust.frame.X / _dustAtlas.Width;
                 float uvY = (float)dust.frame.Y / _dustAtlas.Height;
