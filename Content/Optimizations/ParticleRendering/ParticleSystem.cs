@@ -112,7 +112,7 @@ internal sealed class ParticleSystem : ModSystem
             foreach (EffectPass pass in _instanceParticleRenderer.CurrentTechnique.Passes)
             {
                 pass.Apply();
-                device.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, _vertexBuffer.VertexCount, 0, _indexBuffer.IndexCount / 3, MaxInstances);
+                device.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, _vertexBuffer.VertexCount, 0, _indexBuffer.IndexCount / 3, _dusts.Length);
             }
         });
     }
