@@ -12,20 +12,15 @@ namespace Zenith.Content.Optimizations.ParticleRendering;
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class ParticleSystem : ModSystem
 {
-    private VertexBuffer _vertexBuffer;
-    private IndexBuffer _indexBuffer;
-
-    private DynamicVertexBuffer _instanceBuffer;
-
-    private Texture2D _dustAtlas;
-
-    private Effect _instanceParticleRenderer;
-
     private const int MaxInstances = 50_000;
 
-    private readonly DustInstance[] _instances;
-
-    private readonly Vector2[] _velocities;
+    private VertexBuffer _vertexBuffer;
+    private IndexBuffer _indexBuffer;
+    private DynamicVertexBuffer _instanceBuffer;
+    private Texture2D _dustAtlas;
+    private Effect _instanceParticleRenderer;
+    private readonly DustInstance[] _instances = new DustInstance[MaxInstances];
+    private readonly Vector2[] _velocities = new Vector2[MaxInstances];
 
     private static readonly VertexPositionTexture[] Particle =
     {
@@ -49,12 +44,6 @@ internal sealed class ParticleSystem : ModSystem
         new VertexElement(80, VertexElementFormat.Vector4, VertexElementUsage.Color, 1)
     );
 
-    public ParticleSystem()
-    {
-        _instances = new DustInstance[MaxInstances];
-        _velocities = new Vector2[MaxInstances];
-    }
-
     public override void Load()
     {
         GraphicsDevice device = Main.graphics.GraphicsDevice;
@@ -75,7 +64,7 @@ internal sealed class ParticleSystem : ModSystem
 
             for (int i = 0; i < MaxInstances; i++)
             {
-                Vector2 initialOffset = new(-_dustAtlas.Width / 2, -_dustAtlas.Height / 2);
+                Vector2 initialOffset = new((int)(-_dustAtlas.Width / 2f), (int)(-_dustAtlas.Height / 2f));
 
                 Matrix rotation = Matrix.CreateRotationZ(Main.rand.NextFloat(MathHelper.TwoPi));
                 Matrix offset = Matrix.CreateTranslation(initialOffset.X / 2, initialOffset.Y / 2, 0);
