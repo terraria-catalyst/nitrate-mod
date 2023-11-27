@@ -1,6 +1,5 @@
 ﻿using ReLogic.Threading;
 using System;
-using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace Zenith.Core.Features.Threading;
@@ -49,7 +48,6 @@ public static class FasterParallel
         countdownEvent.Wait();
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void InvokeTask(object? context) => (context as RangeTask)?.Invoke();
 
     private class RangeTask
