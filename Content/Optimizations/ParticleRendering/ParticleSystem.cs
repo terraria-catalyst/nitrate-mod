@@ -45,6 +45,8 @@ internal sealed class ParticleSystem : AbstractParticleRenderer<DustInstance>
     {
         base.PreUpdateDusts();
 
+        //Benchmark();
+
         ModContent.GetInstance<ActionableRenderTargetSystem>().QueueRenderAction(dust_target, () =>
         {
             GraphicsDevice device = Main.graphics.GraphicsDevice;
