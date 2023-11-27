@@ -5,11 +5,11 @@ using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using ReLogic.Content;
 using System;
-using System.Threading.Tasks;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
 using Zenith.Core.Features.Rendering;
+using Zenith.Core.Features.Threading;
 using Zenith.Core.Utilities;
 
 namespace Zenith.Content.Optimizations.ParticleRendering;
@@ -81,47 +81,50 @@ internal sealed class ParticleSystem : AbstractParticleRenderer<DustInstance>
 
     private void SetInstanceData()
     {
-        Parallel.For(0, Particles.Length, i =>
+        FasterParallel.For(0, Particles.Length, (inclusive, exclusive, _) =>
         {
-            Dust dust = Main.dust[i];
-
-            // Something has gone seriously wrong if the atlas is null.
-            if (dust.active && ParticleAtlas is not null)
+            for (int i = inclusive; i < exclusive; i++)
             {
-                float halfWidth = (int)(dust.frame.Width / 2f);
-                float halfHeight = (int)(dust.frame.Height / 2f);
+                Dust dust = Main.dust[i];
 
-                Vector2 initialOffset = new(-halfWidth, -halfHeight);
+                // Something has gone seriously wrong if the atlas is null.
+                if (dust.active && ParticleAtlas is not null)
+                {
+                    float halfWidth = (int)(dust.frame.Width / 2f);
+                    float halfHeight = (int)(dust.frame.Height / 2f);
 
-                SimdMatrix rotation = SimdMatrix.CreateRotationZ(dust.rotation);
-                SimdMatrix offset = SimdMatrix.CreateTranslation(initialOffset.X / 2, initialOffset.Y / 2, 0);
-                SimdMatrix reset = SimdMatrix.CreateTranslation(-initialOffset.X / 2, -initialOffset.Y / 2, 0);
+                    Vector2 initialOffset = new(-halfWidth, -halfHeight);
 
-                SimdMatrix rotationMatrix = offset * rotation * reset;
+                    SimdMatrix rotation = SimdMatrix.CreateRotationZ(dust.rotation);
+                    SimdMatrix offset = SimdMatrix.CreateTranslation(initialOffset.X / 2, initialOffset.Y / 2, 0);
+                    SimdMatrix reset = SimdMatrix.CreateTranslation(-initialOffset.X / 2, -initialOffset.Y / 2, 0);
 
-                SimdMatrix world =
-                    SimdMatrix.CreateScale(dust.scale * dust.frame.Width, dust.scale * dust.frame.Height, 1) *
-                    rotationMatrix *
-                    SimdMatrix.CreateTranslation(
-                        (int)(dust.position.X - Main.screenPosition.X + initialOffset.X),
-                        (int)(dust.position.Y - Main.screenPosition.Y + initialOffset.Y),
-                        0
-                    );
+                    SimdMatrix rotationMatrix = offset * rotation * reset;
 
-                float uvX = (float)dust.frame.X / ParticleAtlas.Width;
-                float uvY = (float)dust.frame.Y / ParticleAtlas.Height;
-                float uvW = (float)(dust.frame.X + dust.frame.Width) / ParticleAtlas.Width;
-                float uvZ = (float)(dust.frame.Y + dust.frame.Height) / ParticleAtlas.Height;
+                    SimdMatrix world =
+                        SimdMatrix.CreateScale(dust.scale * dust.frame.Width, dust.scale * dust.frame.Height, 1) *
+                        rotationMatrix *
+                        SimdMatrix.CreateTranslation(
+                            (int)(dust.position.X - Main.screenPosition.X + initialOffset.X),
+                            (int)(dust.position.Y - Main.screenPosition.Y + initialOffset.Y),
+                            0
+                        );
 
-                Color color = Lighting.GetColor((int)(dust.position.X + 4.0) / 16, (int)(dust.position.Y + 4.0) / 16);
+                    float uvX = (float)dust.frame.X / ParticleAtlas.Width;
+                    float uvY = (float)dust.frame.Y / ParticleAtlas.Height;
+                    float uvW = (float)(dust.frame.X + dust.frame.Width) / ParticleAtlas.Width;
+                    float uvZ = (float)(dust.frame.Y + dust.frame.Height) / ParticleAtlas.Height;
 
-                Color dustColor = dust.GetAlpha(color);
+                    Color color = Lighting.GetColor((int)(dust.position.X + 4.0) / 16, (int)(dust.position.Y + 4.0) / 16);
 
-                Particles[i] = new DustInstance(world, new Vector4(uvX, uvY, uvW, uvZ), dustColor.ToVector4());
-            }
-            else
-            {
-                Particles[i] = new DustInstance();
+                    Color dustColor = dust.GetAlpha(color);
+
+                    Particles[i] = new DustInstance(world, new Vector4(uvX, uvY, uvW, uvZ), dustColor.ToVector4());
+                }
+                else
+                {
+                    Particles[i] = new DustInstance();
+                }
             }
         });
 
