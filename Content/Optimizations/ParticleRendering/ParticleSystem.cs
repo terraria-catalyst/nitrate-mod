@@ -46,7 +46,7 @@ internal sealed class ParticleSystem : AbstractParticleRenderer<DustInstance>
     {
         base.PreUpdateDusts();
 
-        Benchmark();
+        //Benchmark();
 
         ModContent.GetInstance<ActionableRenderTargetSystem>().QueueRenderAction(dust_target, () =>
         {
@@ -54,9 +54,9 @@ internal sealed class ParticleSystem : AbstractParticleRenderer<DustInstance>
 
             device.RasterizerState = RasterizerState.CullNone;
 
-            FnaMatrix projection = FnaMatrix.CreateOrthographicOffCenter(0, Main.screenWidth, Main.screenHeight, 0, -1, 1);
+            SimdMatrix projection = SimdMatrix.CreateOrthographicOffCenter(0, Main.screenWidth, Main.screenHeight, 0, -1, 1);
 
-            InstanceParticleRenderer.Value.Parameters["transformMatrix"].SetValue(projection);
+            InstanceParticleRenderer.Value.Parameters["transformMatrix"].SetValue(projection.ToFna());
             InstanceParticleRenderer.Value.Parameters["dustTexture"].SetValue(ParticleAtlas);
 
             SetInstanceData();
@@ -117,7 +117,7 @@ internal sealed class ParticleSystem : AbstractParticleRenderer<DustInstance>
 
                 Color dustColor = dust.GetAlpha(color);
 
-                Particles[i] = new DustInstance(world.ToFna(), new Vector4(uvX, uvY, uvW, uvZ), dustColor.ToVector4());
+                Particles[i] = new DustInstance(world, new Vector4(uvX, uvY, uvW, uvZ), dustColor.ToVector4());
             }
             else
             {
