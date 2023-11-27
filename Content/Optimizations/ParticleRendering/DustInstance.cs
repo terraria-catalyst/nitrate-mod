@@ -10,13 +10,13 @@ namespace Zenith.Content.Optimizations.ParticleRendering;
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
 public struct DustInstance
 {
-    public Matrix World { get; set; }
+    public SimdMatrix World { get; set; }
 
     public Vector4 InstanceUv { get; set; }
 
     public Vector4 InstanceColor { get; set; }
 
-    public DustInstance(Matrix world, Vector4 instanceUv, Vector4 instanceColor)
+    public DustInstance(SimdMatrix world, Vector4 instanceUv, Vector4 instanceColor)
     {
         World = world;
         InstanceUv = instanceUv;

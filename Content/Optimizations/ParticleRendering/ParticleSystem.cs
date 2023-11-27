@@ -10,6 +10,7 @@ using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
 using Zenith.Core.Features.Rendering;
+using Zenith.Core.Utilities;
 
 namespace Zenith.Content.Optimizations.ParticleRendering;
 
@@ -53,9 +54,9 @@ internal sealed class ParticleSystem : AbstractParticleRenderer<DustInstance>
 
             device.RasterizerState = RasterizerState.CullNone;
 
-            Matrix projection = Matrix.CreateOrthographicOffCenter(0, Main.screenWidth, Main.screenHeight, 0, -1, 1);
+            SimdMatrix projection = SimdMatrix.CreateOrthographicOffCenter(0, Main.screenWidth, Main.screenHeight, 0, -1, 1);
 
-            InstanceParticleRenderer.Value.Parameters["transformMatrix"].SetValue(projection);
+            InstanceParticleRenderer.Value.Parameters["transformMatrix"].SetValue(projection.ToFna());
             InstanceParticleRenderer.Value.Parameters["dustTexture"].SetValue(ParticleAtlas);
 
             SetInstanceData();
@@ -92,16 +93,16 @@ internal sealed class ParticleSystem : AbstractParticleRenderer<DustInstance>
 
                 Vector2 initialOffset = new(-halfWidth, -halfHeight);
 
-                Matrix rotation = Matrix.CreateRotationZ(dust.rotation);
-                Matrix offset = Matrix.CreateTranslation(initialOffset.X / 2, initialOffset.Y / 2, 0);
-                Matrix reset = Matrix.CreateTranslation(-initialOffset.X / 2, -initialOffset.Y / 2, 0);
+                SimdMatrix rotation = SimdMatrix.CreateRotationZ(dust.rotation);
+                SimdMatrix offset = SimdMatrix.CreateTranslation(initialOffset.X / 2, initialOffset.Y / 2, 0);
+                SimdMatrix reset = SimdMatrix.CreateTranslation(-initialOffset.X / 2, -initialOffset.Y / 2, 0);
 
-                Matrix rotationMatrix = offset * rotation * reset;
+                SimdMatrix rotationMatrix = offset * rotation * reset;
 
-                Matrix world =
-                    Matrix.CreateScale(dust.scale * dust.frame.Width, dust.scale * dust.frame.Height, 1) *
+                SimdMatrix world =
+                    SimdMatrix.CreateScale(dust.scale * dust.frame.Width, dust.scale * dust.frame.Height, 1) *
                     rotationMatrix *
-                    Matrix.CreateTranslation(
+                    SimdMatrix.CreateTranslation(
                         (int)(dust.position.X - Main.screenPosition.X + initialOffset.X),
                         (int)(dust.position.Y - Main.screenPosition.Y + initialOffset.Y),
                         0
