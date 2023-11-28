@@ -7,7 +7,7 @@ using Zenith.Core.Features.Rendering;
 
 namespace Zenith.Content.Optimizations.ParticleRendering;
 
-internal abstract class AbstractParticleRenderer<TParticle> : ModSystem where TParticle : unmanaged
+internal abstract class AbstractInstancedParticleRenderer<TParticle> : ModSystem where TParticle : unmanaged
 {
     protected VertexBuffer? VertexBuffer;
     protected IndexBuffer? IndexBuffer;
@@ -18,7 +18,7 @@ internal abstract class AbstractParticleRenderer<TParticle> : ModSystem where TP
 
     protected abstract Lazy<Effect> InstanceParticleRenderer { get; }
 
-    protected AbstractParticleRenderer(int particleCount, string targetName)
+    protected AbstractInstancedParticleRenderer(int particleCount, string targetName)
     {
         Particles = new TParticle[particleCount];
         this.targetName = targetName;

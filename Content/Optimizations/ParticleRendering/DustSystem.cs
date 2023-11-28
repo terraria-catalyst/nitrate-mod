@@ -15,13 +15,13 @@ using Zenith.Core.Utilities;
 namespace Zenith.Content.Optimizations.ParticleRendering;
 
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
-internal sealed class ParticleSystem : AbstractParticleRenderer<DustInstance>
+internal sealed class DustSystem : AbstractInstancedParticleRenderer<DustInstance>
 {
     private const string dust_target = "DustTarget";
 
     protected override Lazy<Effect> InstanceParticleRenderer { get; }
 
-    public ParticleSystem() : base(Main.maxDust, dust_target)
+    public DustSystem() : base(Main.maxDust, dust_target)
     {
         InstanceParticleRenderer = new Lazy<Effect>(() => Mod.Assets.Request<Effect>("Assets/Effects/InstancedParticleRenderer", AssetRequestMode.ImmediateLoad).Value);
     }
@@ -29,6 +29,8 @@ internal sealed class ParticleSystem : AbstractParticleRenderer<DustInstance>
     public override void Load()
     {
         base.Load();
+
+        IL_Dust.UpdateDust += ParallelizedUpdateDust;
 
         // Prevent the original DrawDust method from running; we use an IL edit
         // instead of a detour to allow mods' detours to still run while
@@ -46,7 +48,7 @@ internal sealed class ParticleSystem : AbstractParticleRenderer<DustInstance>
     {
         base.PreUpdateDusts();
 
-        //Benchmark();
+        Benchmark();
 
         ModContent.GetInstance<ActionableRenderTargetSystem>().QueueRenderAction(dust_target, () =>
         {
@@ -129,6 +131,12 @@ internal sealed class ParticleSystem : AbstractParticleRenderer<DustInstance>
         });
 
         InstanceBuffer?.SetData(Particles, 0, Particles.Length, SetDataOptions.None);
+    }
+
+    private void ParallelizedUpdateDust(ILContext il)
+    {
+        ILCursor c = new(il);
+        // Do stuff here
     }
 
     private void Benchmark()
