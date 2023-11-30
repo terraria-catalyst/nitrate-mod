@@ -7,7 +7,7 @@ Leveraging parallelism, SIMD instructions, GPU rendering, and other optimization
 [h2]General Feature Overview[/h2]
 
 [list]
-    [*] Rewrites and optimizes dust rendering to be done almost entirely on the GPU
-    [*] Parallelizes dust updating
+    [*] Rewrites and optimizes dust rendering to be done almost entirely on the GPU (~5x faster in testing, mileage may vary)
+    [*] Parallelizes dust updating (~20.5x faster in testing, mileage may vary)
     [*] Replaces usages of typical FNA types with JIT intrinsic SIMD types in notable hotspots
 [/list]
