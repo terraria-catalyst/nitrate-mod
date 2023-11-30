@@ -39,11 +39,11 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
     {
         ILCursor c = new(il);
 
-        int loopVariableIndex = -1;
         c.GotoNext(MoveType.After, x => x.MatchLdcI4(Main.maxDust));
         c.Emit(OpCodes.Pop);
         c.Emit(OpCodes.Ldsfld, DustToField);
 
+        int loopVariableIndex = -1;
         c.GotoPrev(x => x.MatchLdloc(out loopVariableIndex));
 
         if (loopVariableIndex == -1)
@@ -99,7 +99,6 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
 
             // for (DustIndex = DustFrom; DustIndex < DustTo; DustIndex++)
             // {
-            DustIndex = DustFrom;
             orig();
             // }
         });
