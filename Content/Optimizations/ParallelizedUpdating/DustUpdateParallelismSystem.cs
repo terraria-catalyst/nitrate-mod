@@ -9,23 +9,30 @@ using Zenith.Core.Features.Threading;
 
 namespace Zenith.Content.Optimizations.ParallelizedUpdating;
 
+/// <summary>
+///     Rewrites the dust update method to use parallelism since dust updating
+///     (typically) isn't dependent on the states of other dust.
+/// </summary>
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class DustUpdateParallelismSystem : ModSystem
 {
     private static bool RunningInParallel;
 
     [ThreadStatic]
+    [UsedImplicitly(ImplicitUseKindFlags.Access)]
     private static int DustFrom;
 
     [ThreadStatic]
+    [UsedImplicitly(ImplicitUseKindFlags.Access)]
     private static int DustTo;
 
     [ThreadStatic]
+    [UsedImplicitly(ImplicitUseKindFlags.Access | ImplicitUseKindFlags.Assign)]
     private static int DustIndex;
 
-    private static FieldInfo DustFromField = typeof(DustUpdateParallelismSystem).GetField(nameof(DustFrom), BindingFlags.NonPublic | BindingFlags.Static)!;
-    private static FieldInfo DustToField = typeof(DustUpdateParallelismSystem).GetField(nameof(DustTo), BindingFlags.NonPublic | BindingFlags.Static)!;
-    private static FieldInfo DustIndexField = typeof(DustUpdateParallelismSystem).GetField(nameof(DustIndex), BindingFlags.NonPublic | BindingFlags.Static)!;
+    private static readonly FieldInfo dust_from_field = typeof(DustUpdateParallelismSystem).GetField(nameof(DustFrom), BindingFlags.NonPublic | BindingFlags.Static)!;
+    private static readonly FieldInfo dust_to_field = typeof(DustUpdateParallelismSystem).GetField(nameof(DustTo), BindingFlags.NonPublic | BindingFlags.Static)!;
+    private static readonly FieldInfo dust_index_field = typeof(DustUpdateParallelismSystem).GetField(nameof(DustIndex), BindingFlags.NonPublic | BindingFlags.Static)!;
 
     public override void OnModLoad()
     {
@@ -37,12 +44,18 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
 
     private static void MakeThreadStaticParallel(ILContext il)
     {
+        // Rewrites Dust::UpdateDust to use our thread-static fields instead of
+        // local variables and constant values.
+
         ILCursor c = new(il);
 
+        // Navigate to the Main.maxDust constant used by the loop and use our
+        // DustTo field instead.
         c.GotoNext(MoveType.After, x => x.MatchLdcI4(Main.maxDust));
         c.Emit(OpCodes.Pop);
-        c.Emit(OpCodes.Ldsfld, DustToField);
+        c.Emit(OpCodes.Ldsfld, dust_to_field);
 
+        // Dynamically find the local index of the actual loop index variable.
         int loopVariableIndex = -1;
         c.GotoPrev(x => x.MatchLdloc(out loopVariableIndex));
 
@@ -51,11 +64,15 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
             throw new Exception("Could not find loop variable index");
         }
 
+        // Find where the loop variable is initialized and use our DustFrom
+        // field instead.
         c.Index = 0;
         c.GotoNext(x => x.MatchLdcI4(0), x => x.MatchStloc(loopVariableIndex));
         c.GotoPrev(MoveType.After, x => x.MatchLdcI4(0));
         c.Emit(OpCodes.Pop);
-        c.Emit(OpCodes.Ldsfld, DustFromField);
+        c.Emit(OpCodes.Ldsfld, dust_from_field);
+
+        // Replace references to the loop variable with our DustIndex field.
 
         // There exist some labels to these opcodes we normally want to remove,
         // so just change their opcodes and operands instead...
@@ -64,20 +81,16 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
 
         while (c.TryGotoNext(MoveType.Before, x => x.MatchLdloc(loopVariableIndex)))
         {
-            // c.Remove();
-            // c.Emit(OpCodes.Ldsfld, DustIndexField);
             c.Next!.OpCode = OpCodes.Ldsfld;
-            c.Next!.Operand = DustIndexField;
+            c.Next!.Operand = dust_index_field;
         }
 
         c.Index = 0;
 
         while (c.TryGotoNext(MoveType.Before, x => x.MatchStloc(loopVariableIndex)))
         {
-            // c.Remove();
-            // c.Emit(OpCodes.Stsfld, DustIndexField);
             c.Next!.OpCode = OpCodes.Stsfld;
-            c.Next!.Operand = DustIndexField;
+            c.Next!.Operand = dust_index_field;
         }
     }
 
@@ -97,10 +110,7 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
             DustFrom = inclusive;
             DustTo = exclusive;
 
-            // for (DustIndex = DustFrom; DustIndex < DustTo; DustIndex++)
-            // {
             orig();
-            // }
         });
     }
 }
