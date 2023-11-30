@@ -5,9 +5,9 @@ using System;
 using System.Reflection;
 using Terraria;
 using Terraria.ModLoader;
-using Zenith.Core.Features.Threading;
+using Nitrate.Core.Features.Threading;
 
-namespace Zenith.Content.Optimizations.ParallelizedUpdating;
+namespace Nitrate.Content.Optimizations.ParallelizedUpdating;
 
 /// <summary>
 ///     Rewrites the dust update method to use parallelism since dust updating

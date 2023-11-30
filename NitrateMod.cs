@@ -1,9 +1,9 @@
 using JetBrains.Annotations;
 using Terraria.ModLoader;
 
-namespace Zenith;
+namespace Nitrate;
 
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
-public sealed class ZenithMod : Mod
+public sealed class NitrateMod : Mod
 {
 }

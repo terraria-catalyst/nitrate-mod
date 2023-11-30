@@ -2,7 +2,7 @@
 using System;
 using System.Threading;
 
-namespace Zenith.Core.Features.Threading;
+namespace Nitrate.Core.Features.Threading;
 
 public static class FasterParallel
 {

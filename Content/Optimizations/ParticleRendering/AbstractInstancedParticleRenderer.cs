@@ -3,9 +3,9 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.ModLoader;
-using Zenith.Core.Features.Rendering;
+using Nitrate.Core.Features.Rendering;
 
-namespace Zenith.Content.Optimizations.ParticleRendering;
+namespace Nitrate.Content.Optimizations.ParticleRendering;
 
 internal abstract class AbstractInstancedParticleRenderer<TParticle> : ModSystem where TParticle : unmanaged
 {

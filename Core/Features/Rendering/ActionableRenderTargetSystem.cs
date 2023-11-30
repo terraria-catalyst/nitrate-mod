@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace Zenith.Core.Features.Rendering;
+namespace Nitrate.Core.Features.Rendering;
 
 /// <summary>
 ///     Handles the registration of and rendering of render targets that deal

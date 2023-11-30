@@ -1,8 +1,8 @@
-﻿# Zenith
+﻿# Nitrate
 
-Zenith is a performance optimization mod focused on generalized improvements to many features throughout the game.
+Nitrate is a performance optimization mod focused on generalized improvements to many features throughout the game.
 
-Leveraging parallelism, SIMD instructions, GPU rendering, and other optimizations, Zenith is able to provide a significant boost in performance.
+Leveraging parallelism, SIMD instructions, GPU rendering, and other optimizations, Nitrate is able to provide a significant boost in performance.
 
 ## General Feature Overview
 

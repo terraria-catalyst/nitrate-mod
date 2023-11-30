@@ -8,11 +8,11 @@ using System;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
-using Zenith.Core.Features.Rendering;
-using Zenith.Core.Features.Threading;
-using Zenith.Core.Utilities;
+using Nitrate.Core.Features.Rendering;
+using Nitrate.Core.Features.Threading;
+using Nitrate.Core.Utilities;
 
-namespace Zenith.Content.Optimizations.ParticleRendering;
+namespace Nitrate.Content.Optimizations.ParticleRendering;
 
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class InstancedDustRenderer : AbstractInstancedParticleRenderer<DustInstance>
