@@ -1,1 +1,8 @@
-Zenith is a pretty cool mod, it does...this. Modify this file with a description of your mod.
+Zenith is a performance optimization mod focused on generalized improvements to many features throughout the game.
+
+Leveraging parallelism, SIMD instructions, GPU rendering, and other optimizations, Zenith is able to provide a significant boost in performance.
+
+General Feature Overview
+ * Rewrites and optimizes dust rendering to be done almost entirely on the GPU
+ * Parallelizes dust updating
+ * Replaces usages of typical FNA types with JIT intrinsic SIMD types in notable hotspots
