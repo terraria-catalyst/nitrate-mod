@@ -15,13 +15,13 @@ using Zenith.Core.Utilities;
 namespace Zenith.Content.Optimizations.ParticleRendering;
 
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
-internal sealed class DustSystem : AbstractInstancedParticleRenderer<DustInstance>
+internal sealed class InstancedDustRenderer : AbstractInstancedParticleRenderer<DustInstance>
 {
     private const string dust_target = "DustTarget";
 
     protected override Lazy<Effect> InstanceParticleRenderer { get; }
 
-    public DustSystem() : base(Main.maxDust, dust_target)
+    public InstancedDustRenderer() : base(Main.maxDust, dust_target)
     {
         InstanceParticleRenderer = new Lazy<Effect>(() => Mod.Assets.Request<Effect>("Assets/Effects/InstancedParticleRenderer", AssetRequestMode.ImmediateLoad).Value);
     }
