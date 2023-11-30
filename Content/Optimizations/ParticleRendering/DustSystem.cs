@@ -30,8 +30,6 @@ internal sealed class DustSystem : AbstractInstancedParticleRenderer<DustInstanc
     {
         base.Load();
 
-        IL_Dust.UpdateDust += ParallelizedUpdateDust;
-
         // Prevent the original DrawDust method from running; we use an IL edit
         // instead of a detour to allow mods' detours to still run while
         // cancelling vanilla behavior.
@@ -131,12 +129,6 @@ internal sealed class DustSystem : AbstractInstancedParticleRenderer<DustInstanc
         });
 
         InstanceBuffer?.SetData(Particles, 0, Particles.Length, SetDataOptions.None);
-    }
-
-    private void ParallelizedUpdateDust(ILContext il)
-    {
-        ILCursor c = new(il);
-        // Do stuff here
     }
 
     private void Benchmark()
