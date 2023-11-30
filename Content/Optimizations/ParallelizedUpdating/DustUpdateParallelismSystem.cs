@@ -38,11 +38,11 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
     {
         base.OnModLoad();
 
-        IL_Dust.UpdateDust += MakeThreadStaticParallel;
-        On_Dust.UpdateDust += HandleThreadStaticParallel;
+        IL_Dust.UpdateDust += UpdateDustMakeThreadStaticParallel;
+        On_Dust.UpdateDust += UpdateDustHandleThreadStaticParallel;
     }
 
-    private static void MakeThreadStaticParallel(ILContext il)
+    private static void UpdateDustMakeThreadStaticParallel(ILContext il)
     {
         // Rewrites Dust::UpdateDust to use our thread-static fields instead of
         // local variables and constant values.
@@ -94,7 +94,7 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
         }
     }
 
-    private static void HandleThreadStaticParallel(On_Dust.orig_UpdateDust orig)
+    private static void UpdateDustHandleThreadStaticParallel(On_Dust.orig_UpdateDust orig)
     {
         if (RunningInParallel)
         {
