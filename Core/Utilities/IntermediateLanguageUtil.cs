@@ -11,7 +11,7 @@ internal static class IntermediateLanguageUtil
     public static void CloneMethodBodyToCursor(MethodBody body, ILCursor c)
     {
         c.Index = 0;
-        
+
         // Don't bother removing instructions since there'll be returns copied
         // anyway.
         // c.RemoveRange(c.Instrs.Count);
@@ -54,30 +54,32 @@ internal static class IntermediateLanguageUtil
 
         c.Method.CustomDebugInformations.AddRange(body.Method.CustomDebugInformations.Select(x =>
         {
-            if (x is AsyncMethodBodyDebugInformation asyncInfo)
+            switch (x)
             {
-                AsyncMethodBodyDebugInformation info = new();
+                case AsyncMethodBodyDebugInformation asyncInfo: {
+                    AsyncMethodBodyDebugInformation info = new();
 
-                if (asyncInfo.CatchHandler.Offset >= 0)
-                {
-                    info.CatchHandler = asyncInfo.CatchHandler.IsEndOfMethod ? new InstructionOffset() : new InstructionOffset(resolveInstrOff(info.CatchHandler.Offset));
+                    if (asyncInfo.CatchHandler.Offset >= 0)
+                    {
+                        info.CatchHandler = asyncInfo.CatchHandler.IsEndOfMethod ? new InstructionOffset() : new InstructionOffset(resolveInstrOff(info.CatchHandler.Offset));
+                    }
+
+                    info.Yields.AddRange(asyncInfo.Yields.Select(y => y.IsEndOfMethod ? new InstructionOffset() : new InstructionOffset(resolveInstrOff(y.Offset))));
+                    info.Resumes.AddRange(asyncInfo.Resumes.Select(y => y.IsEndOfMethod ? new InstructionOffset() : new InstructionOffset(resolveInstrOff(y.Offset))));
+
+                    return info;
                 }
 
-                info.Yields.AddRange(asyncInfo.Yields.Select(y => y.IsEndOfMethod ? new InstructionOffset() : new InstructionOffset(resolveInstrOff(y.Offset))));
-                info.Resumes.AddRange(asyncInfo.Resumes.Select(y => y.IsEndOfMethod ? new InstructionOffset() : new InstructionOffset(resolveInstrOff(y.Offset))));
+                case StateMachineScopeDebugInformation stateInfo: {
+                    StateMachineScopeDebugInformation info = new();
+                    info.Scopes.AddRange(stateInfo.Scopes.Select(y => new StateMachineScope(resolveInstrOff(y.Start.Offset), y.End.IsEndOfMethod ? null : resolveInstrOff(y.End.Offset))));
 
-                return info;
+                    return info;
+                }
+
+                default:
+                    return x;
             }
-
-            if (x is StateMachineScopeDebugInformation stateInfo)
-            {
-                StateMachineScopeDebugInformation info = new();
-                info.Scopes.AddRange(stateInfo.Scopes.Select(y => new StateMachineScope(resolveInstrOff(y.Start.Offset), y.End.IsEndOfMethod ? null : resolveInstrOff(y.End.Offset))));
-
-                return info;
-            }
-
-            return x;
         }));
 
         c.Method.DebugInformation.SequencePoints.AddRange(body.Method.DebugInformation.SequencePoints.Select(x => new SequencePoint(resolveInstrOff(x.Offset), x.Document)
@@ -89,6 +91,7 @@ internal static class IntermediateLanguageUtil
         }));
 
         c.Index = 0;
+
         return;
 
         Instruction resolveInstrOff(int off)
