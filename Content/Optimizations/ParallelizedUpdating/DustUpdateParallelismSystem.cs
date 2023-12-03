@@ -88,8 +88,8 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
 
         // Navigate to the Main.maxDust constant used by the loop and use our
         // exclusive parameter instead.
-        c.GotoNext(MoveType.After, x => x.MatchLdcI4(Main.maxDust));
-        c.Emit(OpCodes.Pop);
+        c.GotoNext(MoveType.Before, x => x.MatchLdcI4(Main.maxDust));
+        c.Remove();
         c.Emit(OpCodes.Ldarg_1);
 
         // Dynamically find the local index of the actual loop index variable.
@@ -104,33 +104,14 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
         // Find where the loop variable is initialized and use our inclusive
         // parameter instead.
         c.Index = 0;
-        c.GotoNext(x => x.MatchLdcI4(0), x => x.MatchStloc(loopVariableIndex));
+        c.GotoNext(x => x.MatchStloc(loopVariableIndex));
         c.GotoPrev(MoveType.After, x => x.MatchLdcI4(0));
         c.Emit(OpCodes.Pop);
         c.Emit(OpCodes.Ldarg_0);
 
-        // Replace references to the loop variable with our DustIndex field.
-
-        // There exist some labels to these opcodes we normally want to remove,
-        // so just change their opcodes and operands instead...
-
-        /*c.Index = 0;
-
-        while (c.TryGotoNext(MoveType.Before, x => x.MatchLdloc(loopVariableIndex)))
-        {
-            c.Next!.OpCode = OpCodes.Ldsfld;
-            c.Next!.Operand = dust_index_field;
-        }
-
-        c.Index = 0;
-
-        while (c.TryGotoNext(MoveType.Before, x => x.MatchStloc(loopVariableIndex)))
-        {
-            c.Next!.OpCode = OpCodes.Stsfld;
-            c.Next!.Operand = dust_index_field;
-        }*/
-
         updateDustBody = null;
+
+        MonoModHooks.DumpIL(ModContent.GetInstance<NitrateMod>(), il);
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
