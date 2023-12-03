@@ -29,7 +29,7 @@ internal abstract class AbstractSimdifier<TFrom, TTo> : ISimdifier
     public virtual void Simdify(ILCursor c)
     {
         // Modify variables to use the new, expected type.
-        foreach (VariableDefinition variable in c.Body.Variables)
+        /*foreach (VariableDefinition variable in c.Body.Variables)
         {
             if (!_variableRemap.TryGetValue(variable.VariableType.FullName, out Type? to))
             {
@@ -37,7 +37,7 @@ internal abstract class AbstractSimdifier<TFrom, TTo> : ISimdifier
             }
 
             variable.VariableType = c.Body.Method.Module.ImportReference(to);
-        }
+        }*/
 
         // Replace method calls from the old type to the new type.
         foreach (Instruction instr in c.Instrs)
@@ -166,6 +166,11 @@ internal abstract class AbstractSimdifier<TFrom, TTo> : ISimdifier
             }
 
             if (methRef.ReturnType.FullName != typeof(TFrom).FullName)
+            {
+                continue;
+            }
+
+            if (methRef.Name is "As" or "Undo")
             {
                 continue;
             }
