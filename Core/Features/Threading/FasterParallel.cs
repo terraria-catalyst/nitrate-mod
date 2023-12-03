@@ -42,8 +42,8 @@ public static class FasterParallel
             }
             else
             {
-                // ThreadPool.QueueUserWorkItem(InvokeTask, rangeTask);
-                Task.Run(() => InvokeTask(rangeTask));
+                ThreadPool.QueueUserWorkItem(InvokeTask, rangeTask);
+                // Task.Run(() => InvokeTask(rangeTask));
             }
         }
 
