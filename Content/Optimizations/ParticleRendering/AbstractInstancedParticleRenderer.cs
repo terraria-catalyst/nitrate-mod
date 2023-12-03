@@ -14,14 +14,14 @@ internal abstract class AbstractInstancedParticleRenderer<TParticle> : ModSystem
     protected DynamicVertexBuffer? InstanceBuffer;
     protected Texture2D? ParticleAtlas;
     protected readonly TParticle[] Particles;
-    private readonly string targetName;
+    private readonly string _targetName;
 
     protected abstract Lazy<Effect> InstanceParticleRenderer { get; }
 
     protected AbstractInstancedParticleRenderer(int particleCount, string targetName)
     {
         Particles = new TParticle[particleCount];
-        this.targetName = targetName;
+        this._targetName = targetName;
     }
 
     public override void Load()
@@ -50,7 +50,7 @@ internal abstract class AbstractInstancedParticleRenderer<TParticle> : ModSystem
     {
         base.PostSetupContent();
 
-        ModContent.GetInstance<ActionableRenderTargetSystem>().RegisterRenderTarget(targetName);
+        ModContent.GetInstance<ActionableRenderTargetSystem>().RegisterRenderTarget(_targetName);
     }
 
     public override void Unload()

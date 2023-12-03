@@ -53,7 +53,7 @@ internal sealed class ActionableRenderTargetSystem : ModSystem
     ///     The dictionary of render targets and their associated rendering
     ///     data.
     /// </summary>
-    private readonly Dictionary<string, IActionableRenderTarget> targets = new();
+    private readonly Dictionary<string, IActionableRenderTarget> _targets = new();
 
     public override void Load()
     {
@@ -72,7 +72,7 @@ internal sealed class ActionableRenderTargetSystem : ModSystem
 
         Main.RunOnMainThread(() =>
         {
-            foreach (IActionableRenderTarget target in targets.Values)
+            foreach (IActionableRenderTarget target in _targets.Values)
             {
                 target.Dispose();
             }
@@ -90,7 +90,7 @@ internal sealed class ActionableRenderTargetSystem : ModSystem
 
         GraphicsDevice device = Main.graphics.GraphicsDevice;
 
-        foreach (IActionableRenderTarget target in targets.Values)
+        foreach (IActionableRenderTarget target in _targets.Values)
         {
             RenderTargetBinding[] bindings = device.GetRenderTargets();
 
@@ -111,7 +111,7 @@ internal sealed class ActionableRenderTargetSystem : ModSystem
     {
         orig(self);
 
-        foreach (string id in targets.Keys)
+        foreach (string id in _targets.Keys)
         {
             Main.spriteBatch.Begin(
                 SpriteSortMode.Immediate,
@@ -123,7 +123,7 @@ internal sealed class ActionableRenderTargetSystem : ModSystem
                 Main.GameViewMatrix.TransformationMatrix
             );
 
-            Main.spriteBatch.Draw(targets[id].RenderTarget, Vector2.Zero, Color.White);
+            Main.spriteBatch.Draw(_targets[id].RenderTarget, Vector2.Zero, Color.White);
             Main.spriteBatch.End();
         }
     }
@@ -132,11 +132,11 @@ internal sealed class ActionableRenderTargetSystem : ModSystem
     {
         Main.RunOnMainThread(() =>
         {
-            foreach (string id in targets.Keys)
+            foreach (string id in _targets.Keys)
             {
-                IActionableRenderTarget target = targets[id];
+                IActionableRenderTarget target = _targets[id];
                 target.Dispose();
-                targets[id] = target.ReinitForResize();
+                _targets[id] = target.ReinitForResize();
             }
         });
     }
@@ -164,7 +164,7 @@ internal sealed class ActionableRenderTargetSystem : ModSystem
     {
         Main.RunOnMainThread(() =>
         {
-            targets[id] = target();
+            _targets[id] = target();
         });
     }
 
@@ -175,6 +175,6 @@ internal sealed class ActionableRenderTargetSystem : ModSystem
     /// <param name="renderAction">The action to be executed.</param>
     public void QueueRenderAction(string id, Action renderAction)
     {
-        targets[id].Actions.Add(renderAction);
+        _targets[id].Actions.Add(renderAction);
     }
 }

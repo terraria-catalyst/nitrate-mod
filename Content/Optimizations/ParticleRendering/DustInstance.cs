@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using JetBrains.Annotations;
+using Microsoft.Xna.Framework;
 using System.Runtime.InteropServices;
 
 namespace Nitrate.Content.Optimizations.ParticleRendering;
@@ -8,13 +9,11 @@ namespace Nitrate.Content.Optimizations.ParticleRendering;
 ///     matrix, subdivision data, and the color used to render the particle.
 /// </summary>
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
-public struct DustInstance
+internal readonly struct DustInstance
 {
-    public SimdMatrix World { get; set; }
-
-    public Vector4 InstanceUv { get; set; }
-
-    public Vector4 InstanceColor { get; set; }
+    public readonly SimdMatrix World;
+    public readonly Vector4 InstanceUv;
+    public readonly Vector4 InstanceColor;
 
     public DustInstance(SimdMatrix world, Vector4 instanceUv, Vector4 instanceColor)
     {

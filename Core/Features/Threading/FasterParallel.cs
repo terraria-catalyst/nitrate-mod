@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace Nitrate.Core.Features.Threading;
 
-public static class FasterParallel
+internal static class FasterParallel
 {
     public static void For(int fromInclusive, int toExclusive, ParallelForAction callback, object? context = null)
     {
@@ -53,35 +53,35 @@ public static class FasterParallel
 
     private class RangeTask
     {
-        private readonly ParallelForAction action;
-        private readonly int fromInclusive;
-        private readonly int toExclusive;
-        private readonly object? context;
-        private readonly CountdownEvent countdownEvent;
+        private readonly ParallelForAction _action;
+        private readonly int _fromInclusive;
+        private readonly int _toExclusive;
+        private readonly object? _context;
+        private readonly CountdownEvent _countdownEvent;
 
         public RangeTask(ParallelForAction action, int fromInclusive, int toExclusive, object? context, CountdownEvent countdownEvent)
         {
-            this.action = action;
-            this.fromInclusive = fromInclusive;
-            this.toExclusive = toExclusive;
-            this.context = context;
-            this.countdownEvent = countdownEvent;
+            this._action = action;
+            this._fromInclusive = fromInclusive;
+            this._toExclusive = toExclusive;
+            this._context = context;
+            this._countdownEvent = countdownEvent;
         }
 
         public void Invoke()
         {
             try
             {
-                if (fromInclusive == toExclusive)
+                if (_fromInclusive == _toExclusive)
                 {
                     return;
                 }
 
-                action(fromInclusive, toExclusive, context);
+                _action(_fromInclusive, _toExclusive, _context);
             }
             finally
             {
-                countdownEvent.Signal();
+                _countdownEvent.Signal();
             }
         }
     }
