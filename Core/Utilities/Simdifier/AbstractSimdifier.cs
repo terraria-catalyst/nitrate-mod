@@ -1,11 +1,13 @@
 ﻿using Mono.Cecil;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using MonoMod.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using MethodAttributes = Mono.Cecil.MethodAttributes;
+using System.Reflection.Emit;
+using OpCodes = Mono.Cecil.Cil.OpCodes;
 
 namespace Nitrate.Core.Utilities.Simdifier;
 
@@ -17,7 +19,7 @@ internal abstract class AbstractSimdifier<TFrom, TTo> : ISimdifier
     private readonly Dictionary<string, MethodInfo> _instanceRemap = new();
     private readonly Dictionary<string, MethodInfo> _newobjRemap = new();
 
-    private readonly Dictionary<string, MethodDefinition> _lightweightMethodWrapperRemap = new();
+    private readonly Dictionary<string, MethodInfo> _lightweightMethodWrapperRemap = new();
 
     protected AbstractSimdifier()
     {
@@ -26,6 +28,7 @@ internal abstract class AbstractSimdifier<TFrom, TTo> : ISimdifier
 
     public virtual void Simdify(ILCursor c)
     {
+        // Modify variables to use the new, expected type.
         foreach (VariableDefinition variable in c.Body.Variables)
         {
             if (!_variableRemap.TryGetValue(variable.VariableType.FullName, out Type? to))
@@ -36,6 +39,7 @@ internal abstract class AbstractSimdifier<TFrom, TTo> : ISimdifier
             variable.VariableType = c.Body.Method.Module.ImportReference(to);
         }
 
+        // Replace method calls from the old type to the new type.
         foreach (Instruction instr in c.Instrs)
         {
             if (instr.OpCode == OpCodes.Call)
@@ -74,37 +78,134 @@ internal abstract class AbstractSimdifier<TFrom, TTo> : ISimdifier
             }
         }
 
-        foreach (Instruction instr in c.Instrs)
+        // Transform types to and from any relevant instructions.
+
+        c.Index = 0;
+        FieldReference? fieldRef = null;
+
+        /*while (c.TryGotoNext(MoveType.After, x => x.MatchLdfld(out fieldRef)))
         {
-            if (instr.OpCode != OpCodes.Call)
+            if (fieldRef is null)
             {
                 continue;
             }
 
-            if (instr.Operand is not MethodReference methodReference)
+            if (fieldRef.FieldType.FullName != typeof(TFrom).FullName)
             {
                 continue;
             }
 
-            if (!methodReference.HasParameters)
+            c.Emit(OpCodes.Call, GetType().GetMethod("As", BindingFlags.Static | BindingFlags.NonPublic)!);
+        }
+
+        c.Index = 0;
+        fieldRef = null;
+
+        while (c.TryGotoNext(MoveType.After, x => x.MatchLdsfld(out fieldRef)))
+        {
+            if (fieldRef is null)
             {
                 continue;
             }
 
-            if (methodReference.Parameters.All(x => x.ParameterType.FullName != typeof(TFrom).FullName))
+            if (fieldRef.FieldType.FullName != typeof(TFrom).FullName)
             {
                 continue;
             }
 
-            if (_lightweightMethodWrapperRemap.TryGetValue(methodReference.FullName, out MethodDefinition? wrapper))
-            {
-                instr.Operand = c.Body.Method.Module.ImportReference(wrapper);
+            c.Emit(OpCodes.Call, GetType().GetMethod("As", BindingFlags.Static | BindingFlags.NonPublic)!);
+        }*/
 
+        c.Index = 0;
+        fieldRef = null;
+
+        while (c.TryGotoNext(MoveType.Before, x => x.MatchStfld(out fieldRef)))
+        {
+            if (fieldRef is null)
+            {
                 continue;
             }
 
-            wrapper = _lightweightMethodWrapperRemap[methodReference.FullName] = GenerateLightweightMethodWrapper(methodReference, c.Module);
-            instr.Operand = c.Body.Method.Module.ImportReference(wrapper);
+            if (fieldRef.FieldType.FullName != typeof(TFrom).FullName)
+            {
+                continue;
+            }
+
+            c.Emit(OpCodes.Call, GetType().GetMethod("Undo", BindingFlags.Static | BindingFlags.NonPublic)!);
+            c.Index++;
+        }
+
+        c.Index = 0;
+        fieldRef = null;
+
+        while (c.TryGotoNext(MoveType.Before, x => x.MatchStsfld(out fieldRef)))
+        {
+            if (fieldRef is null)
+            {
+                continue;
+            }
+
+            if (fieldRef.FieldType.FullName != typeof(TFrom).FullName)
+            {
+                continue;
+            }
+
+            c.Emit(OpCodes.Call, GetType().GetMethod("Undo", BindingFlags.Static | BindingFlags.NonPublic)!);
+            c.Index++;
+        }
+
+        // Do the same for calls.
+        c.Index = 0;
+        MethodReference? methRef = null;
+
+        while (c.TryGotoNext(MoveType.After, x => x.MatchCall(out methRef)))
+        {
+            if (methRef is null)
+            {
+                continue;
+            }
+
+            if (methRef.ReturnType.FullName != typeof(TFrom).FullName)
+            {
+                continue;
+            }
+
+            c.Emit(OpCodes.Call, GetType().GetMethod("As", BindingFlags.Static | BindingFlags.NonPublic)!);
+        }
+
+        // Wrap method calls that expect the old type.
+        methRef = null;
+
+        while (c.TryGotoNext(MoveType.Before, x => x.MatchCall(out methRef)))
+        {
+            if (methRef is null)
+            {
+                continue;
+            }
+
+            if (!methRef.HasParameters)
+            {
+                continue;
+            }
+
+            if (methRef.Parameters.All(x => x.ParameterType.FullName != typeof(TFrom).FullName))
+            {
+                continue;
+            }
+
+            if (_instanceRemap.ContainsValue((MethodInfo)methRef.ResolveReflection()) || _newobjRemap.ContainsValue((MethodInfo)methRef.ResolveReflection()))
+            {
+                continue;
+            }
+
+            c.Remove();
+
+            if (!_lightweightMethodWrapperRemap.TryGetValue(methRef.FullName, out MethodInfo? wrapper))
+            {
+                wrapper = _lightweightMethodWrapperRemap[methRef.FullName] = GenerateLightweightMethodWrapper(methRef);
+            }
+
+            c.Emit(OpCodes.Call, wrapper);
         }
     }
 
@@ -123,35 +224,27 @@ internal abstract class AbstractSimdifier<TFrom, TTo> : ISimdifier
         _newobjRemap.Add(fromSignature, GetType().GetMethod(toName, BindingFlags.Static | BindingFlags.NonPublic)!);
     }
 
-    private MethodDefinition GenerateLightweightMethodWrapper(MethodReference methodReference, ModuleDefinition module)
+    private MethodInfo GenerateLightweightMethodWrapper(MethodReference methodReference)
     {
-        MethodDefinition wrapper = new(methodReference.Name + "_LightweightWrapper", MethodAttributes.Private | MethodAttributes.Static, methodReference.ReturnType)
+        List<Type> parameters = methodReference.Parameters.Select(parameter => parameter.ParameterType.FullName == typeof(TFrom).FullName ? typeof(TTo) : parameter.ParameterType.ResolveReflection()).ToList();
+        DynamicMethod wrapper = new(methodReference.Name + "_LightweightWrapper", methodReference.ReturnType.ResolveReflection(), parameters.ToArray());
+        // I hate the standard library...
+        // wrapper.MethodImplementationFlags = MethodImplAttributes.AggressiveInlining;
+
+        ILGenerator il = wrapper.GetILGenerator();
+
+        for (int i = 0; i < parameters.Count; i++)
         {
-            AggressiveInlining = true,
-        };
+            il.Emit(System.Reflection.Emit.OpCodes.Ldarg, i);
 
-        foreach (ParameterDefinition parameter in methodReference.Parameters)
-        {
-            wrapper.Parameters.Add(parameter.ParameterType.FullName == typeof(TFrom).FullName
-                ? new ParameterDefinition(parameter.Name, parameter.Attributes, module.ImportReference(typeof(TTo)))
-                : new ParameterDefinition(parameter.Name, parameter.Attributes, parameter.ParameterType));
-        }
-
-        ILCursor c = new(new ILContext(wrapper));
-
-        // push each argument onto the stack and call the original method but convert the arguments to the original type
-        for (int i = 0; i < wrapper.Parameters.Count; i++)
-        {
-            c.Emit(OpCodes.Ldarg, i);
-
-            if (wrapper.Parameters[i].ParameterType.FullName == typeof(TTo).FullName)
+            if (parameters[i] == typeof(TTo))
             {
-                c.Emit(OpCodes.Call, GetType().GetMethod("As", BindingFlags.Static | BindingFlags.NonPublic)!);
+                il.Emit(System.Reflection.Emit.OpCodes.Call, GetType().GetMethod("As", BindingFlags.Static | BindingFlags.NonPublic)!);
             }
         }
 
-        c.Emit(OpCodes.Call, methodReference);
-        c.Emit(OpCodes.Ret);
+        il.Emit(System.Reflection.Emit.OpCodes.Call, (MethodInfo)methodReference.ResolveReflection());
+        il.Emit(System.Reflection.Emit.OpCodes.Ret);
 
         return wrapper;
     }
