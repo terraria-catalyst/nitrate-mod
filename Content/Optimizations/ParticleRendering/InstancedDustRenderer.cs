@@ -46,7 +46,7 @@ internal sealed class InstancedDustRenderer : AbstractInstancedParticleRenderer<
     {
         base.PreUpdateDusts();
 
-        // Benchmark();
+        Benchmark();
 
         ModContent.GetInstance<ActionableRenderTargetSystem>().QueueRenderAction(dust_target, () =>
         {

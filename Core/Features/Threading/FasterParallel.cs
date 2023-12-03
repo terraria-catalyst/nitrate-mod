@@ -1,7 +1,6 @@
 ﻿using ReLogic.Threading;
 using System;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Nitrate.Core.Features.Threading;
 

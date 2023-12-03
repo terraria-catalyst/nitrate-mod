@@ -2,13 +2,14 @@
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
-using MonoMod.Utils;
 using Terraria;
 using Terraria.ModLoader;
 using Nitrate.Core.Features.Threading;
 using Nitrate.Core.Utilities;
 using System;
+using System.Reflection;
 using System.Runtime.CompilerServices;
+using MethodBody = Mono.Cecil.Cil.MethodBody;
 
 namespace Nitrate.Content.Optimizations.ParallelizedUpdating;
 
@@ -19,7 +20,8 @@ namespace Nitrate.Content.Optimizations.ParallelizedUpdating;
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class DustUpdateParallelismSystem : ModSystem
 {
-    private static MethodBody? updateDustBody;
+    private static readonly MethodInfo inner_update_dust_method = typeof(DustUpdateParallelismSystem).GetMethod(nameof(InnerUpdateDust), BindingFlags.NonPublic | BindingFlags.Static)!;
+    private static MethodBody? UpdateDustBody;
 
     private ILHook? _updateDustFillerHook;
 
@@ -27,8 +29,8 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
     {
         base.OnModLoad();
 
-        IL_Dust.UpdateDust += il => updateDustBody = il.Body;
-        _updateDustFillerHook = new ILHook(typeof(DustUpdateParallelismSystem).GetMethod(nameof(UpdateDustFiller), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!, UpdateDustFillerEdit);
+        IL_Dust.UpdateDust += il => UpdateDustBody = il.Body;
+        _updateDustFillerHook = new ILHook(typeof(DustUpdateParallelismSystem).GetMethod(nameof(UpdateDustFiller), BindingFlags.NonPublic | BindingFlags.Static)!, UpdateDustFillerEdit);
         IL_Dust.UpdateDust += UpdateDustMakeThreadStaticParallel;
     }
 
@@ -59,32 +61,30 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
 
         c.GotoLabel(loopLabel);
         c.GotoNext(MoveType.After, x => x.MatchBlt(out _));
-
-        c.EmitDelegate(() =>
-        {
-            ThreadUnsafeCallWatchdog.Enable();
-
-            FasterParallel.For(0, Main.maxDust, (inclusive, exclusive, _) =>
-            {
-                UpdateDustFiller(inclusive, exclusive);
-            });
-
-            ThreadUnsafeCallWatchdog.Disable();
-        });
-
+        c.Emit(OpCodes.Call, inner_update_dust_method);
         c.GotoPrev(MoveType.After, x => x.MatchBlt(out _));
         c.MarkLabel(skipLabel);
     }
 
+    [UsedImplicitly(ImplicitUseKindFlags.Access)]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void InnerUpdateDust()
+    {
+        FasterParallel.For(0, Main.maxDust, (inclusive, exclusive, _) =>
+        {
+            UpdateDustFiller(inclusive, exclusive);
+        });
+    }
+
     private static void UpdateDustFillerEdit(ILContext il)
     {
-        if (updateDustBody is null)
+        if (UpdateDustBody is null)
         {
             throw new Exception("Could not find Dust::UpdateDust method body");
         }
 
         ILCursor c = new(il);
-        IntermediateLanguageUtil.CloneMethodBodyToCursor(updateDustBody, c);
+        IntermediateLanguageUtil.CloneMethodBodyToCursor(UpdateDustBody, c);
 
         // Navigate to the Main.maxDust constant used by the loop and use our
         // exclusive parameter instead.
@@ -109,13 +109,15 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
         c.Emit(OpCodes.Pop);
         c.Emit(OpCodes.Ldarg_0);
 
-        updateDustBody = null;
+        UpdateDustBody = null;
 
         MonoModHooks.DumpIL(ModContent.GetInstance<NitrateMod>(), il);
     }
 
+    // ReSharper disable UnusedParameter.Local
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static void UpdateDustFiller(int inclusive, int exclusive)
     {
     }
+    // ReSharper restore UnusedParameter.Local
 }
