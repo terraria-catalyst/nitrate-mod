@@ -88,6 +88,7 @@ internal static class IntermediateLanguageUtil
             EndColumn = x.EndColumn,
         }));
 
+        c.Index = 0;
         return;
 
         Instruction resolveInstrOff(int off)

@@ -27,8 +27,9 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
     {
         base.OnModLoad();
 
-        IL_Dust.UpdateDust += UpdateDustMakeThreadStaticParallel;
+        IL_Dust.UpdateDust += il => updateDustBody = il.Body;
         _updateDustFillerHook = new ILHook(typeof(DustUpdateParallelismSystem).GetMethod(nameof(UpdateDustFiller), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!, UpdateDustFillerEdit);
+        IL_Dust.UpdateDust += UpdateDustMakeThreadStaticParallel;
     }
 
     public override void Unload()
@@ -41,8 +42,6 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
 
     private static void UpdateDustMakeThreadStaticParallel(ILContext il)
     {
-        updateDustBody = il.Body;
-
         // Rewrites Dust::UpdateDust to use our thread-static fields instead of
         // local variables and constant values.
 
