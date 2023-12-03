@@ -61,7 +61,7 @@ internal abstract class AbstractSimdifier<TFrom, TTo> : ISimdifier
             }
             else if (instr.OpCode == OpCodes.Newobj)
             {
-                if (instr.Operand is not MethodReference methodReference)
+                /*if (instr.Operand is not MethodReference methodReference)
                 {
                     continue;
                 }
@@ -74,7 +74,7 @@ internal abstract class AbstractSimdifier<TFrom, TTo> : ISimdifier
                     }
 
                     instr.Operand = c.Body.Method.Module.ImportReference(remap.Value);
-                }
+                }*/
             }
         }
 
@@ -119,7 +119,7 @@ internal abstract class AbstractSimdifier<TFrom, TTo> : ISimdifier
         c.Index = 0;
         fieldRef = null;
 
-        while (c.TryGotoNext(MoveType.Before, x => x.MatchStfld(out fieldRef)))
+       /* while (c.TryGotoNext(MoveType.Before, x => x.MatchStfld(out fieldRef)))
         {
             if (fieldRef is null)
             {
@@ -133,7 +133,7 @@ internal abstract class AbstractSimdifier<TFrom, TTo> : ISimdifier
 
             c.Emit(OpCodes.Call, GetType().GetMethod("Undo", BindingFlags.Static | BindingFlags.NonPublic)!);
             c.Index++;
-        }
+        }*/
 
         c.Index = 0;
         fieldRef = null;
@@ -158,7 +158,7 @@ internal abstract class AbstractSimdifier<TFrom, TTo> : ISimdifier
         c.Index = 0;
         MethodReference? methRef = null;
 
-        while (c.TryGotoNext(MoveType.After, x => x.MatchCall(out methRef)))
+        /*while (c.TryGotoNext(MoveType.After, x => x.MatchCall(out methRef)))
         {
             if (methRef is null)
             {
@@ -176,7 +176,7 @@ internal abstract class AbstractSimdifier<TFrom, TTo> : ISimdifier
             }
 
             c.Emit(OpCodes.Call, GetType().GetMethod("As", BindingFlags.Static | BindingFlags.NonPublic)!);
-        }
+        }*/
 
         // Wrap method calls that expect the old type.
         methRef = null;

@@ -17,32 +17,36 @@ internal sealed class Vector2Simdifier : AbstractSimdifier<FnaVector2, SimdVecto
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static SimdVector2 op_Multiply_Vector2_int(FnaVector2 @this, int value) => As(@this) * value;
+    private static FnaVector2 op_Multiply_Vector2_int(FnaVector2 @this, int value) => Undo(As(@this) * value);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static SimdVector2 op_Multiply_Vector2_Vector2(FnaVector2 @this, FnaVector2 value) => As(@this) * As(value);
+    private static FnaVector2 op_Multiply_Vector2_Vector2(FnaVector2 @this, FnaVector2 value) => Undo(As(@this) * As(value));
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static SimdVector2 op_Addition_Vector2_Vector2(FnaVector2 @this, FnaVector2 value) => As(@this) + As(value);
+    private static FnaVector2 op_Addition_Vector2_Vector2(FnaVector2 @this, FnaVector2 value) => Undo(As(@this) + As(value));
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static SimdVector2 op_Subtraction_Vector2_Vector2(FnaVector2 @this, FnaVector2 value) => As(@this) - As(value);
+    private static FnaVector2 op_Subtraction_Vector2_Vector2(FnaVector2 @this, FnaVector2 value) => Undo(As(@this) - As(value));
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static SimdVector2 op_Division_Vector2_float(FnaVector2 @this, float value) => As(@this) / value;
+    private static FnaVector2 op_Division_Vector2_float(FnaVector2 @this, float value) => Undo(As(@this) / value);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static SimdVector2 op_Division_Vector2_Vector2(FnaVector2 @this, FnaVector2 value) => As(@this) / As(value);
+    private static FnaVector2 op_Division_Vector2_Vector2(FnaVector2 @this, FnaVector2 value) => Undo(As(@this) / As(value));
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool op_Inequality_Vector2_Vector2(FnaVector2 @this, FnaVector2 value) => As(@this) != As(value);
 
-    // TODO: Benchmark different approaches:
-    // 1:
-    // return new SimdVector2(x, y);
-    // 2:
+    // // TODO: Benchmark different approaches:
+    // // 1:
+    // // return new SimdVector2(x, y);
+    // // 2:
+    // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    // private static SimdVector2 ctor_float_float(float x, float y) => As(new FnaVector2(x, y));
+    
+    // TODO: Kind of useless in this iteration of the design...
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static SimdVector2 ctor_float_float(float x, float y) => As(new FnaVector2(x, y));
+    private static FnaVector2 ctor_float_float(float x, float y) => new(x, y);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static SimdVector2 As(FnaVector2 value) => Unsafe.As<FnaVector2, SimdVector2>(ref value);
