@@ -110,8 +110,6 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
         c.Emit(OpCodes.Ldarg_0);
 
         UpdateDustBody = null;
-
-        MonoModHooks.DumpIL(ModContent.GetInstance<NitrateMod>(), il);
     }
 
     // ReSharper disable UnusedParameter.Local
