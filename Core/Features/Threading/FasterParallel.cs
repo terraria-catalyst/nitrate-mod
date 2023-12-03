@@ -1,6 +1,7 @@
 ﻿using ReLogic.Threading;
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Nitrate.Core.Features.Threading;
 
@@ -41,7 +42,8 @@ public static class FasterParallel
             }
             else
             {
-                ThreadPool.QueueUserWorkItem(InvokeTask, rangeTask);
+                // ThreadPool.QueueUserWorkItem(InvokeTask, rangeTask);
+                Task.Run(() => InvokeTask(rangeTask));
             }
         }
 

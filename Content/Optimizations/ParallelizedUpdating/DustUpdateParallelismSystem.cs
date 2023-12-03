@@ -104,6 +104,7 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
         }
 
         RunningInParallel = true;
+        ThreadUnsafeCallWatchdog.Enable();
 
         FasterParallel.For(0, Main.maxDust, (inclusive, exclusive, _) =>
         {
@@ -112,5 +113,8 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
 
             orig();
         });
+
+        RunningInParallel = false;
+        ThreadUnsafeCallWatchdog.Disable();
     }
 }
