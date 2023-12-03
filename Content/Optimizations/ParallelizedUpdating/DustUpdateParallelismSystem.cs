@@ -88,8 +88,8 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
 
         // Navigate to the Main.maxDust constant used by the loop and use our
         // exclusive parameter instead.
-        c.GotoNext(MoveType.Before, x => x.MatchLdcI4(Main.maxDust));
-        c.Remove();
+        c.GotoNext(MoveType.After, x => x.MatchLdcI4(Main.maxDust));
+        c.Emit(OpCodes.Pop);
         c.Emit(OpCodes.Ldarg_1);
 
         // Dynamically find the local index of the actual loop index variable.
