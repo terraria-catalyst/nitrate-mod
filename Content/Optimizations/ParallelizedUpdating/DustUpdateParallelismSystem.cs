@@ -6,6 +6,7 @@ using MonoMod.Utils;
 using Terraria;
 using Terraria.ModLoader;
 using Nitrate.Core.Features.Threading;
+using Nitrate.Core.Utilities;
 using System;
 using System.Runtime.CompilerServices;
 
@@ -83,9 +84,8 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
             throw new Exception("Could not find Dust::UpdateDust method body");
         }
 
-        il.Method.Body = updateDustBody.Clone(il.Method);
-
         ILCursor c = new(il);
+        IntermediateLanguageUtil.CloneMethodBodyToCursor(updateDustBody, c);
 
         // Navigate to the Main.maxDust constant used by the loop and use our
         // exclusive parameter instead.
