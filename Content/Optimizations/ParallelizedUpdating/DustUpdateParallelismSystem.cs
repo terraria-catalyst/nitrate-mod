@@ -110,6 +110,8 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
         c.Emit(OpCodes.Ldarg_0);
 
         UpdateDustBody = null;
+
+        c.Simdify();
     }
 
     // ReSharper disable UnusedParameter.Local

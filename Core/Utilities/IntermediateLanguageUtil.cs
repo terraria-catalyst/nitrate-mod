@@ -1,20 +1,23 @@
 ﻿using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.Utils;
+using Nitrate.Core.Utilities.Simdifier;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Nitrate.Core.Utilities;
 
 internal static class IntermediateLanguageUtil
 {
+    private static readonly List<ISimdifier> simdifiers = new()
+    {
+        new Vector2Simdifier(),
+    };
+
     public static void CloneMethodBodyToCursor(MethodBody body, ILCursor c)
     {
         c.Index = 0;
-
-        // Don't bother removing instructions since there'll be returns copied
-        // anyway.
-        // c.RemoveRange(c.Instrs.Count);
 
         c.Body.MaxStackSize = body.MaxStackSize;
         c.Body.InitLocals = body.InitLocals;
@@ -105,6 +108,15 @@ internal static class IntermediateLanguageUtil
             }
 
             throw new Exception("Could not resolve instruction offset");
+        }
+    }
+
+    public static void Simdify(this ILCursor c)
+    {
+        foreach (ISimdifier simdifier in simdifiers)
+        {
+            c.Index = 0;
+            simdifier.Simdify(c);
         }
     }
 }

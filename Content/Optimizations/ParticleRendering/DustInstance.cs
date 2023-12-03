@@ -1,5 +1,4 @@
-﻿using JetBrains.Annotations;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using System.Runtime.InteropServices;
 
 namespace Nitrate.Content.Optimizations.ParticleRendering;
