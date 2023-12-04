@@ -12,7 +12,7 @@ using Nitrate.Core.Features.Rendering;
 using Nitrate.Core.Features.Threading;
 using Nitrate.Core.Utilities;
 
-namespace Nitrate.Content.Optimizations.ParticleRendering;
+namespace Nitrate.Content.Optimizations.ParticleRendering.Dust;
 
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class InstancedDustRenderer : AbstractInstancedParticleRenderer<DustInstance>
@@ -46,7 +46,7 @@ internal sealed class InstancedDustRenderer : AbstractInstancedParticleRenderer<
     {
         base.PreUpdateDusts();
 
-        Benchmark();
+        //Benchmark();
 
         ModContent.GetInstance<ActionableRenderTargetSystem>().QueueRenderAction(dust_target, () =>
         {
@@ -85,7 +85,7 @@ internal sealed class InstancedDustRenderer : AbstractInstancedParticleRenderer<
         {
             for (int i = inclusive; i < exclusive; i++)
             {
-                Dust dust = Main.dust[i];
+                Terraria.Dust dust = Main.dust[i];
 
                 // Something has gone seriously wrong if the atlas is null.
                 if (dust.active && ParticleAtlas is not null)
@@ -93,7 +93,7 @@ internal sealed class InstancedDustRenderer : AbstractInstancedParticleRenderer<
                     float halfWidth = (int)(dust.frame.Width / 2f);
                     float halfHeight = (int)(dust.frame.Height / 2f);
 
-                    Vector2 initialOffset = new(-halfWidth, -halfHeight);
+                    FnaVector2 initialOffset = new(-halfWidth, -halfHeight);
 
                     SimdMatrix rotation = SimdMatrix.CreateRotationZ(dust.rotation);
                     SimdMatrix offset = SimdMatrix.CreateTranslation(initialOffset.X / 2, initialOffset.Y / 2, 0);
@@ -115,7 +115,7 @@ internal sealed class InstancedDustRenderer : AbstractInstancedParticleRenderer<
                     float uvW = (float)(dust.frame.X + dust.frame.Width) / ParticleAtlas.Width;
                     float uvZ = (float)(dust.frame.Y + dust.frame.Height) / ParticleAtlas.Height;
 
-                    Color color = Lighting.GetColor((int)(dust.position.X + 4.0) / 16, (int)(dust.position.Y + 4.0) / 16);
+                    Color color = Lighting.GetColor((int)(dust.position.X + 4) / 16, (int)(dust.position.Y + 4) / 16);
 
                     Color dustColor = dust.GetAlpha(color);
 
@@ -136,7 +136,7 @@ internal sealed class InstancedDustRenderer : AbstractInstancedParticleRenderer<
         // Dust benchmark (spawns all 6000 dusts and positions them in a spot next to the player).
         for (int i = 0; i < Main.maxDust; i++)
         {
-            Dust dust = Main.dust[i];
+            Terraria.Dust dust = Main.dust[i];
 
             int type = Terraria.ID.DustID.FlameBurst;
 
@@ -146,8 +146,8 @@ internal sealed class InstancedDustRenderer : AbstractInstancedParticleRenderer<
             dust.noGravity = true;
             dust.color = Color.White;
             dust.alpha = 0;
-            dust.position = Main.LocalPlayer.position + new Vector2(100, 0);
-            dust.velocity = Vector2.Zero;
+            dust.position = Main.LocalPlayer.position + new FnaVector2(100, 0);
+            dust.velocity = FnaVector2.Zero;
             dust.frame.X = 10 * type;
             dust.frame.Y = 10;
             dust.shader = null;
