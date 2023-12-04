@@ -13,7 +13,7 @@ using Terraria.ModLoader;
 namespace Nitrate.Content.Optimizations.ParticleRendering.Rain;
 
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
-internal class InstancedRainRenderer : AbstractInstancedParticleRenderer<RainInstance>
+internal class InstancedRainRenderer : AbstractInstancedParticleRenderer<ParticleInstance>
 {
     private const string dust_target = "DustTarget";
 
@@ -111,11 +111,11 @@ internal class InstancedRainRenderer : AbstractInstancedParticleRenderer<RainIns
                         color *= 1f - Main.shimmerAlpha;
                     }
 
-                    Particles[i] = new RainInstance(world, new Vector4(uvX, uvY, uvW, uvZ), color.ToVector4());
+                    Particles[i] = new ParticleInstance(world, new Vector4(uvX, uvY, uvW, uvZ), color.ToVector4());
                 }
                 else
                 {
-                    Particles[i] = new RainInstance();
+                    Particles[i] = new ParticleInstance();
                 }
             }
         });

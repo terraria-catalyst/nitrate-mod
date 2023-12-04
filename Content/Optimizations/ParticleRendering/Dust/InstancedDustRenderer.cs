@@ -15,7 +15,7 @@ using Nitrate.Core.Utilities;
 namespace Nitrate.Content.Optimizations.ParticleRendering.Dust;
 
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
-internal sealed class InstancedDustRenderer : AbstractInstancedParticleRenderer<DustInstance>
+internal sealed class InstancedDustRenderer : AbstractInstancedParticleRenderer<ParticleInstance>
 {
     private const string dust_target = "DustTarget";
 
@@ -119,11 +119,11 @@ internal sealed class InstancedDustRenderer : AbstractInstancedParticleRenderer<
 
                     Color dustColor = dust.GetAlpha(color);
 
-                    Particles[i] = new DustInstance(world, new Vector4(uvX, uvY, uvW, uvZ), dustColor.ToVector4());
+                    Particles[i] = new ParticleInstance(world, new Vector4(uvX, uvY, uvW, uvZ), dustColor.ToVector4());
                 }
                 else
                 {
-                    Particles[i] = new DustInstance();
+                    Particles[i] = new ParticleInstance();
                 }
             }
         });
