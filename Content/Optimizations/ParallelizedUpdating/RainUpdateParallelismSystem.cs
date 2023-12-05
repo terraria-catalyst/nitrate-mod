@@ -14,8 +14,10 @@ namespace Nitrate.Content.Optimizations.ParallelizedUpdating;
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal class RainUpdateParallelismSystem : ModSystem
 {
-    public override void Load()
+    public override void OnModLoad()
     {
+        base.OnModLoad();
+
         IL_Main.DrawRain += ParalleliseRain;
     }
 

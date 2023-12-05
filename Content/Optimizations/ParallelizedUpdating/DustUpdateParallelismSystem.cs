@@ -10,6 +10,11 @@ using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using MethodBody = Mono.Cecil.Cil.MethodBody;
+using System.Collections.Concurrent;
+using Terraria.DataStructures;
+using Terraria.Graphics.Light;
+using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 
 namespace Nitrate.Content.Optimizations.ParallelizedUpdating;
 
@@ -25,6 +30,10 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
 
     private ILHook? _updateDustFillerHook;
 
+    private static bool UpdatingDust;
+
+    private static List<(int, int, Vector3)> LightCache = new();
+
     public override void OnModLoad()
     {
         base.OnModLoad();
@@ -32,6 +41,8 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
         IL_Dust.UpdateDust += il => UpdateDustBody = il.Body;
         _updateDustFillerHook = new ILHook(typeof(DustUpdateParallelismSystem).GetMethod(nameof(UpdateDustFiller), BindingFlags.NonPublic | BindingFlags.Static)!, UpdateDustFillerEdit);
         IL_Dust.UpdateDust += UpdateDustMakeThreadStaticParallel;
+
+        IL_Lighting.AddLight_int_int_float_float_float += QueueAddLightCall;
     }
 
     public override void Unload()
@@ -70,10 +81,23 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void InnerUpdateDust()
     {
+        UpdatingDust = true;
+
         FasterParallel.For(0, Main.maxDust, (inclusive, exclusive, _) =>
         {
             UpdateDustFiller(inclusive, exclusive);
         });
+
+        UpdatingDust = false;
+
+        for (int i = 0; i < LightCache.Count; i++)
+        {
+            (int, int, Vector3) light = LightCache[i];
+
+            Lighting._activeEngine.AddLight(light.Item1, light.Item2, light.Item3);
+        }
+
+        LightCache.Clear();
     }
 
     private static void UpdateDustFillerEdit(ILContext il)
@@ -120,4 +144,39 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
     {
     }
     // ReSharper restore UnusedParameter.Local
+
+    private void QueueAddLightCall(ILContext il)
+    {
+        ILCursor c = new(il);
+
+        // Emit a delegate that adds the lighting info to the queue and then returns, instead of the default behaviour.
+        for (int i = 0; i < 5; i++)
+        {
+            c.Emit(OpCodes.Ldarg, i);
+        }
+
+        c.EmitDelegate<Action<int, int, float, float, float>>((x, y, r, g, b) =>
+        {
+            LightCache.Add((x, y, new Vector3(r, g, b)));
+        });
+        c.Emit(OpCodes.Ret);
+
+        // Mark a label at the start of the default behaviour.
+        ILLabel defaultMethodStart = c.DefineLabel();
+
+        c.MarkLabel(defaultMethodStart);
+
+        c.Index = 0;
+
+        FieldInfo? updatingDust = typeof(DustUpdateParallelismSystem).GetField("UpdatingDust", BindingFlags.Static | BindingFlags.NonPublic);
+
+        if (updatingDust is null)
+        {
+            throw new Exception($"Could not find field {nameof(UpdatingDust)}.");
+        }
+
+        // Branch to the default behaviour if dusts aren't being updated.
+        c.Emit(OpCodes.Ldsfld, updatingDust);
+        c.Emit(OpCodes.Brfalse, defaultMethodStart);
+    }
 }
