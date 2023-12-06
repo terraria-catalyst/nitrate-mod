@@ -1,8 +1,10 @@
 ﻿using JetBrains.Annotations;
+using Microsoft.Xna.Framework;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using Nitrate.Core.Features.Threading;
 using System;
+using Terraria;
 using Terraria.Graphics.Light;
 using Terraria.ModLoader;
 
@@ -19,6 +21,7 @@ internal sealed class LightingParallelismSystem : ModSystem
         base.OnModLoad();
 
         IL_LightMap.Blur += FasterBlur;
+        IL_TileLightScanner.ExportTo += FasterExportTo;
     }
 
     private void FasterBlur(ILContext il)
@@ -40,6 +43,7 @@ internal sealed class LightingParallelismSystem : ModSystem
         c.Emit(OpCodes.Ret);
     }
 
+    // Exact copy of the vanilla method but with FasterParallel. Appears to significantly lower time spent waiting.
     private void SingleParallelBlur(LightMap lightMap)
     {
         FasterParallel.For(0, lightMap.Width, delegate (int start, int end, object context) {
@@ -57,5 +61,45 @@ internal sealed class LightingParallelismSystem : ModSystem
                 lightMap.BlurLine(lightMap.IndexOf(lightMap.Width - 1, i), lightMap.IndexOf(lightMap.NonVisiblePadding, i), -lightMap.Height);
             }
         });
+    }
+
+    private void FasterExportTo(ILContext il)
+    {
+        ILCursor c = new(il);
+
+        // Load method instance and all arguments.
+        for (int i = 0; i < 4; i++)
+        {
+            c.Emit(OpCodes.Ldarg, i);
+        }
+
+        c.EmitDelegate<Action<TileLightScanner, Rectangle, LightMap, TileLightScannerOptions>>(
+            (self, area, outputMap, options) =>
+            {
+                self._drawInvisibleWalls = options.DrawInvisibleWalls;
+                FasterParallel.For(area.Left, area.Right, delegate (int start, int end, object context) {
+                    for (int i = start; i < end; i++)
+                    {
+                        for (int j = area.Top; j <= area.Bottom; j++)
+                        {
+                            if (self.IsTileNullOrTouchingNull(i, j))
+                            {
+                                outputMap.SetMaskAt(i - area.X, j - area.Y, LightMaskMode.None);
+                                outputMap[i - area.X, j - area.Y] = Vector3.Zero;
+                            }
+                            else
+                            {
+                                LightMaskMode tileMask = self.GetTileMask(Main.tile[i, j]);
+                                outputMap.SetMaskAt(i - area.X, j - area.Y, tileMask);
+                                self.GetTileLight(i, j, out var outputColor);
+                                outputMap[i - area.X, j - area.Y] = outputColor;
+                            }
+                        }
+                    }
+                });
+            }
+        );
+
+        c.Emit(OpCodes.Ret);
     }
 }

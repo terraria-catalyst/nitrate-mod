@@ -10,9 +10,6 @@ using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using MethodBody = Mono.Cecil.Cil.MethodBody;
-using System.Collections.Concurrent;
-using Terraria.DataStructures;
-using Terraria.Graphics.Light;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 
@@ -42,7 +39,7 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
         _updateDustFillerHook = new ILHook(typeof(DustUpdateParallelismSystem).GetMethod(nameof(UpdateDustFiller), BindingFlags.NonPublic | BindingFlags.Static)!, UpdateDustFillerEdit);
         IL_Dust.UpdateDust += UpdateDustMakeThreadStaticParallel;
 
-        IL_Lighting.AddLight_int_int_float_float_float += QueueAddLightCall;
+        IL_Lighting.AddLight_int_int_float_float_float += QueueAddLightCalls;
     }
 
     public override void Unload()
@@ -145,7 +142,7 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
     }
     // ReSharper restore UnusedParameter.Local
 
-    private void QueueAddLightCall(ILContext il)
+    private void QueueAddLightCalls(ILContext il)
     {
         ILCursor c = new(il);
 
