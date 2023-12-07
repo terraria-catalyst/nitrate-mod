@@ -46,8 +46,6 @@ internal sealed class InstancedDustRenderer : AbstractInstancedParticleRenderer<
     {
         base.PreUpdateDusts();
 
-        //Benchmark();
-
         ModContent.GetInstance<ActionableRenderTargetSystem>().QueueRenderAction(dust_target, () =>
         {
             GraphicsDevice device = Main.graphics.GraphicsDevice;
@@ -129,45 +127,5 @@ internal sealed class InstancedDustRenderer : AbstractInstancedParticleRenderer<
         });
 
         InstanceBuffer?.SetData(Particles, 0, Particles.Length, SetDataOptions.None);
-    }
-
-    private void Benchmark()
-    {
-        // Dust benchmark (spawns all 6000 dusts and positions them in a spot next to the player).
-        for (int i = 0; i < Main.maxDust; i++)
-        {
-            Terraria.Dust dust = Main.dust[i];
-
-            int type = Terraria.ID.DustID.FlameBurst;
-
-            dust.fadeIn = 0f;
-            dust.active = true;
-            dust.type = type;
-            dust.noGravity = true;
-            dust.color = Color.White;
-            dust.alpha = 0;
-            dust.position = Main.LocalPlayer.position + new FnaVector2(100, 0);
-            dust.velocity = FnaVector2.Zero;
-            dust.frame.X = 10 * type;
-            dust.frame.Y = 10;
-            dust.shader = null;
-            dust.customData = null;
-            dust.noLightEmittence = false;
-            int num4 = type;
-
-            while (num4 >= 100)
-            {
-                num4 -= 100;
-                dust.frame.X -= 1000;
-                dust.frame.Y += 30;
-            }
-
-            dust.frame.Width = 8;
-            dust.frame.Height = 8;
-            dust.rotation = 0f;
-            dust.scale = 1;
-            dust.noLight = false;
-            dust.firstFrame = true;
-        }
     }
 }

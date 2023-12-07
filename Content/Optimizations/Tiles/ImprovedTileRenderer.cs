@@ -7,7 +7,7 @@ using Terraria.ModLoader;
 namespace Nitrate.Content.Optimizations.Tiles;
 
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
-internal sealed class SingleTileInstancingSystem : ModSystem
+internal sealed class ImprovedTileRenderer : ModSystem
 {
     public override void OnModLoad()
     {
