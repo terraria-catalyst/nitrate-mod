@@ -74,15 +74,14 @@ internal sealed class ThreadUnsafeCallWatchdog : ModSystem
         return il =>
         {
             ILCursor c = new(il);
-
             ILLabel enabledLabel = c.DefineLabel();
+
+            Type[] parameters = method.GetParameters().Select(x => x.ParameterType).ToArray();
+            MethodInfo makeAction = typeof(Delegator).GetMethods().Single(x => x.Name == nameof(Delegator.MakeAction) && x.GetParameters().Length == parameters.Length + 1).MakeGenericMethod(parameters);
+            ConstructorInfo actionCtor = typeof(Action).GetConstructor(new[] { typeof(object), typeof(IntPtr) })!;
 
             c.Emit(OpCodes.Ldsfld, typeof(ThreadUnsafeCallWatchdog).GetField(nameof(Enabled), BindingFlags.NonPublic | BindingFlags.Static)!);
             c.Emit(OpCodes.Brfalse, enabledLabel);
-
-            Type[] parameters = method.GetParameters().Select(x => x.ParameterType).ToArray();
-
-            MethodInfo makeAction = typeof(Delegator).GetMethods().Single(x => x.Name == nameof(Delegator.MakeAction) && x.GetParameters().Length == parameters.Length + 1).MakeGenericMethod(parameters);
 
             if (!method.IsStatic)
             {
@@ -99,9 +98,6 @@ internal sealed class ThreadUnsafeCallWatchdog : ModSystem
             }
 
             c.Emit(OpCodes.Ldftn, method);
-
-            ConstructorInfo actionCtor = typeof(Action).GetConstructor(new[] { typeof(object), typeof(IntPtr) })!;
-
             c.Emit(OpCodes.Newobj, actionCtor);
 
             for (int i = 0; i < parameters.Length; i++)
