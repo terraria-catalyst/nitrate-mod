@@ -94,7 +94,7 @@ internal sealed class LightingParallelismSystem : ModSystem
                             {
                                 LightMaskMode tileMask = self.GetTileMask(Main.tile[i, j]);
                                 outputMap.SetMaskAt(i - area.X, j - area.Y, tileMask);
-                                self.GetTileLight(i, j, out var outputColor);
+                                self.GetTileLight(i, j, out Vector3 outputColor);
                                 outputMap[i - area.X, j - area.Y] = outputColor;
                             }
                         }
