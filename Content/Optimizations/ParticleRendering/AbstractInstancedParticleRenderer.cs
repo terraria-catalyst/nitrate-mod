@@ -21,7 +21,7 @@ internal abstract class AbstractInstancedParticleRenderer<TParticle> : ModSystem
     protected AbstractInstancedParticleRenderer(int particleCount, string targetName)
     {
         Particles = new TParticle[particleCount];
-        this._targetName = targetName;
+        _targetName = targetName;
     }
 
     public override void Load()

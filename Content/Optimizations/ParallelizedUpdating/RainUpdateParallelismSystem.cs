@@ -18,10 +18,10 @@ internal class RainUpdateParallelismSystem : ModSystem
     {
         base.OnModLoad();
 
-        IL_Main.DrawRain += ParalleliseRain;
+        IL_Main.DrawRain += ParallelizeRain;
     }
 
-    private void ParalleliseRain(ILContext il)
+    private static void ParallelizeRain(ILContext il)
     {
         ILCursor c = new(il);
 
@@ -31,9 +31,7 @@ internal class RainUpdateParallelismSystem : ModSystem
             {
                 for (int i = inclusive; i < exclusive; i++)
                 {
-                    Rain rain = Main.rain[i];
-
-                    rain.Update();
+                    Main.rain[i].Update();
                 }
             });
         });

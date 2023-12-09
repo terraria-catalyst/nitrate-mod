@@ -61,11 +61,11 @@ internal static class FasterParallel
 
         public RangeTask(ParallelForAction action, int fromInclusive, int toExclusive, object? context, CountdownEvent countdownEvent)
         {
-            this._action = action;
-            this._fromInclusive = fromInclusive;
-            this._toExclusive = toExclusive;
-            this._context = context;
-            this._countdownEvent = countdownEvent;
+            _action = action;
+            _fromInclusive = fromInclusive;
+            _toExclusive = toExclusive;
+            _context = context;
+            _countdownEvent = countdownEvent;
         }
 
         public void Invoke()

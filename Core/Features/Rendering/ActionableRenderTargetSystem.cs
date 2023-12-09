@@ -111,21 +111,22 @@ internal sealed class ActionableRenderTargetSystem : ModSystem
     {
         orig(self);
 
+        Main.spriteBatch.Begin(
+            SpriteSortMode.Immediate,
+            BlendState.AlphaBlend,
+            SamplerState.PointWrap,
+            DepthStencilState.None,
+            RasterizerState.CullNone,
+            null,
+            Main.GameViewMatrix.TransformationMatrix
+        );
+
         foreach (string id in _targets.Keys)
         {
-            Main.spriteBatch.Begin(
-                SpriteSortMode.Immediate,
-                BlendState.AlphaBlend,
-                SamplerState.PointWrap,
-                DepthStencilState.None,
-                RasterizerState.CullNone,
-                null,
-                Main.GameViewMatrix.TransformationMatrix
-            );
-
             Main.spriteBatch.Draw(_targets[id].RenderTarget, Vector2.Zero, Color.White);
-            Main.spriteBatch.End();
         }
+
+        Main.spriteBatch.End();
     }
 
     private void TargetsNeedResizing(Vector2 _)
