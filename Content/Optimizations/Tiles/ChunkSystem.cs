@@ -268,6 +268,8 @@ internal sealed class ChunkSystem : ModSystem
         }
     }
 
+    // HORRIBLE hack for the time being, these will be rewritten.
+    #region Vanilla Adapted Tile Rendering
     private void DrawSingleTile(Vector2 screenPosition, Vector2 screenOffset, int tileX, int tileY)
     {
         TileDrawing td = Main.instance.TilesRenderer;
@@ -1029,4 +1031,5 @@ internal sealed class ChunkSystem : ModSystem
 
         goto IL_101e;
     }
+    #endregion
 }
