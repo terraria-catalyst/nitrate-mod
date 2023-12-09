@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Nitrate.Core.Utilities;
 using System;
 using System.Collections.Generic;
 using Terraria;
@@ -17,6 +18,8 @@ internal sealed class ChunkSystem : ModSystem
 
     private readonly Dictionary<Point, RenderTarget2D> _loadedChunks = new();
 
+    private readonly Dictionary<Point, RenderTarget2D> _needsPopulating = new();
+
     public override void OnWorldUnload()
     {
         base.OnWorldUnload();
@@ -30,9 +33,12 @@ internal sealed class ChunkSystem : ModSystem
 
         Rectangle screenArea = new((int)Main.screenPosition.X, (int)Main.screenPosition.Y, Main.screenWidth, Main.screenHeight);
 
+        // Chunk coordinates are incremented by 1 in each direction per chunk; 1 unit in chunk coordinates is equal to CHUNK_SIZE.
+        // Chunk coordinates of the top-leftmost visible chunk.
         int topX = (int)Math.Floor((double)screenArea.X / CHUNK_SIZE) - CHUNK_OFFSCREEN_BUFFER;
         int topY = (int)Math.Floor((double)screenArea.Y / CHUNK_SIZE) - CHUNK_OFFSCREEN_BUFFER;
 
+        // Chunk coordinates of the bottom-rightmost visible chunk.
         int bottomX = (int)Math.Floor((double)(screenArea.X + screenArea.Width) / CHUNK_SIZE) + CHUNK_OFFSCREEN_BUFFER;
         int bottomY = (int)Math.Floor((double)(screenArea.Y + screenArea.Height) / CHUNK_SIZE) + CHUNK_OFFSCREEN_BUFFER;
 
@@ -72,6 +78,13 @@ internal sealed class ChunkSystem : ModSystem
     public override void PostDrawTiles()
     {
         base.PostDrawTiles();
+
+        foreach (Point key in _needsPopulating.Keys)
+        {
+            PopulateChunk(key);
+        }
+
+        _needsPopulating.Clear();
 
         Main.spriteBatch.Begin(
             SpriteSortMode.Deferred,
@@ -136,24 +149,50 @@ internal sealed class ChunkSystem : ModSystem
             RenderTargetUsage.PreserveContents
         );
 
-        PopulateChunk(chunkKey, chunk);
-
         _loadedChunks[chunkKey] = chunk;
+        _needsPopulating[chunkKey] = chunk;
     }
 
-    private void PopulateChunk(Point chunkKey, RenderTarget2D chunk)
+    private void PopulateChunk(Point chunkKey)
     {
-        // Temporary for testing purposes. Will replace with rendering onto the chunk soon.
-        Color[] data = new Color[CHUNK_SIZE * CHUNK_SIZE];
+        RenderTarget2D chunk = _loadedChunks[chunkKey];
 
-        Color color = new Color(Main.rand.Next(255), Main.rand.Next(255), Main.rand.Next(255)) * 0.5f;
+        GraphicsDevice device = Main.graphics.GraphicsDevice;
 
-        for (int i = 0; i < data.Length; i++)
+        RenderTargetBinding[] bindings = device.GetRenderTargets();
+
+        device.SetRenderTarget(chunk);
+
+        Main.spriteBatch.Begin(
+            SpriteSortMode.Deferred,
+            BlendState.AlphaBlend,
+            SamplerState.PointClamp,
+            DepthStencilState.None,
+            RasterizerState.CullNone,
+            null,
+            Main.GameViewMatrix.TransformationMatrix
+        );
+
+        Vector2 chunkPositionWorld = new(chunkKey.X * CHUNK_SIZE, chunkKey.Y * CHUNK_SIZE);
+
+        int sizeTiles = CHUNK_SIZE / 16;
+
+        Point chunkPositionTile = new((int)chunkPositionWorld.X / 16, (int)chunkPositionWorld.Y / 16);
+
+        for (int i = 0; i < sizeTiles; i++)
         {
-            data[i] = color;
+            for (int j = 0; j < sizeTiles; j++)
+            {
+                int tileX = chunkPositionTile.X + i;
+                int tileY = chunkPositionTile.Y + j;
+
+                TileUtil.RenderTileAt(tileX, tileY, chunkPositionWorld);
+            }
         }
 
-        chunk.SetData(data);
+        Main.spriteBatch.End();
+
+        device.SetRenderTargets(bindings);
     }
 
     private void UnloadChunk(Point chunkKey) => _loadedChunks[chunkKey].Dispose();
