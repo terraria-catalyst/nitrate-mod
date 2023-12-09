@@ -24,7 +24,7 @@ internal sealed class LightingParallelismSystem : ModSystem
         IL_TileLightScanner.ExportTo += FasterExportTo;
     }
 
-    private void FasterBlur(ILContext il)
+    private static void FasterBlur(ILContext il)
     {
         ILCursor c = new(il);
 
@@ -44,17 +44,19 @@ internal sealed class LightingParallelismSystem : ModSystem
     }
 
     // Exact copy of the vanilla method but with FasterParallel. Appears to significantly lower time spent waiting.
-    private void SingleParallelBlur(LightMap lightMap)
+    private static void SingleParallelBlur(LightMap lightMap)
     {
-        FasterParallel.For(0, lightMap.Width, delegate (int start, int end, object context) {
-            for (int j = start; j < end; j++)
+        FasterParallel.For(0, lightMap.Width, delegate (int start, int end, object _)
+        {
+            for (int i = start; i < end; i++)
             {
-                lightMap.BlurLine(lightMap.IndexOf(j, 0), lightMap.IndexOf(j, lightMap.Height - 1 - lightMap.NonVisiblePadding), 1);
-                lightMap.BlurLine(lightMap.IndexOf(j, lightMap.Height - 1), lightMap.IndexOf(j, lightMap.NonVisiblePadding), -1);
+                lightMap.BlurLine(lightMap.IndexOf(i, 0), lightMap.IndexOf(i, lightMap.Height - 1 - lightMap.NonVisiblePadding), 1);
+                lightMap.BlurLine(lightMap.IndexOf(i, lightMap.Height - 1), lightMap.IndexOf(i, lightMap.NonVisiblePadding), -1);
             }
         });
 
-        FasterParallel.For(0, lightMap.Height, delegate (int start, int end, object context) {
+        FasterParallel.For(0, lightMap.Height, delegate (int start, int end, object _)
+        {
             for (int i = start; i < end; i++)
             {
                 lightMap.BlurLine(lightMap.IndexOf(0, i), lightMap.IndexOf(lightMap.Width - 1 - lightMap.NonVisiblePadding, i), lightMap.Height);
@@ -63,21 +65,22 @@ internal sealed class LightingParallelismSystem : ModSystem
         });
     }
 
-    private void FasterExportTo(ILContext il)
+    private static void FasterExportTo(ILContext il)
     {
         ILCursor c = new(il);
 
-        // Load method instance and all arguments.
-        for (int i = 0; i < 4; i++)
-        {
-            c.Emit(OpCodes.Ldarg, i);
-        }
+        c.Emit(OpCodes.Ldarg_0);
+        c.Emit(OpCodes.Ldarg_1);
+        c.Emit(OpCodes.Ldarg_2);
+        c.Emit(OpCodes.Ldarg_3);
 
         c.EmitDelegate<Action<TileLightScanner, Rectangle, LightMap, TileLightScannerOptions>>(
             (self, area, outputMap, options) =>
             {
                 self._drawInvisibleWalls = options.DrawInvisibleWalls;
-                FasterParallel.For(area.Left, area.Right, delegate (int start, int end, object context) {
+
+                FasterParallel.For(area.Left, area.Right, delegate (int start, int end, object context)
+                {
                     for (int i = start; i < end; i++)
                     {
                         for (int j = area.Top; j <= area.Bottom; j++)

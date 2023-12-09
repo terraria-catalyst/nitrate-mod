@@ -29,7 +29,7 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
 
     private static bool UpdatingDust;
 
-    private static List<(int, int, Vector3)> LightCache = new();
+    private static readonly List<(int, int, Vector3)> light_cache = new();
 
     public override void OnModLoad()
     {
@@ -87,14 +87,14 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
 
         UpdatingDust = false;
 
-        for (int i = 0; i < LightCache.Count; i++)
+        for (int i = 0; i < light_cache.Count; i++)
         {
-            (int, int, Vector3) light = LightCache[i];
+            (int, int, Vector3) light = light_cache[i];
 
             Lighting._activeEngine.AddLight(light.Item1, light.Item2, light.Item3);
         }
 
-        LightCache.Clear();
+        light_cache.Clear();
     }
 
     private static void UpdateDustFillerEdit(ILContext il)
@@ -154,8 +154,9 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
 
         c.EmitDelegate<Action<int, int, float, float, float>>((x, y, r, g, b) =>
         {
-            LightCache.Add((x, y, new Vector3(r, g, b)));
+            light_cache.Add((x, y, new Vector3(r, g, b)));
         });
+
         c.Emit(OpCodes.Ret);
 
         // Mark a label at the start of the default behaviour.

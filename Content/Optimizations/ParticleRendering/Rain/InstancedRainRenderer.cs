@@ -24,11 +24,6 @@ internal class InstancedRainRenderer : AbstractInstancedParticleRenderer<Particl
         InstanceParticleRenderer = new Lazy<Effect>(() => Mod.Assets.Request<Effect>("Assets/Effects/InstancedParticleRenderer", AssetRequestMode.ImmediateLoad).Value);
     }
 
-    public override void Load()
-    {
-        base.Load();
-    }
-
     protected override Texture2D MakeAtlas() => TextureAssets.Rain.Value;
 
     public override void PreUpdateDusts()
