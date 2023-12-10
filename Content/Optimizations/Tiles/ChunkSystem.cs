@@ -20,11 +20,10 @@ namespace Nitrate.Content.Optimizations.Tiles;
 
 /// <summary>
 /// TODO:
-/// Draw chunks with lighting buffer.
 /// Ensure all sources of tiles changing (animations, breaking, placing, hammering etc.) are covered.
 /// Make sure other effects such as dusts/tile cracks are rendered as well.
 /// Ensure water squares can draw.
-/// Find a way to turn off vanilla tile rendering while keeping it stable.
+/// Ensure walls also draw to chunks so renderblack can finally die.
 /// </summary>
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class ChunkSystem : ModSystem
@@ -42,6 +41,8 @@ internal sealed class ChunkSystem : ModSystem
 
     private readonly List<Point> _needsPopulating = new();
 
+    private readonly Lazy<Effect> _lightMapRenderer;
+
     private RenderTarget2D _lightingBuffer;
 
     private Color[] _colorBuffer;
@@ -50,11 +51,9 @@ internal sealed class ChunkSystem : ModSystem
 
     private RenderTarget2D _screenSizeLightingBuffer;
 
-    private readonly Lazy<Effect> LightMapRenderer;
-
     public ChunkSystem()
     {
-        LightMapRenderer = new Lazy<Effect>(() => Mod.Assets.Request<Effect>("Assets/Effects/LightMapRenderer", AssetRequestMode.ImmediateLoad).Value);
+        _lightMapRenderer = new Lazy<Effect>(() => Mod.Assets.Request<Effect>("Assets/Effects/LightMapRenderer", AssetRequestMode.ImmediateLoad).Value);
     }
 
     public override void OnModLoad()
@@ -347,10 +346,10 @@ internal sealed class ChunkSystem : ModSystem
             SamplerState.PointClamp,
             DepthStencilState.None,
             RasterizerState.CullNone,
-            LightMapRenderer.Value
+            _lightMapRenderer.Value
         );
 
-        LightMapRenderer.Value.Parameters["lightMap"].SetValue(_screenSizeLightingBuffer);
+        _lightMapRenderer.Value.Parameters["lightMap"].SetValue(_screenSizeLightingBuffer);
 
         Main.spriteBatch.Draw(_chunkScreenTarget, Vector2.Zero, Color.White);
 
@@ -415,7 +414,6 @@ internal sealed class ChunkSystem : ModSystem
     }
 
     // HORRIBLE hack for the time being, these will be rewritten.
-
     #region Vanilla Adapted Tile Rendering
     private void DrawSingleTile(Vector2 screenPosition, Vector2 screenOffset, int tileX, int tileY)
     {
