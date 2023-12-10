@@ -1,3 +1,4 @@
 displayName = Nitrate
 author = Oli & tomat
 version = 0.1.0
+side = Client
