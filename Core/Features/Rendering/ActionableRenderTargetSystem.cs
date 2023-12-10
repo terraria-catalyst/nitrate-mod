@@ -129,7 +129,7 @@ internal sealed class ActionableRenderTargetSystem : ModSystem
         Main.spriteBatch.End();
     }
 
-    private void TargetsNeedResizing(Vector2 _)
+    private void TargetsNeedResizing(FnaVector2 _)
     {
         Main.RunOnMainThread(() =>
         {
