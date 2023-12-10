@@ -53,14 +53,14 @@ internal sealed class ChunkSystem : ModSystem
         // Add 2 to each dimension for 1 tile of buffer space around the lighting buffer.
         Main.RunOnMainThread(() =>
         {
-            _lightingBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, (Main.screenWidth / 16), (Main.screenHeight / 16));
+            _lightingBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, (Main.screenWidth / 16) + 2, (Main.screenHeight / 16) + 2);
             _colorBuffer = new Color[_lightingBuffer.Width * _lightingBuffer.Height];
         });
 
         Main.OnResolutionChanged += _ =>
         {
             _lightingBuffer?.Dispose();
-            _lightingBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, (Main.screenWidth / 16), (Main.screenHeight / 16));
+            _lightingBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, (Main.screenWidth / 16) + 2, (Main.screenHeight / 16) + 2);
             _colorBuffer = new Color[_lightingBuffer.Width * _lightingBuffer.Height];
         };
     }
@@ -172,8 +172,6 @@ internal sealed class ChunkSystem : ModSystem
             Main.spriteBatch.Draw(chunk, new Vector2(chunkArea.X, chunkArea.Y) - Main.screenPosition, Color.White);
         }
 
-        Main.spriteBatch.Draw(_lightingBuffer, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), Color.White * 0.5f);
-
         Main.spriteBatch.End();
     }
 
@@ -273,8 +271,8 @@ internal sealed class ChunkSystem : ModSystem
 
                 // Subtract 1 to account for buffer space.
                 _colorBuffer[i] = Lighting.GetColor(
-                    (int)(Main.screenPosition.X / 16) + x,
-                    (int)(Main.screenPosition.Y / 16) + y
+                    (int)(Main.screenPosition.X / 16) + x - 1,
+                    (int)(Main.screenPosition.Y / 16) + y - 1
                 );
             }
         });
