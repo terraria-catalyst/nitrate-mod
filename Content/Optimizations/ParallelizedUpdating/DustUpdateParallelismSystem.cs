@@ -2,15 +2,15 @@
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
-using Terraria;
-using Terraria.ModLoader;
+using Nitrate.Core.Features.Parallelization;
 using Nitrate.Core.Features.Threading;
 using Nitrate.Core.Utilities;
 using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Terraria;
+using Terraria.ModLoader;
 using MethodBody = Mono.Cecil.Cil.MethodBody;
-using Nitrate.Core.Features.Parallelization;
 
 namespace Nitrate.Content.Optimizations.ParallelizedUpdating;
 

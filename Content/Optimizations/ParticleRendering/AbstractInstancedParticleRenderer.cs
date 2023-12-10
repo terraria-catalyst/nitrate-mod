@@ -1,9 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Nitrate.Core.Features.Rendering;
 using System;
 using Terraria;
 using Terraria.ModLoader;
-using Nitrate.Core.Features.Rendering;
 
 namespace Nitrate.Content.Optimizations.ParticleRendering;
 

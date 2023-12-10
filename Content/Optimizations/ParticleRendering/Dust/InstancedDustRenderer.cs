@@ -3,14 +3,14 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using Nitrate.Core.Features.Rendering;
+using Nitrate.Core.Features.Threading;
+using Nitrate.Core.Utilities;
 using ReLogic.Content;
 using System;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
-using Nitrate.Core.Features.Rendering;
-using Nitrate.Core.Features.Threading;
-using Nitrate.Core.Utilities;
 
 namespace Nitrate.Content.Optimizations.ParticleRendering.Dust;
 
