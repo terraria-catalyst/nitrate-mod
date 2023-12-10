@@ -15,6 +15,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <None Remove="Assets\Effects\LightMapRenderer.fx" />
       <None Remove="icon_workshop.png" />
       <None Remove="LICENSE.txt" />
       <None Remove="TODO.txt" />

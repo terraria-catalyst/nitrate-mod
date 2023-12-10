@@ -27,6 +27,11 @@ internal class RainUpdateParallelismSystem : ModSystem
 
         c.EmitDelegate(() =>
         {
+            if (!Main.raining)
+            {
+                return;
+            }
+
             FasterParallel.For(0, Main.maxRain, (inclusive, exclusive, _) =>
             {
                 for (int i = inclusive; i < exclusive; i++)

@@ -30,6 +30,11 @@ internal class InstancedRainRenderer : AbstractInstancedParticleRenderer<Particl
     {
         base.PreUpdateDusts();
 
+        if (!Main.raining)
+        {
+            return;
+        }
+
         ModContent.GetInstance<ActionableRenderTargetSystem>().QueueRenderAction(dust_target, () =>
         {
             GraphicsDevice device = Main.graphics.GraphicsDevice;

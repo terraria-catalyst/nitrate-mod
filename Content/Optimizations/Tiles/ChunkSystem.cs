@@ -1,7 +1,10 @@
 ﻿using JetBrains.Annotations;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Nitrate.Content.Optimizations.ParticleRendering.Dust;
 using Nitrate.Core.Features.Threading;
+using Nitrate.Core.Utilities;
+using ReLogic.Content;
 using System;
 using System.Collections.Generic;
 using Terraria;
@@ -41,6 +44,17 @@ internal sealed class ChunkSystem : ModSystem
 
     private Color[] _colorBuffer;
 
+    private RenderTarget2D _chunkScreenTarget;
+
+    private RenderTarget2D _screenSizeLightingBuffer;
+
+    private readonly Lazy<Effect> LightMapRenderer;
+
+    public ChunkSystem()
+    {
+        LightMapRenderer = new Lazy<Effect>(() => Mod.Assets.Request<Effect>("Assets/Effects/LightMapRenderer", AssetRequestMode.ImmediateLoad).Value);
+    }
+
     public override void OnModLoad()
     {
         base.OnModLoad();
@@ -53,14 +67,29 @@ internal sealed class ChunkSystem : ModSystem
         // Add 2 to each dimension for 1 tile of buffer space around the lighting buffer.
         Main.RunOnMainThread(() =>
         {
-            _lightingBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, (Main.screenWidth / 16) + 2, (Main.screenHeight / 16) + 2);
+            _lightingBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, (int)Math.Ceiling(Main.screenWidth / 16f) + 2, (int)Math.Ceiling(Main.screenHeight / 16f) + 2);
+
             _colorBuffer = new Color[_lightingBuffer.Width * _lightingBuffer.Height];
+
+            _chunkScreenTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
+            _screenSizeLightingBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
+
+            // By default Terraria has this set to DiscardContents. This means that switching RTs erases the contents of the backbuffer if done mid-draw.
+            Main.graphics.GraphicsDevice.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
+            Main.graphics.ApplyChanges();
         });
 
         Main.OnResolutionChanged += _ =>
         {
             _lightingBuffer?.Dispose();
             _lightingBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, (Main.screenWidth / 16) + 2, (Main.screenHeight / 16) + 2);
+
+            _chunkScreenTarget?.Dispose();
+            _chunkScreenTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
+
+            _screenSizeLightingBuffer?.Dispose();
+            _screenSizeLightingBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
+
             _colorBuffer = new Color[_lightingBuffer.Width * _lightingBuffer.Height];
         };
     }
@@ -125,19 +154,28 @@ internal sealed class ChunkSystem : ModSystem
         }
 
         _needsPopulating.Clear();
-
-        PopulateLightingBuffer();
     }
 
     public override void PostDrawTiles()
     {
         base.PostDrawTiles();
 
-        DrawChunks();
+        GraphicsDevice device = Main.graphics.GraphicsDevice;
+
+        PopulateLightingBuffer();
+
+        DrawChunksToChunkTarget(device);
+
+        TransferTileSpaceBufferToScreenSpaceBuffer(device);
+
+        RenderChunksWithLighting();
     }
 
-    private void DrawChunks()
+    private void DrawChunksToChunkTarget(GraphicsDevice device)
     {
+        device.SetRenderTarget(_chunkScreenTarget);
+        device.Clear(Color.Transparent);
+
         Main.spriteBatch.Begin(
             SpriteSortMode.Deferred,
             BlendState.AlphaBlend,
@@ -173,6 +211,8 @@ internal sealed class ChunkSystem : ModSystem
         }
 
         Main.spriteBatch.End();
+
+        device.SetRenderTarget(null);
     }
 
     private void DisposeAllChunks()
@@ -278,6 +318,40 @@ internal sealed class ChunkSystem : ModSystem
         });
 
         _lightingBuffer.SetData(_colorBuffer);
+    }
+
+    private void TransferTileSpaceBufferToScreenSpaceBuffer(GraphicsDevice device)
+    {
+        device.SetRenderTarget(_screenSizeLightingBuffer);
+        device.Clear(Color.Transparent);
+
+        Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+
+        Vector2 offset = new(Main.screenPosition.X % 16, Main.screenPosition.Y % 16);
+
+        // Account for tile padding around the screen.
+        Main.spriteBatch.Draw(_lightingBuffer, new Vector2(-16, -16) - offset, null, Color.White, 0, Vector2.Zero, 16, SpriteEffects.None, 0);
+        Main.spriteBatch.End();
+
+        device.SetRenderTarget(null);
+    }
+
+    private void RenderChunksWithLighting()
+    {
+        Main.spriteBatch.Begin(
+            SpriteSortMode.Immediate,
+            BlendState.AlphaBlend,
+            SamplerState.PointClamp,
+            DepthStencilState.None,
+            RasterizerState.CullNone,
+            LightMapRenderer.Value
+        );
+
+        LightMapRenderer.Value.Parameters["lightMap"].SetValue(_screenSizeLightingBuffer);
+
+        Main.spriteBatch.Draw(_chunkScreenTarget, Vector2.Zero, Color.White);
+
+        Main.spriteBatch.End();
     }
 
     private void RegisterTileStateChangedEvents()
