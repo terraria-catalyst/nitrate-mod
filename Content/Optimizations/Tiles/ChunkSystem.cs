@@ -1,6 +1,7 @@
 ﻿using JetBrains.Annotations;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Nitrate.Core.Features.Threading;
 using System;
 using System.Collections.Generic;
 using Terraria;
@@ -17,10 +18,10 @@ namespace Nitrate.Content.Optimizations.Tiles;
 /// <summary>
 /// TODO:
 /// Draw chunks with lighting buffer.
-/// Ensure all sources of tiles changing (animations, breaking, placing, etc.) are covered.
+/// Ensure all sources of tiles changing (animations, breaking, placing, hammering etc.) are covered.
 /// Make sure other effects such as dusts/tile cracks are rendered as well.
+/// Ensure water squares can draw.
 /// Find a way to turn off vanilla tile rendering while keeping it stable.
-/// Fix framing issues that seem to occur for chunks that are initially rendered outside the screen's bounds.
 /// </summary>
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class ChunkSystem : ModSystem
@@ -36,11 +37,32 @@ internal sealed class ChunkSystem : ModSystem
 
     private readonly List<Point> _needsPopulating = new();
 
+    private RenderTarget2D _lightingBuffer;
+
+    private Color[] _colorBuffer;
+
     public override void OnModLoad()
     {
         base.OnModLoad();
 
         RegisterTileStateChangedEvents();
+
+        // TODO: Change this to be IL based and incorporate walls into the chunks.
+        On_Main.RenderTiles += (orig, self) => { };
+
+        // Add 2 to each dimension for 1 tile of buffer space around the lighting buffer.
+        Main.RunOnMainThread(() =>
+        {
+            _lightingBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, (Main.screenWidth / 16), (Main.screenHeight / 16));
+            _colorBuffer = new Color[_lightingBuffer.Width * _lightingBuffer.Height];
+        });
+
+        Main.OnResolutionChanged += _ =>
+        {
+            _lightingBuffer?.Dispose();
+            _lightingBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, (Main.screenWidth / 16), (Main.screenHeight / 16));
+            _colorBuffer = new Color[_lightingBuffer.Width * _lightingBuffer.Height];
+        };
     }
 
     public override void OnWorldUnload()
@@ -103,12 +125,19 @@ internal sealed class ChunkSystem : ModSystem
         }
 
         _needsPopulating.Clear();
+
+        PopulateLightingBuffer();
     }
 
     public override void PostDrawTiles()
     {
         base.PostDrawTiles();
 
+        DrawChunks();
+    }
+
+    private void DrawChunks()
+    {
         Main.spriteBatch.Begin(
             SpriteSortMode.Deferred,
             BlendState.AlphaBlend,
@@ -142,6 +171,8 @@ internal sealed class ChunkSystem : ModSystem
 
             Main.spriteBatch.Draw(chunk, new Vector2(chunkArea.X, chunkArea.Y) - Main.screenPosition, Color.White);
         }
+
+        Main.spriteBatch.Draw(_lightingBuffer, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), Color.White * 0.5f);
 
         Main.spriteBatch.End();
     }
@@ -187,14 +218,14 @@ internal sealed class ChunkSystem : ModSystem
         device.SetRenderTarget(chunk);
         device.Clear(Color.Transparent);
 
+        Main.tileBatch.Begin();
+
         Main.spriteBatch.Begin(
             SpriteSortMode.Deferred,
             BlendState.AlphaBlend,
             SamplerState.PointClamp,
             DepthStencilState.None,
-            RasterizerState.CullNone,
-            null,
-            Main.GameViewMatrix.TransformationMatrix
+            RasterizerState.CullNone
         );
 
         Vector2 chunkPositionWorld = new(chunkKey.X * chunk_size, chunkKey.Y * chunk_size);
@@ -219,6 +250,7 @@ internal sealed class ChunkSystem : ModSystem
             }
         }
 
+        Main.tileBatch.End();
         Main.spriteBatch.End();
 
         device.SetRenderTargets(bindings);
@@ -230,16 +262,38 @@ internal sealed class ChunkSystem : ModSystem
         _needsPopulating.Remove(chunkKey);
     }
 
+    private void PopulateLightingBuffer()
+    {
+        FasterParallel.For(0, _colorBuffer.Length, (inclusive, exclusive, _) =>
+        {
+            for (int i = inclusive; i < exclusive; i++)
+            {
+                int x = i % _lightingBuffer.Width;
+                int y = i / _lightingBuffer.Width;
+
+                // Subtract 1 to account for buffer space.
+                _colorBuffer[i] = Lighting.GetColor(
+                    (int)(Main.screenPosition.X / 16) + x,
+                    (int)(Main.screenPosition.Y / 16) + y
+                );
+            }
+        });
+
+        _lightingBuffer.SetData(_colorBuffer);
+    }
+
     private void RegisterTileStateChangedEvents()
     {
         On_WorldGen.PlaceTile += On_WorldGen_PlaceTile;
         On_WorldGen.KillTile += On_WorldGen_KillTile;
+        On_WorldGen.TileFrame += On_WorldGen_TileFrame;
     }
 
     private bool On_WorldGen_PlaceTile(On_WorldGen.orig_PlaceTile orig, int i, int j, int type, bool mute, bool forced, int plr, int style)
     {
         bool result = orig(i, j, type, mute, forced, plr, style);
 
+        // Maybe can check if(result)? Not sure if the method actually makes any world changes if false.
         TileStateChanged(i, j);
 
         return result;
@@ -248,6 +302,14 @@ internal sealed class ChunkSystem : ModSystem
     private void On_WorldGen_KillTile(On_WorldGen.orig_KillTile orig, int i, int j, bool fail, bool effectOnly, bool noItem)
     {
         orig(i, j, fail, effectOnly, noItem);
+        
+        // Maybe can check if(fail)?
+        TileStateChanged(i, j);
+    }
+
+    private void On_WorldGen_TileFrame(On_WorldGen.orig_TileFrame orig, int i, int j, bool resetFrame, bool noBreak)
+    {
+        orig(i, j, resetFrame, noBreak);
 
         TileStateChanged(i, j);
     }
