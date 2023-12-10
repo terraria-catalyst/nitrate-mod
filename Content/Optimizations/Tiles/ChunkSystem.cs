@@ -1,9 +1,9 @@
 ﻿using JetBrains.Annotations;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Nitrate.Content.Optimizations.ParticleRendering.Dust;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
 using Nitrate.Core.Features.Threading;
-using Nitrate.Core.Utilities;
 using ReLogic.Content;
 using System;
 using System.Collections.Generic;
@@ -36,6 +36,8 @@ internal sealed class ChunkSystem : ModSystem
     // The number of layers of additional chunks that stay loaded off-screen around the player. Could help improve performance when moving around in one location.
     private const int chunk_offscreen_buffer = 1;
 
+    private const int lighting_buffer_offscreen_range_tiles = 1;
+
     private readonly Dictionary<Point, RenderTarget2D> _loadedChunks = new();
 
     private readonly List<Point> _needsPopulating = new();
@@ -61,13 +63,15 @@ internal sealed class ChunkSystem : ModSystem
 
         RegisterTileStateChangedEvents();
 
-        // TODO: Change this to be IL based and incorporate walls into the chunks.
-        On_Main.RenderTiles += (orig, self) => { };
+        IL_Main.RenderTiles += CancelVanillaTileRendering;
 
-        // Add 2 to each dimension for 1 tile of buffer space around the lighting buffer.
         Main.RunOnMainThread(() =>
         {
-            _lightingBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, (int)Math.Ceiling(Main.screenWidth / 16f) + 2, (int)Math.Ceiling(Main.screenHeight / 16f) + 2);
+            _lightingBuffer = new RenderTarget2D(
+                Main.graphics.GraphicsDevice,
+                (int)Math.Ceiling(Main.screenWidth / 16f) + (lighting_buffer_offscreen_range_tiles * 2),
+                (int)Math.Ceiling(Main.screenHeight / 16f) + (lighting_buffer_offscreen_range_tiles * 2)
+            );
 
             _colorBuffer = new Color[_lightingBuffer.Width * _lightingBuffer.Height];
 
@@ -309,10 +313,9 @@ internal sealed class ChunkSystem : ModSystem
                 int x = i % _lightingBuffer.Width;
                 int y = i / _lightingBuffer.Width;
 
-                // Subtract 1 to account for buffer space.
                 _colorBuffer[i] = Lighting.GetColor(
-                    (int)(Main.screenPosition.X / 16) + x - 1,
-                    (int)(Main.screenPosition.Y / 16) + y - 1
+                    (int)(Main.screenPosition.X / 16) + x - lighting_buffer_offscreen_range_tiles,
+                    (int)(Main.screenPosition.Y / 16) + y - lighting_buffer_offscreen_range_tiles
                 );
             }
         });
@@ -330,7 +333,7 @@ internal sealed class ChunkSystem : ModSystem
         Vector2 offset = new(Main.screenPosition.X % 16, Main.screenPosition.Y % 16);
 
         // Account for tile padding around the screen.
-        Main.spriteBatch.Draw(_lightingBuffer, new Vector2(-16, -16) - offset, null, Color.White, 0, Vector2.Zero, 16, SpriteEffects.None, 0);
+        Main.spriteBatch.Draw(_lightingBuffer, new Vector2(-lighting_buffer_offscreen_range_tiles * 16) - offset, null, Color.White, 0, Vector2.Zero, 16, SpriteEffects.None, 0);
         Main.spriteBatch.End();
 
         device.SetRenderTarget(null);
@@ -402,6 +405,13 @@ internal sealed class ChunkSystem : ModSystem
         {
             _needsPopulating.Add(chunkKey);
         }
+    }
+
+    private void CancelVanillaTileRendering(ILContext il)
+    {
+        ILCursor c = new(il);
+
+        c.Emit(OpCodes.Ret);
     }
 
     // HORRIBLE hack for the time being, these will be rewritten.
