@@ -24,6 +24,7 @@ namespace Nitrate.Content.Optimizations.Tiles;
 /// Make sure other effects such as dusts/tile cracks are rendered as well.
 /// Ensure water squares can draw.
 /// Ensure walls also draw to chunks so renderblack can finally die.
+/// Fix lighting buffer with zoom.
 /// </summary>
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class ChunkSystem : ModSystem
