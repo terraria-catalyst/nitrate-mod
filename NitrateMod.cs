@@ -12,6 +12,25 @@ public sealed class NitrateMod : Mod
     {
         base.Load();
 
+        Logger.Info("              .......              ");
+        Logger.Info("             .........             ");
+        Logger.Info("            ...........            ");
+        Logger.Info("            ...........            ");
+        Logger.Info("             .........             ");
+        Logger.Info("              .......              ");
+        Logger.Info("                ...                ");
+        Logger.Info("            ....   ....            ");
+        Logger.Info("           ...       ...           ");
+        Logger.Info("          ..           ..          ");
+        Logger.Info("          ..           ..          ");
+        Logger.Info("          ..           ..          ");
+        Logger.Info("           ..         ..           ");
+        Logger.Info("    ............   ............    ");
+        Logger.Info("  ..........   .....   ..........  ");
+        Logger.Info(" ............         ............ ");
+        Logger.Info(" ............         ............ ");
+        Logger.Info("  ..........           ..........  ");
+        Logger.Info("    ......               ......    ");
         Logger.Info("Thank you for using Nitrate!");
         Logger.Info("Nitrate is free and open-source software, available @ https://github.com/OliHeamon/Nitrate under the GNU Affero General Public License, version 3.");
         Logger.Info("tModLoader makes it difficult to distribute licenses, you may view a copy @ https://github.com/OliHeamon/Nitrate/blob/master/LICENSE.txt.");
