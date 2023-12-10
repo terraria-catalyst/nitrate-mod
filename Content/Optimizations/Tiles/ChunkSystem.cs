@@ -177,6 +177,8 @@ internal sealed class ChunkSystem : ModSystem
 
     private void DrawChunksToChunkTarget(GraphicsDevice device)
     {
+        RenderTargetBinding[] bindings = device.GetRenderTargets();
+
         device.SetRenderTarget(_chunkScreenTarget);
         device.Clear(Color.Transparent);
 
@@ -216,7 +218,7 @@ internal sealed class ChunkSystem : ModSystem
 
         Main.spriteBatch.End();
 
-        device.SetRenderTarget(null);
+        device.SetRenderTargets(bindings);
     }
 
     private void DisposeAllChunks()
@@ -325,6 +327,8 @@ internal sealed class ChunkSystem : ModSystem
 
     private void TransferTileSpaceBufferToScreenSpaceBuffer(GraphicsDevice device)
     {
+        RenderTargetBinding[] bindings = device.GetRenderTargets();
+
         device.SetRenderTarget(_screenSizeLightingBuffer);
         device.Clear(Color.Transparent);
 
@@ -336,7 +340,7 @@ internal sealed class ChunkSystem : ModSystem
         Main.spriteBatch.Draw(_lightingBuffer, new Vector2(-lighting_buffer_offscreen_range_tiles * 16) - offset, null, Color.White, 0, Vector2.Zero, 16, SpriteEffects.None, 0);
         Main.spriteBatch.End();
 
-        device.SetRenderTarget(null);
+        device.SetRenderTargets(bindings);
     }
 
     private void RenderChunksWithLighting()
