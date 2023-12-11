@@ -210,11 +210,6 @@ internal sealed class ChunkSystem : ModSystem
             Main.GameViewMatrix.TransformationMatrix
         );
 
-        foreach (RenderTargetBinding binding in bindings)
-        {
-            Main.spriteBatch.Draw((Texture2D)binding.RenderTarget, Vector2.Zero, Color.White);
-        }
-
         Rectangle screenArea = new((int)Main.screenPosition.X, (int)Main.screenPosition.Y, Main.screenWidth, Main.screenHeight);
 
         foreach (Point key in _loadedChunks.Keys)
@@ -241,7 +236,14 @@ internal sealed class ChunkSystem : ModSystem
 
         Main.spriteBatch.End();
 
-        device.SetRenderTargets(bindings);
+        device.SetRenderTargets(null);
+
+        Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+        foreach (RenderTargetBinding binding in bindings)
+        {
+            Main.spriteBatch.Draw((Texture2D)binding.RenderTarget, Vector2.Zero, Color.White);
+        }
+        Main.spriteBatch.End();
     }
 
     private void TransferTileSpaceBufferToScreenSpaceBuffer(GraphicsDevice device)
