@@ -167,11 +167,8 @@ internal sealed class ChunkSystem : ModSystem
         GraphicsDevice device = Main.graphics.GraphicsDevice;
 
         PopulateLightingBuffer();
-
         DrawChunksToChunkTarget(device);
-
         TransferTileSpaceBufferToScreenSpaceBuffer(device);
-
         RenderChunksWithLighting();
     }
 
