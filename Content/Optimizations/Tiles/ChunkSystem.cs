@@ -172,6 +172,32 @@ internal sealed class ChunkSystem : ModSystem
         RenderChunksWithLighting();
     }
 
+    private void PopulateLightingBuffer()
+    {
+        FasterParallel.For(0, _colorBuffer.Length, (inclusive, exclusive, _) =>
+        {
+            for (int i = inclusive; i < exclusive; i++)
+            {
+                int x = i % _lightingBuffer.Width;
+                int y = i / _lightingBuffer.Width;
+
+                _colorBuffer[i] = Lighting.GetColor(
+                    (int)(Main.screenPosition.X / 16) + x - lighting_buffer_offscreen_range_tiles,
+                    (int)(Main.screenPosition.Y / 16) + y - lighting_buffer_offscreen_range_tiles
+                );
+            }
+        });
+
+        // SetDataPointerEXT skips some overhead.
+        unsafe
+        {
+            fixed (Color* ptr = &_colorBuffer[0])
+            {
+                _lightingBuffer.SetDataPointerEXT(0, null, (IntPtr)ptr, _colorBuffer.Length);
+            }
+        }
+    }
+
     private void DrawChunksToChunkTarget(GraphicsDevice device)
     {
         RenderTargetBinding[] bindings = device.GetRenderTargets();
@@ -221,6 +247,42 @@ internal sealed class ChunkSystem : ModSystem
         Main.spriteBatch.End();
 
         device.SetRenderTargets(bindings);
+    }
+
+    private void TransferTileSpaceBufferToScreenSpaceBuffer(GraphicsDevice device)
+    {
+        RenderTargetBinding[] bindings = device.GetRenderTargets();
+
+        device.SetRenderTarget(_screenSizeLightingBuffer);
+        device.Clear(Color.Transparent);
+
+        Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+
+        Vector2 offset = new(Main.screenPosition.X % 16, Main.screenPosition.Y % 16);
+
+        // Account for tile padding around the screen.
+        Main.spriteBatch.Draw(_lightingBuffer, new Vector2(-lighting_buffer_offscreen_range_tiles * 16) - offset, null, Color.White, 0, Vector2.Zero, 16, SpriteEffects.None, 0);
+        Main.spriteBatch.End();
+
+        device.SetRenderTargets(bindings);
+    }
+
+    private void RenderChunksWithLighting()
+    {
+        Main.spriteBatch.Begin(
+            SpriteSortMode.Immediate,
+            BlendState.AlphaBlend,
+            SamplerState.PointClamp,
+            DepthStencilState.None,
+            RasterizerState.CullNone,
+            _lightMapRenderer.Value
+        );
+
+        _lightMapRenderer.Value.Parameters["lightMap"].SetValue(_screenSizeLightingBuffer);
+
+        Main.spriteBatch.Draw(_chunkScreenTarget, Vector2.Zero, Color.White);
+
+        Main.spriteBatch.End();
     }
 
     private void DisposeAllChunks()
@@ -306,61 +368,6 @@ internal sealed class ChunkSystem : ModSystem
     {
         _loadedChunks[chunkKey].Dispose();
         _needsPopulating.Remove(chunkKey);
-    }
-
-    private void PopulateLightingBuffer()
-    {
-        FasterParallel.For(0, _colorBuffer.Length, (inclusive, exclusive, _) =>
-        {
-            for (int i = inclusive; i < exclusive; i++)
-            {
-                int x = i % _lightingBuffer.Width;
-                int y = i / _lightingBuffer.Width;
-
-                _colorBuffer[i] = Lighting.GetColor(
-                    (int)(Main.screenPosition.X / 16) + x - lighting_buffer_offscreen_range_tiles,
-                    (int)(Main.screenPosition.Y / 16) + y - lighting_buffer_offscreen_range_tiles
-                );
-            }
-        });
-
-        _lightingBuffer.SetData(_colorBuffer);
-    }
-
-    private void TransferTileSpaceBufferToScreenSpaceBuffer(GraphicsDevice device)
-    {
-        RenderTargetBinding[] bindings = device.GetRenderTargets();
-
-        device.SetRenderTarget(_screenSizeLightingBuffer);
-        device.Clear(Color.Transparent);
-
-        Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
-
-        Vector2 offset = new(Main.screenPosition.X % 16, Main.screenPosition.Y % 16);
-
-        // Account for tile padding around the screen.
-        Main.spriteBatch.Draw(_lightingBuffer, new Vector2(-lighting_buffer_offscreen_range_tiles * 16) - offset, null, Color.White, 0, Vector2.Zero, 16, SpriteEffects.None, 0);
-        Main.spriteBatch.End();
-
-        device.SetRenderTargets(bindings);
-    }
-
-    private void RenderChunksWithLighting()
-    {
-        Main.spriteBatch.Begin(
-            SpriteSortMode.Immediate,
-            BlendState.AlphaBlend,
-            SamplerState.PointClamp,
-            DepthStencilState.None,
-            RasterizerState.CullNone,
-            _lightMapRenderer.Value
-        );
-
-        _lightMapRenderer.Value.Parameters["lightMap"].SetValue(_screenSizeLightingBuffer);
-
-        Main.spriteBatch.Draw(_chunkScreenTarget, Vector2.Zero, Color.White);
-
-        Main.spriteBatch.End();
     }
 
     private void RegisterTileStateChangedEvents()
