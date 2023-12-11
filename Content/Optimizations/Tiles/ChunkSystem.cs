@@ -14,11 +14,10 @@ namespace Nitrate.Content.Optimizations.Tiles;
 
 /// <summary>
 /// TODO:
-/// Ensure all sources of tiles changing (animations, breaking, placing, hammering etc.) are covered.
 /// Make sure other effects such as dusts/tile cracks are rendered as well.
-/// Ensure water squares can draw.
-/// Ensure walls also draw to chunks so renderblack can finally die.
-/// Fix lighting buffer with zoom.
+/// Ensure water squares can draw behind tiles.
+/// Maybe make RenderTiles2 still run for the nonsolid layer and tile deco/animated tiles?
+/// Fix layering.
 /// </summary>
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class ChunkSystem : ModSystem
@@ -58,7 +57,7 @@ internal sealed class ChunkSystem : ModSystem
         RegisterTileStateChangedEvents();
 
         IL_Main.RenderTiles += CancelVanillaRendering;
-        // TODO: IL_Main.RenderTiles2 += CancelVanillaRendering;
+        // IL_Main.RenderTiles2 += CancelVanillaRendering;
         IL_Main.RenderWalls += CancelVanillaRendering;
 
         Main.RunOnMainThread(() =>
@@ -252,7 +251,15 @@ internal sealed class ChunkSystem : ModSystem
         device.SetRenderTarget(_screenSizeLightingBuffer);
         device.Clear(Color.Transparent);
 
-        Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+        Main.spriteBatch.Begin(
+            SpriteSortMode.Immediate,
+            BlendState.AlphaBlend,
+            SamplerState.LinearClamp,
+            DepthStencilState.None,
+            RasterizerState.CullNone,
+            null,
+            Main.GameViewMatrix.TransformationMatrix
+        );
 
         Vector2 offset = new(Main.screenPosition.X % 16, Main.screenPosition.Y % 16);
 
