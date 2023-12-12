@@ -60,6 +60,8 @@ internal sealed class ChunkSystem : ModSystem
         // IL_Main.RenderTiles2 += CancelVanillaRendering;
         IL_Main.RenderWalls += CancelVanillaRendering;
 
+        IL_Main.DoDraw_Tiles_Solid += ChunkDrawingPipeline;
+
         Main.RunOnMainThread(() =>
         {
             _lightingBuffer = new RenderTarget2D(
@@ -155,18 +157,6 @@ internal sealed class ChunkSystem : ModSystem
         _needsPopulating.Clear();
     }
 
-    public override void PostDrawTiles()
-    {
-        base.PostDrawTiles();
-
-        GraphicsDevice device = Main.graphics.GraphicsDevice;
-
-        PopulateLightingBuffer();
-        DrawChunksToChunkTarget(device);
-        TransferTileSpaceBufferToScreenSpaceBuffer(device);
-        RenderChunksWithLighting();
-    }
-
     private void PopulateLightingBuffer()
     {
         FasterParallel.For(0, _colorBuffer.Length, (inclusive, exclusive, _) =>
@@ -195,8 +185,6 @@ internal sealed class ChunkSystem : ModSystem
 
     private void DrawChunksToChunkTarget(GraphicsDevice device)
     {
-        RenderTargetBinding[] bindings = device.GetRenderTargets();
-
         device.SetRenderTarget(_chunkScreenTarget);
         device.Clear(Color.Transparent);
 
@@ -210,7 +198,9 @@ internal sealed class ChunkSystem : ModSystem
             Main.GameViewMatrix.TransformationMatrix
         );
 
-        Rectangle screenArea = new((int)Main.screenPosition.X, (int)Main.screenPosition.Y, Main.screenWidth, Main.screenHeight);
+        FnaVector2 screenPosition = Main.screenPosition;
+
+        Rectangle screenArea = new((int)screenPosition.X, (int)screenPosition.Y, Main.screenWidth, Main.screenHeight);
 
         foreach (Point key in _loadedChunks.Keys)
         {
@@ -231,25 +221,16 @@ internal sealed class ChunkSystem : ModSystem
                 throw new Exception("Attempted to render a disposed chunk.");
             }
 
-            Main.spriteBatch.Draw(chunk, new Vector2(chunkArea.X, chunkArea.Y) - Main.screenPosition, Color.White);
+            Main.spriteBatch.Draw(chunk, new Vector2(chunkArea.X, chunkArea.Y) - screenPosition, Color.White);
         }
 
         Main.spriteBatch.End();
 
         device.SetRenderTargets(null);
-
-        Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
-        foreach (RenderTargetBinding binding in bindings)
-        {
-            Main.spriteBatch.Draw((Texture2D)binding.RenderTarget, Vector2.Zero, Color.White);
-        }
-        Main.spriteBatch.End();
     }
 
     private void TransferTileSpaceBufferToScreenSpaceBuffer(GraphicsDevice device)
     {
-        RenderTargetBinding[] bindings = device.GetRenderTargets();
-
         device.SetRenderTarget(_screenSizeLightingBuffer);
         device.Clear(Color.Transparent);
 
@@ -269,7 +250,7 @@ internal sealed class ChunkSystem : ModSystem
         Main.spriteBatch.Draw(_lightingBuffer, new Vector2(-lighting_buffer_offscreen_range_tiles * 16) - offset, null, Color.White, 0, Vector2.Zero, 16, SpriteEffects.None, 0);
         Main.spriteBatch.End();
 
-        device.SetRenderTargets(bindings);
+        device.SetRenderTargets(null);
     }
 
     private void RenderChunksWithLighting()
@@ -312,8 +293,6 @@ internal sealed class ChunkSystem : ModSystem
         RenderTarget2D chunk = _loadedChunks[chunkKey];
 
         GraphicsDevice device = Main.graphics.GraphicsDevice;
-
-        RenderTargetBinding[] bindings = device.GetRenderTargets();
 
         device.SetRenderTarget(chunk);
         device.Clear(Color.Transparent);
@@ -369,7 +348,7 @@ internal sealed class ChunkSystem : ModSystem
         Main.tileBatch.End();
         Main.spriteBatch.End();
 
-        device.SetRenderTargets(bindings);
+        device.SetRenderTargets(null);
     }
 
     private void UnloadChunk(Point chunkKey)
@@ -469,6 +448,23 @@ internal sealed class ChunkSystem : ModSystem
     private void CancelVanillaRendering(ILContext il)
     {
         ILCursor c = new(il);
+
+        c.Emit(OpCodes.Ret);
+    }
+
+    private void ChunkDrawingPipeline(ILContext il)
+    {
+        ILCursor c = new(il);
+
+        c.EmitDelegate(() =>
+        {
+            GraphicsDevice device = Main.graphics.GraphicsDevice;
+
+            PopulateLightingBuffer();
+            DrawChunksToChunkTarget(device);
+            TransferTileSpaceBufferToScreenSpaceBuffer(device);
+            RenderChunksWithLighting();
+        });
 
         c.Emit(OpCodes.Ret);
     }
