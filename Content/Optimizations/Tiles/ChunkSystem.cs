@@ -18,6 +18,7 @@ namespace Nitrate.Content.Optimizations.Tiles;
 /// Ensure water squares can draw behind tiles.
 /// Maybe make RenderTiles2 still run for the nonsolid layer and tile deco/animated tiles?
 /// Fix layering.
+/// Fix tiny offset issue.
 /// </summary>
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class ChunkSystem : ModSystem
@@ -45,6 +46,8 @@ internal sealed class ChunkSystem : ModSystem
 
     private RenderTarget2D _screenSizeLightingBuffer;
 
+    private bool _allRenderResourcesInitialised;
+
     public ChunkSystem()
     {
         _lightMapRenderer = new Lazy<Effect>(() => Mod.Assets.Request<Effect>("Assets/Effects/LightMapRenderer", AssetRequestMode.ImmediateLoad).Value);
@@ -56,6 +59,7 @@ internal sealed class ChunkSystem : ModSystem
 
         RegisterTileStateChangedEvents();
 
+        IL_Main.DoDraw += PrepareChunkRenderTargets;
         IL_Main.RenderTiles += CancelVanillaRendering;
         // IL_Main.RenderTiles2 += CancelVanillaRendering;
         IL_Main.RenderWalls += CancelVanillaRendering;
@@ -78,6 +82,8 @@ internal sealed class ChunkSystem : ModSystem
             // By default Terraria has this set to DiscardContents. This means that switching RTs erases the contents of the backbuffer if done mid-draw.
             Main.graphics.GraphicsDevice.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
             Main.graphics.ApplyChanges();
+
+            _allRenderResourcesInitialised = true;
         });
 
         Main.OnResolutionChanged += _ =>
@@ -159,16 +165,15 @@ internal sealed class ChunkSystem : ModSystem
         }
 
         _needsPopulating.Clear();
-
-        GraphicsDevice device = Main.graphics.GraphicsDevice;
-
-        PopulateLightingBuffer();
-        DrawChunksToChunkTarget(device);
-        TransferTileSpaceBufferToScreenSpaceBuffer(device);
     }
 
     private void PopulateLightingBuffer()
     {
+        if (_colorBuffer is null || _lightingBuffer is null)
+        {
+            return;
+        }
+
         FasterParallel.For(0, _colorBuffer.Length, (inclusive, exclusive, _) =>
         {
             for (int i = inclusive; i < exclusive; i++)
@@ -195,6 +200,11 @@ internal sealed class ChunkSystem : ModSystem
 
     private void DrawChunksToChunkTarget(GraphicsDevice device)
     {
+        if (_chunkScreenTarget is null)
+        {
+            return;
+        }
+
         device.SetRenderTarget(_chunkScreenTarget);
         device.Clear(Color.Transparent);
 
@@ -208,10 +218,9 @@ internal sealed class ChunkSystem : ModSystem
             Main.GameViewMatrix.TransformationMatrix
         );
 
-        // Velocity is added as this screen position is 1 tick behind.
-        FnaVector2 screenPosition = Main.screenPosition + Main.LocalPlayer.velocity;
+        FnaVector2 screenPosition = Main.screenPosition;
 
-        Rectangle screenArea = new((int)screenPosition.X, (int)screenPosition.Y, Main.screenWidth, Main.screenHeight);
+        Rectangle screenArea = new((int)Main.screenPosition.X, (int)Main.screenPosition.Y, Main.screenWidth, Main.screenHeight);
 
         foreach (Point key in _loadedChunks.Keys)
         {
@@ -242,6 +251,11 @@ internal sealed class ChunkSystem : ModSystem
 
     private void TransferTileSpaceBufferToScreenSpaceBuffer(GraphicsDevice device)
     {
+        if (_screenSizeLightingBuffer is null)
+        {
+            return;
+        }
+
         device.SetRenderTarget(_screenSizeLightingBuffer);
         device.Clear(Color.Transparent);
 
@@ -255,7 +269,7 @@ internal sealed class ChunkSystem : ModSystem
             Main.GameViewMatrix.TransformationMatrix
         );
 
-        Vector2 offset = new(Main.screenPosition.X % 16, Main.screenPosition.Y % 16);
+        FnaVector2 offset = new(Main.screenPosition.X % 16, Main.screenPosition.Y % 16);
 
         // Account for tile padding around the screen.
         Main.spriteBatch.Draw(_lightingBuffer, new Vector2(-lighting_buffer_offscreen_range_tiles * 16) - offset, null, Color.White, 0, Vector2.Zero, 16, SpriteEffects.None, 0);
@@ -461,6 +475,23 @@ internal sealed class ChunkSystem : ModSystem
         ILCursor c = new(il);
 
         c.Emit(OpCodes.Ret);
+    }
+
+    private void PrepareChunkRenderTargets(ILContext il)
+    {
+        ILCursor c = new(il);
+
+        // Go to the end of the method.
+        //c.Index = c.Instrs.Count - 1;
+
+        c.EmitDelegate(() =>
+        {
+            GraphicsDevice device = Main.graphics.GraphicsDevice;
+
+            PopulateLightingBuffer();
+            DrawChunksToChunkTarget(device);
+            TransferTileSpaceBufferToScreenSpaceBuffer(device);
+        });
     }
 
     private void NewDrawSolidTiles(ILContext il)
