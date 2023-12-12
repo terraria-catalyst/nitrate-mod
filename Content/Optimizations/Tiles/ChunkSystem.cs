@@ -1,4 +1,5 @@
 ﻿using JetBrains.Annotations;
+using log4net.Util;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Mono.Cecil.Cil;
@@ -59,8 +60,8 @@ internal sealed class ChunkSystem : ModSystem
         IL_Main.RenderTiles += CancelVanillaRendering;
         // IL_Main.RenderTiles2 += CancelVanillaRendering;
         IL_Main.RenderWalls += CancelVanillaRendering;
-
-        IL_Main.DoDraw_Tiles_Solid += ChunkDrawingPipeline;
+        IL_Main.DoDraw_Tiles_Solid += NewDrawSolidTiles;
+        IL_Main.DoDraw_Tiles_NonSolid += NewDrawNonSolidTiles;
 
         Main.RunOnMainThread(() =>
         {
@@ -452,7 +453,7 @@ internal sealed class ChunkSystem : ModSystem
         c.Emit(OpCodes.Ret);
     }
 
-    private void ChunkDrawingPipeline(ILContext il)
+    private void NewDrawSolidTiles(ILContext il)
     {
         ILCursor c = new(il);
 
@@ -464,6 +465,42 @@ internal sealed class ChunkSystem : ModSystem
             DrawChunksToChunkTarget(device);
             TransferTileSpaceBufferToScreenSpaceBuffer(device);
             RenderChunksWithLighting();
+
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.Transform);
+            try
+            {
+                Main.player[Main.myPlayer].hitReplace.DrawFreshAnimations(Main.spriteBatch);
+                Main.player[Main.myPlayer].hitTile.DrawFreshAnimations(Main.spriteBatch);
+            }
+            catch (Exception e2)
+            {
+                TimeLogger.DrawException(e2);
+            }
+
+            Main.spriteBatch.End();
+        });
+
+        c.Emit(OpCodes.Ret);
+    }
+
+    private void NewDrawNonSolidTiles(ILContext il)
+    {
+        ILCursor c = new(il);
+
+        c.EmitDelegate(() =>
+        {
+            Main.spriteBatch.End();
+
+            try
+            {
+                Main.instance.DrawTileEntities(false, false, false);
+            }
+            catch (Exception e)
+            {
+                TimeLogger.DrawException(e);
+            }
+
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.Transform);
         });
 
         c.Emit(OpCodes.Ret);
