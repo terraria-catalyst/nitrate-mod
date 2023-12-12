@@ -1,9 +1,11 @@
 TODO FOR NEXT RELEASE (v0.1.0)
 ------------------------------
 
-- Improvements to non-solid tile drawing (NON-BLOCKING).
-- Spelunker potion support for tile rendering + any other similar effects (NON-BLOCKING).
-- Finish rewrite to main menu UI changes (BLOCKING).
+- [BLOCKING] Finish rewrite to main menu UI changes.
+- [BLOCKING] Update various READMEs/descriptions to list new changes and ensure accurate statistics.
+- [NON-BLOCKING] Get some nice stats for framerate and frametime and organize a graph or two for promotion.
+- [NON-BLOCKING] Improvements to non-solid tile drawing.
+- [NON-BLOCKING] Spelunker potion support for tile rendering + any other similar effects.
 
 LONG-/SHORT-TERM FEATURE TODO
 -----------------------------
