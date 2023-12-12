@@ -1,5 +1,4 @@
 ﻿using JetBrains.Annotations;
-using log4net.Util;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Mono.Cecil.Cil;
@@ -8,7 +7,6 @@ using Nitrate.Core.Features.Threading;
 using ReLogic.Content;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Terraria;
 using Terraria.ModLoader;
 
