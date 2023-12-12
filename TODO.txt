@@ -1,3 +1,13 @@
+TODO FOR NEXT RELEASE (v0.1.0)
+------------------------------
+
+- Improvements to non-solid tile drawing (NON-BLOCKING).
+- Spelunker potion support for tile rendering + any other similar effects (NON-BLOCKING.
+- Finish rewrite to main menu UI changes (BLOCKING).
+
+LONG-/SHORT-TERM FEATURE TODO
+-----------------------------
+
 - Dust particle renderer should support modded dusts.
   - This will take a lot of effort and will never be perfect. Performance will take a massive hit if we try to value accuracy to extremely.
   - This is at least partially reliant on runtime atlasing which we have not implemented.
