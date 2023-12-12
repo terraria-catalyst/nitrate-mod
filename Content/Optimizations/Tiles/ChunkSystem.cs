@@ -83,7 +83,11 @@ internal sealed class ChunkSystem : ModSystem
         Main.OnResolutionChanged += _ =>
         {
             _lightingBuffer?.Dispose();
-            _lightingBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, (Main.screenWidth / 16) + 2, (Main.screenHeight / 16) + 2);
+            _lightingBuffer = new RenderTarget2D(
+                Main.graphics.GraphicsDevice,
+                (int)Math.Ceiling(Main.screenWidth / 16f) + (lighting_buffer_offscreen_range_tiles * 2),
+                (int)Math.Ceiling(Main.screenHeight / 16f) + (lighting_buffer_offscreen_range_tiles * 2)
+            );
 
             _chunkScreenTarget?.Dispose();
             _chunkScreenTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
@@ -155,6 +159,12 @@ internal sealed class ChunkSystem : ModSystem
         }
 
         _needsPopulating.Clear();
+
+        GraphicsDevice device = Main.graphics.GraphicsDevice;
+
+        PopulateLightingBuffer();
+        DrawChunksToChunkTarget(device);
+        TransferTileSpaceBufferToScreenSpaceBuffer(device);
     }
 
     private void PopulateLightingBuffer()
@@ -198,7 +208,8 @@ internal sealed class ChunkSystem : ModSystem
             Main.GameViewMatrix.TransformationMatrix
         );
 
-        FnaVector2 screenPosition = Main.screenPosition;
+        // Velocity is added as this screen position is 1 tick behind.
+        FnaVector2 screenPosition = Main.screenPosition + Main.LocalPlayer.velocity;
 
         Rectangle screenArea = new((int)screenPosition.X, (int)screenPosition.Y, Main.screenWidth, Main.screenHeight);
 
@@ -458,11 +469,6 @@ internal sealed class ChunkSystem : ModSystem
 
         c.EmitDelegate(() =>
         {
-            GraphicsDevice device = Main.graphics.GraphicsDevice;
-
-            PopulateLightingBuffer();
-            DrawChunksToChunkTarget(device);
-            TransferTileSpaceBufferToScreenSpaceBuffer(device);
             RenderChunksWithLighting();
 
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.Transform);
