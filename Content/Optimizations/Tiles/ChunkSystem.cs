@@ -18,7 +18,7 @@ namespace Nitrate.Content.Optimizations.Tiles;
 /// Ensure water squares can draw behind tiles.
 /// Maybe make RenderTiles2 still run for the nonsolid layer and tile deco/animated tiles?
 /// Fix layering.
-/// Fix tiny offset issue.
+/// Fix broken offset (my hated).
 /// </summary>
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class ChunkSystem : ModSystem
@@ -482,7 +482,7 @@ internal sealed class ChunkSystem : ModSystem
         ILCursor c = new(il);
 
         // Go to the end of the method.
-        //c.Index = c.Instrs.Count - 1;
+        c.Index = c.Instrs.Count - 1;
 
         c.EmitDelegate(() =>
         {
