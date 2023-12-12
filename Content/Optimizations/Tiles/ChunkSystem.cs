@@ -8,6 +8,7 @@ using Nitrate.Core.Features.Threading;
 using ReLogic.Content;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Terraria;
 using Terraria.ModLoader;
 
