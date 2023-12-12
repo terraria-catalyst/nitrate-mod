@@ -59,7 +59,6 @@ internal sealed class ChunkSystem : ModSystem
 
         RegisterTileStateChangedEvents();
 
-        IL_Main.DoDraw += PrepareChunkRenderTargets;
         IL_Main.RenderTiles += CancelVanillaRendering;
         // IL_Main.RenderTiles2 += CancelVanillaRendering;
         IL_Main.RenderWalls += CancelVanillaRendering;
@@ -205,6 +204,13 @@ internal sealed class ChunkSystem : ModSystem
             return;
         }
 
+        RenderTargetBinding[] bindings = device.GetRenderTargets();
+
+        foreach (RenderTargetBinding binding in bindings)
+        {
+            ((RenderTarget2D)binding.RenderTarget).RenderTargetUsage = RenderTargetUsage.PreserveContents;
+        }
+
         device.SetRenderTarget(_chunkScreenTarget);
         device.Clear(Color.Transparent);
 
@@ -220,7 +226,7 @@ internal sealed class ChunkSystem : ModSystem
 
         FnaVector2 screenPosition = Main.screenPosition;
 
-        Rectangle screenArea = new((int)Main.screenPosition.X, (int)Main.screenPosition.Y, Main.screenWidth, Main.screenHeight);
+        Rectangle screenArea = new((int)screenPosition.X, (int)screenPosition.Y, Main.screenWidth, Main.screenHeight);
 
         foreach (Point key in _loadedChunks.Keys)
         {
@@ -246,7 +252,7 @@ internal sealed class ChunkSystem : ModSystem
 
         Main.spriteBatch.End();
 
-        device.SetRenderTargets(null);
+        device.SetRenderTargets(bindings);
     }
 
     private void TransferTileSpaceBufferToScreenSpaceBuffer(GraphicsDevice device)
@@ -254,6 +260,13 @@ internal sealed class ChunkSystem : ModSystem
         if (_screenSizeLightingBuffer is null)
         {
             return;
+        }
+
+        RenderTargetBinding[] bindings = device.GetRenderTargets();
+
+        foreach (RenderTargetBinding binding in bindings)
+        {
+            ((RenderTarget2D)binding.RenderTarget).RenderTargetUsage = RenderTargetUsage.PreserveContents;
         }
 
         device.SetRenderTarget(_screenSizeLightingBuffer);
@@ -275,7 +288,7 @@ internal sealed class ChunkSystem : ModSystem
         Main.spriteBatch.Draw(_lightingBuffer, new Vector2(-lighting_buffer_offscreen_range_tiles * 16) - offset, null, Color.White, 0, Vector2.Zero, 16, SpriteEffects.None, 0);
         Main.spriteBatch.End();
 
-        device.SetRenderTargets(null);
+        device.SetRenderTargets(bindings);
     }
 
     private void RenderChunksWithLighting()
@@ -477,12 +490,9 @@ internal sealed class ChunkSystem : ModSystem
         c.Emit(OpCodes.Ret);
     }
 
-    private void PrepareChunkRenderTargets(ILContext il)
+    private void NewDrawSolidTiles(ILContext il)
     {
         ILCursor c = new(il);
-
-        // Go to the end of the method.
-        c.Index = c.Instrs.Count - 1;
 
         c.EmitDelegate(() =>
         {
@@ -491,15 +501,6 @@ internal sealed class ChunkSystem : ModSystem
             PopulateLightingBuffer();
             DrawChunksToChunkTarget(device);
             TransferTileSpaceBufferToScreenSpaceBuffer(device);
-        });
-    }
-
-    private void NewDrawSolidTiles(ILContext il)
-    {
-        ILCursor c = new(il);
-
-        c.EmitDelegate(() =>
-        {
             RenderChunksWithLighting();
 
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.Transform);
