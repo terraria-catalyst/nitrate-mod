@@ -60,7 +60,7 @@ internal sealed class ChunkSystem : ModSystem
         RegisterTileStateChangedEvents();
 
         IL_Main.RenderTiles += CancelVanillaRendering;
-        // IL_Main.RenderTiles2 += CancelVanillaRendering;
+        IL_Main.RenderTiles2 += CancelVanillaRendering;
         IL_Main.RenderWalls += CancelVanillaRendering;
         IL_Main.DoDraw_Tiles_Solid += NewDrawSolidTiles;
         IL_Main.DoDraw_Tiles_NonSolid += NewDrawNonSolidTiles;

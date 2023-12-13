@@ -1,5 +1,5 @@
 displayName = Nitrate
 author = Oli & tomat
-version = 0.1.1
+version = 0.1.2
 side = Client
 homepage = https://catalyst.tomat.dev/
