@@ -1,6 +1,5 @@
 ﻿using JetBrains.Annotations;
 using Microsoft.Xna.Framework;
-using Nitrate.Content.UI;
 using ReLogic.Graphics;
 using System;
 using System.Numerics;
@@ -71,16 +70,29 @@ internal sealed class MainMenuRenderer : ModSystem
         const string nitrate_warning = "Please bear in mind that Nitrate is still under active development.\nFeatures may be broken, tweaked, or removed/reworked entirely.\nPlease report any issues and keep in mind that your game may break!";
         drawText(nitrate_warning, new FnaVector2(padding, padding + charHeight), Color.PaleVioletRed, 0f, FnaVector2.Zero, new FnaVector2(small_text_scale));
 
-        Rectangle giveUsMoneyBox = new(padding, mainBox.Y + mainBox.Height + 6 + padding, 208, (int)(charHeight + (charHeight * small_text_scale)));
+        Rectangle giveUsMoneyBox = new(padding, mainBox.Y + mainBox.Height + 6 + padding, 425, (int)(charHeight + (charHeight * small_text_scale)));
         ModContent.GetInstance<BoxRenderer>().DrawBox(Main.spriteBatch, giveUsMoneyBox);
 
         const string give_us_money = "Consider supporting us!";
         const string condescending = ";)";
+        const string patreon = "[c/FF424D:Patreon]: [c/7289DA:patreon.com/CatalystTeam] <-- (clickable!)";
         drawText(give_us_money, new FnaVector2(padding, giveUsMoneyBox.Y), Color.White, 0f, FnaVector2.Zero, FnaVector2.One);
         drawText(condescending, new FnaVector2(padding + font.MeasureString(give_us_money).X + title_version_spacing, giveUsMoneyBox.Y + charHeight * ((1f - small_text_scale) / 2f)), Color.White, 0f, FnaVector2.Zero, new FnaVector2(small_text_scale));
-        drawText("[c/FF424D:Patreon]: patreon.com/CatalystTeam", new FnaVector2(padding, giveUsMoneyBox.Y + charHeight), Color.White, 0f, FnaVector2.Zero, new FnaVector2(small_text_scale));
+        drawText(patreon, new FnaVector2(padding, giveUsMoneyBox.Y + charHeight), Color.White, 0f, FnaVector2.Zero, new FnaVector2(small_text_scale));
 
-        Rectangle debugBox = new(padding, giveUsMoneyBox.Y + giveUsMoneyBox.Height + 6 + padding, 208, (int)(charHeight * 4 * small_text_scale));
+        const string ignore = "Patreon:" ;
+        const string clickable = "patreon.com/CatalystTeam";
+        float ignoreWidth = font.MeasureString(ignore).X * small_text_scale;
+        float clickableWidth = font.MeasureString(clickable).X * small_text_scale;
+        float clickableHeight = charHeight * small_text_scale;
+        Rectangle clickableBox = new((int)(padding + ignoreWidth), (int)(giveUsMoneyBox.Y + charHeight), (int)clickableWidth, (int)clickableHeight);
+
+        if (Main.mouseLeft && Main.mouseLeftRelease && clickableBox.Intersects(new Rectangle(Main.mouseX, Main.mouseY, 1, 1)))
+        {
+            Utils.OpenToURL("https://patreon.com/CatalystTeam");
+        }
+
+        Rectangle debugBox = new(padding, giveUsMoneyBox.Y + giveUsMoneyBox.Height + 6 + padding, 425, (int)(charHeight * 4 * small_text_scale));
         ModContent.GetInstance<BoxRenderer>().DrawBox(Main.spriteBatch, debugBox);
 
         drawText($"Supports SIMD: {Vector.IsHardwareAccelerated}", new FnaVector2(padding, debugBox.Y), Color.White, 0f, FnaVector2.Zero, new FnaVector2(small_text_scale));
