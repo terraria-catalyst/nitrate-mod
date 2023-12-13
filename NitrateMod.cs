@@ -8,6 +8,8 @@ namespace Nitrate;
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 public sealed class NitrateMod : Mod
 {
+    public const string Patreon = "patreon.com/TeamCatalyst";
+
     public override void Load()
     {
         base.Load();

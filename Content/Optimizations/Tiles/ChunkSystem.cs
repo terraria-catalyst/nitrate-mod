@@ -17,8 +17,6 @@ namespace Nitrate.Content.Optimizations.Tiles;
 /// Make sure other effects such as dusts/tile cracks are rendered as well.
 /// Ensure water squares can draw behind tiles.
 /// Maybe make RenderTiles2 still run for the nonsolid layer and tile deco/animated tiles?
-/// Fix layering.
-/// Fix broken offset (my hated).
 /// </summary>
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class ChunkSystem : ModSystem
@@ -46,7 +44,7 @@ internal sealed class ChunkSystem : ModSystem
 
     private RenderTarget2D _screenSizeLightingBuffer;
 
-    private bool _allRenderResourcesInitialised;
+    private bool _enabled;
 
     public ChunkSystem()
     {
@@ -56,6 +54,13 @@ internal sealed class ChunkSystem : ModSystem
     public override void OnModLoad()
     {
         base.OnModLoad();
+
+        _enabled = ModContent.GetInstance<NitrateConfig>().ExperimentalTileRenderer;
+
+        if (!_enabled)
+        {
+            return;
+        }
 
         RegisterTileStateChangedEvents();
 
@@ -67,6 +72,9 @@ internal sealed class ChunkSystem : ModSystem
 
         Main.RunOnMainThread(() =>
         {
+            // Clear any previous targets if vanilla tile rendering used to be on.
+            Main.instance.ReleaseTargets();
+
             _lightingBuffer = new RenderTarget2D(
                 Main.graphics.GraphicsDevice,
                 (int)Math.Ceiling(Main.screenWidth / 16f) + (lighting_buffer_offscreen_range_tiles * 2),
@@ -81,8 +89,6 @@ internal sealed class ChunkSystem : ModSystem
             // By default Terraria has this set to DiscardContents. This means that switching RTs erases the contents of the backbuffer if done mid-draw.
             Main.graphics.GraphicsDevice.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
             Main.graphics.ApplyChanges();
-
-            _allRenderResourcesInitialised = true;
         });
 
         Main.OnResolutionChanged += _ =>
@@ -108,12 +114,29 @@ internal sealed class ChunkSystem : ModSystem
     {
         base.OnWorldUnload();
 
+        if (!_enabled)
+        {
+            return;
+        }
+
+        DisposeAllChunks();
+    }
+
+    public override void Unload()
+    {
+        base.Unload();
+
         DisposeAllChunks();
     }
 
     public override void PostUpdateEverything()
     {
         base.PostUpdateEverything();
+
+        if (!_enabled)
+        {
+            return;
+        }
 
         Rectangle screenArea = new((int)Main.screenPosition.X, (int)Main.screenPosition.Y, Main.screenWidth, Main.screenHeight);
 
@@ -293,6 +316,11 @@ internal sealed class ChunkSystem : ModSystem
 
     private void RenderChunksWithLighting()
     {
+        if (_chunkScreenTarget is null || _screenSizeLightingBuffer is null)
+        {
+            return;
+        }
+
         Main.spriteBatch.Begin(
             SpriteSortMode.Immediate,
             BlendState.AlphaBlend,
@@ -401,8 +429,17 @@ internal sealed class ChunkSystem : ModSystem
         {
             foreach (RenderTarget2D chunk in _loadedChunks.Values)
             {
-                chunk.Dispose();
+                chunk?.Dispose();
             }
+
+            _lightingBuffer?.Dispose();
+            _lightingBuffer = null;
+
+            _chunkScreenTarget?.Dispose();
+            _chunkScreenTarget = null;
+
+            _screenSizeLightingBuffer?.Dispose();
+            _screenSizeLightingBuffer = null;
         });
 
         _loadedChunks.Clear();

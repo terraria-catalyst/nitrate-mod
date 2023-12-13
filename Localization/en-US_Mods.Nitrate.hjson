@@ -1,0 +1,10 @@
+Configs: {
+	NitrateConfig: {
+		DisplayName: Nitrate Config
+
+		ExperimentalTileRenderer: {
+			Label: Experimental Tile Renderer
+			Tooltip: An experimental tile renderer that is approximately 5x faster than the vanilla system.
+		}
+	}
+}
