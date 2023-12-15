@@ -9,7 +9,7 @@ using Terraria.ModLoader;
 using Terraria.UI;
 using Terraria.UI.Chat;
 
-namespace Nitrate.Core.Features.UI;
+namespace Nitrate.Core.UI;
 
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class MainMenuRenderer : ModSystem

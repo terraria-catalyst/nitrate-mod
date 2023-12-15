@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using Terraria.ModLoader;
 
-namespace Nitrate.Core.Features.UI;
+namespace Nitrate.Core.UI;
 
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class BoxRenderer : ModSystem, IBoxRenderer

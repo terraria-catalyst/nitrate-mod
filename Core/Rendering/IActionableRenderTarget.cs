@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Nitrate.Core.Features.Rendering;
+namespace Nitrate.Core.Rendering;
 
 /// <summary>
 ///     An actionable render target used in the

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Nitrate.Core.Features.UI;
+namespace Nitrate.Core.UI;
 
 public interface IBoxRenderer
 {

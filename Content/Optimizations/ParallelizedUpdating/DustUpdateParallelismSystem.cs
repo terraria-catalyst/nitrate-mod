@@ -2,8 +2,8 @@
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
-using Nitrate.Core.Features.Parallelization;
-using Nitrate.Core.Features.Threading;
+using Nitrate.Core.Parallelization;
+using Nitrate.Core.Threading;
 using Nitrate.Core.Utilities;
 using System;
 using System.Reflection;

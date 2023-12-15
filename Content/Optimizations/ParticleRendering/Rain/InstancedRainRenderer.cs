@@ -1,8 +1,8 @@
 ﻿using JetBrains.Annotations;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Nitrate.Core.Features.Rendering;
-using Nitrate.Core.Features.Threading;
+using Nitrate.Core.Rendering;
+using Nitrate.Core.Threading;
 using Nitrate.Core.Utilities;
 using ReLogic.Content;
 using System;

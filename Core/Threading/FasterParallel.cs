@@ -2,7 +2,7 @@
 using System;
 using System.Threading;
 
-namespace Nitrate.Core.Features.Threading;
+namespace Nitrate.Core.Threading;
 
 internal static class FasterParallel
 {

@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using Nitrate.Core.Features.Threading;
+using Nitrate.Core.Threading;
 using ReLogic.Content;
 using System;
 using System.Collections.Generic;
@@ -94,6 +94,7 @@ internal sealed class ChunkSystem : ModSystem
         Main.OnResolutionChanged += _ =>
         {
             _lightingBuffer?.Dispose();
+
             _lightingBuffer = new RenderTarget2D(
                 Main.graphics.GraphicsDevice,
                 (int)Math.Ceiling(Main.screenWidth / 16f) + (lighting_buffer_offscreen_range_tiles * 2),
@@ -370,6 +371,7 @@ internal sealed class ChunkSystem : ModSystem
         Point chunkPositionTile = new((int)chunkPositionWorld.X / 16, (int)chunkPositionWorld.Y / 16);
 
         Main.tileBatch.Begin();
+
         Main.spriteBatch.Begin(
             SpriteSortMode.Deferred,
             BlendState.AlphaBlend,
@@ -469,7 +471,7 @@ internal sealed class ChunkSystem : ModSystem
     private void On_WorldGen_KillTile(On_WorldGen.orig_KillTile orig, int i, int j, bool fail, bool effectOnly, bool noItem)
     {
         orig(i, j, fail, effectOnly, noItem);
-        
+
         // Maybe can check if(fail)?
         TileStateChanged(i, j);
     }
@@ -541,6 +543,7 @@ internal sealed class ChunkSystem : ModSystem
             RenderChunksWithLighting();
 
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.Transform);
+
             try
             {
                 Main.player[Main.myPlayer].hitReplace.DrawFreshAnimations(Main.spriteBatch);
