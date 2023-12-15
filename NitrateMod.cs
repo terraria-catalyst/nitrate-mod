@@ -8,7 +8,7 @@ namespace Nitrate;
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 public sealed class NitrateMod : Mod
 {
-    public const string Patreon = "patreon.com/TeamCatalyst";
+    public const string PATREON = "patreon.com/TeamCatalyst";
 
     public override void Load()
     {
@@ -34,8 +34,8 @@ public sealed class NitrateMod : Mod
         Logger.Info("  ..........           ..........  ");
         Logger.Info("    ......               ......    ");
         Logger.Info("Thank you for using Nitrate!");
-        Logger.Info("Nitrate is free and open-source software, available @ https://github.com/OliHeamon/Nitrate under the GNU Affero General Public License, version 3.");
-        Logger.Info("tModLoader makes it difficult to distribute licenses, you may view a copy @ https://github.com/OliHeamon/Nitrate/blob/master/LICENSE.txt.");
+        Logger.Info("Nitrate is free and open-source software, available @ https://github.com/terraria-catalyst/Nitrate under the GNU Affero General Public License, version 3.");
+        Logger.Info("tModLoader makes it difficult to distribute licenses, you may view a copy @ https://github.com/terraria-catalyst/Nitrate/blob/master/LICENSE.txt.");
         Logger.Info("Supports SIMD: " + Vector.IsHardwareAccelerated);
         Logger.Info(".NET Version: " + Environment.Version);
         Logger.Info("OS: " + Environment.OSVersion);

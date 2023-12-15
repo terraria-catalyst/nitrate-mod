@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using Nitrate.Core.Listeners;
 using Nitrate.Core.Threading;
 using ReLogic.Content;
 using System;
@@ -62,7 +63,10 @@ internal sealed class ChunkSystem : ModSystem
             return;
         }
 
-        RegisterTileStateChangedEvents();
+        TileStateChangedListener.OnTileSingleStateChange += TileStateChanged;
+        // TileStateChangedListener.OnTileRangeStateChange += TileRangeStateChanged;
+        TileStateChangedListener.OnWallSingleStateChange += TileStateChanged;
+        // TileStateChangedListener.OnWallRangeStateChange += TileRangeStateChanged;
 
         IL_Main.RenderTiles += CancelVanillaRendering;
         IL_Main.RenderTiles2 += CancelVanillaRendering;
@@ -448,62 +452,6 @@ internal sealed class ChunkSystem : ModSystem
         _needsPopulating.Clear();
     }
 
-    private void RegisterTileStateChangedEvents()
-    {
-        On_WorldGen.PlaceTile += On_WorldGen_PlaceTile;
-        On_WorldGen.KillTile += On_WorldGen_KillTile;
-        On_WorldGen.TileFrame += On_WorldGen_TileFrame;
-        On_WorldGen.PlaceWall += On_WorldGen_PlaceWall;
-        On_WorldGen.KillWall += On_WorldGen_KillWall;
-        On_Framing.WallFrame += On_Framing_WallFrame;
-    }
-
-    private bool On_WorldGen_PlaceTile(On_WorldGen.orig_PlaceTile orig, int i, int j, int type, bool mute, bool forced, int plr, int style)
-    {
-        bool result = orig(i, j, type, mute, forced, plr, style);
-
-        // Maybe can check if(result)? Not sure if the method actually makes any world changes if false.
-        TileStateChanged(i, j);
-
-        return result;
-    }
-
-    private void On_WorldGen_KillTile(On_WorldGen.orig_KillTile orig, int i, int j, bool fail, bool effectOnly, bool noItem)
-    {
-        orig(i, j, fail, effectOnly, noItem);
-
-        // Maybe can check if(fail)?
-        TileStateChanged(i, j);
-    }
-
-    private void On_WorldGen_TileFrame(On_WorldGen.orig_TileFrame orig, int i, int j, bool resetFrame, bool noBreak)
-    {
-        orig(i, j, resetFrame, noBreak);
-
-        TileStateChanged(i, j);
-    }
-
-    private void On_WorldGen_PlaceWall(On_WorldGen.orig_PlaceWall orig, int i, int j, int type, bool mute)
-    {
-        orig(i, j, type, mute);
-
-        TileStateChanged(i, j);
-    }
-
-    private void On_WorldGen_KillWall(On_WorldGen.orig_KillWall orig, int i, int j, bool fail)
-    {
-        orig(i, j, fail);
-
-        TileStateChanged(i, j);
-    }
-
-    private void On_Framing_WallFrame(On_Framing.orig_WallFrame orig, int i, int j, bool resetFrame)
-    {
-        orig(i, j, resetFrame);
-
-        TileStateChanged(i, j);
-    }
-
     private void TileStateChanged(int i, int j)
     {
         int chunkX = (int)Math.Floor(i / (chunk_size / 16.0));
@@ -521,6 +469,17 @@ internal sealed class ChunkSystem : ModSystem
             _needsPopulating.Add(chunkKey);
         }
     }
+
+    /*private void TileRangeStateChanged(int fromX, int toX, int fromY, int toY)
+    {
+        for (int i = fromX; i <= toX; i++)
+        {
+            for (int j = fromY; j <= toY; j++)
+            {
+                TileStateChanged(i, j);
+            }
+        }
+    }*/
 
     private void CancelVanillaRendering(ILContext il)
     {

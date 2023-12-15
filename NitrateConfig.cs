@@ -1,14 +1,16 @@
-﻿using System.ComponentModel;
+﻿using JetBrains.Annotations;
+using System.ComponentModel;
 using Terraria.ModLoader.Config;
 
-namespace Nitrate
-{
-    internal sealed class NitrateConfig : ModConfig
-    {
-        public override ConfigScope Mode => ConfigScope.ClientSide;
+namespace Nitrate;
 
-        [DefaultValue(true)]
-        [ReloadRequired]
-        public bool ExperimentalTileRenderer { get; set; }
-    }
+[UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
+internal sealed class NitrateConfig : ModConfig
+{
+    public override ConfigScope Mode => ConfigScope.ClientSide;
+
+    [ReloadRequired]
+    [DefaultValue(true)]
+    [UsedImplicitly(ImplicitUseKindFlags.Access | ImplicitUseKindFlags.Assign)]
+    public bool ExperimentalTileRenderer { get; set; }
 }
