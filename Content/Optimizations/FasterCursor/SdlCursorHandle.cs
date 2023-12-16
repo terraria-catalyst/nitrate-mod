@@ -72,7 +72,7 @@ internal sealed class SdlCursorHandle : SafeHandleZeroOrMinusOneIsInvalid
         return new SdlCursorHandle(handle, true);
     }
 
-    public static SdlCursorHandle FromPixels(Color[] pixels, int width, int height, FnaVector2 origin)
+    public static SdlCursorHandle FromPixels(byte[] pixels, int width, int height, FnaVector2 origin)
     {
         nint surface = IntPtr.Zero;
         nint handle;

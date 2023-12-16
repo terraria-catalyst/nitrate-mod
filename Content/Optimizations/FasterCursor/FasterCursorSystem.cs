@@ -14,10 +14,12 @@ internal sealed class FasterCursorSystem : ModSystem
     // and oscillating mouse scaling.
     private const int cursor_width = 14 * 5;
     private const int cursor_height = 14 * 5;
-    private static FnaVector2 CursorPosition;
     private static FnaVector2 CursorOrigin;
     private static RenderTarget2D CursorTarget = null!;
     private static SdlCursorHandle? CursorHandle;
+    private static bool InExistingCursorContext;
+    private static bool EnteredFromDrawThickCursor;
+    private static SpriteBatchUtil.SpriteBatchSnapshot Snapshot;
 
     // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
     private static bool Enabled => CursorTarget is not null && !(Main.gameMenu && Main.alreadyGrabbingSunOrMoon) && ModContent.GetInstance<NitrateConfig>().FasterCursor;
@@ -35,30 +37,10 @@ internal sealed class FasterCursorSystem : ModSystem
         {
             CursorTarget = new RenderTarget2D(
                 Main.graphics.GraphicsDevice,
-                Main.screenWidth,
-                Main.screenHeight
+                cursor_width,
+                cursor_height
             );
         });
-
-        Main.OnResolutionChanged += UpdateRenderTargets;
-    }
-
-    public override void OnModUnload()
-    {
-        base.OnModUnload();
-
-        Main.OnResolutionChanged -= UpdateRenderTargets;
-    }
-
-    private static void UpdateRenderTargets(Vector2 _)
-    {
-        CursorTarget?.Dispose();
-
-        CursorTarget = new RenderTarget2D(
-            Main.graphics.GraphicsDevice,
-            Main.screenWidth,
-            Main.screenHeight
-        );
     }
 
     private static void UpdateAndSetCursor(On_Main.orig_Draw_Inner orig, Main self, GameTime gameTime)
@@ -67,29 +49,17 @@ internal sealed class FasterCursorSystem : ModSystem
 
         if (!Enabled)
         {
+            Main.instance.IsMouseVisible = false;
+
             return;
         }
 
-        Color[] pixels = new Color[CursorTarget.Width * CursorTarget.Height];
-        CursorTarget.GetData(pixels);
+        Main.instance.IsMouseVisible = true;
 
-        FnaVector2 start = CursorPosition - CursorOrigin;
-        FnaVector2 end = start + new FnaVector2(cursor_width, cursor_height);
-        Color[] cursorPixels = new Color[cursor_width * cursor_height];
+        byte[] pixelParts = new byte[cursor_width * cursor_height * 4];
+        CursorTarget.GetData(pixelParts);
 
-        // copy the rect start -> end from pixels to cursorPixels
-        for (int y = (int)start.Y; y < end.Y; y++)
-        {
-            for (int x = (int)start.X; x < end.X; x++)
-            {
-                int cursorIndex = (y - (int)start.Y) * cursor_width + (x - (int)start.X);
-                int index = y * CursorTarget.Width + x;
-
-                cursorPixels[cursorIndex] = pixels[index];
-            }
-        }
-
-        SdlCursorHandle handle = SdlCursorHandle.FromPixels(cursorPixels, cursor_width, cursor_height, CursorOrigin);
+        SdlCursorHandle handle = SdlCursorHandle.FromPixels(pixelParts, cursor_width, cursor_height, CursorOrigin);
         handle.SetSdlCursor();
 
         CursorHandle?.Dispose();
@@ -105,10 +75,42 @@ internal sealed class FasterCursorSystem : ModSystem
             return;
         }
 
-        CursorPosition = Main.MouseScreen;
+        if (!InExistingCursorContext)
+        {
+            InExistingCursorContext = true;
 
-        using (_ = Main.spriteBatch.BeginDrawingToRenderTarget(Main.graphics.graphicsDevice, CursorTarget))
+            (int realX, int realY) = (Main.mouseX, Main.mouseY);
+            (Main.mouseX, Main.mouseY) = (0, 0);
+
+            using (_ = Main.spriteBatch.BeginDrawingToRenderTarget(Main.graphics.graphicsDevice, CursorTarget))
+                orig(bonus, smart);
+
+            (Main.mouseX, Main.mouseY) = (realX, realY);
+
+            InExistingCursorContext = false;
+            EnteredFromDrawThickCursor = false;
+        }
+        else if (EnteredFromDrawThickCursor)
+        {
             orig(bonus, smart);
+            
+            Main.spriteBatch.End();
+            Main.instance.GraphicsDevice.SetRenderTarget(null);
+
+            Main.spriteBatch.Begin(
+                Snapshot.SortMode,
+                Snapshot.BlendState,
+                Snapshot.SamplerState,
+                Snapshot.DepthStencilState,
+                Snapshot.RasterizerState,
+                Snapshot.Effect,
+                Snapshot.TransformMatrix
+            );
+        }
+        else
+        {
+            orig(bonus, smart);
+        }
     }
 
     private static Vector2 CaptureDrawnThickCursor(On_Main.orig_DrawThickCursor orig, bool smart)
@@ -118,10 +120,39 @@ internal sealed class FasterCursorSystem : ModSystem
             return orig(smart);
         }
 
-        using (_ = Main.spriteBatch.BeginDrawingToRenderTarget(Main.graphics.graphicsDevice, CursorTarget))
+        if (!InExistingCursorContext)
+        {
+            InExistingCursorContext = true;
+            EnteredFromDrawThickCursor = true;
+
+            (int realX, int realY) = (Main.mouseX, Main.mouseY);
+            (Main.mouseX, Main.mouseY) = (0, 0);
+
+            Main.spriteBatch.TryEnd(out Snapshot);
+
+            Main.instance.GraphicsDevice.SetRenderTarget(CursorTarget);
+            Main.instance.GraphicsDevice.Clear(Color.Transparent);
+
+            Main.spriteBatch.Begin(
+                Snapshot.SortMode,
+                Snapshot.BlendState,
+                Snapshot.SamplerState,
+                Snapshot.DepthStencilState,
+                Snapshot.RasterizerState,
+                Snapshot.Effect,
+                Snapshot.TransformMatrix
+            );
+
             CursorOrigin = orig(smart);
 
-        CursorPosition = Main.MouseScreen;
+            (Main.mouseX, Main.mouseY) = (realX, realY);
+
+            // InExistingCursorContext = false;
+        }
+        else
+        {
+            CursorOrigin = orig(smart);
+        }
 
         return CursorOrigin;
     }
@@ -135,9 +166,23 @@ internal sealed class FasterCursorSystem : ModSystem
             return;
         }
 
-        using (_ = Main.spriteBatch.BeginDrawingToRenderTarget(Main.graphics.graphicsDevice, CursorTarget))
-            orig();
+        if (!InExistingCursorContext)
+        {
+            InExistingCursorContext = true;
 
-        CursorPosition = Main.MouseScreen;
+            (int realX, int realY) = (Main.mouseX, Main.mouseY);
+            (Main.mouseX, Main.mouseY) = (0, 0);
+
+            using (_ = Main.spriteBatch.BeginDrawingToRenderTarget(Main.graphics.graphicsDevice, CursorTarget))
+                orig();
+
+            (Main.mouseX, Main.mouseY) = (realX, realY);
+
+            InExistingCursorContext = false;
+        }
+        else
+        {
+            orig();
+        }
     }
 }
