@@ -94,8 +94,8 @@ internal sealed class InstancedDustRenderer : AbstractInstancedParticleRenderer<
                     FnaVector2 initialOffset = new(-halfWidth, -halfHeight);
 
                     SimdMatrix rotation = SimdMatrix.CreateRotationZ(dust.rotation);
-                    SimdMatrix offset = SimdMatrix.CreateTranslation(initialOffset.X / 2, initialOffset.Y / 2, 0);
-                    SimdMatrix reset = SimdMatrix.CreateTranslation(-initialOffset.X / 2, -initialOffset.Y / 2, 0);
+                    SimdMatrix offset = SimdMatrix.CreateTranslation(initialOffset.X, initialOffset.Y, 0);
+                    SimdMatrix reset = SimdMatrix.CreateTranslation(-initialOffset.X, -initialOffset.Y, 0);
 
                     SimdMatrix rotationMatrix = offset * rotation * reset;
 
