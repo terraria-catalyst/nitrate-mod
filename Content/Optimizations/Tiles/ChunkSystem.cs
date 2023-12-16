@@ -1,6 +1,7 @@
 ﻿using JetBrains.Annotations;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using Nitrate.Core.Listeners;
@@ -9,6 +10,7 @@ using ReLogic.Content;
 using System;
 using System.Collections.Generic;
 using Terraria;
+using Terraria.GameContent;
 using Terraria.ModLoader;
 
 namespace Nitrate.Content.Optimizations.Tiles;
@@ -47,6 +49,8 @@ internal sealed class ChunkSystem : ModSystem
 
     private bool _enabled;
 
+    private bool _debug;
+
     public ChunkSystem()
     {
         _lightMapRenderer = new Lazy<Effect>(() => Mod.Assets.Request<Effect>("Assets/Effects/LightMapRenderer", AssetRequestMode.ImmediateLoad).Value);
@@ -76,7 +80,7 @@ internal sealed class ChunkSystem : ModSystem
 
         Main.RunOnMainThread(() =>
         {
-            // Clear any previous targets if vanilla tile rendering used to be on.
+            // Clear any previous targets if vanilla tile rendering was previously enabled.
             Main.instance.ReleaseTargets();
 
             _lightingBuffer = new RenderTarget2D(
@@ -124,7 +128,16 @@ internal sealed class ChunkSystem : ModSystem
             return;
         }
 
-        DisposeAllChunks();
+        Main.RunOnMainThread(() =>
+        {
+            foreach (RenderTarget2D chunk in _loadedChunks.Values)
+            {
+                chunk?.Dispose();
+            }
+        });
+
+        _loadedChunks.Clear();
+        _needsPopulating.Clear();
     }
 
     public override void Unload()
@@ -132,6 +145,20 @@ internal sealed class ChunkSystem : ModSystem
         base.Unload();
 
         DisposeAllChunks();
+    }
+
+    public override void PostUpdateInput()
+    {
+        base.PostUpdateInput();
+
+        Keys debugKey = Keys.F5;
+
+        if (Main.keyState.IsKeyDown(debugKey) && !Main.oldKeyState.IsKeyDown(debugKey))
+        {
+            _debug = !_debug;
+
+            Main.NewText($"Chunk Borders ({debugKey}): " + (_debug ? "Shown" : "Hidden"), _debug ? Color.Green : Color.Red);
+        }
     }
 
     public override void PostUpdateEverything()
@@ -340,6 +367,33 @@ internal sealed class ChunkSystem : ModSystem
         Main.spriteBatch.Draw(_chunkScreenTarget, Vector2.Zero, Color.White);
 
         Main.spriteBatch.End();
+
+        if (_debug)
+        {
+            Main.spriteBatch.Begin(
+                SpriteSortMode.Deferred,
+                BlendState.AlphaBlend,
+                SamplerState.PointClamp,
+                DepthStencilState.None,
+                RasterizerState.CullNone
+            );
+
+            int lineWidth = 2;
+            int offset = lineWidth / 2;
+
+            foreach (Point chunkKey in _loadedChunks.Keys)
+            {
+                int chunkX = (chunkKey.X * chunk_size) - (int)Main.screenPosition.X;
+                int chunkY = (chunkKey.Y * chunk_size) - (int)Main.screenPosition.Y;
+
+                Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX - offset, chunkY - offset, chunk_size + offset, lineWidth), Color.Yellow);
+                Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX + chunk_size - offset, chunkY - offset, lineWidth, chunk_size + offset), Color.Yellow);
+                Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX - offset, chunkY + chunk_size - offset, chunk_size + offset, lineWidth), Color.Yellow);
+                Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX - offset, chunkY - offset, lineWidth, chunk_size + offset), Color.Yellow);
+            }
+
+            Main.spriteBatch.End();
+        }
     }
 
     private void LoadChunk(Point chunkKey)
