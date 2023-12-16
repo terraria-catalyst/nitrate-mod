@@ -6,5 +6,10 @@ Configs: {
 			Label: Experimental Tile Renderer
 			Tooltip: An experimental tile renderer that is approximately 5x faster than the vanilla system.
 		}
+
+		FasterCursor: {
+			Label: Faster Cursor
+			Tooltip: Rewrites cursor rendering to be considerably more responsive and not tied to game framerate.
+		}
 	}
 }

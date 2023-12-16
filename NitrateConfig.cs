@@ -13,4 +13,8 @@ internal sealed class NitrateConfig : ModConfig
     [DefaultValue(true)]
     [UsedImplicitly(ImplicitUseKindFlags.Access | ImplicitUseKindFlags.Assign)]
     public bool ExperimentalTileRenderer { get; set; }
+
+    [DefaultValue(true)]
+    [UsedImplicitly(ImplicitUseKindFlags.Access | ImplicitUseKindFlags.Assign)]
+    public bool FasterCursor { get; set; }
 }
