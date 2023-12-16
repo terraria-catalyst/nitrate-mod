@@ -8,7 +8,7 @@ using System.Reflection;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace Nitrate.Core.Parallelization;
+namespace Nitrate.Core.Listeners;
 
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class ThreadUnsafeCallWatchdog : ModSystem
