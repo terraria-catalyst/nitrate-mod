@@ -8,6 +8,10 @@ using System.Linq;
 
 namespace Nitrate.Core.Utilities;
 
+/// <summary>
+///     Basic utilities for dealing with IL.
+/// </summary>
+[ApiReleaseCandidate("1.0.0")] // Would need further refinement.
 internal static class IntermediateLanguageUtil
 {
     private static readonly List<ISimdifier> simdifiers = new()
@@ -15,6 +19,12 @@ internal static class IntermediateLanguageUtil
         new Vector2Simdifier(),
     };
 
+    /// <summary>
+    ///     Clones the given method body to the cursor, wholesale copying all
+    ///     relevant contents (instructions, parameters, variables, etc.).
+    /// </summary>
+    /// <param name="body">The body to copy from.</param>
+    /// <param name="c">The cursor to copy to.</param>
     public static void CloneMethodBodyToCursor(MethodBody body, ILCursor c)
     {
         c.Index = 0;
@@ -111,6 +121,10 @@ internal static class IntermediateLanguageUtil
         }
     }
 
+    /// <summary>
+    ///     "Simdifies" a method.
+    /// </summary>
+    /// <param name="c">The cursor of the method to "simdify."</param>
     public static void Simdify(this ILCursor c)
     {
         foreach (ISimdifier simdifier in simdifiers)

@@ -4,8 +4,16 @@ using System.Threading;
 
 namespace Nitrate.Core.Threading;
 
+/// <summary>
+///     A faster reimplementation of <see cref="FastParallel"/>.
+/// </summary>
+/// <seealso cref="FastParallel"/>
+[ApiReleaseCandidate("1.0.0")]
 internal static class FasterParallel
 {
+    /// <summary>
+    ///     A faster reimplementation of <see cref="FastParallel.For"/>.
+    /// </summary>
     public static void For(int fromInclusive, int toExclusive, ParallelForAction callback, object? context = null)
     {
         int rangeLength = toExclusive - fromInclusive;
@@ -42,7 +50,6 @@ internal static class FasterParallel
             else
             {
                 ThreadPool.QueueUserWorkItem(InvokeTask, rangeTask);
-                // Task.Run(() => InvokeTask(rangeTask));
             }
         }
 

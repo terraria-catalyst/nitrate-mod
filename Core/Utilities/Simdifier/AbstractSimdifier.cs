@@ -15,22 +15,24 @@ internal abstract class AbstractSimdifier : ISimdifier
         // Replace method calls from the old type to the new type.
         foreach (Instruction instr in c.Instrs)
         {
-            if (instr.OpCode == OpCodes.Call)
+            if (instr.OpCode != OpCodes.Call)
             {
-                if (instr.Operand is not MethodReference methodReference)
+                continue;
+            }
+
+            if (instr.Operand is not MethodReference methodReference)
+            {
+                continue;
+            }
+
+            foreach (KeyValuePair<string, MethodInfo> remap in _instanceRemap)
+            {
+                if (methodReference.FullName != remap.Key)
                 {
                     continue;
                 }
 
-                foreach (KeyValuePair<string, MethodInfo> remap in _instanceRemap)
-                {
-                    if (methodReference.FullName != remap.Key)
-                    {
-                        continue;
-                    }
-
-                    instr.Operand = c.Body.Method.Module.ImportReference(remap.Value);
-                }
+                instr.Operand = c.Body.Method.Module.ImportReference(remap.Value);
             }
         }
     }

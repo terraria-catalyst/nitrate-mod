@@ -4,6 +4,7 @@ using Terraria.ModLoader;
 
 namespace Nitrate.Core.Listeners;
 
+[ApiReleaseCandidate("1.0.0")]
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class TileStateChangedListener : ModSystem
 {

@@ -11,7 +11,8 @@ using Terraria.ModLoader;
 namespace Nitrate.Content.Optimizations.ParallelizedUpdating;
 
 /// <summary>
-///     Minor optimisation that makes some aspects of lighting use this mod's improved FasterParallel over FastParallel.
+///     Minor optimisation that makes some aspects of lighting use this mod's
+///     improved <see cref="FasterParallel"/> over <see cref="FastParallel"/>.
 /// </summary>
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class LightingParallelismSystem : ModSystem

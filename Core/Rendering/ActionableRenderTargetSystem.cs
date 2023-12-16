@@ -18,6 +18,7 @@ namespace Nitrate.Core.Rendering;
 ///     and rendering (drawing of the render target), which occurs in a detour
 ///     targeting <see cref="Main.DrawProjectiles"/> (in post).
 /// </remarks>
+[ApiReleaseCandidate("1.0.0")]
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class ActionableRenderTargetSystem : ModSystem
 {

@@ -9,6 +9,7 @@ namespace Nitrate.Core.Rendering;
 ///     <see cref="ActionableRenderTargetSystem"/>. May hold a list of actions
 ///     to be executed in the context of the render target.
 /// </summary>
+[ApiReleaseCandidate("1.0.0")]
 internal interface IActionableRenderTarget : IDisposable
 {
     /// <summary>
@@ -27,5 +28,10 @@ internal interface IActionableRenderTarget : IDisposable
     /// </summary>
     void Finish();
 
+    /// <summary>
+    ///     Reinitializes the <see cref="IActionableRenderTarget"/> for a
+    ///     screen resize.
+    /// </summary>
+    /// <returns></returns>
     IActionableRenderTarget ReinitForResize();
 }

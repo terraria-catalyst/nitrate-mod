@@ -4,7 +4,7 @@ using ReLogic.Content;
 
 namespace Nitrate.Core.UI;
 
-public sealed class VanillaBoxRenderer : IBoxRenderer
+internal sealed class VanillaBoxRenderer : IBoxRenderer
 {
     private const int padding = 6;
     private const int content = 4;

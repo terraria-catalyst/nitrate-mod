@@ -6,6 +6,11 @@ using Terraria.ModLoader;
 
 namespace Nitrate.Core.UI;
 
+/// <summary>
+///     Implements <see cref="IBoxRenderer"/> and handles delegating to a real
+///     implementation. Handles initialization of box renders and configuration.
+/// </summary>
+[ApiReleaseCandidate("1.0.0")]
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class BoxRenderer : ModSystem, IBoxRenderer
 {

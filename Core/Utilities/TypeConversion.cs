@@ -2,6 +2,9 @@
 
 namespace Nitrate.Core.Utilities;
 
+/// <summary>
+///     Basic type conversion utilities.
+/// </summary>
 internal static class TypeConversion
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

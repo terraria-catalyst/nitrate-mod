@@ -11,6 +11,9 @@ using Terraria.UI.Chat;
 
 namespace Nitrate.Core.UI;
 
+/// <summary>
+///     Handles rendering UI to the main menu.
+/// </summary>
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class MainMenuRenderer : ModSystem
 {
