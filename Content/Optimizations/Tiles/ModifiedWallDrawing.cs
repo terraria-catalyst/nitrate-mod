@@ -3,7 +3,6 @@ using Terraria.GameContent;
 using Terraria;
 using Terraria.GameContent.Drawing;
 using Microsoft.Xna.Framework;
-using Terraria.Graphics;
 
 namespace Nitrate.Content.Optimizations.Tiles;
 

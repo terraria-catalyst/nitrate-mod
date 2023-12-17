@@ -1,5 +1,4 @@
 ﻿using Microsoft.Win32.SafeHandles;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SDL2;
 using System;
