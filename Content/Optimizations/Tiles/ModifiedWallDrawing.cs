@@ -22,6 +22,12 @@ internal class ModifiedWallDrawing
 
         ushort wall = tile.wall;
 
+        // WallDrawing.FullTile accesses the tiles at (i - 1) and (i + 1)
+        if ((i - 1) < 0 || (i + 1) >= wd._tileArray.Width)
+        {
+            return;
+        }
+
         if (wall <= 0 || wd.FullTile(i, j) || (wall == 318 && !wd._shouldShowInvisibleWalls) || (tile.invisibleWall() && !wd._shouldShowInvisibleWalls))
         {
             return;

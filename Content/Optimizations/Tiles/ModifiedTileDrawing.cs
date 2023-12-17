@@ -774,10 +774,20 @@ internal static class ModifiedTileDrawing
 
         if (!TileID.Sets.Platforms[drawData.typeCache] && !TileID.Sets.IgnoresNearbyHalfbricksWhenDrawn[drawData.typeCache] && td._tileSolid[drawData.typeCache] && !TileID.Sets.NotReallySolid[drawData.typeCache] && !drawData.tileCache.halfBrick())
         {
+            if ((tileX - 1) < 0)
+            {
+                return;
+            }
+
             tile = Main.tile[tileX - 1, tileY];
 
             if (!tile.halfBrick())
             {
+                if ((tileX + 1) >= Main.tile.Width)
+                {
+                    return;
+                }
+
                 tile = Main.tile[tileX + 1, tileY];
 
                 if (!tile.halfBrick())
