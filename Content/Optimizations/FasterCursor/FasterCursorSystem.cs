@@ -1,4 +1,4 @@
-﻿using JetBrains.Annotations;
+﻿/*using JetBrains.Annotations;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Nitrate.Core.Utilities;
@@ -93,7 +93,7 @@ internal sealed class FasterCursorSystem : ModSystem
         else if (EnteredFromDrawThickCursor)
         {
             orig(bonus, smart);
-            
+
             Main.spriteBatch.End();
             Main.instance.GraphicsDevice.SetRenderTarget(null);
 
@@ -185,4 +185,5 @@ internal sealed class FasterCursorSystem : ModSystem
             orig();
         }
     }
-}
+}*/
+
