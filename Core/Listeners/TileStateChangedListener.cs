@@ -1,4 +1,5 @@
 ﻿using JetBrains.Annotations;
+using System.IO;
 using Terraria;
 using Terraria.ModLoader;
 
@@ -10,15 +11,9 @@ internal sealed class TileStateChangedListener : ModSystem
 {
     public delegate void SingleStateChange(int x, int y);
 
-    // public delegate void RangeStateChange(int fromX, int toX, int fromY, int toY);
-
     public static event SingleStateChange? OnTileSingleStateChange;
 
-    // public static event RangeStateChange? OnTileRangeStateChange;
-
     public static event SingleStateChange? OnWallSingleStateChange;
-
-    // public static event RangeStateChange? OnWallRangeStateChange;
 
     public override void OnModLoad()
     {
@@ -35,6 +30,8 @@ internal sealed class TileStateChangedListener : ModSystem
         On_Framing.WallFrame += WallFrame;
         On_WorldGen.paintWall += PaintWall;
         On_WorldGen.paintCoatTile += CoatWall;
+
+        On_NetMessage.DecompressTileBlock_Inner += DecompressTileBlock;
     }
 
     private static bool PlaceTile(On_WorldGen.orig_PlaceTile orig, int i, int j, int type, bool mute, bool forced, int plr, int style)
@@ -105,5 +102,18 @@ internal sealed class TileStateChangedListener : ModSystem
         OnWallSingleStateChange?.Invoke(x, y);
 
         return result;
+    }
+
+    private static void DecompressTileBlock(On_NetMessage.orig_DecompressTileBlock_Inner orig, BinaryReader reader, int xStart, int yStart, int width, int height)
+    {
+        orig(reader, xStart, yStart, width, height);
+
+        for (int i = xStart; i < xStart + width; i++)
+        {
+            for (int j = yStart; j < yStart + height; j++)
+            {
+                OnTileSingleStateChange?.Invoke(i, j);
+            }
+        }
     }
 }
