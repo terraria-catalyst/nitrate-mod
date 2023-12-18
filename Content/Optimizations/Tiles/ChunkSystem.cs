@@ -77,9 +77,7 @@ internal sealed class ChunkSystem : ModSystem
         }
 
         TileStateChangedListener.OnTileSingleStateChange += TileStateChanged;
-        // TileStateChangedListener.OnTileRangeStateChange += TileRangeStateChanged;
         TileStateChangedListener.OnWallSingleStateChange += TileStateChanged;
-        // TileStateChangedListener.OnWallRangeStateChange += TileRangeStateChanged;
 
         // Disable RenderX methods in relation to tile rendering. These methods
         // are responsible for drawing the tile render target in vanilla.
@@ -538,17 +536,6 @@ internal sealed class ChunkSystem : ModSystem
         }
     }
 
-    /*private void TileRangeStateChanged(int fromX, int toX, int fromY, int toY)
-    {
-        for (int i = fromX; i <= toX; i++)
-        {
-            for (int j = fromY; j <= toY; j++)
-            {
-                TileStateChanged(i, j);
-            }
-        }
-    }*/
-
     private static void CancelVanillaRendering(ILContext il)
     {
         ILCursor c = new(il);
@@ -562,8 +549,7 @@ internal sealed class ChunkSystem : ModSystem
 
         c.EmitDelegate(() =>
         {
-            // TODO: Does nothing for the solid layer.
-            // Main.instance.TilesRenderer.PreDrawTiles(true, false, true);
+            Main.instance.TilesRenderer.PreDrawTiles(true, false, true);
 
             GraphicsDevice device = Main.graphics.GraphicsDevice;
 
@@ -571,6 +557,8 @@ internal sealed class ChunkSystem : ModSystem
             DrawChunksToChunkTarget(device);
             TransferTileSpaceBufferToScreenSpaceBuffer(device);
             RenderChunksWithLighting();
+
+            Main.instance.DrawTileEntities(true, true, false);
 
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.Transform);
 
