@@ -578,7 +578,7 @@ internal sealed class ChunkSystem : ModSystem
         {
             // TODO: Does nothing for the solid layer.
             // Main.instance.TilesRenderer.PreDrawTiles(true, false, true);
-            
+
             GraphicsDevice device = Main.graphics.GraphicsDevice;
 
             PopulateLightingBuffer();
@@ -611,7 +611,8 @@ internal sealed class ChunkSystem : ModSystem
         c.EmitDelegate(() =>
         {
             Main.instance.TilesRenderer.PreDrawTiles(false, false, true);
-            
+            Main.instance.TilesRenderer.Draw(false, false, true);
+
             Main.spriteBatch.End();
 
             try
