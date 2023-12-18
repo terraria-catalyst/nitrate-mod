@@ -1,4 +1,8 @@
-﻿[h1]Nitrate[/h1]
+﻿[url=https://catalyst.tomat.dev]Website[/url]
+[url=https://www.patreon.com/TeamCatalyst]Patreon[/url]
+[url=https://discord.gg/vPTUZcvXjg]Discord[/url]
+
+[h1]Nitrate[/h1]
 
 Nitrate is a performance optimization mod focused on generalized improvements to many features throughout the game.
 
