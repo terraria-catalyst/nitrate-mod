@@ -27,9 +27,14 @@ internal sealed class TileStateChangedListener : ModSystem
         On_WorldGen.PlaceTile += PlaceTile;
         On_WorldGen.KillTile += KillTile;
         On_WorldGen.TileFrame += TileFrame;
+        On_WorldGen.paintTile += PaintTile;
+        On_WorldGen.paintCoatTile += CoatTile;
+
         On_WorldGen.PlaceWall += PlaceWall;
         On_WorldGen.KillWall += KillWall;
         On_Framing.WallFrame += WallFrame;
+        On_WorldGen.paintWall += PaintWall;
+        On_WorldGen.paintCoatTile += CoatWall;
     }
 
     private static bool PlaceTile(On_WorldGen.orig_PlaceTile orig, int i, int j, int type, bool mute, bool forced, int plr, int style)
@@ -52,6 +57,22 @@ internal sealed class TileStateChangedListener : ModSystem
         OnTileSingleStateChange?.Invoke(i, j);
     }
 
+    private static bool PaintTile(On_WorldGen.orig_paintTile orig, int x, int y, byte color, bool broadcast)
+    {
+        bool result = orig(x, y, color, broadcast);
+        OnTileSingleStateChange?.Invoke(x, y);
+
+        return result;
+    }
+
+    private static bool CoatTile(On_WorldGen.orig_paintCoatTile orig, int x, int y, byte paintCoatId, bool broadcast)
+    {
+        bool result = orig(x, y, paintCoatId, broadcast);
+        OnTileSingleStateChange?.Invoke(x, y);
+
+        return result;
+    }
+
     private static void PlaceWall(On_WorldGen.orig_PlaceWall orig, int i, int j, int type, bool mute)
     {
         orig(i, j, type, mute);
@@ -68,5 +89,21 @@ internal sealed class TileStateChangedListener : ModSystem
     {
         orig(i, j, resetFrame);
         OnWallSingleStateChange?.Invoke(i, j);
+    }
+
+    private static bool PaintWall(On_WorldGen.orig_paintWall orig, int x, int y, byte color, bool broadcast)
+    {
+        bool result = orig(x, y, color, broadcast);
+        OnWallSingleStateChange?.Invoke(x, y);
+
+        return result;
+    }
+
+    private static bool CoatWall(On_WorldGen.orig_paintCoatTile orig, int x, int y, byte paintCoatId, bool broadcast)
+    {
+        bool result = orig(x, y, paintCoatId, broadcast);
+        OnWallSingleStateChange?.Invoke(x, y);
+
+        return result;
     }
 }
