@@ -892,14 +892,18 @@ internal sealed class ChunkSystem : ModSystem
 
     private static void AddSpecialPointToHashMap(On_TileDrawing.orig_AddSpecialPoint orig, TileDrawing self, int x, int y, int type)
     {
+        if (type == (int)TileDrawing.TileCounterType.Tree)
+        {
+            orig(self, x, y, type);
+
+            return;
+        }
+
         SpecialPoints[new Point(x, y)] = (TileDrawing.TileCounterType)type;
     }
 
     private static bool HandledBySpecialPoint(Tile tile, int x, int y)
     {
-        // ReSharper disable once ConvertToConstant.Local
-        bool flag = true;
-
         switch (tile.type)
         {
             case 52:
@@ -987,7 +991,5 @@ internal sealed class ChunkSystem : ModSystem
             default:
                 return Main.instance.TilesRenderer.ShouldSwayInWind(x, y, tile);
         }
-
-        return false;
     }
 }
