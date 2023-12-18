@@ -1,4 +1,4 @@
-﻿using JetBrains.Annotations;
+﻿/*using JetBrains.Annotations;
 using MonoMod.Cil;
 using Nitrate.Core.Utilities;
 using Terraria.ModLoader;
@@ -20,4 +20,5 @@ internal sealed class MiscSimdApplicationSystem : ModSystem
         ILCursor c = new(il);
         c.Simdify();
     }
-}
+}*/
+
