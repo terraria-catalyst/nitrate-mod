@@ -20,11 +20,12 @@ namespace Nitrate.Content.Optimizations.Tiles;
 /// TODO:
 /// Make sure other effects such as dusts/tile cracks are rendered as well.
 /// Ensure water squares can draw behind tiles.
-/// Maybe make RenderTiles2 still run for the nonsolid layer and tile deco/animated tiles?
+/// Maybe make RenderTiles2 still run for the non-solid layer and tile deco/animated tiles?
 /// </summary>
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class ChunkSystem : ModSystem
 {
+    [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
     private sealed class WarningSystem : ModPlayer
     {
         public override void OnEnterWorld()
@@ -60,13 +61,13 @@ internal sealed class ChunkSystem : ModSystem
 
     private readonly Lazy<Effect> _lightMapRenderer;
 
-    private RenderTarget2D _lightingBuffer;
+    private RenderTarget2D? _lightingBuffer;
 
-    private Color[] _colorBuffer;
+    private Color[] _colorBuffer = Array.Empty<Color>();
 
-    private RenderTarget2D _chunkScreenTarget;
+    private RenderTarget2D? _chunkScreenTarget;
 
-    private RenderTarget2D _screenSizeLightingBuffer;
+    private RenderTarget2D? _screenSizeLightingBuffer;
 
     private bool _enabled;
 
@@ -115,7 +116,7 @@ internal sealed class ChunkSystem : ModSystem
             _chunkScreenTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
             _screenSizeLightingBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
 
-            // By default Terraria has this set to DiscardContents. This means that switching RTs erases the contents of the backbuffer if done mid-draw.
+            // By default, Terraria has this set to DiscardContents. This means that switching RTs erases the contents of the backbuffer if done mid-draw.
             Main.graphics.GraphicsDevice.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
             Main.graphics.ApplyChanges();
         });
@@ -153,7 +154,7 @@ internal sealed class ChunkSystem : ModSystem
         {
             foreach (RenderTarget2D chunk in _loadedChunks.Values)
             {
-                chunk?.Dispose();
+                chunk.Dispose();
             }
         });
 
@@ -244,7 +245,7 @@ internal sealed class ChunkSystem : ModSystem
 
     private void PopulateLightingBuffer()
     {
-        if (_colorBuffer is null || _lightingBuffer is null)
+        if (_lightingBuffer is null)
         {
             return;
         }
@@ -510,7 +511,7 @@ internal sealed class ChunkSystem : ModSystem
         {
             foreach (RenderTarget2D chunk in _loadedChunks.Values)
             {
-                chunk?.Dispose();
+                chunk.Dispose();
             }
 
             _lightingBuffer?.Dispose();

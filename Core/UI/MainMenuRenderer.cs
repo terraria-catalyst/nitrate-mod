@@ -19,7 +19,7 @@ internal sealed class MainMenuRenderer : ModSystem
 {
     private static GameTime? GameTime;
 
-    public UserInterface UserInterface { get; } = new();
+    private UserInterface UserInterface { get; } = new();
 
     public override void Load()
     {
@@ -102,6 +102,8 @@ internal sealed class MainMenuRenderer : ModSystem
         drawText($".NET Version: {Environment.Version}", new FnaVector2(padding, debugBox.Y + charHeight * small_text_scale), Color.White, 0f, FnaVector2.Zero, new FnaVector2(small_text_scale));
         drawText($"OS: {Environment.OSVersion.ToString().Replace("Microsoft ", "")}", new FnaVector2(padding, debugBox.Y + charHeight * small_text_scale * 2), Color.White, 0f, FnaVector2.Zero, new FnaVector2(small_text_scale));
         drawText($"Architecture: {(Environment.Is64BitOperatingSystem ? "x64" : "x86")}", new FnaVector2(padding, debugBox.Y + charHeight * small_text_scale * 3), Color.White, 0f, FnaVector2.Zero, new FnaVector2(small_text_scale));
+
+        return;
 
         void drawText(string text, FnaVector2 position, Color baseColor, float rotation, FnaVector2 origin, FnaVector2 baseScale)
         {

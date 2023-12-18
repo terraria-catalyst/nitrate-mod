@@ -8,6 +8,11 @@
         <LangVersion>latest</LangVersion>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <Nullable>enable</Nullable>
+
+        <!-- Ignore duplicate type definitions from dependencies because
+             MonoMod.Utils and our publicizer package we use both define
+             IgnoresAccessChecksToAttribute. -->
+        <NoWarn>CS0436</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>

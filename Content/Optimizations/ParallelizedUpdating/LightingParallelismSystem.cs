@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using Nitrate.Core.Threading;
+using ReLogic.Threading;
 using System;
 using Terraria;
 using Terraria.Graphics.Light;
@@ -80,7 +81,7 @@ internal sealed class LightingParallelismSystem : ModSystem
             {
                 self._drawInvisibleWalls = options.DrawInvisibleWalls;
 
-                FasterParallel.For(area.Left, area.Right, delegate (int start, int end, object context)
+                FasterParallel.For(area.Left, area.Right, delegate (int start, int end, object _)
                 {
                     for (int i = start; i < end; i++)
                     {
