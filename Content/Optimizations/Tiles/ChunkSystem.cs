@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.GameContent;
+using Terraria.GameContent.Drawing;
 using Terraria.ModLoader;
 
 namespace Nitrate.Content.Optimizations.Tiles;
@@ -94,9 +95,14 @@ internal sealed class ChunkSystem : ModSystem
         TileStateChangedListener.OnWallSingleStateChange += TileStateChanged;
         // TileStateChangedListener.OnWallRangeStateChange += TileRangeStateChanged;
 
+        // Disable RenderX methods in relation to tile rendering. These methods
+        // are responsible for drawing the tile render target in vanilla.
         IL_Main.RenderTiles += CancelVanillaRendering;
         IL_Main.RenderTiles2 += CancelVanillaRendering;
         IL_Main.RenderWalls += CancelVanillaRendering;
+
+        // Hijack the methods responsible for actually drawing to the vanilla
+        // tile render target.
         IL_Main.DoDraw_Tiles_Solid += NewDrawSolidTiles;
         IL_Main.DoDraw_Tiles_NonSolid += NewDrawNonSolidTiles;
 
@@ -570,6 +576,9 @@ internal sealed class ChunkSystem : ModSystem
 
         c.EmitDelegate(() =>
         {
+            // TODO: Does nothing for the solid layer.
+            // Main.instance.TilesRenderer.PreDrawTiles(true, false, true);
+            
             GraphicsDevice device = Main.graphics.GraphicsDevice;
 
             PopulateLightingBuffer();
@@ -601,6 +610,8 @@ internal sealed class ChunkSystem : ModSystem
 
         c.EmitDelegate(() =>
         {
+            Main.instance.TilesRenderer.PreDrawTiles(false, false, true);
+            
             Main.spriteBatch.End();
 
             try
