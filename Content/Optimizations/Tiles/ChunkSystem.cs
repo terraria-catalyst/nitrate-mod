@@ -265,7 +265,7 @@ internal sealed class ChunkSystem : ModSystem
 
     private static void PopulateLightingBuffer()
     {
-        if (LightingBuffer is null)
+        if (LightingBuffer is null || ColorBuffer is null)
         {
             return;
         }
