@@ -610,8 +610,8 @@ internal sealed class ChunkSystem : ModSystem
 
         c.EmitDelegate(() =>
         {
-            Main.instance.TilesRenderer.PreDrawTiles(false, false, true);
-            Main.instance.TilesRenderer.Draw(false, false, true);
+            // Main.instance.TilesRenderer.PreDrawTiles(false, false, true);
+            // Main.instance.TilesRenderer.Draw(false, false, true);
 
             Main.spriteBatch.End();
 
