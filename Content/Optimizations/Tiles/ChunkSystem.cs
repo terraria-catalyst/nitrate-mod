@@ -6,6 +6,7 @@ using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using Nitrate.Core.Listeners;
 using Nitrate.Core.Threading;
+using Nitrate.Core.Utilities;
 using ReLogic.Content;
 using System;
 using System.Collections.Generic;
@@ -24,6 +25,26 @@ namespace Nitrate.Content.Optimizations.Tiles;
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class ChunkSystem : ModSystem
 {
+    private sealed class WarningSystem : ModPlayer
+    {
+        public override void OnEnterWorld()
+        {
+            base.OnEnterWorld();
+
+            if (Main.myPlayer != Player.whoAmI)
+            {
+                return;
+            }
+
+            NitrateConfig config = ModContent.GetInstance<NitrateConfig>();
+
+            if (config.ExperimentalTileRenderer && !config.ExperimentalTileRendererWarning)
+            {
+                Main.NewText("StartupMessages.ExperimentalTileRendererWarning".LocalizeNitrate(), Color.PaleVioletRed);
+            }
+        }
+    }
+
     // Good sizes include 20, 25, 40, 50, and 100 tiles, as these sizes all multiply evenly into every single default world size's width and height.
     // Smaller chunks are likely better performance-wise as not as many tiles need to be redrawn.
     private const int chunk_size = 20 * 16;

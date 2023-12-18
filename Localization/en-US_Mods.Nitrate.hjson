@@ -7,9 +7,22 @@ Configs: {
 			Tooltip: An experimental tile renderer that is approximately 5x faster than the vanilla system.
 		}
 
+		ExperimentalTileRendererWarning: {
+			Label: Disable Experimental Tile Renderer Warning
+			Tooltip: Disables the on-join message that appears when using the experimental tile renderer.
+		}
+
 		FasterCursor: {
 			Label: Faster Cursor
 			Tooltip: Rewrites cursor rendering to be considerably more responsive and not tied to game framerate.
 		}
 	}
 }
+
+StartupMessages.ExperimentalTileRendererWarning:
+	'''
+	You are currently using Nitrate's experimental tile renderer.
+	A bulk of Nitrate's performance increases are a result of this renderer,
+	but it is still in development and may cause serious rendering issues (or even crashes!).
+	You can toggle the use of this renderer in the config, as well as this message.
+	'''
