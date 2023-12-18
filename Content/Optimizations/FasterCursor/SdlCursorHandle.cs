@@ -1,4 +1,4 @@
-﻿using Microsoft.Win32.SafeHandles;
+﻿/*using Microsoft.Win32.SafeHandles;
 using Microsoft.Xna.Framework.Graphics;
 using SDL2;
 using System;
@@ -104,4 +104,5 @@ internal sealed class SdlCursorHandle : SafeHandleZeroOrMinusOneIsInvalid
 
         return new SdlCursorHandle(handle, true);
     }
-}
+}*/
+
