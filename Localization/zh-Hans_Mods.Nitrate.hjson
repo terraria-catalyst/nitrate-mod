@@ -1,0 +1,28 @@
+Configs: {
+	NitrateConfig: {
+		DisplayName: Nitrate设置
+
+		ExperimentalTileRenderer: {
+			Label: 实验性物块渲染器
+			Tooltip: 实验性物块渲染器, 速度大概是原版系统的5倍.
+		}
+
+		ExperimentalTileRendererWarning: {
+			Label: 禁用实验性物块渲染器警告
+			Tooltip: 禁用当启用实验性物块渲染器后在进入时出现的警告讯息.
+		}
+
+		FasterCursor: {
+			Label: 更快的光标
+			Tooltip: 重写光标的渲染, 大幅度提高其响应速度并使其不受游戏帧率的限制.
+		}
+	}
+}
+
+StartupMessages.ExperimentalTileRendererWarning:
+	'''
+	你正在使用Nitrate的实验性物块渲染器.
+	Nitrate的大部分性能提升都归功于该渲染器,
+	但它仍在开发中, 并且可能会导致严重的渲染问题 (甚至崩溃!).
+	你可以在设置中开关此渲染器, 或者这条讯息的出现.
+	'''
