@@ -1,12 +1,12 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Nitrate.UI;
+namespace Nitrate.API.UI;
 
 /// <summary>
 ///     Renders boxes.
 /// </summary>
-internal interface IBoxRenderer
+public interface IBoxRenderer
 {
     /// <summary>
     ///     Draws a box at the given coordinates with the given width and

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Nitrate.API.UI;
 using ReLogic.Content;
 
 namespace Nitrate.UI;

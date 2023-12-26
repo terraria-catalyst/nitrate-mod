@@ -1,5 +1,6 @@
 ﻿using JetBrains.Annotations;
 using Microsoft.Xna.Framework;
+using Nitrate.API.UI;
 using Nitrate.Utilities;
 using ReLogic.Graphics;
 using System;
@@ -63,7 +64,7 @@ internal sealed class MainMenuRenderer : ModSystem
         const float small_text_scale = 0.75f;
 
         Rectangle mainBox = new(padding, padding, 425, (int)(charHeight + charHeight * small_text_scale * 3));
-        ModContent.GetInstance<BoxRenderer>().DrawBox(Main.spriteBatch, mainBox);
+        BoxRenderer.DrawBox(Main.spriteBatch, mainBox);
 
         const float title_version_spacing = 8f;
         const string nitrate_title = "Nitrate";
@@ -75,7 +76,7 @@ internal sealed class MainMenuRenderer : ModSystem
         drawText(nitrateWarning, new FnaVector2(padding, padding + charHeight), Color.PaleVioletRed, 0f, FnaVector2.Zero, new FnaVector2(small_text_scale));
 
         Rectangle giveUsMoneyBox = new(padding, mainBox.Y + mainBox.Height + 6 + padding, 425, (int)(charHeight + (charHeight * small_text_scale)));
-        ModContent.GetInstance<BoxRenderer>().DrawBox(Main.spriteBatch, giveUsMoneyBox);
+        BoxRenderer.DrawBox(Main.spriteBatch, giveUsMoneyBox);
 
         string giveUsMoney = "Menu.GiveUsMoney".LocalizeNitrate();
         const string condescending = ";)";
@@ -97,7 +98,7 @@ internal sealed class MainMenuRenderer : ModSystem
         }
 
         Rectangle debugBox = new(padding, giveUsMoneyBox.Y + giveUsMoneyBox.Height + 6 + padding, 425, (int)(charHeight * 4 * small_text_scale));
-        ModContent.GetInstance<BoxRenderer>().DrawBox(Main.spriteBatch, debugBox);
+        BoxRenderer.DrawBox(Main.spriteBatch, debugBox);
 
         drawText("Menu.SIMD".LocalizeNitrate(Vector.IsHardwareAccelerated), new FnaVector2(padding, debugBox.Y), Color.White, 0f, FnaVector2.Zero, new FnaVector2(small_text_scale));
         drawText("Menu.NETVersion".LocalizeNitrate(Environment.Version), new FnaVector2(padding, debugBox.Y + charHeight * small_text_scale), Color.White, 0f, FnaVector2.Zero, new FnaVector2(small_text_scale));
