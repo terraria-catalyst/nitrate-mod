@@ -21,7 +21,6 @@ namespace Nitrate.API.Rendering;
 ///     Inheritance from <see cref="ModSystem"/> is not an API guarantee but
 ///     rather an implementation detail.
 /// </remarks>
-[ApiReleaseCandidate("1.0.0")]
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 public sealed class ActionableRenderTargetSystem : ModSystem
 {

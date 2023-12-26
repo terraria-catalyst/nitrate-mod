@@ -6,7 +6,6 @@ namespace Nitrate.UI;
 /// <summary>
 ///     Renders boxes.
 /// </summary>
-[ApiReleaseCandidate("1.0.0")]
 internal interface IBoxRenderer
 {
     /// <summary>

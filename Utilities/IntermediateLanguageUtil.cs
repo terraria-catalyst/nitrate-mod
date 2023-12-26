@@ -9,7 +9,6 @@ namespace Nitrate.Utilities;
 /// <summary>
 ///     Basic utilities for dealing with IL.
 /// </summary>
-[ApiReleaseCandidate("1.0.0")] // Would need further refinement.
 internal static class IntermediateLanguageUtil
 {
     /// <summary>
