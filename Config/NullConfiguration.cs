@@ -2,12 +2,12 @@
 
 public sealed class NullConfiguration : IConfiguration
 {
-    public bool UsesExperimentalTileRenderer {
+    bool IConfiguration.UsesExperimentalTileRenderer {
         get => false;
         set { }
     }
 
-    public bool DisabledExperimentalTileRendererWarning {
+    bool IConfiguration.DisabledExperimentalTileRendererWarning {
         get => false;
         set { }
     }

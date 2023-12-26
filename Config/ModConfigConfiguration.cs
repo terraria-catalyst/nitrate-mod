@@ -32,12 +32,12 @@ internal sealed class ModConfigConfiguration : IConfiguration
 
     private static NitrateConfig Config => ModContent.GetInstance<NitrateConfig>();
 
-    public bool UsesExperimentalTileRenderer {
+    bool IConfiguration.UsesExperimentalTileRenderer {
         get => Config.ExperimentalTileRenderer;
         set => Config.ExperimentalTileRenderer = value;
     }
 
-    public bool DisabledExperimentalTileRendererWarning {
+    bool IConfiguration.DisabledExperimentalTileRendererWarning {
         get => Config.ExperimentalTileRendererWarning;
         set => Config.ExperimentalTileRendererWarning = value;
     }
