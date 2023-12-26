@@ -8,7 +8,6 @@ using Terraria.GameContent;
 using Terraria.ModLoader;
 using Terraria.UI;
 using Terraria.UI.Chat;
-using Terraria.Localization;
 using Nitrate.Core.Utilities;
 
 namespace Nitrate.Core.UI;
