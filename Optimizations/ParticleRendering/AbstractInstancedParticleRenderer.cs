@@ -5,7 +5,7 @@ using System;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace Nitrate.Content.Optimizations.ParticleRendering;
+namespace Nitrate.Optimizations.ParticleRendering;
 
 internal abstract class AbstractInstancedParticleRenderer<TParticle> : ModSystem where TParticle : unmanaged
 {

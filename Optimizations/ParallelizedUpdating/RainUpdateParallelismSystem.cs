@@ -5,7 +5,7 @@ using Nitrate.API.Threading;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace Nitrate.Content.Optimizations.ParallelizedUpdating;
+namespace Nitrate.Optimizations.ParallelizedUpdating;
 
 /// <summary>
 ///     Rewrites the rain update method to use parallelism since rain updating

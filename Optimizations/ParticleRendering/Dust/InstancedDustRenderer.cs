@@ -10,9 +10,8 @@ using ReLogic.Content;
 using System;
 using Terraria;
 using Terraria.GameContent;
-using Terraria.ModLoader;
 
-namespace Nitrate.Content.Optimizations.ParticleRendering.Dust;
+namespace Nitrate.Optimizations.ParticleRendering.Dust;
 
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class InstancedDustRenderer : AbstractInstancedParticleRenderer<ParticleInstance>

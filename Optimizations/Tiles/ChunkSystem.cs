@@ -15,7 +15,7 @@ using Terraria.GameContent;
 using Terraria.GameContent.Drawing;
 using Terraria.ModLoader;
 
-namespace Nitrate.Content.Optimizations.Tiles;
+namespace Nitrate.Optimizations.Tiles;
 
 /// <summary>
 /// TODO:

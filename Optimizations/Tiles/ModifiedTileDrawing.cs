@@ -1,16 +1,16 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
+using Terraria;
 using Terraria.DataStructures;
+using Terraria.GameContent;
 using Terraria.GameContent.Drawing;
 using Terraria.GameContent.Liquid;
-using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.Utilities;
-using Terraria;
-using Microsoft.Xna.Framework;
 
-namespace Nitrate.Content.Optimizations.Tiles;
+namespace Nitrate.Optimizations.Tiles;
 
 internal static class ModifiedTileDrawing
 {

@@ -3,7 +3,7 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.UI.Elements;
 using Terraria.UI;
 
-namespace Nitrate.Content.UI;
+namespace Nitrate.UI;
 
 internal sealed class MainMenuPanels : UIState
 {

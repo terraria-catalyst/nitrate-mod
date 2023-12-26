@@ -1,10 +1,10 @@
-﻿using Microsoft.Xna.Framework.Graphics;
-using Terraria.GameContent;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria;
+using Terraria.GameContent;
 using Terraria.GameContent.Drawing;
-using Microsoft.Xna.Framework;
 
-namespace Nitrate.Content.Optimizations.Tiles;
+namespace Nitrate.Optimizations.Tiles;
 
 internal class ModifiedWallDrawing
 {

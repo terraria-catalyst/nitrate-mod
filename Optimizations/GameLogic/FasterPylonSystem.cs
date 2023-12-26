@@ -8,7 +8,7 @@ using Terraria.DataStructures;
 using Terraria.GameContent;
 using Terraria.ModLoader;
 
-namespace Nitrate.Content.Optimizations.GameLogic;
+namespace Nitrate.Optimizations.GameLogic;
 
 /// <summary>
 ///     Optimizes internal code for pylons.

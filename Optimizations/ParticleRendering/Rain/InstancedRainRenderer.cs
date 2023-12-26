@@ -8,9 +8,8 @@ using ReLogic.Content;
 using System;
 using Terraria;
 using Terraria.GameContent;
-using Terraria.ModLoader;
 
-namespace Nitrate.Content.Optimizations.ParticleRendering.Rain;
+namespace Nitrate.Optimizations.ParticleRendering.Rain;
 
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal class InstancedRainRenderer : AbstractInstancedParticleRenderer<ParticleInstance>
