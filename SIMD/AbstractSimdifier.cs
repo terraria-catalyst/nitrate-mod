@@ -1,10 +1,11 @@
 ﻿using Mono.Cecil;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using Nitrate.API.SIMD;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace Nitrate.Core.Utilities.Simdifier;
+namespace Nitrate.SIMD;
 
 internal abstract class AbstractSimdifier : ISimdifier
 {

@@ -1,7 +1,8 @@
 ﻿using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.Utils;
-using Nitrate.Core.Utilities.Simdifier;
+using Nitrate.API.SIMD;
+using Nitrate.SIMD;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,11 +15,6 @@ namespace Nitrate.Core.Utilities;
 [ApiReleaseCandidate("1.0.0")] // Would need further refinement.
 internal static class IntermediateLanguageUtil
 {
-    private static readonly List<ISimdifier> simdifiers = new()
-    {
-        new Vector2Simdifier(),
-    };
-
     /// <summary>
     ///     Clones the given method body to the cursor, wholesale copying all
     ///     relevant contents (instructions, parameters, variables, etc.).
@@ -118,19 +114,6 @@ internal static class IntermediateLanguageUtil
             }
 
             throw new Exception("Could not resolve instruction offset");
-        }
-    }
-
-    /// <summary>
-    ///     "Simdifies" a method.
-    /// </summary>
-    /// <param name="c">The cursor of the method to "simdify."</param>
-    public static void Simdify(this ILCursor c)
-    {
-        foreach (ISimdifier simdifier in simdifiers)
-        {
-            c.Index = 0;
-            simdifier.Simdify(c);
         }
     }
 }

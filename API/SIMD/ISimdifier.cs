@@ -1,13 +1,11 @@
 ﻿using MonoMod.Cil;
 
-namespace Nitrate.Core.Utilities.Simdifier;
+namespace Nitrate.API.SIMD;
 
 /// <summary>
 ///     Simdifies a method body.
 /// </summary>
-// Needs to be publicized once a proper system is in place for registering new Simdifiers.
-[ApiReleaseCandidate("1.0.0")]
-internal interface ISimdifier
+public interface ISimdifier
 {
     /// <summary>
     ///     Simdifies the given method body.

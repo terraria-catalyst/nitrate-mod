@@ -3,6 +3,7 @@ using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using Nitrate.API.Listeners;
+using Nitrate.API.SIMD;
 using Nitrate.API.Threading;
 using Nitrate.Core.Utilities;
 using System;
@@ -116,7 +117,7 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
 
         updateDustBody = null;
 
-        c.Simdify();
+        Simdifier.Simdify(c);
     }
 
     // ReSharper disable UnusedParameter.Local
