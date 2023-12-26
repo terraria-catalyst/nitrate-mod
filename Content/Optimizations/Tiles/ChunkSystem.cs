@@ -38,9 +38,7 @@ internal sealed class ChunkSystem : ModSystem
                 return;
             }
 
-            NitrateConfig config = ModContent.GetInstance<NitrateConfig>();
-
-            if (config.ExperimentalTileRenderer && !config.ExperimentalTileRendererWarning)
+            if (Configuration is { UsesExperimentalTileRenderer: true, DisabledExperimentalTileRendererWarning: false })
             {
                 Main.NewText("StartupMessages.ExperimentalTileRendererWarning".LocalizeNitrate(), Color.PaleVioletRed);
             }
@@ -71,7 +69,7 @@ internal sealed class ChunkSystem : ModSystem
     {
         base.OnModLoad();
 
-        Enabled = ModContent.GetInstance<NitrateConfig>().ExperimentalTileRenderer;
+        Enabled = Configuration.UsesExperimentalTileRenderer;
 
         if (!Enabled)
         {
