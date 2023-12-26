@@ -46,6 +46,7 @@ public sealed class ThreadUnsafeCallWatchdog : ModSystem
 
     private static readonly ConcurrentBag<Action> actions = new();
     private static readonly MethodInfo add_light_int_int_float_float_float = Info.OfMethod("tModLoader", "Terraria.Lighting", "AddLight", "Int32,Int32,Single,Single,Single");
+    private static readonly MethodInfo get_enabled = Info.OfPropertyGet("Nitrate", "Nitrate.API.Listeners.ThreadUnsafeCallWatchdog", nameof(Enabled));
 
     public override void Load()
     {
@@ -98,7 +99,7 @@ public sealed class ThreadUnsafeCallWatchdog : ModSystem
             MethodInfo makeAction = typeof(Delegator).GetMethods().Single(x => x.Name == nameof(Delegator.MakeAction) && x.GetParameters().Length == parameters.Length + 1).MakeGenericMethod(parameters);
             ConstructorInfo actionCtor = typeof(Action).GetConstructor(new[] { typeof(object), typeof(IntPtr) })!;
 
-            c.Emit(OpCodes.Call, typeof(ThreadUnsafeCallWatchdog).GetProperty(nameof(Enabled), BindingFlags.Public | BindingFlags.Static)!.GetMethod!);
+            c.Emit(OpCodes.Call, get_enabled);
             c.Emit(OpCodes.Brfalse, enabledLabel);
 
             if (!method.IsStatic)

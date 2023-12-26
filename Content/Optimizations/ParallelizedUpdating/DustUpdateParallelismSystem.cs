@@ -22,7 +22,8 @@ namespace Nitrate.Content.Optimizations.ParallelizedUpdating;
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class DustUpdateParallelismSystem : ModSystem
 {
-    private static readonly MethodInfo inner_update_dust_method = typeof(DustUpdateParallelismSystem).GetMethod(nameof(InnerUpdateDust), BindingFlags.NonPublic | BindingFlags.Static)!;
+    private static readonly MethodInfo update_dust_filler = Info.OfMethod("Nitrate", "Nitrate.Content.Optimizations.ParallelizedUpdating.DustUpdateParallelismSystem", "UpdateDustFiller");
+    private static readonly MethodInfo inner_update_dust = Info.OfMethod("Nitrate", "Nitrate.Content.Optimizations.ParallelizedUpdating.DustUpdateParallelismSystem", "InnerUpdateDust");
     private static MethodBody? updateDustBody;
 
     private ILHook? updateDustFillerHook;
@@ -32,7 +33,7 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
         base.OnModLoad();
 
         IL_Dust.UpdateDust += il => updateDustBody = il.Body;
-        updateDustFillerHook = new ILHook(typeof(DustUpdateParallelismSystem).GetMethod(nameof(UpdateDustFiller), BindingFlags.NonPublic | BindingFlags.Static)!, UpdateDustFillerEdit);
+        updateDustFillerHook = new ILHook(update_dust_filler, UpdateDustFillerEdit);
         IL_Dust.UpdateDust += UpdateDustMakeThreadStaticParallel;
     }
 
@@ -63,7 +64,7 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
 
         c.GotoLabel(loopLabel);
         c.GotoNext(MoveType.After, x => x.MatchBlt(out _));
-        c.Emit(OpCodes.Call, inner_update_dust_method);
+        c.Emit(OpCodes.Call, inner_update_dust);
         c.GotoPrev(MoveType.After, x => x.MatchBlt(out _));
         c.MarkLabel(skipLabel);
     }
