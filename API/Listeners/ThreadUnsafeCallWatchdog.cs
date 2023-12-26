@@ -98,7 +98,7 @@ public sealed class ThreadUnsafeCallWatchdog : ModSystem
             MethodInfo makeAction = typeof(Delegator).GetMethods().Single(x => x.Name == nameof(Delegator.MakeAction) && x.GetParameters().Length == parameters.Length + 1).MakeGenericMethod(parameters);
             ConstructorInfo actionCtor = typeof(Action).GetConstructor(new[] { typeof(object), typeof(IntPtr) })!;
 
-            c.Emit(OpCodes.Ldsfld, typeof(ThreadUnsafeCallWatchdog).GetField(nameof(Enabled), BindingFlags.NonPublic | BindingFlags.Static)!);
+            c.Emit(OpCodes.Call, typeof(ThreadUnsafeCallWatchdog).GetProperty(nameof(Enabled), BindingFlags.Public | BindingFlags.Static)!.GetMethod!);
             c.Emit(OpCodes.Brfalse, enabledLabel);
 
             if (!method.IsStatic)
