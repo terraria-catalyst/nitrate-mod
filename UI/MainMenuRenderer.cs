@@ -86,9 +86,8 @@ internal sealed class MainMenuRenderer : ModSystem
         drawText(patreon, new FnaVector2(padding, giveUsMoneyBox.Y + charHeight), Color.White, 0f, FnaVector2.Zero, new FnaVector2(small_text_scale));
 
         string ignore = "Menu.Ignore".LocalizeNitrate();
-        const string clickable = PATREON;
         float ignoreWidth = font.MeasureString(ignore).X * small_text_scale;
-        float clickableWidth = font.MeasureString(clickable).X * small_text_scale;
+        float clickableWidth = font.MeasureString(PATREON).X * small_text_scale;
         float clickableHeight = charHeight * small_text_scale;
         Rectangle clickableBox = new((int)(padding + ignoreWidth), (int)(giveUsMoneyBox.Y + charHeight), (int)clickableWidth, (int)clickableHeight);
 
