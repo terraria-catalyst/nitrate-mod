@@ -3,16 +3,32 @@ using System.IO;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace Nitrate.Core.Listeners;
+namespace Nitrate.API.Listeners;
 
+/// <summary>
+///     Provides event hooks for when the state of a tile or wall changes.
+/// </summary>
+/// <remarks>
+///     Inheritance from <see cref="ModSystem"/> is not an API guarantee but
+///     rather an implementation detail.
+/// </remarks>
 [ApiReleaseCandidate("1.0.0")]
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
-internal sealed class TileStateChangedListener : ModSystem
+public sealed class TileStateChangedListener : ModSystem
 {
+    /// <summary>
+    ///     A delegate for when the state of a tile or wall changes.
+    /// </summary>
     public delegate void SingleStateChange(int x, int y);
 
+    /// <summary>
+    ///     An event that is raised when the state of a tile changes.
+    /// </summary>
     public static event SingleStateChange? OnTileSingleStateChange;
 
+    /// <summary>
+    ///     An event that is raised when the state of a wall changes.
+    /// </summary>
     public static event SingleStateChange? OnWallSingleStateChange;
 
     public override void OnModLoad()

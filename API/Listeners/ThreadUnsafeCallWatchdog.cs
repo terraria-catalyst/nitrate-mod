@@ -8,11 +8,19 @@ using System.Reflection;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace Nitrate.Core.Listeners;
+namespace Nitrate.API.Listeners;
 
+/// <summary>
+///     A toggleable watchdog that may capture common thread-unsafe calls in
+///     various newly-parallelized callsites.
+/// </summary>
+/// <remarks>
+///     Inheritance from <see cref="ModSystem"/> is not an API guarantee but
+///     rather an implementation detail.
+/// </remarks>
 [ApiReleaseCandidate("1.0.0")]
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
-internal sealed class ThreadUnsafeCallWatchdog : ModSystem
+public sealed class ThreadUnsafeCallWatchdog : ModSystem
 {
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private static class Delegator
@@ -32,7 +40,11 @@ internal sealed class ThreadUnsafeCallWatchdog : ModSystem
         public static Action MakeAction<T1, T2, T3, T4, T5, T6>(Action<T1, T2, T3, T4, T5, T6> action, T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6) => () => action(t1, t2, t3, t4, t5, t6);
     }
 
-    private static bool Enabled;
+    /// <summary>
+    ///     Whether the watchdog is currently enabled.
+    /// </summary>
+    public static bool Enabled { get; private set; }
+
     private static readonly ConcurrentBag<Action> actions = new();
 
     public override void Load()
@@ -42,12 +54,18 @@ internal sealed class ThreadUnsafeCallWatchdog : ModSystem
         IL_Lighting.AddLight_int_int_float_float_float += QueueEditor(typeof(Lighting).GetMethod(nameof(Lighting.AddLight), new[] { typeof(int), typeof(int), typeof(float), typeof(float), typeof(float) })!);
     }
 
+    /// <summary>
+    ///     Enables the watchdog.
+    /// </summary>
     public static void Enable()
     {
         Enabled = true;
         actions.Clear();
     }
 
+    /// <summary>
+    ///     Disables the watchdog.
+    /// </summary>
     public static void Disable()
     {
         Enabled = false;
