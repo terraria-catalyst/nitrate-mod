@@ -1,13 +1,10 @@
 ﻿using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.Utils;
-using Nitrate.API.SIMD;
-using Nitrate.SIMD;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
-namespace Nitrate.Core.Utilities;
+namespace Nitrate.Utilities;
 
 /// <summary>
 ///     Basic utilities for dealing with IL.

@@ -5,7 +5,7 @@ using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using Nitrate.API.Rendering;
 using Nitrate.API.Threading;
-using Nitrate.Core.Utilities;
+using Nitrate.Utilities;
 using ReLogic.Content;
 using System;
 using Terraria;

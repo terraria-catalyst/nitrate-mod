@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Nitrate.Core.UI;
+namespace Nitrate.UI;
 
 /// <summary>
 ///     Renders boxes.

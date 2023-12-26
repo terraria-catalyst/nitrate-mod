@@ -1,5 +1,6 @@
 ﻿using JetBrains.Annotations;
 using Microsoft.Xna.Framework;
+using Nitrate.Utilities;
 using ReLogic.Graphics;
 using System;
 using System.Numerics;
@@ -8,9 +9,8 @@ using Terraria.GameContent;
 using Terraria.ModLoader;
 using Terraria.UI;
 using Terraria.UI.Chat;
-using Nitrate.Core.Utilities;
 
-namespace Nitrate.Core.UI;
+namespace Nitrate.UI;
 
 /// <summary>
 ///     Handles rendering UI to the main menu.

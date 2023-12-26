@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 
-namespace Nitrate.Core.Utilities;
+namespace Nitrate.Utilities;
 
 internal static class SpriteBatchUtil
 {

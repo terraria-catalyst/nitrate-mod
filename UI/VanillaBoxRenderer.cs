@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 
-namespace Nitrate.Core.UI;
+namespace Nitrate.UI;
 
 internal sealed class VanillaBoxRenderer : IBoxRenderer
 {

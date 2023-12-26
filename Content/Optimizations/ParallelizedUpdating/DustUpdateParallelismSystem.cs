@@ -5,7 +5,7 @@ using MonoMod.RuntimeDetour;
 using Nitrate.API.Listeners;
 using Nitrate.API.SIMD;
 using Nitrate.API.Threading;
-using Nitrate.Core.Utilities;
+using Nitrate.Utilities;
 using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;

@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using Terraria.ModLoader;
 
-namespace Nitrate.Core.UI;
+namespace Nitrate.UI;
 
 /// <summary>
 ///     Implements <see cref="IBoxRenderer"/> and handles delegating to a real
