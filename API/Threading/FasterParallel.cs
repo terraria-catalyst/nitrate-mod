@@ -2,14 +2,13 @@
 using System;
 using System.Threading;
 
-namespace Nitrate.Core.Threading;
+namespace Nitrate.API.Threading;
 
 /// <summary>
 ///     A faster reimplementation of <see cref="FastParallel"/>.
 /// </summary>
 /// <seealso cref="FastParallel"/>
-[ApiReleaseCandidate("1.0.0")]
-internal static class FasterParallel
+public static class FasterParallel
 {
     /// <summary>
     ///     A faster reimplementation of <see cref="FastParallel.For"/>.
@@ -60,35 +59,35 @@ internal static class FasterParallel
 
     private class RangeTask
     {
-        private readonly ParallelForAction _action;
-        private readonly int _fromInclusive;
-        private readonly int _toExclusive;
-        private readonly object? _context;
-        private readonly CountdownEvent _countdownEvent;
+        private readonly ParallelForAction action;
+        private readonly int fromInclusive;
+        private readonly int toExclusive;
+        private readonly object? context;
+        private readonly CountdownEvent countdownEvent;
 
         public RangeTask(ParallelForAction action, int fromInclusive, int toExclusive, object? context, CountdownEvent countdownEvent)
         {
-            _action = action;
-            _fromInclusive = fromInclusive;
-            _toExclusive = toExclusive;
-            _context = context;
-            _countdownEvent = countdownEvent;
+            this.action = action;
+            this.fromInclusive = fromInclusive;
+            this.toExclusive = toExclusive;
+            this.context = context;
+            this.countdownEvent = countdownEvent;
         }
 
         public void Invoke()
         {
             try
             {
-                if (_fromInclusive == _toExclusive)
+                if (fromInclusive == toExclusive)
                 {
                     return;
                 }
 
-                _action(_fromInclusive, _toExclusive, _context);
+                action(fromInclusive, toExclusive, context);
             }
             finally
             {
-                _countdownEvent.Signal();
+                countdownEvent.Signal();
             }
         }
     }

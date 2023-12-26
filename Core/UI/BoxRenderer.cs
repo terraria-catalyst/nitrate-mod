@@ -14,17 +14,17 @@ namespace Nitrate.Core.UI;
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class BoxRenderer : ModSystem, IBoxRenderer
 {
-    private IBoxRenderer? _renderer;
+    private IBoxRenderer? renderer;
 
     public override void Load()
     {
         base.Load();
 
-        _renderer = new VanillaBoxRenderer(Mod.Assets.Request<Texture2D>("Assets/UI/Box", AssetRequestMode.ImmediateLoad));
+        renderer = new VanillaBoxRenderer(Mod.Assets.Request<Texture2D>("Assets/UI/Box", AssetRequestMode.ImmediateLoad));
     }
 
     public void DrawBox(SpriteBatch spriteBatch, Rectangle box, Color? color = null, bool isPaddingPartOfRectangle = false)
     {
-        _renderer?.DrawBox(spriteBatch, box, color, isPaddingPartOfRectangle);
+        renderer?.DrawBox(spriteBatch, box, color, isPaddingPartOfRectangle);
     }
 }

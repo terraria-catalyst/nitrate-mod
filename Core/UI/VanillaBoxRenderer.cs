@@ -19,11 +19,11 @@ internal sealed class VanillaBoxRenderer : IBoxRenderer
     private static readonly Rectangle right_edge = new(padding + content, padding, padding, content);
     private static readonly Color default_color = new Color(63, 82, 151) * 0.7f;
 
-    private readonly Asset<Texture2D> _boxTexture;
+    private readonly Asset<Texture2D> boxTexture;
 
     public VanillaBoxRenderer(Asset<Texture2D> boxTexture)
     {
-        _boxTexture = boxTexture;
+        this.boxTexture = boxTexture;
     }
 
     public void DrawBox(SpriteBatch spriteBatch, Rectangle box, Color? color = null, bool isPaddingPartOfRectangle = false)
@@ -41,16 +41,16 @@ internal sealed class VanillaBoxRenderer : IBoxRenderer
             box.Inflate(padding, padding);
         }
 
-        spriteBatch.Draw(_boxTexture.Value, inner, center, color.Value);
+        spriteBatch.Draw(boxTexture.Value, inner, center, color.Value);
 
-        spriteBatch.Draw(_boxTexture.Value, new Rectangle(box.X + padding, box.Y, box.Width - padding * 2, padding), top_edge, color.Value);
-        spriteBatch.Draw(_boxTexture.Value, new Rectangle(box.X + padding, box.Y + box.Height - padding, box.Width - padding * 2, padding), bottom_edge, color.Value);
-        spriteBatch.Draw(_boxTexture.Value, new Rectangle(box.X, box.Y + padding, padding, box.Height - padding * 2), left_edge, color.Value);
-        spriteBatch.Draw(_boxTexture.Value, new Rectangle(box.X + box.Width - padding, box.Y + padding, padding, box.Height - padding * 2), right_edge, color.Value);
+        spriteBatch.Draw(boxTexture.Value, new Rectangle(box.X + padding, box.Y, box.Width - padding * 2, padding), top_edge, color.Value);
+        spriteBatch.Draw(boxTexture.Value, new Rectangle(box.X + padding, box.Y + box.Height - padding, box.Width - padding * 2, padding), bottom_edge, color.Value);
+        spriteBatch.Draw(boxTexture.Value, new Rectangle(box.X, box.Y + padding, padding, box.Height - padding * 2), left_edge, color.Value);
+        spriteBatch.Draw(boxTexture.Value, new Rectangle(box.X + box.Width - padding, box.Y + padding, padding, box.Height - padding * 2), right_edge, color.Value);
 
-        spriteBatch.Draw(_boxTexture.Value, new Rectangle(box.X, box.Y, padding, padding), top_left_corner, color.Value);
-        spriteBatch.Draw(_boxTexture.Value, new Rectangle(box.X + box.Width - padding, box.Y, padding, padding), top_right_corner, color.Value);
-        spriteBatch.Draw(_boxTexture.Value, new Rectangle(box.X, box.Y + box.Height - padding, padding, padding), bottom_left_corner, color.Value);
-        spriteBatch.Draw(_boxTexture.Value, new Rectangle(box.X + box.Width - padding, box.Y + box.Height - padding, padding, padding), bottom_right_corner, color.Value);
+        spriteBatch.Draw(boxTexture.Value, new Rectangle(box.X, box.Y, padding, padding), top_left_corner, color.Value);
+        spriteBatch.Draw(boxTexture.Value, new Rectangle(box.X + box.Width - padding, box.Y, padding, padding), top_right_corner, color.Value);
+        spriteBatch.Draw(boxTexture.Value, new Rectangle(box.X, box.Y + box.Height - padding, padding, padding), bottom_left_corner, color.Value);
+        spriteBatch.Draw(boxTexture.Value, new Rectangle(box.X + box.Width - padding, box.Y + box.Height - padding, padding, padding), bottom_right_corner, color.Value);
     }
 }

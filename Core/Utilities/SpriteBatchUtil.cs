@@ -36,30 +36,30 @@ internal static class SpriteBatchUtil
 
     private sealed class TemporaryRestartContext : IDisposable
     {
-        private readonly SpriteBatch _spriteBatch;
-        private readonly GraphicsDevice _graphicsDevice;
-        private readonly SpriteBatchSnapshot _snapshot;
+        private readonly SpriteBatch spriteBatch;
+        private readonly GraphicsDevice graphicsDevice;
+        private readonly SpriteBatchSnapshot snapshot;
 
         public TemporaryRestartContext(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice, SpriteBatchSnapshot snapshot)
         {
-            _spriteBatch = spriteBatch;
-            _graphicsDevice = graphicsDevice;
-            _snapshot = snapshot;
+            this.spriteBatch = spriteBatch;
+            this.graphicsDevice = graphicsDevice;
+            this.snapshot = snapshot;
         }
 
         public void Dispose()
         {
-            _spriteBatch.End();
-            _graphicsDevice.SetRenderTarget(null);
+            spriteBatch.End();
+            graphicsDevice.SetRenderTarget(null);
 
-            _spriteBatch.Begin(
-                _snapshot.SortMode,
-                _snapshot.BlendState,
-                _snapshot.SamplerState,
-                _snapshot.DepthStencilState,
-                _snapshot.RasterizerState,
-                _snapshot.Effect,
-                _snapshot.TransformMatrix
+            spriteBatch.Begin(
+                snapshot.SortMode,
+                snapshot.BlendState,
+                snapshot.SamplerState,
+                snapshot.DepthStencilState,
+                snapshot.RasterizerState,
+                snapshot.Effect,
+                snapshot.TransformMatrix
             );
         }
     }

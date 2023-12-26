@@ -18,7 +18,7 @@ namespace Nitrate.Core.UI;
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class MainMenuRenderer : ModSystem
 {
-    private static GameTime? GameTime;
+    private static GameTime? gameTime;
 
     private UserInterface UserInterface { get; } = new();
 
@@ -34,7 +34,7 @@ internal sealed class MainMenuRenderer : ModSystem
 
     private static void CaptureGameTime(On_Main.orig_DrawMenu orig, Main self, GameTime gameTime)
     {
-        GameTime = gameTime;
+        MainMenuRenderer.gameTime = gameTime;
         orig(self, gameTime);
     }
 
@@ -44,13 +44,13 @@ internal sealed class MainMenuRenderer : ModSystem
 
         DrawLegacyMenuStuff();
 
-        if (GameTime is null)
+        if (gameTime is null)
         {
             return;
         }
 
-        UserInterface.Update(GameTime);
-        UserInterface.Draw(Main.spriteBatch, GameTime);
+        UserInterface.Update(gameTime);
+        UserInterface.Draw(Main.spriteBatch, gameTime);
     }
 
     private static void DrawLegacyMenuStuff()
@@ -71,17 +71,17 @@ internal sealed class MainMenuRenderer : ModSystem
         drawText(nitrate_title, new FnaVector2(padding, padding), Color.White, 0f, FnaVector2.Zero, FnaVector2.One);
         drawText(nitrateVersion, new FnaVector2(padding + font.MeasureString(nitrate_title).X + title_version_spacing, padding + charHeight * ((1f - small_text_scale) / 2f)), Color.White, 0f, FnaVector2.Zero, new FnaVector2(small_text_scale));
 
-        string nitrate_warning = "Menu.NitrateWarning".LocalizeNitrate();
-        drawText(nitrate_warning, new FnaVector2(padding, padding + charHeight), Color.PaleVioletRed, 0f, FnaVector2.Zero, new FnaVector2(small_text_scale));
+        string nitrateWarning = "Menu.NitrateWarning".LocalizeNitrate();
+        drawText(nitrateWarning, new FnaVector2(padding, padding + charHeight), Color.PaleVioletRed, 0f, FnaVector2.Zero, new FnaVector2(small_text_scale));
 
         Rectangle giveUsMoneyBox = new(padding, mainBox.Y + mainBox.Height + 6 + padding, 425, (int)(charHeight + (charHeight * small_text_scale)));
         ModContent.GetInstance<BoxRenderer>().DrawBox(Main.spriteBatch, giveUsMoneyBox);
 
-        string give_us_money = "Menu.GiveUsMoney".LocalizeNitrate();
+        string giveUsMoney = "Menu.GiveUsMoney".LocalizeNitrate();
         const string condescending = ";)";
         string patreon = "Menu.Patreon".LocalizeNitrate(PATREON);
-        drawText(give_us_money, new FnaVector2(padding, giveUsMoneyBox.Y), Color.White, 0f, FnaVector2.Zero, FnaVector2.One);
-        drawText(condescending, new FnaVector2(padding + font.MeasureString(give_us_money).X + title_version_spacing, giveUsMoneyBox.Y + charHeight * ((1f - small_text_scale) / 2f)), Color.White, 0f, FnaVector2.Zero, new FnaVector2(small_text_scale));
+        drawText(giveUsMoney, new FnaVector2(padding, giveUsMoneyBox.Y), Color.White, 0f, FnaVector2.Zero, FnaVector2.One);
+        drawText(condescending, new FnaVector2(padding + font.MeasureString(giveUsMoney).X + title_version_spacing, giveUsMoneyBox.Y + charHeight * ((1f - small_text_scale) / 2f)), Color.White, 0f, FnaVector2.Zero, new FnaVector2(small_text_scale));
         drawText(patreon, new FnaVector2(padding, giveUsMoneyBox.Y + charHeight), Color.White, 0f, FnaVector2.Zero, new FnaVector2(small_text_scale));
 
         string ignore = "Menu.Ignore".LocalizeNitrate();

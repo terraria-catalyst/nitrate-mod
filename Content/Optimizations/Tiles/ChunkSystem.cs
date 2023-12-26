@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Input;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using Nitrate.API.Listeners;
-using Nitrate.Core.Threading;
+using Nitrate.API.Threading;
 using Nitrate.Core.Utilities;
 using ReLogic.Content;
 using System;
@@ -57,21 +57,21 @@ internal sealed class ChunkSystem : ModSystem
     private static readonly Dictionary<Point, RenderTarget2D> loaded_chunks = new();
     private static readonly List<Point> needs_populating = new();
     private static readonly Lazy<Effect> light_map_renderer = new(() => ModContent.Request<Effect>("Nitrate/Assets/Effects/LightMapRenderer", AssetRequestMode.ImmediateLoad).Value);
-    private static RenderTarget2D? LightingBuffer;
-    private static Color[] ColorBuffer = Array.Empty<Color>();
-    private static RenderTarget2D? ChunkScreenTarget;
-    private static RenderTarget2D? ScreenSizeLightingBuffer;
-    private static bool Enabled;
-    private static bool Debug;
-    private static Dictionary<Point, TileDrawing.TileCounterType> SpecialPoints = new();
+    private static RenderTarget2D? lightingBuffer;
+    private static Color[] colorBuffer = Array.Empty<Color>();
+    private static RenderTarget2D? chunkScreenTarget;
+    private static RenderTarget2D? screenSizeLightingBuffer;
+    private static bool enabled;
+    private static bool debug;
+    private static Dictionary<Point, TileDrawing.TileCounterType> specialPoints = new();
 
     public override void OnModLoad()
     {
         base.OnModLoad();
 
-        Enabled = Configuration.UsesExperimentalTileRenderer;
+        enabled = Configuration.UsesExperimentalTileRenderer;
 
-        if (!Enabled)
+        if (!enabled)
         {
             return;
         }
@@ -97,16 +97,16 @@ internal sealed class ChunkSystem : ModSystem
             // Clear any previous targets if vanilla tile rendering was previously enabled.
             Main.instance.ReleaseTargets();
 
-            LightingBuffer = new RenderTarget2D(
+            lightingBuffer = new RenderTarget2D(
                 Main.graphics.GraphicsDevice,
                 (int)Math.Ceiling(Main.screenWidth / 16f) + (lighting_buffer_offscreen_range_tiles * 2),
                 (int)Math.Ceiling(Main.screenHeight / 16f) + (lighting_buffer_offscreen_range_tiles * 2)
             );
 
-            ColorBuffer = new Color[LightingBuffer.Width * LightingBuffer.Height];
+            colorBuffer = new Color[lightingBuffer.Width * lightingBuffer.Height];
 
-            ChunkScreenTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
-            ScreenSizeLightingBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
+            chunkScreenTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
+            screenSizeLightingBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
 
             // By default, Terraria has this set to DiscardContents. This means that switching RTs erases the contents of the backbuffer if done mid-draw.
             Main.graphics.GraphicsDevice.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
@@ -115,21 +115,21 @@ internal sealed class ChunkSystem : ModSystem
 
         Main.OnResolutionChanged += _ =>
         {
-            LightingBuffer?.Dispose();
+            lightingBuffer?.Dispose();
 
-            LightingBuffer = new RenderTarget2D(
+            lightingBuffer = new RenderTarget2D(
                 Main.graphics.GraphicsDevice,
                 (int)Math.Ceiling(Main.screenWidth / 16f) + (lighting_buffer_offscreen_range_tiles * 2),
                 (int)Math.Ceiling(Main.screenHeight / 16f) + (lighting_buffer_offscreen_range_tiles * 2)
             );
 
-            ChunkScreenTarget?.Dispose();
-            ChunkScreenTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
+            chunkScreenTarget?.Dispose();
+            chunkScreenTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
 
-            ScreenSizeLightingBuffer?.Dispose();
-            ScreenSizeLightingBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
+            screenSizeLightingBuffer?.Dispose();
+            screenSizeLightingBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
 
-            ColorBuffer = new Color[LightingBuffer.Width * LightingBuffer.Height];
+            colorBuffer = new Color[lightingBuffer.Width * lightingBuffer.Height];
         };
     }
 
@@ -137,7 +137,7 @@ internal sealed class ChunkSystem : ModSystem
     {
         base.OnWorldUnload();
 
-        if (!Enabled)
+        if (!enabled)
         {
             return;
         }
@@ -169,9 +169,9 @@ internal sealed class ChunkSystem : ModSystem
 
         if (Main.keyState.IsKeyDown(debugKey) && !Main.oldKeyState.IsKeyDown(debugKey))
         {
-            Debug = !Debug;
+            debug = !debug;
 
-            Main.NewText($"Chunk Borders ({debugKey}): " + (Debug ? "Shown" : "Hidden"), Debug ? Color.Green : Color.Red);
+            Main.NewText($"Chunk Borders ({debugKey}): " + (debug ? "Shown" : "Hidden"), debug ? Color.Green : Color.Red);
         }
     }
 
@@ -179,7 +179,7 @@ internal sealed class ChunkSystem : ModSystem
     {
         base.PostUpdateEverything();
 
-        if (!Enabled)
+        if (!enabled)
         {
             return;
         }
@@ -238,7 +238,7 @@ internal sealed class ChunkSystem : ModSystem
 
         Dictionary<int, int> specialsCounts = new();
 
-        foreach ((Point point, TileDrawing.TileCounterType type) in SpecialPoints)
+        foreach ((Point point, TileDrawing.TileCounterType type) in specialPoints)
         {
             if (type == TileDrawing.TileCounterType.Tree)
             {
@@ -263,19 +263,19 @@ internal sealed class ChunkSystem : ModSystem
 
     private static void PopulateLightingBuffer()
     {
-        if (LightingBuffer is null)
+        if (lightingBuffer is null)
         {
             return;
         }
 
-        FasterParallel.For(0, ColorBuffer.Length, (inclusive, exclusive, _) =>
+        FasterParallel.For(0, colorBuffer.Length, (inclusive, exclusive, _) =>
         {
             for (int i = inclusive; i < exclusive; i++)
             {
-                int x = i % LightingBuffer.Width;
-                int y = i / LightingBuffer.Width;
+                int x = i % lightingBuffer.Width;
+                int y = i / lightingBuffer.Width;
 
-                ColorBuffer[i] = Lighting.GetColor(
+                colorBuffer[i] = Lighting.GetColor(
                     (int)(Main.screenPosition.X / 16) + x - lighting_buffer_offscreen_range_tiles,
                     (int)(Main.screenPosition.Y / 16) + y - lighting_buffer_offscreen_range_tiles
                 );
@@ -285,16 +285,16 @@ internal sealed class ChunkSystem : ModSystem
         // SetDataPointerEXT skips some overhead.
         unsafe
         {
-            fixed (Color* ptr = &ColorBuffer[0])
+            fixed (Color* ptr = &colorBuffer[0])
             {
-                LightingBuffer.SetDataPointerEXT(0, null, (IntPtr)ptr, ColorBuffer.Length);
+                lightingBuffer.SetDataPointerEXT(0, null, (IntPtr)ptr, colorBuffer.Length);
             }
         }
     }
 
     private static void DrawChunksToChunkTarget(GraphicsDevice device)
     {
-        if (ChunkScreenTarget is null)
+        if (chunkScreenTarget is null)
         {
             return;
         }
@@ -306,7 +306,7 @@ internal sealed class ChunkSystem : ModSystem
             ((RenderTarget2D)binding.RenderTarget).RenderTargetUsage = RenderTargetUsage.PreserveContents;
         }
 
-        device.SetRenderTarget(ChunkScreenTarget);
+        device.SetRenderTarget(chunkScreenTarget);
         device.Clear(Color.Transparent);
 
         Main.spriteBatch.Begin(
@@ -352,7 +352,7 @@ internal sealed class ChunkSystem : ModSystem
 
     private static void TransferTileSpaceBufferToScreenSpaceBuffer(GraphicsDevice device)
     {
-        if (ScreenSizeLightingBuffer is null)
+        if (screenSizeLightingBuffer is null)
         {
             return;
         }
@@ -364,7 +364,7 @@ internal sealed class ChunkSystem : ModSystem
             ((RenderTarget2D)binding.RenderTarget).RenderTargetUsage = RenderTargetUsage.PreserveContents;
         }
 
-        device.SetRenderTarget(ScreenSizeLightingBuffer);
+        device.SetRenderTarget(screenSizeLightingBuffer);
         device.Clear(Color.Transparent);
 
         Main.spriteBatch.Begin(
@@ -380,7 +380,7 @@ internal sealed class ChunkSystem : ModSystem
         FnaVector2 offset = new(Main.screenPosition.X % 16, Main.screenPosition.Y % 16);
 
         // Account for tile padding around the screen.
-        Main.spriteBatch.Draw(LightingBuffer, new Vector2(-lighting_buffer_offscreen_range_tiles * 16) - offset, null, Color.White, 0, Vector2.Zero, 16, SpriteEffects.None, 0);
+        Main.spriteBatch.Draw(lightingBuffer, new Vector2(-lighting_buffer_offscreen_range_tiles * 16) - offset, null, Color.White, 0, Vector2.Zero, 16, SpriteEffects.None, 0);
         Main.spriteBatch.End();
 
         device.SetRenderTargets(bindings);
@@ -388,7 +388,7 @@ internal sealed class ChunkSystem : ModSystem
 
     private static void RenderChunksWithLighting()
     {
-        if (ChunkScreenTarget is null || ScreenSizeLightingBuffer is null)
+        if (chunkScreenTarget is null || screenSizeLightingBuffer is null)
         {
             return;
         }
@@ -402,13 +402,13 @@ internal sealed class ChunkSystem : ModSystem
             light_map_renderer.Value
         );
 
-        light_map_renderer.Value.Parameters["lightMap"].SetValue(ScreenSizeLightingBuffer);
+        light_map_renderer.Value.Parameters["lightMap"].SetValue(screenSizeLightingBuffer);
 
-        Main.spriteBatch.Draw(ChunkScreenTarget, Vector2.Zero, Color.White);
+        Main.spriteBatch.Draw(chunkScreenTarget, Vector2.Zero, Color.White);
 
         Main.spriteBatch.End();
 
-        if (Debug)
+        if (debug)
         {
             Main.spriteBatch.Begin(
                 SpriteSortMode.Deferred,
@@ -539,14 +539,14 @@ internal sealed class ChunkSystem : ModSystem
                 chunk.Dispose();
             }
 
-            LightingBuffer?.Dispose();
-            LightingBuffer = null;
+            lightingBuffer?.Dispose();
+            lightingBuffer = null;
 
-            ChunkScreenTarget?.Dispose();
-            ChunkScreenTarget = null;
+            chunkScreenTarget?.Dispose();
+            chunkScreenTarget = null;
 
-            ScreenSizeLightingBuffer?.Dispose();
-            ScreenSizeLightingBuffer = null;
+            screenSizeLightingBuffer?.Dispose();
+            screenSizeLightingBuffer = null;
         });
 
         loaded_chunks.Clear();
@@ -647,9 +647,9 @@ internal sealed class ChunkSystem : ModSystem
     {
         Point point = new(x, y);
 
-        if (SpecialPoints.ContainsKey(point))
+        if (specialPoints.ContainsKey(point))
         {
-            SpecialPoints.Remove(point);
+            specialPoints.Remove(point);
         }
 
         // ReSharper disable once ConvertToConstant.Local
@@ -897,7 +897,7 @@ internal sealed class ChunkSystem : ModSystem
             return;
         }
 
-        SpecialPoints[new Point(x, y)] = (TileDrawing.TileCounterType)type;
+        specialPoints[new Point(x, y)] = (TileDrawing.TileCounterType)type;
     }
 
     private static bool HandledBySpecialPoint(Tile tile, int x, int y)

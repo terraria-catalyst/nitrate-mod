@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using Nitrate.Core.Threading;
+using Nitrate.API.Threading;
 using ReLogic.Threading;
 using System;
 using Terraria;

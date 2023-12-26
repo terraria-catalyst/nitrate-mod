@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Nitrate.API.Rendering;
-using Nitrate.Core.Threading;
+using Nitrate.API.Threading;
 using Nitrate.Core.Utilities;
 using ReLogic.Content;
 using System;

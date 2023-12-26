@@ -8,7 +8,7 @@ namespace Nitrate.Core.Utilities.Simdifier;
 
 internal abstract class AbstractSimdifier : ISimdifier
 {
-    private readonly Dictionary<string, MethodInfo> _instanceRemap = new();
+    private readonly Dictionary<string, MethodInfo> instanceRemap = new();
 
     public virtual void Simdify(ILCursor c)
     {
@@ -25,7 +25,7 @@ internal abstract class AbstractSimdifier : ISimdifier
                 continue;
             }
 
-            foreach (KeyValuePair<string, MethodInfo> remap in _instanceRemap)
+            foreach (KeyValuePair<string, MethodInfo> remap in instanceRemap)
             {
                 if (methodReference.FullName != remap.Key)
                 {
@@ -39,6 +39,6 @@ internal abstract class AbstractSimdifier : ISimdifier
 
     protected void ReplaceCall(string fromSignature, string toName)
     {
-        _instanceRemap.Add(fromSignature, GetType().GetMethod(toName, BindingFlags.Static | BindingFlags.NonPublic)!);
+        instanceRemap.Add(fromSignature, GetType().GetMethod(toName, BindingFlags.Static | BindingFlags.NonPublic)!);
     }
 }

@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using Nitrate.API.Rendering;
-using Nitrate.Core.Threading;
+using Nitrate.API.Threading;
 using Nitrate.Core.Utilities;
 using ReLogic.Content;
 using System;

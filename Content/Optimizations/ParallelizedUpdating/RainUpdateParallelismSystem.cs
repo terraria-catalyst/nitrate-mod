@@ -1,7 +1,7 @@
 ﻿using JetBrains.Annotations;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using Nitrate.Core.Threading;
+using Nitrate.API.Threading;
 using Terraria;
 using Terraria.ModLoader;
 

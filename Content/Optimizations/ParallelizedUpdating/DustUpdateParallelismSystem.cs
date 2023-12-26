@@ -3,7 +3,7 @@ using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using Nitrate.API.Listeners;
-using Nitrate.Core.Threading;
+using Nitrate.API.Threading;
 using Nitrate.Core.Utilities;
 using System;
 using System.Reflection;
@@ -22,16 +22,16 @@ namespace Nitrate.Content.Optimizations.ParallelizedUpdating;
 internal sealed class DustUpdateParallelismSystem : ModSystem
 {
     private static readonly MethodInfo inner_update_dust_method = typeof(DustUpdateParallelismSystem).GetMethod(nameof(InnerUpdateDust), BindingFlags.NonPublic | BindingFlags.Static)!;
-    private static MethodBody? UpdateDustBody;
+    private static MethodBody? updateDustBody;
 
-    private ILHook? _updateDustFillerHook;
+    private ILHook? updateDustFillerHook;
 
     public override void OnModLoad()
     {
         base.OnModLoad();
 
-        IL_Dust.UpdateDust += il => UpdateDustBody = il.Body;
-        _updateDustFillerHook = new ILHook(typeof(DustUpdateParallelismSystem).GetMethod(nameof(UpdateDustFiller), BindingFlags.NonPublic | BindingFlags.Static)!, UpdateDustFillerEdit);
+        IL_Dust.UpdateDust += il => updateDustBody = il.Body;
+        updateDustFillerHook = new ILHook(typeof(DustUpdateParallelismSystem).GetMethod(nameof(UpdateDustFiller), BindingFlags.NonPublic | BindingFlags.Static)!, UpdateDustFillerEdit);
         IL_Dust.UpdateDust += UpdateDustMakeThreadStaticParallel;
     }
 
@@ -39,8 +39,8 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
     {
         base.Unload();
 
-        _updateDustFillerHook?.Dispose();
-        _updateDustFillerHook = null;
+        updateDustFillerHook?.Dispose();
+        updateDustFillerHook = null;
     }
 
     private static void UpdateDustMakeThreadStaticParallel(ILContext il)
@@ -83,13 +83,13 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
 
     private static void UpdateDustFillerEdit(ILContext il)
     {
-        if (UpdateDustBody is null)
+        if (updateDustBody is null)
         {
             throw new Exception("Could not find Dust::UpdateDust method body");
         }
 
         ILCursor c = new(il);
-        IntermediateLanguageUtil.CloneMethodBodyToCursor(UpdateDustBody, c);
+        IntermediateLanguageUtil.CloneMethodBodyToCursor(updateDustBody, c);
 
         // Navigate to the Main.maxDust constant used by the loop and use our
         // exclusive parameter instead.
@@ -114,7 +114,7 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
         c.Emit(OpCodes.Pop);
         c.Emit(OpCodes.Ldarg_0);
 
-        UpdateDustBody = null;
+        updateDustBody = null;
 
         c.Simdify();
     }
