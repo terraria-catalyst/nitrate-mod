@@ -45,12 +45,12 @@ public sealed class ThreadUnsafeCallWatchdog : ModSystem
     public static bool Enabled { get; private set; }
 
     private static readonly ConcurrentBag<Action> actions = new();
+    private static readonly MethodInfo add_light_int_int_float_float_float = Info.OfMethod("tModLoader", "Terraria.Lighting", "AddLight", "Int32,Int32,Single,Single,Single");
 
     public override void Load()
     {
         base.Load();
-
-        IL_Lighting.AddLight_int_int_float_float_float += QueueEditor(typeof(Lighting).GetMethod(nameof(Lighting.AddLight), new[] { typeof(int), typeof(int), typeof(float), typeof(float), typeof(float) })!);
+        IL_Lighting.AddLight_int_int_float_float_float += QueueEditor(add_light_int_int_float_float_float);
     }
 
     /// <summary>
