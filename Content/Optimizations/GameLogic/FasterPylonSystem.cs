@@ -14,7 +14,7 @@ namespace Nitrate.Content.Optimizations.GameLogic;
 ///     Optimizes internal code for pylons.
 /// </summary>
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
-public class FasterPylonSystem : ModSystem
+internal sealed class FasterPylonSystem : ModSystem
 {
     public override void OnModLoad()
     {
