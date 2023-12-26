@@ -41,4 +41,8 @@
         <DoNotPublicize Include="tModLoader:Terraria.Main.OnPostDraw"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="API\" />
+    </ItemGroup>
+
 </Project>

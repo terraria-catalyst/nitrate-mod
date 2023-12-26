@@ -1,4 +1,6 @@
-﻿namespace Nitrate.Config;
+﻿using Nitrate.Config;
+
+namespace Nitrate.API.Config;
 
 /// <summary>
 ///     Configuration for <see cref="NitrateMod"/>.

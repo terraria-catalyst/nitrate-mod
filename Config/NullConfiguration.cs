@@ -1,6 +1,8 @@
-﻿namespace Nitrate.Config;
+﻿using Nitrate.API.Config;
 
-public sealed class NullConfiguration : IConfiguration
+namespace Nitrate.Config;
+
+internal sealed class NullConfiguration : IConfiguration
 {
     bool IConfiguration.UsesExperimentalTileRenderer {
         get => false;

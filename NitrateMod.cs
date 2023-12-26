@@ -1,4 +1,5 @@
 using JetBrains.Annotations;
+using Nitrate.API.Config;
 using Nitrate.Config;
 using System;
 using System.Numerics;
