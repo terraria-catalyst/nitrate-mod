@@ -29,10 +29,12 @@ public class FasterPylonSystem : ModSystem
     ///     <see cref="Player.IsTileTypeInInteractionRange"/> method to find if
     ///     any pylon is nearby the player.
     ///     <br />
+    ///     <br />
     ///     The problem:
     ///     <br />
     ///     A single invocation of this method can (and usually does) perform
     ///     over 14,000 tile lookups.
+    ///     <br />
     ///     <br />
     ///     The solution:
     ///     <br />
@@ -40,6 +42,7 @@ public class FasterPylonSystem : ModSystem
     ///     the player from every pylon. The game limits the amount of pylons
     ///     that can be placed, putting an upper bound on the potential downside
     ///     of this operation.
+    ///     <br />
     ///     <br />
     ///     Results:
     ///     <br />
@@ -58,22 +61,21 @@ public class FasterPylonSystem : ModSystem
         {
             foreach (TeleportPylonInfo info in Main.PylonSystem.Pylons)
             {
-                Point16 point = info.PositionInTiles;
-                Point16 lowerRightPylonPoint = new(point.X + 2, point.Y + 3);
+                Point16 pos = info.PositionInTiles;
+                Point16 lowerRightPylonPoint = new(pos.X + 2, pos.Y + 3);
 
-                Point playerPoint = player.position.ToTileCoordinates();
+                Point playerPos = player.position.ToTileCoordinates();
 
                 TileReachCheckSettings.Pylons.GetRanges(player, out int x, out int y);
-                int minRangeX = Utils.Clamp(point.X - x, 0, Main.maxTilesX - 1);
+                int minRangeX = Utils.Clamp(pos.X - x, 0, Main.maxTilesX - 1);
                 int maxRangeX = Utils.Clamp(lowerRightPylonPoint.X + x - 1, 0, Main.maxTilesX - 1);
-                int minRangeY = Utils.Clamp(point.Y - y - 1, 0, Main.maxTilesY - 1);
+                int minRangeY = Utils.Clamp(pos.Y - y - 1, 0, Main.maxTilesY - 1);
                 int maxRangeY = Utils.Clamp(lowerRightPylonPoint.Y + y - 1, 0, Main.maxTilesY - 1);
 
-                if (playerPoint.X >= minRangeX &&
-                    playerPoint.X <= maxRangeX &&
-                    playerPoint.Y >= minRangeY &&
-                    playerPoint.Y <= maxRangeY)
+                if (playerPos.X >= minRangeX && playerPos.X <= maxRangeX && playerPos.Y >= minRangeY && playerPos.Y <= maxRangeY)
+                {
                     return true;
+                }
             }
 
             return false;
