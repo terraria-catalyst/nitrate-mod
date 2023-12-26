@@ -79,13 +79,13 @@ internal sealed class MainMenuRenderer : ModSystem
 
         string give_us_money = "Menu.GiveUsMoney".LocalizeNitrate();
         const string condescending = ";)";
-        string patreon = "Menu.Patreon".LocalizeNitrate(NitrateMod.PATREON);
+        string patreon = "Menu.Patreon".LocalizeNitrate(PATREON);
         drawText(give_us_money, new FnaVector2(padding, giveUsMoneyBox.Y), Color.White, 0f, FnaVector2.Zero, FnaVector2.One);
         drawText(condescending, new FnaVector2(padding + font.MeasureString(give_us_money).X + title_version_spacing, giveUsMoneyBox.Y + charHeight * ((1f - small_text_scale) / 2f)), Color.White, 0f, FnaVector2.Zero, new FnaVector2(small_text_scale));
         drawText(patreon, new FnaVector2(padding, giveUsMoneyBox.Y + charHeight), Color.White, 0f, FnaVector2.Zero, new FnaVector2(small_text_scale));
 
         string ignore = "Menu.Ignore".LocalizeNitrate();
-        const string clickable = NitrateMod.PATREON;
+        const string clickable = PATREON;
         float ignoreWidth = font.MeasureString(ignore).X * small_text_scale;
         float clickableWidth = font.MeasureString(clickable).X * small_text_scale;
         float clickableHeight = charHeight * small_text_scale;
@@ -93,7 +93,7 @@ internal sealed class MainMenuRenderer : ModSystem
 
         if (Main.mouseLeft && Main.mouseLeftRelease && clickableBox.Intersects(new Rectangle(Main.mouseX, Main.mouseY, 1, 1)))
         {
-            Utils.OpenToURL($"https://{NitrateMod.PATREON}");
+            Utils.OpenToURL($"https://{PATREON}");
         }
 
         Rectangle debugBox = new(padding, giveUsMoneyBox.Y + giveUsMoneyBox.Height + 6 + padding, 425, (int)(charHeight * 4 * small_text_scale));
