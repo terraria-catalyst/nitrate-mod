@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace Nitrate.Core.Rendering;
+namespace Nitrate.API.Rendering;
 
 /// <summary>
 ///     Handles the registration of and rendering of render targets that deal
@@ -17,10 +17,13 @@ namespace Nitrate.Core.Rendering;
 ///     execution] of actions) that occurs in <see cref="PostUpdateEverything"/>
 ///     and rendering (drawing of the render target), which occurs in a detour
 ///     targeting <see cref="Main.DrawProjectiles"/> (in post).
+///     <br />
+///     Inheritance from <see cref="ModSystem"/> is not an API guarantee but
+///     rather an implementation detail.
 /// </remarks>
 [ApiReleaseCandidate("1.0.0")]
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
-internal sealed class ActionableRenderTargetSystem : ModSystem
+public sealed class ActionableRenderTargetSystem : ModSystem
 {
     private sealed class DefaultActionableRenderTarget : IActionableRenderTarget
     {
@@ -54,7 +57,7 @@ internal sealed class ActionableRenderTargetSystem : ModSystem
     ///     The dictionary of render targets and their associated rendering
     ///     data.
     /// </summary>
-    private readonly Dictionary<string, IActionableRenderTarget> _targets = new();
+    private static readonly Dictionary<string, IActionableRenderTarget> targets = new();
 
     public override void Load()
     {
@@ -73,7 +76,7 @@ internal sealed class ActionableRenderTargetSystem : ModSystem
 
         Main.RunOnMainThread(() =>
         {
-            foreach (IActionableRenderTarget target in _targets.Values)
+            foreach (IActionableRenderTarget target in targets.Values)
             {
                 target.Dispose();
             }
@@ -91,7 +94,7 @@ internal sealed class ActionableRenderTargetSystem : ModSystem
 
         GraphicsDevice device = Main.graphics.GraphicsDevice;
 
-        foreach (IActionableRenderTarget target in _targets.Values)
+        foreach (IActionableRenderTarget target in targets.Values)
         {
             RenderTargetBinding[] bindings = device.GetRenderTargets();
 
@@ -122,9 +125,9 @@ internal sealed class ActionableRenderTargetSystem : ModSystem
             Main.GameViewMatrix.TransformationMatrix
         );
 
-        foreach (string id in _targets.Keys)
+        foreach (string id in targets.Keys)
         {
-            Main.spriteBatch.Draw(_targets[id].RenderTarget, Vector2.Zero, Color.White);
+            Main.spriteBatch.Draw(targets[id].RenderTarget, Vector2.Zero, Color.White);
         }
 
         Main.spriteBatch.End();
@@ -134,11 +137,11 @@ internal sealed class ActionableRenderTargetSystem : ModSystem
     {
         Main.RunOnMainThread(() =>
         {
-            foreach (string id in _targets.Keys)
+            foreach (string id in targets.Keys)
             {
-                IActionableRenderTarget target = _targets[id];
+                IActionableRenderTarget target = targets[id];
                 target.Dispose();
-                _targets[id] = target.ReinitForResize();
+                targets[id] = target.ReinitForResize();
             }
         });
     }
@@ -148,7 +151,7 @@ internal sealed class ActionableRenderTargetSystem : ModSystem
     ///     list of drawing actions.
     /// </summary>
     /// <param name="id">The ID of the render target and its layer.</param>
-    public void RegisterRenderTarget(string id)
+    public static void RegisterRenderTarget(string id)
     {
         RegisterRenderTarget(id, static () => new DefaultActionableRenderTarget());
     }
@@ -162,11 +165,11 @@ internal sealed class ActionableRenderTargetSystem : ModSystem
     ///     A function returning the target to render (to be executed on the
     ///     main thread).
     /// </param>
-    public void RegisterRenderTarget(string id, Func<IActionableRenderTarget> target)
+    public static void RegisterRenderTarget(string id, Func<IActionableRenderTarget> target)
     {
         Main.RunOnMainThread(() =>
         {
-            _targets[id] = target();
+            targets[id] = target();
         });
     }
 
@@ -175,8 +178,8 @@ internal sealed class ActionableRenderTargetSystem : ModSystem
     /// </summary>
     /// <param name="id">The ID of the render target to render to.</param>
     /// <param name="renderAction">The action to be executed.</param>
-    public void QueueRenderAction(string id, Action renderAction)
+    public static void QueueRenderAction(string id, Action renderAction)
     {
-        _targets[id].Actions.Add(renderAction);
+        targets[id].Actions.Add(renderAction);
     }
 }

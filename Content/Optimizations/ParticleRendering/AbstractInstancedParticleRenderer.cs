@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Nitrate.Core.Rendering;
+using Nitrate.API.Rendering;
 using System;
 using Terraria;
 using Terraria.ModLoader;
@@ -50,7 +50,7 @@ internal abstract class AbstractInstancedParticleRenderer<TParticle> : ModSystem
     {
         base.PostSetupContent();
 
-        ModContent.GetInstance<ActionableRenderTargetSystem>().RegisterRenderTarget(_targetName);
+        ActionableRenderTargetSystem.RegisterRenderTarget(_targetName);
     }
 
     public override void Unload()

@@ -1,7 +1,7 @@
 ﻿using JetBrains.Annotations;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Nitrate.Core.Rendering;
+using Nitrate.API.Rendering;
 using Nitrate.Core.Threading;
 using Nitrate.Core.Utilities;
 using ReLogic.Content;
@@ -35,7 +35,7 @@ internal class InstancedRainRenderer : AbstractInstancedParticleRenderer<Particl
             return;
         }
 
-        ModContent.GetInstance<ActionableRenderTargetSystem>().QueueRenderAction(dust_target, () =>
+        ActionableRenderTargetSystem.QueueRenderAction(dust_target, () =>
         {
             GraphicsDevice device = Main.graphics.GraphicsDevice;
 

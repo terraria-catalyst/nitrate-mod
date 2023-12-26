@@ -2,15 +2,14 @@
 using System;
 using System.Collections.Generic;
 
-namespace Nitrate.Core.Rendering;
+namespace Nitrate.API.Rendering;
 
 /// <summary>
 ///     An actionable render target used in the
 ///     <see cref="ActionableRenderTargetSystem"/>. May hold a list of actions
 ///     to be executed in the context of the render target.
 /// </summary>
-[ApiReleaseCandidate("1.0.0")]
-internal interface IActionableRenderTarget : IDisposable
+public interface IActionableRenderTarget : IDisposable
 {
     /// <summary>
     ///     The list of actions to be executed in the context of the render
@@ -32,6 +31,5 @@ internal interface IActionableRenderTarget : IDisposable
     ///     Reinitializes the <see cref="IActionableRenderTarget"/> for a
     ///     screen resize.
     /// </summary>
-    /// <returns></returns>
     IActionableRenderTarget ReinitForResize();
 }
