@@ -70,7 +70,6 @@ public sealed class AnimatedTileRegistry : ModSystem
         { TileID.Furnaces, TileAnimatedType.Passive },
         { TileID.Saplings, TileAnimatedType.SpecialPoint },
         { TileID.Containers, TileAnimatedType.Interactable }, // Chests.
-        { TileID.CorruptGrass, TileAnimatedType.SpecialPoint },
         { TileID.Sunflower, TileAnimatedType.SpecialPoint },
         { TileID.ShadowOrbs, TileAnimatedType.Passive },
         { TileID.Candles, TileAnimatedType.Passive | TileAnimatedType.Interactable },

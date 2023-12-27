@@ -10,7 +10,6 @@ using Nitrate.Utilities;
 using ReLogic.Content;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.Graphics.Effects;
@@ -86,9 +85,10 @@ internal sealed class ChunkSystem : ModSystem
 
         // Hijack the methods responsible for actually drawing to the vanilla
         // tile render target.
-        IL_Main.DoDraw_Tiles_Solid += CancelVanillaRendering;
-        IL_Main.DoDraw_Tiles_NonSolid += CancelVanillaRendering;
-        IL_Main.DoDraw_WallsAndBlacks += CancelVanillaRendering;
+        IL_Main.DoDraw_WallsAndBlacks += NewDrawWalls;
+        IL_Main.DoDraw_Tiles_NonSolid += NewDrawNonSolidTiles;
+        IL_Main.DoDraw_Tiles_Solid += NewDrawSolidTiles;
+        On_Main.DoDraw_WallsTilesNPCs += HookBeforeDrawingToPopulateLightingBuffer;
 
         Main.RunOnMainThread(() =>
         {
@@ -295,6 +295,8 @@ internal sealed class ChunkSystem : ModSystem
         device.SetRenderTarget(screenSizeLightingBuffer);
         device.Clear(Color.Transparent);
 
+        bool ended = Main.spriteBatch.TryEnd(out SpriteBatchUtil.SpriteBatchSnapshot snapshot);
+
         Main.spriteBatch.Begin(
             SpriteSortMode.Immediate,
             BlendState.AlphaBlend,
@@ -312,6 +314,11 @@ internal sealed class ChunkSystem : ModSystem
         Main.spriteBatch.End();
 
         device.SetRenderTargets(bindings);
+
+        if (ended)
+        {
+            Main.spriteBatch.BeginWithSnapshot(snapshot);
+        }
     }
 
     private static void TileStateChanged(int i, int j)
@@ -360,46 +367,63 @@ internal sealed class ChunkSystem : ModSystem
         c.Emit(OpCodes.Ret);
     }
 
+    private static void NewDrawWalls(ILContext il)
+    {
+        ILCursor c = new(il);
+
+        c.EmitDelegate(() =>
+        {
+            Main.spriteBatch.TryEnd(out SpriteBatchUtil.SpriteBatchSnapshot s);
+
+            walls.DrawChunksToChunkTarget(Main.graphics.GraphicsDevice);
+            walls.RenderChunksWithLighting(screenSizeLightingBuffer, light_map_renderer);
+
+            Main.spriteBatch.Begin(s.SortMode, s.BlendState, s.SamplerState, s.DepthStencilState, s.RasterizerState, s.Effect, s.TransformMatrix);
+
+            Main.instance.DrawTileCracks(2, Main.LocalPlayer.hitReplace);
+            Main.instance.DrawTileCracks(2, Main.LocalPlayer.hitTile);
+
+            Overlays.Scene.Draw(Main.spriteBatch, RenderLayers.Walls);
+        });
+
+        c.Emit(OpCodes.Ret);
+    }
+
+    private static void NewDrawNonSolidTiles(ILContext il)
+    {
+        ILCursor c = new(il);
+
+        c.EmitDelegate(() =>
+        {
+            // FIX: Last parameter (intoRenderTargets) is TRUE because it is
+            // required for special counts to actually clear.
+            Main.instance.TilesRenderer.PreDrawTiles(false, false, true);
+
+            Main.spriteBatch.TryEnd(out _);
+
+            non_solid_tiles.DrawChunksToChunkTarget(Main.graphics.GraphicsDevice);
+            non_solid_tiles.RenderChunksWithLighting(screenSizeLightingBuffer, light_map_renderer);
+
+            // Main.spriteBatch.End();
+
+            Main.instance.DrawTileEntities(false, false, false);
+
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.Transform);
+        });
+
+        c.Emit(OpCodes.Ret);
+    }
+
     private static void NewDrawSolidTiles(ILContext il)
     {
         ILCursor c = new(il);
 
         c.EmitDelegate(() =>
         {
-            // Main.instance.TilesRenderer.PreDrawTiles(true, false, true);
+            Main.instance.TilesRenderer.PreDrawTiles(true, false, false);
 
-            GraphicsDevice device = Main.graphics.GraphicsDevice;
-
-            solid_tiles.DrawChunksToChunkTarget(device);
-            // TransferTileSpaceBufferToScreenSpaceBuffer(device);
+            solid_tiles.DrawChunksToChunkTarget(Main.graphics.GraphicsDevice);
             solid_tiles.RenderChunksWithLighting(screenSizeLightingBuffer, light_map_renderer);
-
-            if (debug)
-            {
-                Main.spriteBatch.Begin(
-                    SpriteSortMode.Deferred,
-                    BlendState.AlphaBlend,
-                    SamplerState.PointClamp,
-                    DepthStencilState.None,
-                    RasterizerState.CullNone
-                );
-
-                int lineWidth = 2;
-                int offset = lineWidth / 2;
-
-                foreach (Point chunkKey in solid_tiles.Loaded.Keys)
-                {
-                    int chunkX = (chunkKey.X * CHUNK_SIZE) - (int)Main.screenPosition.X;
-                    int chunkY = (chunkKey.Y * CHUNK_SIZE) - (int)Main.screenPosition.Y;
-
-                    Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX - offset, chunkY - offset, CHUNK_SIZE + offset, lineWidth), Color.Yellow);
-                    Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX + CHUNK_SIZE - offset, chunkY - offset, lineWidth, CHUNK_SIZE + offset), Color.Yellow);
-                    Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX - offset, chunkY + CHUNK_SIZE - offset, CHUNK_SIZE + offset, lineWidth), Color.Yellow);
-                    Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX - offset, chunkY - offset, lineWidth, CHUNK_SIZE + offset), Color.Yellow);
-                }
-
-                Main.spriteBatch.End();
-            }
 
             Main.instance.DrawTileEntities(true, true, false);
 
@@ -416,62 +440,44 @@ internal sealed class ChunkSystem : ModSystem
             }
 
             Main.spriteBatch.End();
-        });
 
-        c.Emit(OpCodes.Ret);
-    }
+            if (!debug)
+            {
+                return;
+            }
 
-    private static void NewDrawNonSolidTiles(ILContext il)
-    {
-        ILCursor c = new(il);
+            Main.spriteBatch.Begin(
+                SpriteSortMode.Deferred,
+                BlendState.AlphaBlend,
+                SamplerState.PointClamp,
+                DepthStencilState.None,
+                RasterizerState.CullNone
+            );
 
-        c.EmitDelegate(() =>
-        {
-            /*Main.instance.TilesRenderer.PreDrawTiles(false, false, true);
+            const int line_width = 2;
+            const int offset = line_width / 2;
+
+            foreach (Point chunkKey in solid_tiles.Loaded.Keys)
+            {
+                int chunkX = (chunkKey.X * CHUNK_SIZE) - (int)Main.screenPosition.X;
+                int chunkY = (chunkKey.Y * CHUNK_SIZE) - (int)Main.screenPosition.Y;
+
+                Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX - offset, chunkY - offset, CHUNK_SIZE + offset, line_width), Color.Yellow);
+                Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX + CHUNK_SIZE - offset, chunkY - offset, line_width, CHUNK_SIZE + offset), Color.Yellow);
+                Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX - offset, chunkY + CHUNK_SIZE - offset, CHUNK_SIZE + offset, line_width), Color.Yellow);
+                Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX - offset, chunkY - offset, line_width, CHUNK_SIZE + offset), Color.Yellow);
+            }
 
             Main.spriteBatch.End();
-
-            try
-            {
-                Main.instance.DrawTileEntities(false, true, false);
-            }
-            catch (Exception e)
-            {
-                TimeLogger.DrawException(e);
-            }
-
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.Transform);*/
-
-            Main.instance.TilesRenderer.PreDrawTiles(false, false, false);
         });
 
         c.Emit(OpCodes.Ret);
     }
 
-    private static void NewDrawWalls(ILContext il)
+    private static void HookBeforeDrawingToPopulateLightingBuffer(On_Main.orig_DoDraw_WallsTilesNPCs orig, Main self)
     {
-        ILCursor c = new(il);
-
-        c.EmitDelegate(() =>
-        {
-            PopulateLightingBuffer();
-
-            GraphicsDevice device = Main.graphics.GraphicsDevice;
-
-            Main.spriteBatch.TryEnd(out SpriteBatchUtil.SpriteBatchSnapshot s);
-
-            walls.DrawChunksToChunkTarget(device);
-            TransferTileSpaceBufferToScreenSpaceBuffer(device);
-            walls.RenderChunksWithLighting(screenSizeLightingBuffer, light_map_renderer);
-
-            Main.spriteBatch.Begin(s.SortMode, s.BlendState, s.SamplerState, s.DepthStencilState, s.RasterizerState, s.Effect, s.TransformMatrix);
-
-            Main.instance.DrawTileCracks(2, Main.LocalPlayer.hitReplace);
-            Main.instance.DrawTileCracks(2, Main.LocalPlayer.hitTile);
-
-            Overlays.Scene.Draw(Main.spriteBatch, RenderLayers.Walls);
-        });
-
-        c.Emit(OpCodes.Ret);
+        PopulateLightingBuffer();
+        TransferTileSpaceBufferToScreenSpaceBuffer(Main.graphics.GraphicsDevice);
+        orig(self);
     }
 }
