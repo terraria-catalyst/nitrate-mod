@@ -432,6 +432,30 @@ public sealed class AnimatedTileRegistry : ModSystem
             }
         }
     }
+    
+    public static void RegisterTile(int tileId, TileAnimatedType type)
+    {
+        if (!tiles.ContainsKey(tileId))
+        {
+            tiles.Add(tileId, type);
+        }
+        else
+        {
+            tiles[tileId] |= type;
+        }
+    }
+    
+    public static void RegisterWall(int wallId, TileAnimatedType type)
+    {
+        if (!walls.ContainsKey(wallId))
+        {
+            walls.Add(wallId, type);
+        }
+        else
+        {
+            walls[wallId] |= type;
+        }
+    }
 
     // Also keep DontDrawTileSliced in mind?
     public static bool IsTilePossiblyAnimated(int tileId) => tiles.ContainsKey(tileId) ||
