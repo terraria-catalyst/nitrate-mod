@@ -26,16 +26,13 @@ Menu: {
 		Features may be broken, tweaked, or removed/reworked entirely.
 		Please report any issues and keep in mind that your game may break!
 		'''
-
-		GiveUsMoney: Consider supporting us!
-		Patreon: "[c/FF424D:Patreon]: [c/7289DA:{0}] <-- (clickable!)"
-
-		Ignore: "Patreon:"
-
-		SIMD: "Supports SIMD: {0}"
-		NETVersion: ".NET Version: {0}"
-		OS: "OS: {0}"
-		Architecture: "Architecture: {0}"
+	GiveUsMoney: Consider supporting us!
+	Patreon: "[c/FF424D:Patreon]: [c/7289DA:{0}] <-- (clickable!)"
+	Ignore: Patreon:
+	SIMD: Supports SIMD: {0}
+	NETVersion: .NET Version: {0}
+	OS: OS: {0}
+	Architecture: Architecture: {0}
 }
 
 StartupMessages.ExperimentalTileRendererWarning:

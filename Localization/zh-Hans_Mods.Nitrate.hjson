@@ -26,16 +26,13 @@ Menu: {
 		功能可能会被破坏、调整或完全删除/重做.
 		请报告遇到任何问题，并记住你的游戏可能会坏掉!
 		'''
-
-		GiveUsMoney: 请考虑支持我们!
-		Patreon: "[c/FF424D:Patreon]: [c/7289DA:{0}] <-- (这里可以点!)"
-
-		Ignore: "Patreon:"
-
-		SIMD: "支持SIMD: {0}"
-		NETVersion: ".NET版本: {0}"
-		OS: "操作系统: {0}"
-		Architecture: "指令集架构: {0}"
+	GiveUsMoney: 请考虑支持我们!
+	Patreon: "[c/FF424D:Patreon]: [c/7289DA:{0}] <-- (这里可以点!)"
+	Ignore: Patreon:
+	SIMD: 支持SIMD: {0}
+	NETVersion: .NET版本: {0}
+	OS: 操作系统: {0}
+	Architecture: 指令集架构: {0}
 }
 
 StartupMessages.ExperimentalTileRendererWarning:

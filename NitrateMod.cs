@@ -1,14 +1,31 @@
 using JetBrains.Annotations;
+using Nitrate.API.Config;
+using Nitrate.Config;
 using System;
 using System.Numerics;
 using Terraria.ModLoader;
 
 namespace Nitrate;
 
+/// <summary>
+///     The main <see cref="Mod"/> implementation of Nitrate.
+/// </summary>
+/// <remarks>
+///     Logic is largely kept out of this class, and should instead be dealt
+///     with appropriately in other tModLoader APIs such as
+///     <see cref="ModSystem"/>.
+/// </remarks>
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 public sealed class NitrateMod : Mod
 {
-    internal const string PATREON = "patreon.com/TeamCatalyst";
+    /// <summary>
+    ///     The Patreon link for Team Catalyst, Nitrate's development team.
+    /// </summary>
+    public const string PATREON = "patreon.com/TeamCatalyst";
+
+    public static IConfiguration Configuration => ModContent.GetInstance<NitrateMod>().configuration;
+
+    private IConfiguration configuration = new ModConfigConfiguration();
 
     public override void Load()
     {
@@ -40,5 +57,12 @@ public sealed class NitrateMod : Mod
         Logger.Info(".NET Version: " + Environment.Version);
         Logger.Info("OS: " + Environment.OSVersion);
         Logger.Info("Architecture: " + (Environment.Is64BitOperatingSystem ? "x64" : "x86"));
+    }
+
+    public override void Unload()
+    {
+        base.Unload();
+
+        configuration = IConfiguration.NULL;
     }
 }
