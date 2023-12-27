@@ -23,35 +23,6 @@ internal sealed class FasterPylonSystem : ModSystem
         IL_TeleportPylonsSystem.IsPlayerNearAPylon += SpeedUpIsPlayerNearAPylon;
     }
 
-    /// <summary>
-    ///     The vanilla implementation of
-    ///     <see cref="TeleportPylonsSystem.IsPlayerNearAPylon"/> uses the
-    ///     <see cref="Player.IsTileTypeInInteractionRange"/> method to find if
-    ///     any pylon is nearby the player.
-    ///     <br />
-    ///     <br />
-    ///     The problem:
-    ///     <br />
-    ///     A single invocation of this method can (and usually does) perform
-    ///     over 14,000 tile lookups.
-    ///     <br />
-    ///     <br />
-    ///     The solution:
-    ///     <br />
-    ///     Instead of searching for nearby pylons from the player, search for
-    ///     the player from every pylon. The game limits the amount of pylons
-    ///     that can be placed, putting an upper bound on the potential downside
-    ///     of this operation.
-    ///     <br />
-    ///     <br />
-    ///     Results:
-    ///     <br />
-    ///     From testing, the original method would perform at an average of
-    ///     0.5ms per invocation.
-    ///     <br />
-    ///     The updated method reduces this to 0.005ms per invocation on
-    ///     average.
-    /// </summary>
     private static void SpeedUpIsPlayerNearAPylon(ILContext il)
     {
         ILCursor cursor = new(il);

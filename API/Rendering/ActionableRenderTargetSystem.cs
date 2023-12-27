@@ -110,7 +110,7 @@ public sealed class ActionableRenderTargetSystem : ModSystem
         }
     }
 
-    private void DrawRenderTargets(On_Main.orig_DrawProjectiles orig, Main self)
+    private static void DrawRenderTargets(On_Main.orig_DrawProjectiles orig, Main self)
     {
         orig(self);
 
@@ -132,7 +132,7 @@ public sealed class ActionableRenderTargetSystem : ModSystem
         Main.spriteBatch.End();
     }
 
-    private void TargetsNeedResizing(FnaVector2 _)
+    private static void TargetsNeedResizing(FnaVector2 _)
     {
         Main.RunOnMainThread(() =>
         {
