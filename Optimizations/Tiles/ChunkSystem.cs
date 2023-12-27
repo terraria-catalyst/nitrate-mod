@@ -6,26 +6,22 @@ using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using Nitrate.API.Listeners;
 using Nitrate.API.Threading;
-using Nitrate.API.Tiles;
 using Nitrate.Utilities;
 using ReLogic.Content;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
-using Terraria.DataStructures;
 using Terraria.GameContent;
 using Terraria.Graphics.Effects;
 using Terraria.ModLoader;
 
 namespace Nitrate.Optimizations.Tiles;
 
-/// <summary>
-/// TODO:
-/// Make sure other effects such as dusts/tile cracks are rendered as well.
-/// Ensure water squares can draw behind tiles.
-/// Maybe make RenderTiles2 still run for the non-solid layer and tile deco/animated tiles?
-/// </summary>
+// TODO:
+// Make sure other effects such as dusts/tile cracks are rendered as well.
+// Ensure water squares can draw behind tiles.
+// Maybe make RenderTiles2 still run for the non-solid layer and tile deco/animated tiles?
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class ChunkSystem : ModSystem
 {
@@ -57,9 +53,10 @@ internal sealed class ChunkSystem : ModSystem
 
     private const int lighting_buffer_offscreen_range_tiles = 1;
 
-    private static readonly ChunkCollection tiles = new TileChunkCollection();
+    private static readonly ChunkCollection solid_tiles = new TileChunkCollection { SolidLayer = true };
+    private static readonly ChunkCollection non_solid_tiles = new TileChunkCollection { SolidLayer = false };
     private static readonly ChunkCollection walls = new WallChunkCollection();
-
+    private static readonly ChunkCollection[] chunk_collections = { solid_tiles, non_solid_tiles, walls };
     private static readonly Lazy<Effect> light_map_renderer = new(() => ModContent.Request<Effect>("Nitrate/Assets/Effects/LightMapRenderer", AssetRequestMode.ImmediateLoad).Value);
     private static RenderTarget2D? lightingBuffer;
     private static Color[] colorBuffer = Array.Empty<Color>();
@@ -89,10 +86,9 @@ internal sealed class ChunkSystem : ModSystem
 
         // Hijack the methods responsible for actually drawing to the vanilla
         // tile render target.
-        IL_Main.DoDraw_Tiles_Solid += NewDrawSolidTiles;
-        IL_Main.DoDraw_Tiles_NonSolid += NewDrawNonSolidTiles;
-
-        IL_Main.DoDraw_WallsAndBlacks += NewDrawWalls;
+        IL_Main.DoDraw_Tiles_Solid += CancelVanillaRendering;
+        IL_Main.DoDraw_Tiles_NonSolid += CancelVanillaRendering;
+        IL_Main.DoDraw_WallsAndBlacks += CancelVanillaRendering;
 
         Main.RunOnMainThread(() =>
         {
@@ -107,8 +103,11 @@ internal sealed class ChunkSystem : ModSystem
 
             colorBuffer = new Color[lightingBuffer.Width * lightingBuffer.Height];
 
-            tiles.ScreenTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
-            walls.ScreenTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
+            foreach (ChunkCollection chunkCollection in chunk_collections)
+            {
+                chunkCollection.ScreenTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
+            }
+
             screenSizeLightingBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
 
             // By default, Terraria has this set to DiscardContents. This means that switching RTs erases the contents of the backbuffer if done mid-draw.
@@ -126,10 +125,11 @@ internal sealed class ChunkSystem : ModSystem
                 (int)Math.Ceiling(Main.screenHeight / 16f) + (lighting_buffer_offscreen_range_tiles * 2)
             );
 
-            tiles.ScreenTarget?.Dispose();
-            tiles.ScreenTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
-            walls.ScreenTarget?.Dispose();
-            walls.ScreenTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
+            foreach (ChunkCollection chunkCollection in chunk_collections)
+            {
+                chunkCollection.ScreenTarget?.Dispose();
+                chunkCollection.ScreenTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
+            }
 
             screenSizeLightingBuffer?.Dispose();
             screenSizeLightingBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
@@ -149,34 +149,36 @@ internal sealed class ChunkSystem : ModSystem
 
         // Clone these outside of the delegate to ensure the delegate captures
         // an uncleared collection. This probably prevents a memory leak.
-        List<Chunk> loadedTilesClone = tiles.Loaded.Values.ToList();
-        List<Chunk> loadedWallsClone = walls.Loaded.Values.ToList();
+        List<Chunk> loadedChunksClone = new();
+
+        foreach (ChunkCollection chunkCollection in chunk_collections)
+        {
+            loadedChunksClone.AddRange(chunkCollection.Loaded.Values);
+        }
 
         Main.RunOnMainThread(() =>
         {
-            foreach (Chunk chunk in loadedTilesClone)
-            {
-                chunk.Dispose();
-            }
-
-            foreach (Chunk chunk in loadedWallsClone)
+            foreach (Chunk chunk in loadedChunksClone)
             {
                 chunk.Dispose();
             }
         });
 
-        tiles.Loaded.Clear();
-        walls.Loaded.Clear();
-        tiles.NeedsPopulating.Clear();
-        walls.NeedsPopulating.Clear();
+        foreach (ChunkCollection chunkCollection in chunk_collections)
+        {
+            chunkCollection.Loaded.Clear();
+            chunkCollection.NeedsPopulating.Clear();
+        }
     }
 
     public override void Unload()
     {
         base.Unload();
 
-        tiles.DisposeAllChunks();
-        walls.DisposeAllChunks();
+        foreach (ChunkCollection chunkCollection in chunk_collections)
+        {
+            chunkCollection.DisposeAllChunks();
+        }
 
         Main.RunOnMainThread(() =>
         {
@@ -229,64 +231,20 @@ internal sealed class ChunkSystem : ModSystem
             {
                 Point chunkKey = new(x, y);
 
-                if (!tiles.Loaded.ContainsKey(chunkKey))
+                foreach (ChunkCollection chunkCollection in chunk_collections)
                 {
-                    tiles.LoadChunk(chunkKey);
-                }
-
-                if (!walls.Loaded.ContainsKey(chunkKey))
-                {
-                    walls.LoadChunk(chunkKey);
+                    if (!chunkCollection.Loaded.ContainsKey(chunkKey))
+                    {
+                        chunkCollection.LoadChunk(chunkKey);
+                    }
                 }
             }
         }
 
-        List<Point> removeTileList = new();
-        List<Point> removeWallList = new();
-
-        foreach (Point key in tiles.Loaded.Keys)
+        foreach (ChunkCollection chunkCollection in chunk_collections)
         {
-            // If this chunk is outside the load range, unload it.
-            if (key.X < topX || key.X > bottomX || key.Y < topY || key.Y > bottomY)
-            {
-                tiles.UnloadChunk(key);
-                removeTileList.Add(key);
-            }
+            chunkCollection.RemoveOutOfBoundsAndPopulate(topX, bottomX, topY, bottomY);
         }
-
-        foreach (Point key in removeTileList)
-        {
-            tiles.Loaded.Remove(key);
-        }
-
-        foreach (Point key in tiles.NeedsPopulating)
-        {
-            tiles.PopulateChunk(key);
-        }
-
-        tiles.NeedsPopulating.Clear();
-
-        foreach (Point key in walls.Loaded.Keys)
-        {
-            // If this chunk is outside the load range, unload it.
-            if (key.X < topX || key.X > bottomX || key.Y < topY || key.Y > bottomY)
-            {
-                walls.UnloadChunk(key);
-                removeWallList.Add(key);
-            }
-        }
-
-        foreach (Point key in removeWallList)
-        {
-            walls.Loaded.Remove(key);
-        }
-
-        foreach (Point key in walls.NeedsPopulating)
-        {
-            walls.PopulateChunk(key);
-        }
-
-        walls.NeedsPopulating.Clear();
     }
 
     private static void PopulateLightingBuffer()
@@ -363,14 +321,17 @@ internal sealed class ChunkSystem : ModSystem
 
         Point chunkKey = new(chunkX, chunkY);
 
-        if (!tiles.Loaded.ContainsKey(chunkKey))
+        foreach (ChunkCollection chunkCollection in new [] { non_solid_tiles, solid_tiles })
         {
-            return;
-        }
+            if (!chunkCollection.Loaded.ContainsKey(chunkKey))
+            {
+                return;
+            }
 
-        if (!tiles.NeedsPopulating.Contains(chunkKey))
-        {
-            tiles.NeedsPopulating.Add(chunkKey);
+            if (!chunkCollection.NeedsPopulating.Contains(chunkKey))
+            {
+                chunkCollection.NeedsPopulating.Add(chunkKey);
+            }
         }
     }
 
@@ -409,9 +370,9 @@ internal sealed class ChunkSystem : ModSystem
 
             GraphicsDevice device = Main.graphics.GraphicsDevice;
 
-            tiles.DrawChunksToChunkTarget(device);
+            solid_tiles.DrawChunksToChunkTarget(device);
             // TransferTileSpaceBufferToScreenSpaceBuffer(device);
-            tiles.RenderChunksWithLighting(screenSizeLightingBuffer, light_map_renderer);
+            solid_tiles.RenderChunksWithLighting(screenSizeLightingBuffer, light_map_renderer);
 
             if (debug)
             {
@@ -426,7 +387,7 @@ internal sealed class ChunkSystem : ModSystem
                 int lineWidth = 2;
                 int offset = lineWidth / 2;
 
-                foreach (Point chunkKey in tiles.Loaded.Keys)
+                foreach (Point chunkKey in solid_tiles.Loaded.Keys)
                 {
                     int chunkX = (chunkKey.X * CHUNK_SIZE) - (int)Main.screenPosition.X;
                     int chunkY = (chunkKey.Y * CHUNK_SIZE) - (int)Main.screenPosition.Y;
@@ -466,7 +427,7 @@ internal sealed class ChunkSystem : ModSystem
 
         c.EmitDelegate(() =>
         {
-            Main.instance.TilesRenderer.PreDrawTiles(false, false, true);
+            /*Main.instance.TilesRenderer.PreDrawTiles(false, false, true);
 
             Main.spriteBatch.End();
 
@@ -479,7 +440,9 @@ internal sealed class ChunkSystem : ModSystem
                 TimeLogger.DrawException(e);
             }
 
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.Transform);
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.Transform);*/
+
+            Main.instance.TilesRenderer.PreDrawTiles(false, false, false);
         });
 
         c.Emit(OpCodes.Ret);

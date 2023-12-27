@@ -90,10 +90,40 @@ internal abstract class ChunkCollection
             NeedsPopulating.Clear();
         });
     }
+
+    public virtual void RemoveOutOfBoundsAndPopulate(int topX, int bottomX, int topY, int bottomY)
+    {
+        List<Point> removeList = new();
+        
+        foreach (Point key in Loaded.Keys)
+        {
+            if (key.X >= topX && key.X <= bottomX && key.Y >= topY && key.Y <= bottomY)
+            {
+                continue;
+            }
+
+            UnloadChunk(key);
+            removeList.Add(key);
+        }
+        
+        foreach (Point key in removeList)
+        {
+            Loaded.Remove(key);
+        }
+
+        foreach (Point key in NeedsPopulating)
+        {
+            PopulateChunk(key);
+        }
+        
+        NeedsPopulating.Clear();
+    }
 }
 
 internal sealed class TileChunkCollection : ChunkCollection
 {
+    public bool SolidLayer { get; init; }
+
     public override void PopulateChunk(Point key)
     {
         Chunk chunk = Loaded[key];
