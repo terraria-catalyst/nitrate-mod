@@ -153,7 +153,8 @@ internal static class ModifiedTileDrawing
                 num4 = 2;
             }
 
-            Main.spriteBatch.Draw(TextureAssets.ShroomCap.Value, new FnaVector2(tileX * 16 - (int)screenPosition.X - 22, tileY * 16 - (int)screenPosition.Y - 26) + screenOffset, new Rectangle(num4 * 62, 0, 60, 42), Lighting.GetColor(tileX, tileY), 0f, TileDrawing._zero, 1f, drawData.tileSpriteEffect,
+            Main.spriteBatch.Draw(TextureAssets.ShroomCap.Value, new FnaVector2(tileX * 16 - (int)screenPosition.X - 22, tileY * 16 - (int)screenPosition.Y - 26) + screenOffset, new Rectangle(num4 * 62, 0, 60, 42), Lighting.GetColor(tileX, tileY), 0f, TileDrawing._zero, 1f,
+                drawData.tileSpriteEffect,
                 0f);
         }
 
@@ -187,95 +188,90 @@ internal static class ModifiedTileDrawing
 
                 break;
 
-            case 442:
+            case 442: {
+                int num7 = drawData.tileFrameX / 22;
+
+                if (num7 == 3)
                 {
-                    int num7 = drawData.tileFrameX / 22;
-
-                    if (num7 == 3)
-                    {
-                        vector.X += 2f;
-                    }
-
-                    break;
+                    vector.X += 2f;
                 }
+
+                break;
+            }
 
             case 51:
                 //drawData.finalColor = drawData.tileLight * 0.5f;
                 break;
 
             case 160:
-            case 692:
+            case 692: {
+                Color color = new(Main.DiscoR, Main.DiscoG, Main.DiscoB, 255);
+
+                if (drawData.tileCache.inActive())
                 {
-                    Color color = new(Main.DiscoR, Main.DiscoG, Main.DiscoB, 255);
-
-                    if (drawData.tileCache.inActive())
-                    {
-                        color = drawData.tileCache.actColor(color);
-                    }
-
-                    drawData.finalColor = color;
-
-                    break;
+                    color = drawData.tileCache.actColor(color);
                 }
 
-            case 129:
+                drawData.finalColor = color;
+
+                break;
+            }
+
+            case 129: {
+                drawData.finalColor = new Color(255, 255, 255, 100);
+                int num6 = 2;
+
+                if (drawData.tileFrameX >= 324)
                 {
-                    drawData.finalColor = new Color(255, 255, 255, 100);
-                    int num6 = 2;
-
-                    if (drawData.tileFrameX >= 324)
-                    {
-                        drawData.finalColor = Color.Transparent;
-                    }
-
-                    if (drawData.tileFrameY < 36)
-                    {
-                        vector.Y += num6 * (drawData.tileFrameY == 0).ToDirectionInt();
-                    }
-                    else
-                    {
-                        vector.X += num6 * (drawData.tileFrameY == 36).ToDirectionInt();
-                    }
-
-                    break;
+                    drawData.finalColor = Color.Transparent;
                 }
 
-            case 272:
+                if (drawData.tileFrameY < 36)
                 {
-                    int num5 = Main.tileFrame[drawData.typeCache];
-                    num5 += tileX % 2;
-                    num5 += tileY % 2;
-                    num5 += tileX % 3;
-                    num5 += tileY % 3;
-                    num5 %= 2;
-                    num5 *= 90;
-                    drawData.addFrY += num5;
-                    rectangle.Y += num5;
-
-                    break;
+                    vector.Y += num6 * (drawData.tileFrameY == 0).ToDirectionInt();
+                }
+                else
+                {
+                    vector.X += num6 * (drawData.tileFrameY == 36).ToDirectionInt();
                 }
 
-            case 80:
+                break;
+            }
+
+            case 272: {
+                int num5 = Main.tileFrame[drawData.typeCache];
+                num5 += tileX % 2;
+                num5 += tileY % 2;
+                num5 += tileX % 3;
+                num5 += tileY % 3;
+                num5 %= 2;
+                num5 *= 90;
+                drawData.addFrY += num5;
+                rectangle.Y += num5;
+
+                break;
+            }
+
+            case 80: {
+                WorldGen.GetCactusType(tileX, tileY, drawData.tileFrameX, drawData.tileFrameY, out var evil, out var good, out var crimson);
+
+                if (evil)
                 {
-                    WorldGen.GetCactusType(tileX, tileY, drawData.tileFrameX, drawData.tileFrameY, out var evil, out var good, out var crimson);
-
-                    if (evil)
-                    {
-                        rectangle.Y += 54;
-                    }
-
-                    if (good)
-                    {
-                        rectangle.Y += 108;
-                    }
-
-                    if (crimson)
-                    {
-                        rectangle.Y += 162;
-                    }
-
-                    break;
+                    rectangle.Y += 54;
                 }
+
+                if (good)
+                {
+                    rectangle.Y += 108;
+                }
+
+                if (crimson)
+                {
+                    rectangle.Y += 162;
+                }
+
+                break;
+            }
 
             case 83:
                 drawData.drawTexture = td.GetTileDrawTexture(drawData.tileCache, tileX, tileY);
@@ -410,31 +406,31 @@ internal static class ModifiedTileDrawing
 
                     break;
 
-                case 129:
+                case 129: {
+                    if (drawData.tileFrameX < 324)
                     {
-                        if (drawData.tileFrameX < 324)
-                        {
-                            flag2 = true;
-
-                            break;
-                        }
-
-                        drawData.drawTexture = td.GetTileDrawTexture(drawData.tileCache, tileX, tileY);
-                        color2 = Main.hslToRgb(0.7f + (float)Math.Sin((float)Math.PI * 2f * Main.GlobalTimeWrappedHourly * 0.16f + tileX * 0.3f + tileY * 0.7f) * 0.16f, 1f, 0.5f);
-                        color2.A /= 2;
-                        color2 *= 0.3f;
-                        int num10 = 72;
-
-                        for (float num11 = 0f; num11 < (float)Math.PI * 2f; num11 += (float)Math.PI / 2f)
-                        {
-                            Main.spriteBatch.Draw(drawData.drawTexture, vector + num11.ToRotationVector2() * 2f, new Rectangle(drawData.tileFrameX + drawData.addFrX, drawData.tileFrameY + drawData.addFrY + num10, drawData.tileWidth, drawData.tileHeight), color2, 0f, FnaVector2.Zero, 1f, SpriteEffects.None,
-                                0f);
-                        }
-
-                        color2 = new Color(255, 255, 255, 100);
+                        flag2 = true;
 
                         break;
                     }
+
+                    drawData.drawTexture = td.GetTileDrawTexture(drawData.tileCache, tileX, tileY);
+                    color2 = Main.hslToRgb(0.7f + (float)Math.Sin((float)Math.PI * 2f * Main.GlobalTimeWrappedHourly * 0.16f + tileX * 0.3f + tileY * 0.7f) * 0.16f, 1f, 0.5f);
+                    color2.A /= 2;
+                    color2 *= 0.3f;
+                    int num10 = 72;
+
+                    for (float num11 = 0f; num11 < (float)Math.PI * 2f; num11 += (float)Math.PI / 2f)
+                    {
+                        Main.spriteBatch.Draw(drawData.drawTexture, vector + num11.ToRotationVector2() * 2f, new Rectangle(drawData.tileFrameX + drawData.addFrX, drawData.tileFrameY + drawData.addFrY + num10, drawData.tileWidth, drawData.tileHeight), color2, 0f, FnaVector2.Zero, 1f,
+                            SpriteEffects.None,
+                            0f);
+                    }
+
+                    color2 = new Color(255, 255, 255, 100);
+
+                    break;
+                }
             }
 
             color2 = Color.White;
@@ -531,7 +527,8 @@ internal static class ModifiedTileDrawing
                                 break;
                         }
 
-                        Main.spriteBatch.Draw(drawData.drawTexture, vector + new FnaVector2(num17, i * num13 + num14), new Rectangle(drawData.tileFrameX + drawData.addFrX + num17, drawData.tileFrameY + drawData.addFrY + num16, num13, num15), color2, 0f, TileDrawing._zero, 1f, drawData.tileSpriteEffect,
+                        Main.spriteBatch.Draw(drawData.drawTexture, vector + new FnaVector2(num17, i * num13 + num14), new Rectangle(drawData.tileFrameX + drawData.addFrX + num17, drawData.tileFrameY + drawData.addFrY + num16, num13, num15), color2, 0f, TileDrawing._zero, 1f,
+                            drawData.tileSpriteEffect,
                             0f);
                     }
 
@@ -804,7 +801,8 @@ internal static class ModifiedTileDrawing
 
                 if (tile.halfBrick())
                 {
-                    Main.spriteBatch.Draw(drawData.drawTexture, normalTilePosition + new FnaVector2(0f, 8f), new Rectangle(drawData.tileFrameX + drawData.addFrX, drawData.addFrY + drawData.tileFrameY + 8, drawData.tileWidth, 8), drawData.finalColor, 0f, TileDrawing._zero, 1f, drawData.tileSpriteEffect,
+                    Main.spriteBatch.Draw(drawData.drawTexture, normalTilePosition + new FnaVector2(0f, 8f), new Rectangle(drawData.tileFrameX + drawData.addFrX, drawData.addFrY + drawData.tileFrameY + 8, drawData.tileWidth, 8), drawData.finalColor, 0f, TileDrawing._zero, 1f,
+                        drawData.tileSpriteEffect,
                         0f);
 
                     Rectangle value = new(126 + drawData.addFrX, drawData.addFrY, 16, 8);
@@ -845,7 +843,8 @@ internal static class ModifiedTileDrawing
                 Main.spriteBatch.Draw(drawData.drawTexture, normalTilePosition + new FnaVector2(0f, 8f), new Rectangle(drawData.tileFrameX + drawData.addFrX, drawData.addFrY + drawData.tileFrameY + 8, drawData.tileWidth, 8), drawData.finalColor, 0f, TileDrawing._zero, 1f, drawData.tileSpriteEffect,
                     0f);
 
-                Main.spriteBatch.Draw(drawData.drawTexture, normalTilePosition + new FnaVector2(num8, 0f), new Rectangle(drawData.tileFrameX + num8 + drawData.addFrX, drawData.addFrY + drawData.tileFrameY, drawData.tileWidth - num8, drawData.tileHeight), drawData.finalColor, 0f, TileDrawing._zero, 1f,
+                Main.spriteBatch.Draw(drawData.drawTexture, normalTilePosition + new FnaVector2(num8, 0f), new Rectangle(drawData.tileFrameX + num8 + drawData.addFrX, drawData.addFrY + drawData.tileFrameY, drawData.tileWidth - num8, drawData.tileHeight), drawData.finalColor, 0f, TileDrawing._zero,
+                    1f,
                     drawData.tileSpriteEffect, 0f);
 
                 Main.spriteBatch.Draw(drawData.drawTexture, normalTilePosition, new Rectangle(144 + drawData.addFrX, drawData.addFrY, num8, 8), drawData.finalColor, 0f, TileDrawing._zero, 1f, drawData.tileSpriteEffect, 0f);
@@ -886,7 +885,7 @@ internal static class ModifiedTileDrawing
 
         goto IL_0cc9;
 
-    IL_043e:
+        IL_043e:
         Rectangle value2 = new(162, drawData.tileFrameY, 16, 16);
         bool[] platforms = TileID.Sets.Platforms;
         tile = Main.tile[tileX - 1, tileY + 1];
@@ -905,7 +904,7 @@ internal static class ModifiedTileDrawing
 
         return;
 
-    IL_0cc9:
+        IL_0cc9:
 
         if (Lighting.NotRetro && td._tileSolid[drawData.typeCache] && !drawData.tileCache.halfBrick() && !TileID.Sets.DontDrawTileSliced[drawData.tileCache.type])
         {
@@ -950,7 +949,7 @@ internal static class ModifiedTileDrawing
 
         goto IL_101e;
 
-    IL_0269:
+        IL_0269:
         Rectangle value3 = new(198, drawData.tileFrameY, 16, 16);
         bool[] platforms2 = TileID.Sets.Platforms;
         tile = Main.tile[tileX + 1, tileY + 1];
@@ -969,12 +968,12 @@ internal static class ModifiedTileDrawing
 
         return;
 
-    IL_101e:
+        IL_101e:
         td.DrawSingleTile_Flames(screenPosition, screenOffset, tileX, tileY, drawData);
 
         return;
 
-    IL_0e81:
+        IL_0e81:
 
         if (TileID.Sets.CritterCageLidStyle[drawData.typeCache] >= 0)
         {
@@ -1006,5 +1005,243 @@ internal static class ModifiedTileDrawing
         }
 
         goto IL_101e;
+    }
+
+    public static void StillHandleSpecialsBecauseTerrariaWasPoorlyProgrammed(int type, bool flag, int j, int i, int frameX, int frameY, Tile tile)
+    {
+        switch (type)
+        {
+            case 52:
+            case 62:
+            case 115:
+            case 205:
+            case 382:
+            case 528:
+            case 636:
+            case 638:
+                if (flag)
+                {
+                    Main.instance.TilesRenderer.CrawlToTopOfVineAndAddSpecialPoint(i, j);
+                }
+
+                break;
+
+            case 549:
+                if (flag)
+                {
+                    Main.instance.TilesRenderer.CrawlToBottomOfReverseVineAndAddSpecialPoint(i, j);
+                }
+
+                break;
+
+            case 34:
+                if (frameX % 54 == 0 && frameY % 54 == 0 && flag)
+                {
+                    Main.instance.TilesRenderer.AddSpecialPoint(j, i, TileDrawing.TileCounterType.MultiTileVine);
+                }
+
+                break;
+
+            case 454:
+                if (frameX % 72 == 0 && frameY % 54 == 0 && flag)
+                {
+                    Main.instance.TilesRenderer.AddSpecialPoint(j, i, TileDrawing.TileCounterType.MultiTileVine);
+                }
+
+                break;
+
+            case 42:
+            case 270:
+            case 271:
+            case 572:
+            case 581:
+            case 660:
+                if (frameX % 18 == 0 && frameY % 36 == 0 && flag)
+                {
+                    Main.instance.TilesRenderer.AddSpecialPoint(j, i, TileDrawing.TileCounterType.MultiTileVine);
+                }
+
+                break;
+
+            case 91:
+                if (frameX % 18 == 0 && frameY % 54 == 0 && flag)
+                {
+                    Main.instance.TilesRenderer.AddSpecialPoint(j, i, TileDrawing.TileCounterType.MultiTileVine);
+                }
+
+                break;
+
+            case 95:
+            case 126:
+            case 444:
+                if (frameX % 36 == 0 && frameY % 36 == 0 && flag)
+                {
+                    Main.instance.TilesRenderer.AddSpecialPoint(j, i, TileDrawing.TileCounterType.MultiTileVine);
+                }
+
+                break;
+
+            case 465:
+            case 591:
+            case 592:
+                if (frameX % 36 == 0 && frameY % 54 == 0 && flag)
+                {
+                    Main.instance.TilesRenderer.AddSpecialPoint(j, i, TileDrawing.TileCounterType.MultiTileVine);
+                }
+
+                break;
+
+            case 27:
+                if (frameX % 36 == 0 && frameY == 0 && flag)
+                {
+                    Main.instance.TilesRenderer.AddSpecialPoint(j, i, TileDrawing.TileCounterType.MultiTileGrass);
+                }
+
+                break;
+
+            case 236:
+            case 238:
+                if (frameX % 36 == 0 && frameY == 0 && flag)
+                {
+                    Main.instance.TilesRenderer.AddSpecialPoint(j, i, TileDrawing.TileCounterType.MultiTileGrass);
+                }
+
+                break;
+
+            case 233:
+                if (frameY == 0 && frameX % 54 == 0 && flag)
+                {
+                    Main.instance.TilesRenderer.AddSpecialPoint(j, i, TileDrawing.TileCounterType.MultiTileGrass);
+                }
+
+                if (frameY == 34 && frameX % 36 == 0 && flag)
+                {
+                    Main.instance.TilesRenderer.AddSpecialPoint(j, i, TileDrawing.TileCounterType.MultiTileGrass);
+                }
+
+                break;
+
+            case 652:
+                if (frameX % 36 == 0 && flag)
+                {
+                    Main.instance.TilesRenderer.AddSpecialPoint(j, i, TileDrawing.TileCounterType.MultiTileGrass);
+                }
+
+                break;
+
+            case 651:
+                if (frameX % 54 == 0 && flag)
+                {
+                    Main.instance.TilesRenderer.AddSpecialPoint(j, i, TileDrawing.TileCounterType.MultiTileGrass);
+                }
+
+                break;
+
+            case 530:
+                if (frameX < 270)
+                {
+                    if (frameX % 54 == 0 && frameY == 0 && flag)
+                    {
+                        Main.instance.TilesRenderer.AddSpecialPoint(j, i, TileDrawing.TileCounterType.MultiTileGrass);
+                    }
+
+                    break;
+                }
+
+                break;
+
+            case 485:
+            case 489:
+            case 490:
+                if (frameY == 0 && frameX % 36 == 0 && flag)
+                {
+                    Main.instance.TilesRenderer.AddSpecialPoint(j, i, TileDrawing.TileCounterType.MultiTileGrass);
+                }
+
+                break;
+
+            case 521:
+            case 522:
+            case 523:
+            case 524:
+            case 525:
+            case 526:
+            case 527:
+                if (frameY == 0 && frameX % 36 == 0 && flag)
+                {
+                    Main.instance.TilesRenderer.AddSpecialPoint(j, i, TileDrawing.TileCounterType.MultiTileGrass);
+                }
+
+                break;
+
+            case 493:
+                if (frameY == 0 && frameX % 18 == 0 && flag)
+                {
+                    Main.instance.TilesRenderer.AddSpecialPoint(j, i, TileDrawing.TileCounterType.MultiTileGrass);
+                }
+
+                break;
+
+            case 519:
+                if (frameX / 18 <= 4 && flag)
+                {
+                    Main.instance.TilesRenderer.AddSpecialPoint(j, i, TileDrawing.TileCounterType.MultiTileGrass);
+                }
+
+                break;
+
+            case 373:
+            case 374:
+            case 375:
+            case 461:
+                Main.instance.TilesRenderer.EmitLiquidDrops(i, j, tile, (ushort)type);
+
+                break;
+
+            case 491:
+                if (flag && frameX == 18 && frameY == 18)
+                {
+                    Main.instance.TilesRenderer.AddSpecialPoint(j, i, TileDrawing.TileCounterType.VoidLens);
+                }
+
+                break;
+
+            case 597:
+                if (flag && frameX % 54 == 0 && frameY == 0)
+                {
+                    Main.instance.TilesRenderer.AddSpecialPoint(j, i, TileDrawing.TileCounterType.TeleportationPylon);
+                }
+
+                break;
+
+            case 617:
+                if (flag && frameX % 54 == 0 && frameY % 72 == 0)
+                {
+                    Main.instance.TilesRenderer.AddSpecialPoint(j, i, TileDrawing.TileCounterType.MasterTrophy);
+                }
+
+                break;
+
+            case 184:
+                if (flag)
+                {
+                    Main.instance.TilesRenderer.AddSpecialPoint(j, i, TileDrawing.TileCounterType.AnyDirectionalGrass);
+                }
+
+                break;
+
+            default:
+                if (Main.instance.TilesRenderer.ShouldSwayInWind(j, i, tile))
+                {
+                    if (flag)
+                    {
+                        Main.instance.TilesRenderer.AddSpecialPoint(j, i, TileDrawing.TileCounterType.WindyGrass);
+                    }
+
+                    break;
+                }
+
+                break;
+        }
     }
 }
