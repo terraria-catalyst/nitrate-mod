@@ -70,6 +70,11 @@ internal static class ModifiedTileDrawing
     {
         _ = solid;
 
+        if (IsDrawnBySpecialPoint(tile, x, y))
+        {
+            return;
+        }
+
         TileDrawInfo drawData = Main.instance.TilesRenderer._currentTileDrawInfo.Value!;
         drawData.tileCache = tile;
         drawData.typeCache = type;
@@ -1287,6 +1292,99 @@ internal static class ModifiedTileDrawing
                 }
 
                 break;
+        }
+    }
+
+    private static bool IsDrawnBySpecialPoint(Tile tile, int x, int y)
+    {
+        ushort type = tile.type;
+
+        switch (type)
+        {
+            case 52:
+            case 62:
+            case 115:
+            case 205:
+            case 382:
+            case 528:
+            case 636:
+            case 638:
+                return true;
+
+            case 549:
+                return true;
+
+            case 34:
+                return true;
+
+            case 454:
+                return true;
+
+            case 42:
+            case 270:
+            case 271:
+            case 572:
+            case 581:
+            case 660:
+                return true;
+
+            case 91:
+                return true;
+
+            case 95:
+            case 126:
+            case 444:
+                return true;
+
+            case 465:
+            case 591:
+            case 592:
+                return true;
+
+            case 27:
+                return true;
+
+            case 236:
+            case 238:
+                return true;
+
+            case 233:
+                return true;
+
+            case 652:
+                return true;
+
+            case 651:
+                return true;
+
+            case 530:
+                return true;
+
+            case 485:
+            case 489:
+            case 490:
+                return true;
+
+            case 521:
+            case 522:
+            case 523:
+            case 524:
+            case 525:
+            case 526:
+            case 527:
+                return true;
+
+            case 493:
+                return true;
+
+            case 519:
+                return true;
+
+            case 184:
+                return true;
+
+            default:
+                return Main.instance.TilesRenderer.ShouldSwayInWind(x, y, tile);
         }
     }
 
