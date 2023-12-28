@@ -39,8 +39,6 @@ internal static class ModifiedTileDrawing
 
         Tile tile = Framing.GetTileSafely(x, y);
         ushort type = tile.type;
-        short frameX = tile.frameX;
-        short frameY = tile.frameY;
 
         if (!tile.HasTile)
         {
@@ -57,29 +55,28 @@ internal static class ModifiedTileDrawing
             if (TileLoader.PreDraw(j, i, type, Main.spriteBatch))
             {
                 AddSpecialPointsForTile(tile, x, y);
-                DrawSingleTile_Vanilla(solid, x, y, screenPosition, Vector2.Zero, tile, type);
+                DrawSingleTile_Inner(vanilla, solid, x, y, screenPosition, Vector2.Zero, tile, type);
             }
 
             TileLoader.PostDraw(j, i, type, Main.spriteBatch);
         }
         else
         {
-            DrawSingleTile_Nitrate(solid, x, y, screenPosition, tile, type, frameX, frameY);
+            DrawSingleTile_Inner(vanilla, solid, x, y, screenPosition, Vector2.Zero, tile, type);
         }
     }
 
-    private static void DrawSingleTile_Nitrate(bool solid, int x, int y, FnaVector2 screenPosition, Tile tile, ushort type, short frameX, short frameY)
+    private static void DrawSingleTile_Inner(bool vanilla, bool solid, int x, int y, FnaVector2 screenPosition, FnaVector2 screenOffset, Tile tile, ushort type)
     {
-    }
+        _ = solid;
 
-    private static void DrawSingleTile_Vanilla(bool solid, int x, int y, FnaVector2 screenPosition, FnaVector2 screenOffset, Tile tile, ushort type)
-    {
         TileDrawInfo drawData = Main.instance.TilesRenderer._currentTileDrawInfo.Value!;
         drawData.tileCache = tile;
         drawData.typeCache = type;
         drawData.tileFrameX = tile.frameX;
         drawData.tileFrameY = tile.frameY;
-        drawData.tileLight = Lighting.GetColor(x, y);
+        // drawData.tileLight = Lighting.GetColor(x, y);
+        drawData.tileLight = vanilla ? Lighting.GetColor(x, y) : Color.White;
 
         if (tile is { liquid: > 0, type: 518 })
         {
@@ -90,8 +87,7 @@ internal static class ModifiedTileDrawing
             out drawData.glowTexture, out drawData.glowSourceRect, out drawData.glowColor);
 
         drawData.drawTexture = Main.instance.TilesRenderer.GetTileDrawTexture(drawData.tileCache, x, y);
-        Texture2D highlightTexture = null;
-        Rectangle empty = Rectangle.Empty;
+        Texture2D? highlightTexture = null;
         Color highlightColor = Color.Transparent;
 
         if (TileID.Sets.HasOutlines[drawData.typeCache])
@@ -217,7 +213,7 @@ internal static class ModifiedTileDrawing
         }
 
         drawData.colorTint = Color.White;
-        drawData.finalColor = TileDrawing.GetFinalLight(drawData.tileCache, drawData.typeCache, drawData.tileLight, drawData.colorTint);
+        drawData.finalColor = vanilla ? TileDrawing.GetFinalLight(drawData.tileCache, drawData.typeCache, drawData.tileLight, drawData.colorTint) : Color.White;
 
         switch (drawData.typeCache)
         {
@@ -246,7 +242,10 @@ internal static class ModifiedTileDrawing
                 break;
 
             case 51:
-                drawData.finalColor = drawData.tileLight * 0.5f;
+                if (vanilla)
+                {
+                    drawData.finalColor = drawData.tileLight * 0.5f;
+                }
 
                 break;
 
@@ -344,6 +343,11 @@ internal static class ModifiedTileDrawing
                 break;
         }
 
+        if (!vanilla)
+        {
+            drawData.tileLight = Color.White;
+        }
+
         if (drawData.typeCache == 314)
         {
             Main.instance.TilesRenderer.DrawTile_MinecartTrack(screenPosition, screenOffset, x, y, drawData);
@@ -354,7 +358,7 @@ internal static class ModifiedTileDrawing
         }
         else
         {
-            Main.instance.TilesRenderer.DrawBasicTile(screenPosition, screenOffset, x, y, drawData, rectangle, vector);
+            DrawBasicTile(screenPosition, screenOffset, x, y, drawData, rectangle, vector);
         }
 
         if (Main.tileGlowMask[drawData.tileCache.type] != -1)
@@ -593,14 +597,460 @@ internal static class ModifiedTileDrawing
 
             if (highlightTexture != null)
             {
-                empty = new Rectangle(drawData.tileFrameX + drawData.addFrX, drawData.tileFrameY + drawData.addFrY, drawData.tileWidth, drawData.tileHeight);
+                Rectangle sourceRectangle = new(drawData.tileFrameX + drawData.addFrX, drawData.tileFrameY + drawData.addFrY, drawData.tileWidth, drawData.tileHeight);
                 const int num11 = 0;
                 const int num13 = 0;
 
-                Main.spriteBatch.Draw(highlightTexture, new Vector2(x * 16 - (int)screenPosition.X - (drawData.tileWidth - 16f) / 2f + num11, y * 16 - (int)screenPosition.Y + drawData.tileTop + num13) + screenOffset, empty, highlightColor, 0f, TileDrawing._zero, 1f,
+                Main.spriteBatch.Draw(highlightTexture, new Vector2(x * 16 - (int)screenPosition.X - (drawData.tileWidth - 16f) / 2f + num11, y * 16 - (int)screenPosition.Y + drawData.tileTop + num13) + screenOffset, sourceRectangle, highlightColor, 0f, TileDrawing._zero, 1f,
                     drawData.tileSpriteEffect, 0f);
             }
         }
+    }
+
+    private static void DrawBasicTile(FnaVector2 screenPosition, FnaVector2 screenOffset, int tileX, int tileY, TileDrawInfo drawData, Rectangle normalTileRect, FnaVector2 normalTilePosition)
+    {
+        TileDrawing td = Main.instance.TilesRenderer;
+
+        Tile tile;
+
+        if (TileID.Sets.Platforms[drawData.typeCache] && WorldGen.IsRope(tileX, tileY) && Main.tile[tileX, tileY - 1] != null)
+        {
+            tile = Main.tile[tileX, tileY - 1];
+            _ = ref tile.type;
+            int y = (tileY + tileX) % 3 * 18;
+            Texture2D tileDrawTexture = td.GetTileDrawTexture(Main.tile[tileX, tileY - 1], tileX, tileY);
+
+            if (tileDrawTexture != null)
+            {
+                Main.spriteBatch.Draw(tileDrawTexture, new FnaVector2(tileX * 16 - (int)screenPosition.X, tileY * 16 - (int)screenPosition.Y) + screenOffset, new Rectangle(90, y, 16, 16), drawData.tileLight, 0f, default, 1f, drawData.tileSpriteEffect, 0f);
+            }
+        }
+
+        if (drawData.tileCache.slope() > 0)
+        {
+            if (TileID.Sets.Platforms[drawData.tileCache.type])
+            {
+                Main.spriteBatch.Draw(drawData.drawTexture, normalTilePosition, normalTileRect, drawData.finalColor, 0f, TileDrawing._zero, 1f, drawData.tileSpriteEffect, 0f);
+
+                if (drawData.tileCache.slope() == 1)
+                {
+                    tile = Main.tile[tileX + 1, tileY + 1];
+
+                    if (tile.active())
+                    {
+                        bool[] tileSolid = Main.tileSolid;
+                        tile = Main.tile[tileX + 1, tileY + 1];
+
+                        if (tileSolid[tile.type])
+                        {
+                            tile = Main.tile[tileX + 1, tileY + 1];
+
+                            if (tile.slope() != 2)
+                            {
+                                tile = Main.tile[tileX + 1, tileY + 1];
+
+                                if (!tile.halfBrick())
+                                {
+                                    tile = Main.tile[tileX, tileY + 1];
+
+                                    if (!tile.active())
+                                    {
+                                        goto IL_0269;
+                                    }
+
+                                    tile = Main.tile[tileX, tileY + 1];
+
+                                    if (tile.blockType() != 0)
+                                    {
+                                        tile = Main.tile[tileX, tileY + 1];
+
+                                        if (tile.blockType() != 5)
+                                        {
+                                            goto IL_0269;
+                                        }
+                                    }
+
+                                    bool[] blocksStairs = TileID.Sets.BlocksStairs;
+                                    tile = Main.tile[tileX, tileY + 1];
+
+                                    if (!blocksStairs[tile.type])
+                                    {
+                                        bool[] blocksStairsAbove = TileID.Sets.BlocksStairsAbove;
+                                        tile = Main.tile[tileX, tileY + 1];
+
+                                        if (!blocksStairsAbove[tile.type])
+                                        {
+                                            goto IL_0269;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (drawData.tileCache.slope() != 2)
+                {
+                    return;
+                }
+
+                tile = Main.tile[tileX - 1, tileY + 1];
+
+                if (!tile.active())
+                {
+                    return;
+                }
+
+                bool[] tileSolid2 = Main.tileSolid;
+                tile = Main.tile[tileX - 1, tileY + 1];
+
+                if (!tileSolid2[tile.type])
+                {
+                    return;
+                }
+
+                tile = Main.tile[tileX - 1, tileY + 1];
+
+                if (tile.slope() == 1)
+                {
+                    return;
+                }
+
+                tile = Main.tile[tileX - 1, tileY + 1];
+
+                if (tile.halfBrick())
+                {
+                    return;
+                }
+
+                tile = Main.tile[tileX, tileY + 1];
+
+                if (tile.active())
+                {
+                    tile = Main.tile[tileX, tileY + 1];
+
+                    if (tile.blockType() != 0)
+                    {
+                        tile = Main.tile[tileX, tileY + 1];
+
+                        if (tile.blockType() != 4)
+                        {
+                            goto IL_043e;
+                        }
+                    }
+
+                    bool[] blocksStairs2 = TileID.Sets.BlocksStairs;
+                    tile = Main.tile[tileX, tileY + 1];
+
+                    if (blocksStairs2[tile.type])
+                    {
+                        return;
+                    }
+
+                    bool[] blocksStairsAbove2 = TileID.Sets.BlocksStairsAbove;
+                    tile = Main.tile[tileX, tileY + 1];
+
+                    if (blocksStairsAbove2[tile.type])
+                    {
+                        return;
+                    }
+                }
+
+                goto IL_043e;
+            }
+
+            if (TileID.Sets.HasSlopeFrames[drawData.tileCache.type])
+            {
+                Main.spriteBatch.Draw(drawData.drawTexture, normalTilePosition, new Rectangle(drawData.tileFrameX + drawData.addFrX, drawData.tileFrameY + drawData.addFrY, 16, 16), drawData.finalColor, 0f, TileDrawing._zero, 1f, drawData.tileSpriteEffect, 0f);
+
+                return;
+            }
+
+            int num = drawData.tileCache.slope();
+            int num2 = 2;
+
+            for (int i = 0; i < 8; i++)
+            {
+                int num3 = i * -2;
+                int num4 = 16 - i * 2;
+                int num5 = 16 - num4;
+                int num6;
+
+                switch (num)
+                {
+                    case 1:
+                        num3 = 0;
+                        num6 = i * 2;
+                        num4 = 14 - i * 2;
+                        num5 = 0;
+
+                        break;
+
+                    case 2:
+                        num3 = 0;
+                        num6 = 16 - i * 2 - 2;
+                        num4 = 14 - i * 2;
+                        num5 = 0;
+
+                        break;
+
+                    case 3:
+                        num6 = i * 2;
+
+                        break;
+
+                    default:
+                        num6 = 16 - i * 2 - 2;
+
+                        break;
+                }
+
+                Main.spriteBatch.Draw(drawData.drawTexture, normalTilePosition + new FnaVector2(num6, i * num2 + num3), new Rectangle(drawData.tileFrameX + drawData.addFrX + num6, drawData.tileFrameY + drawData.addFrY + num5, num2, num4), drawData.finalColor, 0f, TileDrawing._zero, 1f,
+                    drawData.tileSpriteEffect, 0f);
+            }
+
+            int num7 = ((num <= 2) ? 14 : 0);
+            Main.spriteBatch.Draw(drawData.drawTexture, normalTilePosition + new FnaVector2(0f, num7), new Rectangle(drawData.tileFrameX + drawData.addFrX, drawData.tileFrameY + drawData.addFrY + num7, 16, 2), drawData.finalColor, 0f, TileDrawing._zero, 1f, drawData.tileSpriteEffect, 0f);
+
+            return;
+        }
+
+        if (!TileID.Sets.Platforms[drawData.typeCache] && !TileID.Sets.IgnoresNearbyHalfbricksWhenDrawn[drawData.typeCache] && td._tileSolid[drawData.typeCache] && !TileID.Sets.NotReallySolid[drawData.typeCache] && !drawData.tileCache.halfBrick())
+        {
+            if ((tileX - 1) < 0)
+            {
+                return;
+            }
+
+            tile = Main.tile[tileX - 1, tileY];
+
+            if (!tile.halfBrick())
+            {
+                if ((tileX + 1) >= Main.tile.Width)
+                {
+                    return;
+                }
+
+                tile = Main.tile[tileX + 1, tileY];
+
+                if (!tile.halfBrick())
+                {
+                    goto IL_0cc9;
+                }
+            }
+
+            tile = Main.tile[tileX - 1, tileY];
+
+            if (tile.halfBrick())
+            {
+                tile = Main.tile[tileX + 1, tileY];
+
+                if (tile.halfBrick())
+                {
+                    Main.spriteBatch.Draw(drawData.drawTexture, normalTilePosition + new FnaVector2(0f, 8f), new Rectangle(drawData.tileFrameX + drawData.addFrX, drawData.addFrY + drawData.tileFrameY + 8, drawData.tileWidth, 8), drawData.finalColor, 0f, TileDrawing._zero, 1f,
+                        drawData.tileSpriteEffect,
+                        0f);
+
+                    Rectangle value = new(126 + drawData.addFrX, drawData.addFrY, 16, 8);
+                    tile = Main.tile[tileX, tileY - 1];
+
+                    if (tile.active())
+                    {
+                        tile = Main.tile[tileX, tileY - 1];
+
+                        if (!tile.bottomSlope())
+                        {
+                            tile = Main.tile[tileX, tileY - 1];
+
+                            if (tile.type == drawData.typeCache)
+                            {
+                                value = new Rectangle(90 + drawData.addFrX, drawData.addFrY, 16, 8);
+                            }
+                        }
+                    }
+
+                    Main.spriteBatch.Draw(drawData.drawTexture, normalTilePosition, value, drawData.finalColor, 0f, TileDrawing._zero, 1f, drawData.tileSpriteEffect, 0f);
+
+                    return;
+                }
+            }
+
+            tile = Main.tile[tileX - 1, tileY];
+
+            if (tile.halfBrick())
+            {
+                int num8 = 4;
+
+                if (TileID.Sets.AllBlocksWithSmoothBordersToResolveHalfBlockIssue[drawData.typeCache])
+                {
+                    num8 = 2;
+                }
+
+                Main.spriteBatch.Draw(drawData.drawTexture, normalTilePosition + new FnaVector2(0f, 8f), new Rectangle(drawData.tileFrameX + drawData.addFrX, drawData.addFrY + drawData.tileFrameY + 8, drawData.tileWidth, 8), drawData.finalColor, 0f, TileDrawing._zero, 1f, drawData.tileSpriteEffect,
+                    0f);
+
+                Main.spriteBatch.Draw(drawData.drawTexture, normalTilePosition + new FnaVector2(num8, 0f), new Rectangle(drawData.tileFrameX + num8 + drawData.addFrX, drawData.addFrY + drawData.tileFrameY, drawData.tileWidth - num8, drawData.tileHeight), drawData.finalColor, 0f, TileDrawing._zero,
+                    1f,
+                    drawData.tileSpriteEffect, 0f);
+
+                Main.spriteBatch.Draw(drawData.drawTexture, normalTilePosition, new Rectangle(144 + drawData.addFrX, drawData.addFrY, num8, 8), drawData.finalColor, 0f, TileDrawing._zero, 1f, drawData.tileSpriteEffect, 0f);
+
+                if (num8 == 2)
+                {
+                    Main.spriteBatch.Draw(drawData.drawTexture, normalTilePosition, new Rectangle(148 + drawData.addFrX, drawData.addFrY, 2, 2), drawData.finalColor, 0f, TileDrawing._zero, 1f, drawData.tileSpriteEffect, 0f);
+                }
+
+                return;
+            }
+
+            tile = Main.tile[tileX + 1, tileY];
+
+            if (tile.halfBrick())
+            {
+                int num9 = 4;
+
+                if (TileID.Sets.AllBlocksWithSmoothBordersToResolveHalfBlockIssue[drawData.typeCache])
+                {
+                    num9 = 2;
+                }
+
+                Main.spriteBatch.Draw(drawData.drawTexture, normalTilePosition + new FnaVector2(0f, 8f), new Rectangle(drawData.tileFrameX + drawData.addFrX, drawData.addFrY + drawData.tileFrameY + 8, drawData.tileWidth, 8), drawData.finalColor, 0f, TileDrawing._zero, 1f, drawData.tileSpriteEffect,
+                    0f);
+
+                Main.spriteBatch.Draw(drawData.drawTexture, normalTilePosition, new Rectangle(drawData.tileFrameX + drawData.addFrX, drawData.addFrY + drawData.tileFrameY, drawData.tileWidth - num9, drawData.tileHeight), drawData.finalColor, 0f, TileDrawing._zero, 1f, drawData.tileSpriteEffect, 0f);
+                Main.spriteBatch.Draw(drawData.drawTexture, normalTilePosition + new FnaVector2(16 - num9, 0f), new Rectangle(144 + (16 - num9), 0, num9, 8), drawData.finalColor, 0f, TileDrawing._zero, 1f, drawData.tileSpriteEffect, 0f);
+
+                if (num9 == 2)
+                {
+                    Main.spriteBatch.Draw(drawData.drawTexture, normalTilePosition + new FnaVector2(14f, 0f), new Rectangle(156, 0, 2, 2), drawData.finalColor, 0f, TileDrawing._zero, 1f, drawData.tileSpriteEffect, 0f);
+                }
+            }
+
+            return;
+        }
+
+        goto IL_0cc9;
+
+        IL_043e:
+        Rectangle value2 = new(162, drawData.tileFrameY, 16, 16);
+        bool[] platforms = TileID.Sets.Platforms;
+        tile = Main.tile[tileX - 1, tileY + 1];
+
+        if (platforms[tile.type])
+        {
+            tile = Main.tile[tileX - 1, tileY + 1];
+
+            if (tile.slope() == 0)
+            {
+                value2.X = 306;
+            }
+        }
+
+        Main.spriteBatch.Draw(drawData.drawTexture, normalTilePosition + new FnaVector2(0f, 16f), value2, drawData.finalColor, 0f, TileDrawing._zero, 1f, drawData.tileSpriteEffect, 0f);
+
+        return;
+
+        IL_0cc9:
+
+        if (Lighting.NotRetro && td._tileSolid[drawData.typeCache] && !drawData.tileCache.halfBrick() && !TileID.Sets.DontDrawTileSliced[drawData.tileCache.type])
+        {
+            //td.DrawSingleTile_SlicedBlock(normalTilePosition, tileX, tileY, drawData);
+            Main.spriteBatch.Draw(drawData.drawTexture, normalTilePosition, new Rectangle(drawData.tileFrameX + drawData.addFrX, drawData.tileFrameY + drawData.addFrY, drawData.tileWidth, drawData.tileHeight), drawData.finalColor, 0f, TileDrawing._zero, 1f, drawData.tileSpriteEffect, 0f);
+
+            return;
+        }
+
+        if (drawData.halfBrickHeight != 8)
+        {
+            goto IL_0e81;
+        }
+
+        tile = Main.tile[tileX, tileY + 1];
+
+        if (tile.active())
+        {
+            bool[] tileSolid3 = td._tileSolid;
+            tile = Main.tile[tileX, tileY + 1];
+
+            if (tileSolid3[tile.type])
+            {
+                tile = Main.tile[tileX, tileY + 1];
+
+                if (!tile.halfBrick())
+                {
+                    goto IL_0e81;
+                }
+            }
+        }
+
+        if (TileID.Sets.Platforms[drawData.typeCache])
+        {
+            Main.spriteBatch.Draw(drawData.drawTexture, normalTilePosition, normalTileRect, drawData.finalColor, 0f, TileDrawing._zero, 1f, drawData.tileSpriteEffect, 0f);
+        }
+        else
+        {
+            Main.spriteBatch.Draw(drawData.drawTexture, normalTilePosition, normalTileRect.Modified(0, 0, 0, -4), drawData.finalColor, 0f, TileDrawing._zero, 1f, drawData.tileSpriteEffect, 0f);
+            Main.spriteBatch.Draw(drawData.drawTexture, normalTilePosition + new FnaVector2(0f, 4f), new Rectangle(144 + drawData.addFrX, 66 + drawData.addFrY, drawData.tileWidth, 4), drawData.finalColor, 0f, TileDrawing._zero, 1f, drawData.tileSpriteEffect, 0f);
+        }
+
+        goto IL_101e;
+
+        IL_0269:
+        Rectangle value3 = new(198, drawData.tileFrameY, 16, 16);
+        bool[] platforms2 = TileID.Sets.Platforms;
+        tile = Main.tile[tileX + 1, tileY + 1];
+
+        if (platforms2[tile.type])
+        {
+            tile = Main.tile[tileX + 1, tileY + 1];
+
+            if (tile.slope() == 0)
+            {
+                value3.X = 324;
+            }
+        }
+
+        Main.spriteBatch.Draw(drawData.drawTexture, normalTilePosition + new FnaVector2(0f, 16f), value3, drawData.finalColor, 0f, TileDrawing._zero, 1f, drawData.tileSpriteEffect, 0f);
+
+        return;
+
+        IL_101e:
+        td.DrawSingleTile_Flames(screenPosition, screenOffset, tileX, tileY, drawData);
+
+        return;
+
+        IL_0e81:
+
+        if (TileID.Sets.CritterCageLidStyle[drawData.typeCache] >= 0)
+        {
+            int num10 = TileID.Sets.CritterCageLidStyle[drawData.typeCache];
+
+            if ((num10 < 3 && normalTileRect.Y % 54 == 0) || (num10 >= 3 && normalTileRect.Y % 36 == 0))
+            {
+                FnaVector2 position = normalTilePosition;
+                position.Y += 8f;
+                Rectangle value4 = normalTileRect;
+                value4.Y += 8;
+                value4.Height -= 8;
+                Main.spriteBatch.Draw(drawData.drawTexture, position, value4, drawData.finalColor, 0f, TileDrawing._zero, 1f, drawData.tileSpriteEffect, 0f);
+                position = normalTilePosition;
+                position.Y -= 2f;
+                value4 = normalTileRect;
+                value4.Y = 0;
+                value4.Height = 10;
+                Main.spriteBatch.Draw(TextureAssets.CageTop[num10].Value, position, value4, drawData.finalColor, 0f, TileDrawing._zero, 1f, drawData.tileSpriteEffect, 0f);
+            }
+            else
+            {
+                Main.spriteBatch.Draw(drawData.drawTexture, normalTilePosition, normalTileRect, drawData.finalColor, 0f, TileDrawing._zero, 1f, drawData.tileSpriteEffect, 0f);
+            }
+        }
+        else
+        {
+            Main.spriteBatch.Draw(drawData.drawTexture, normalTilePosition, normalTileRect, drawData.finalColor, 0f, TileDrawing._zero, 1f, drawData.tileSpriteEffect, 0f);
+        }
+
+        goto IL_101e;
     }
 
     private static void AddSpecialPointsForTile(Tile tile, int x, int y)

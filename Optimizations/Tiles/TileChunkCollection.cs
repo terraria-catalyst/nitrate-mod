@@ -128,29 +128,6 @@ internal sealed class TileChunkCollection : ChunkCollection
             }
 
             Main.spriteBatch.Draw(target, new Vector2(chunkArea.X, chunkArea.Y) - screenPosition, Color.White);
-
-            foreach (Point tilePoint in chunk.AnimatedPoints)
-            {
-                Tile tile = Framing.GetTileSafely(tilePoint);
-
-                if (!tile.HasTile)
-                {
-                    continue;
-                }
-
-                if (!TextureAssets.Tile[tile.type].IsLoaded)
-                {
-                    Main.instance.LoadTiles(tile.type);
-                }
-
-                if (TileLoader.PreDraw(tilePoint.X, tilePoint.Y, tile.type, Main.spriteBatch))
-                {
-                    // Main.NewText(new Vector2(tilePoint.X * 16, tilePoint.Y * 16));
-                    ModifiedTileDrawing.DrawSingleTile(true, SolidLayer, tilePoint.X, tilePoint.Y, Main.screenPosition);
-                }
-
-                TileLoader.PostDraw(tilePoint.X, tilePoint.Y, tile.type, Main.spriteBatch);
-            }
         }
 
         Main.spriteBatch.End();

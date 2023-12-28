@@ -61,7 +61,8 @@ internal sealed class ChunkSystem : ModSystem
     private static Color[] colorBuffer = Array.Empty<Color>();
     private static RenderTarget2D? screenSizeLightingBuffer;
     private static bool enabled;
-    private static bool debug;
+    private static bool debugChunkBorders;
+    private static bool debugLightMap;
 
     public override void OnModLoad()
     {
@@ -194,13 +195,21 @@ internal sealed class ChunkSystem : ModSystem
     {
         base.PostUpdateInput();
 
-        Keys debugKey = Keys.F5;
+        const Keys chunk_border_key = Keys.F5;
+        const Keys light_map_key = Keys.F6;
 
-        if (Main.keyState.IsKeyDown(debugKey) && !Main.oldKeyState.IsKeyDown(debugKey))
+        if (Main.keyState.IsKeyDown(chunk_border_key) && !Main.oldKeyState.IsKeyDown(chunk_border_key))
         {
-            debug = !debug;
+            debugChunkBorders = !debugChunkBorders;
 
-            Main.NewText($"Chunk Borders ({debugKey}): " + (debug ? "Shown" : "Hidden"), debug ? Color.Green : Color.Red);
+            Main.NewText($"Chunk Borders ({chunk_border_key}): " + (debugChunkBorders ? "Shown" : "Hidden"), debugChunkBorders ? Color.Green : Color.Red);
+        }
+
+        if (Main.keyState.IsKeyDown(light_map_key) && !Main.oldKeyState.IsKeyDown(light_map_key))
+        {
+            debugLightMap = !debugLightMap;
+
+            Main.NewText($"Light Map ({light_map_key}): " + (debugLightMap ? "Shown" : "Hidden"), debugLightMap ? Color.Green : Color.Red);
         }
     }
 
@@ -398,7 +407,7 @@ internal sealed class ChunkSystem : ModSystem
             // FIX: Last parameter (intoRenderTargets) is TRUE because it is
             // required for special counts to actually clear.
             Main.instance.TilesRenderer.PreDrawTiles(false, false, true);
-            
+
             non_solid_tiles.DoRenderTiles(Main.graphics.GraphicsDevice, screenSizeLightingBuffer, light_map_renderer, Main.spriteBatch.TryEnd(out SpriteBatchUtil.SpriteBatchSnapshot snapshot) ? snapshot : null);
 
             Main.instance.DrawTileEntities(false, false, false);
@@ -436,34 +445,40 @@ internal sealed class ChunkSystem : ModSystem
 
             Main.spriteBatch.End();
 
-            if (!debug)
+            if (debugChunkBorders || debugLightMap)
             {
-                return;
+                Main.spriteBatch.Begin(
+                    SpriteSortMode.Deferred,
+                    BlendState.AlphaBlend,
+                    SamplerState.PointClamp,
+                    DepthStencilState.None,
+                    RasterizerState.CullNone
+                );
+
+                if (debugChunkBorders)
+                {
+                    const int line_width = 2;
+                    const int offset = line_width / 2;
+
+                    foreach (Point chunkKey in solid_tiles.Loaded.Keys)
+                    {
+                        int chunkX = (chunkKey.X * CHUNK_SIZE) - (int)Main.screenPosition.X;
+                        int chunkY = (chunkKey.Y * CHUNK_SIZE) - (int)Main.screenPosition.Y;
+
+                        Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX - offset, chunkY - offset, CHUNK_SIZE + offset, line_width), Color.Yellow);
+                        Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX + CHUNK_SIZE - offset, chunkY - offset, line_width, CHUNK_SIZE + offset), Color.Yellow);
+                        Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX - offset, chunkY + CHUNK_SIZE - offset, CHUNK_SIZE + offset, line_width), Color.Yellow);
+                        Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX - offset, chunkY - offset, line_width, CHUNK_SIZE + offset), Color.Yellow);
+                    }
+                }
+
+                if (debugLightMap)
+                {
+                    Main.spriteBatch.Draw(screenSizeLightingBuffer, Vector2.Zero, Color.White);
+                }
+
+                Main.spriteBatch.End();
             }
-
-            Main.spriteBatch.Begin(
-                SpriteSortMode.Deferred,
-                BlendState.AlphaBlend,
-                SamplerState.PointClamp,
-                DepthStencilState.None,
-                RasterizerState.CullNone
-            );
-
-            const int line_width = 2;
-            const int offset = line_width / 2;
-
-            foreach (Point chunkKey in solid_tiles.Loaded.Keys)
-            {
-                int chunkX = (chunkKey.X * CHUNK_SIZE) - (int)Main.screenPosition.X;
-                int chunkY = (chunkKey.Y * CHUNK_SIZE) - (int)Main.screenPosition.Y;
-
-                Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX - offset, chunkY - offset, CHUNK_SIZE + offset, line_width), Color.Yellow);
-                Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX + CHUNK_SIZE - offset, chunkY - offset, line_width, CHUNK_SIZE + offset), Color.Yellow);
-                Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX - offset, chunkY + CHUNK_SIZE - offset, CHUNK_SIZE + offset, line_width), Color.Yellow);
-                Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX - offset, chunkY - offset, line_width, CHUNK_SIZE + offset), Color.Yellow);
-            }
-
-            Main.spriteBatch.End();
         });
 
         c.Emit(OpCodes.Ret);
