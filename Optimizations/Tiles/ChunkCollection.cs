@@ -66,25 +66,22 @@ internal abstract class ChunkCollection
 
     public virtual void DisposeAllChunks()
     {
+        List<Chunk> loadedCopy = Loaded.Values.ToList();
+
+        // Capture a copy that wasn't cleared to avoid memory leaks.
         Main.RunOnMainThread(() =>
         {
-            List<Chunk> loadedCopy = Loaded.Values.ToList();
-
-            // Capture a copy that wasn't cleared to avoid memory leaks.
-            Main.RunOnMainThread(() =>
+            foreach (Chunk chunk in loadedCopy)
             {
-                foreach (Chunk chunk in loadedCopy)
-                {
-                    chunk.Dispose();
-                }
+                chunk.Dispose();
+            }
 
-                ScreenTarget?.Dispose();
-                ScreenTarget = null;
-            });
-
-            Loaded.Clear();
-            NeedsPopulating.Clear();
+            ScreenTarget?.Dispose();
+            ScreenTarget = null;
         });
+
+        Loaded.Clear();
+        NeedsPopulating.Clear();
     }
 
     public virtual void RemoveOutOfBoundsAndPopulate(int topX, int bottomX, int topY, int bottomY)
