@@ -4,6 +4,8 @@ using Nitrate.API.Tiles;
 using Nitrate.Utilities;
 using System;
 using Terraria;
+using Terraria.GameContent;
+using Terraria.ID;
 
 namespace Nitrate.Optimizations.Tiles;
 
@@ -51,10 +53,10 @@ internal sealed class WallChunkCollection : ChunkCollection
 
                 Tile tile = Framing.GetTileSafely(tileX, tileY);
 
-                /*if (!tile.HasTile)
+                if ( /*!tile.HasTile*/ tile.WallType <= WallID.None)
                 {
                     continue;
-                }*/
+                }
 
                 if (AnimatedTileRegistry.IsWallPossiblyAnimated(tile.WallType))
                 {
@@ -62,6 +64,7 @@ internal sealed class WallChunkCollection : ChunkCollection
                 }
                 else
                 {
+                    // Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(tileX * 16 - (int)chunkPositionWorld.X, tileY * 16 - (int)chunkPositionWorld.Y, 16, 16), Color.Yellow);
                     ModifiedTileDrawing.DrawSingleWall(false, tileX, tileY, chunkPositionWorld);
                 }
             }
@@ -125,12 +128,6 @@ internal sealed class WallChunkCollection : ChunkCollection
             }
 
             Main.spriteBatch.Draw(target, new Vector2(chunkArea.X, chunkArea.Y) - screenPosition, Color.White);
-
-            foreach (Point wallPoint in chunk.AnimatedPoints)
-            {
-                // ModifiedWallDrawing.DrawSingleWallMostlyUnmodified(wallPoint.X, wallPoint.Y, new Vector2(key.X * ChunkSystem.CHUNK_SIZE, key.Y * ChunkSystem.CHUNK_SIZE));
-                ModifiedTileDrawing.DrawSingleWall(true, wallPoint.X, wallPoint.Y, Main.screenPosition);
-            }
         }
 
         Main.spriteBatch.End();
@@ -156,6 +153,7 @@ internal sealed class WallChunkCollection : ChunkCollection
             foreach (Point wallPoint in chunk.AnimatedPoints)
             {
                 // ModifiedWallDrawing.DrawSingleWallMostlyUnmodified(wallPoint.X, wallPoint.Y, new Vector2(key.X * ChunkSystem.CHUNK_SIZE, key.Y * ChunkSystem.CHUNK_SIZE));
+                // Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(wallPoint.X * 16 - (int)Main.screenPosition.X, wallPoint.Y * 16 - (int)Main.screenPosition.Y, 16, 16), Color.Red);
                 ModifiedTileDrawing.DrawSingleWall(true, wallPoint.X, wallPoint.Y, Main.screenPosition);
             }
         }

@@ -1393,35 +1393,35 @@ internal static class ModifiedTileDrawing
     ///     Draws a single wall.
     /// </summary>
     /// <param name="vanilla"></param>
-    /// <param name="i"></param>
-    /// <param name="j"></param>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
     /// <param name="screenPosition"></param>
     /// <remarks>
     ///     This is extracted from <see cref="WallDrawing.DrawWalls"/>.
     /// </remarks>
-    public static void DrawSingleWall(bool vanilla, int i, int j, FnaVector2 screenPosition)
+    public static void DrawSingleWall(bool vanilla, int x, int y, FnaVector2 screenPosition)
     {
         WallDrawing wd = Main.instance.WallsRenderer;
         wd._tileArray = Main.tile;
         int[] wallBlend = Main.wallBlend;
         Rectangle value = new(0, 0, 32, 32);
-        Tile tile = wd._tileArray[i, j];
+        Tile tile = wd._tileArray[x, y];
         ushort wall = tile.wall;
 
         // WallDrawing.FullTile accesses the tiles at (i - 1) and (i + 1)
-        if (i - 1 < 0 || i + 1 >= wd._tileArray.Width)
+        if (x - 1 < 0 || x + 1 >= wd._tileArray.Width)
         {
             return;
         }
 
-        if (wall <= 0 || wd.FullTile(i, j) || wall == 318 && !wd._shouldShowInvisibleWalls || tile.invisibleWall() && !wd._shouldShowInvisibleWalls)
+        if (wall <= 0 || wd.FullTile(x, y) || wall == 318 && !wd._shouldShowInvisibleWalls || tile.invisibleWall() && !wd._shouldShowInvisibleWalls)
         {
             return;
         }
 
-        if (!vanilla || WallLoader.PreDraw(i, j, wall, Main.spriteBatch))
+        if (!vanilla || WallLoader.PreDraw(x, y, wall, Main.spriteBatch))
         {
-            Color color = vanilla ? Lighting.GetColor(i, j) : Color.White;
+            Color color = vanilla ? Lighting.GetColor(x, y) : Color.White;
 
             if (vanilla)
             {
@@ -1435,7 +1435,7 @@ internal static class ModifiedTileDrawing
                     color = Color.White;
                 }
 
-                if (color is { R: 0, G: 0, B: 0 } && i < Main.UnderworldLayer)
+                if (color is { R: 0, G: 0, B: 0 } && y < Main.UnderworldLayer)
                 {
                     return;
                 }
@@ -1451,7 +1451,7 @@ internal static class ModifiedTileDrawing
             if ((uint)(wall2 - 242) <= 1u)
             {
                 int num11 = 20;
-                int num12 = (Main.wallFrameCounter[wall] + i * 11 + j * 27) % (num11 * 8);
+                int num12 = (Main.wallFrameCounter[wall] + x * 11 + y * 27) % (num11 * 8);
                 value.Y = tile.wallFrameY() + 180 * (num12 / num11);
             }
 
@@ -1459,7 +1459,7 @@ internal static class ModifiedTileDrawing
 
             if ((!vanilla || Lighting.NotRetro) && !Main.wallLight[wall] && tile.wall != 241 && (tile.wall < 88 || tile.wall > 93) && !WorldGen.SolidTile(tile))
             {
-                Texture2D tileDrawTexture = wd.GetTileDrawTexture(tile, j, i);
+                Texture2D tileDrawTexture = wd.GetTileDrawTexture(tile, x, y);
 
                 if (tile.wall == 346)
                 {
@@ -1471,7 +1471,7 @@ internal static class ModifiedTileDrawing
                 }
                 else
                 {
-                    Lighting.GetCornerColors(j, i, out vertices);
+                    Lighting.GetCornerColors(x, y, out vertices);
 
                     if ((uint)(tile.wall - 341) <= 4u)
                     {
@@ -1489,7 +1489,7 @@ internal static class ModifiedTileDrawing
                     vertices = new VertexColors(Color.White);
                 }
 
-                Main.tileBatch.Draw(tileDrawTexture, new Vector2(j * 16 - (int)screenPosition.X - 8, i * 16 - (int)screenPosition.Y - 8), value, vertices, Vector2.Zero, 1f, SpriteEffects.None);
+                Main.tileBatch.Draw(tileDrawTexture, new Vector2(x * 16 - (int)screenPosition.X - 8, y * 16 - (int)screenPosition.Y - 8), value, vertices, Vector2.Zero, 1f, SpriteEffects.None);
             }
             else
             {
@@ -1506,8 +1506,8 @@ internal static class ModifiedTileDrawing
                     color2 = Color.White;
                 }
 
-                Texture2D tileDrawTexture2 = wd.GetTileDrawTexture(tile, i, j);
-                Main.spriteBatch.Draw(tileDrawTexture2, new Vector2(i * 16 - (int)screenPosition.X - 8, j * 16 - (int)screenPosition.Y - 8), value, color2, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+                Texture2D tileDrawTexture2 = wd.GetTileDrawTexture(tile, x, y);
+                Main.spriteBatch.Draw(tileDrawTexture2, new Vector2(x * 16 - (int)screenPosition.X - 8, y * 16 - (int)screenPosition.Y - 8), value, color2, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
             }
 
             float gfxQuality = Main.gfxQuality;
@@ -1523,28 +1523,28 @@ internal static class ModifiedTileDrawing
 
             if (color.R > num2 || color.G > num3 || color.B > num4)
             {
-                bool num13 = wd._tileArray[i - 1, j].wall > 0 && wallBlend[wd._tileArray[i - 1, j].wall] != wallBlend[tile.wall];
-                bool flag = wd._tileArray[i + 1, j].wall > 0 && wallBlend[wd._tileArray[i + 1, j].wall] != wallBlend[tile.wall];
-                bool flag2 = wd._tileArray[i, j - 1].wall > 0 && wallBlend[wd._tileArray[i, j - 1].wall] != wallBlend[tile.wall];
-                bool flag3 = wd._tileArray[i, j + 1].wall > 0 && wallBlend[wd._tileArray[i, j + 1].wall] != wallBlend[tile.wall];
+                bool num13 = wd._tileArray[x - 1, y].wall > 0 && wallBlend[wd._tileArray[x - 1, y].wall] != wallBlend[tile.wall];
+                bool flag = wd._tileArray[x + 1, y].wall > 0 && wallBlend[wd._tileArray[x + 1, y].wall] != wallBlend[tile.wall];
+                bool flag2 = wd._tileArray[x, y - 1].wall > 0 && wallBlend[wd._tileArray[x, y - 1].wall] != wallBlend[tile.wall];
+                bool flag3 = wd._tileArray[x, y + 1].wall > 0 && wallBlend[wd._tileArray[x, y + 1].wall] != wallBlend[tile.wall];
 
                 if (num13)
-                    Main.spriteBatch.Draw(TextureAssets.WallOutline.Value, new Vector2(i * 16 - (int)screenPosition.X, j * 16 - (int)screenPosition.Y), new Rectangle(0, 0, 2, 16), color, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+                    Main.spriteBatch.Draw(TextureAssets.WallOutline.Value, new Vector2(x * 16 - (int)screenPosition.X, y * 16 - (int)screenPosition.Y), new Rectangle(0, 0, 2, 16), color, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
 
                 if (flag)
-                    Main.spriteBatch.Draw(TextureAssets.WallOutline.Value, new Vector2(i * 16 - (int)screenPosition.X + 14, j * 16 - (int)screenPosition.Y), new Rectangle(14, 0, 2, 16), color, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+                    Main.spriteBatch.Draw(TextureAssets.WallOutline.Value, new Vector2(x * 16 - (int)screenPosition.X + 14, y * 16 - (int)screenPosition.Y), new Rectangle(14, 0, 2, 16), color, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
 
                 if (flag2)
-                    Main.spriteBatch.Draw(TextureAssets.WallOutline.Value, new Vector2(i * 16 - (int)screenPosition.X, j * 16 - (int)screenPosition.Y), new Rectangle(0, 0, 16, 2), color, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+                    Main.spriteBatch.Draw(TextureAssets.WallOutline.Value, new Vector2(x * 16 - (int)screenPosition.X, y * 16 - (int)screenPosition.Y), new Rectangle(0, 0, 16, 2), color, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
 
                 if (flag3)
-                    Main.spriteBatch.Draw(TextureAssets.WallOutline.Value, new Vector2(i * 16 - (int)screenPosition.X, j * 16 - (int)screenPosition.Y + 14), new Rectangle(0, 14, 16, 2), color, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+                    Main.spriteBatch.Draw(TextureAssets.WallOutline.Value, new Vector2(x * 16 - (int)screenPosition.X, y * 16 - (int)screenPosition.Y + 14), new Rectangle(0, 14, 16, 2), color, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
             }
         }
 
         if (!vanilla)
         {
-            WallLoader.PostDraw(i, j, wall, Main.spriteBatch);
+            WallLoader.PostDraw(x, y, wall, Main.spriteBatch);
         }
     }
 }
