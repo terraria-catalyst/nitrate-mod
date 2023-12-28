@@ -50,17 +50,19 @@ internal sealed class WallChunkCollection : ChunkCollection
 
                 Tile tile = Framing.GetTileSafely(tileX, tileY);
 
-                if (!tile.HasTile)
+                /*if (!tile.HasTile)
                 {
                     continue;
-                }
+                }*/
 
                 if (AnimatedTileRegistry.IsWallPossiblyAnimated(tile.WallType))
                 {
                     chunk.AnimatedPoints.Add(new Point(tileX, tileY));
                 }
-
-                ModifiedTileDrawing.DrawSingleWall(false, tileX, tileY, chunkPositionWorld);
+                else
+                {
+                    ModifiedTileDrawing.DrawSingleWall(false, tileX, tileY, chunkPositionWorld);
+                }
             }
         }
 

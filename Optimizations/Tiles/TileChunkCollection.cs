@@ -18,7 +18,7 @@ internal sealed class TileChunkCollection : ChunkCollection
     {
         Chunk chunk = Loaded[key];
         RenderTarget2D target = chunk.RenderTarget;
-        
+
         chunk.AnimatedPoints.Clear();
 
         GraphicsDevice device = Main.graphics.GraphicsDevice;
@@ -59,6 +59,11 @@ internal sealed class TileChunkCollection : ChunkCollection
                 if (!tile.HasTile || Main.instance.TilesRenderer.IsTileDrawLayerSolid(tile.type) != SolidLayer)
                 {
                     continue;
+                }
+
+                if (SolidLayer)
+                {
+                    Main.instance.TilesRenderer.DrawTile_LiquidBehindTile(SolidLayer, false, -1, chunkPositionWorld, Vector2.Zero, tileX, tileY, tile);
                 }
 
                 if (AnimatedTileRegistry.IsTilePossiblyAnimated(tile.TileType))

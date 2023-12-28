@@ -98,8 +98,8 @@ internal sealed class ChunkSystem : ModSystem
 
             lightingBuffer = new RenderTarget2D(
                 Main.graphics.GraphicsDevice,
-                (int)Math.Ceiling(Main.screenWidth / 16f) + (lighting_buffer_offscreen_range_tiles * 2),
-                (int)Math.Ceiling(Main.screenHeight / 16f) + (lighting_buffer_offscreen_range_tiles * 2)
+                (int)Math.Ceiling(Main.screenWidth / 16f) + lighting_buffer_offscreen_range_tiles * 2,
+                (int)Math.Ceiling(Main.screenHeight / 16f) + lighting_buffer_offscreen_range_tiles * 2
             );
 
             colorBuffer = new Color[lightingBuffer.Width * lightingBuffer.Height];
@@ -122,8 +122,8 @@ internal sealed class ChunkSystem : ModSystem
 
             lightingBuffer = new RenderTarget2D(
                 Main.graphics.GraphicsDevice,
-                (int)Math.Ceiling(Main.screenWidth / 16f) + (lighting_buffer_offscreen_range_tiles * 2),
-                (int)Math.Ceiling(Main.screenHeight / 16f) + (lighting_buffer_offscreen_range_tiles * 2)
+                (int)Math.Ceiling(Main.screenWidth / 16f) + lighting_buffer_offscreen_range_tiles * 2,
+                (int)Math.Ceiling(Main.screenHeight / 16f) + lighting_buffer_offscreen_range_tiles * 2
             );
 
             foreach (ChunkCollection chunkCollection in chunk_collections)
@@ -462,8 +462,8 @@ internal sealed class ChunkSystem : ModSystem
 
                     foreach (Point chunkKey in solid_tiles.Loaded.Keys)
                     {
-                        int chunkX = (chunkKey.X * CHUNK_SIZE) - (int)Main.screenPosition.X;
-                        int chunkY = (chunkKey.Y * CHUNK_SIZE) - (int)Main.screenPosition.Y;
+                        int chunkX = chunkKey.X * CHUNK_SIZE - (int)Main.screenPosition.X;
+                        int chunkY = chunkKey.Y * CHUNK_SIZE - (int)Main.screenPosition.Y;
 
                         Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX - offset, chunkY - offset, CHUNK_SIZE + offset, line_width), Color.Yellow);
                         Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX + CHUNK_SIZE - offset, chunkY - offset, line_width, CHUNK_SIZE + offset), Color.Yellow);
