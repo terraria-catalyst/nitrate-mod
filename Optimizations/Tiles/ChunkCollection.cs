@@ -271,6 +271,12 @@ internal sealed class TileChunkCollection : ChunkCollection
 
         device.SetRenderTargets(bindings);
     }
+
+    public void DoRenderTiles(GraphicsDevice graphicsGraphicsDevice, RenderTarget2D? screenSizeLightingBuffer, Lazy<Effect> lightMapRenderer)
+    {
+        DrawChunksToChunkTarget(graphicsGraphicsDevice);
+        RenderChunksWithLighting(screenSizeLightingBuffer, lightMapRenderer);
+    }
 }
 
 internal sealed class WallChunkCollection : ChunkCollection

@@ -52,9 +52,9 @@ internal sealed class ChunkSystem : ModSystem
 
     private const int lighting_buffer_offscreen_range_tiles = 1;
 
-    private static readonly ChunkCollection solid_tiles = new TileChunkCollection { SolidLayer = true };
-    private static readonly ChunkCollection non_solid_tiles = new TileChunkCollection { SolidLayer = false };
-    private static readonly ChunkCollection walls = new WallChunkCollection();
+    private static readonly TileChunkCollection solid_tiles = new() { SolidLayer = true };
+    private static readonly TileChunkCollection non_solid_tiles = new() { SolidLayer = false };
+    private static readonly WallChunkCollection walls = new();
     private static readonly ChunkCollection[] chunk_collections = { solid_tiles, non_solid_tiles, walls };
     private static readonly Lazy<Effect> light_map_renderer = new(() => ModContent.Request<Effect>("Nitrate/Assets/Effects/LightMapRenderer", AssetRequestMode.ImmediateLoad).Value);
     private static RenderTarget2D? lightingBuffer;
@@ -401,10 +401,7 @@ internal sealed class ChunkSystem : ModSystem
 
             Main.spriteBatch.TryEnd(out _);
 
-            non_solid_tiles.DrawChunksToChunkTarget(Main.graphics.GraphicsDevice);
-            non_solid_tiles.RenderChunksWithLighting(screenSizeLightingBuffer, light_map_renderer);
-
-            // Main.spriteBatch.End();
+            non_solid_tiles.DoRenderTiles(Main.graphics.GraphicsDevice, screenSizeLightingBuffer, light_map_renderer);
 
             Main.instance.DrawTileEntities(false, false, false);
 
@@ -422,8 +419,10 @@ internal sealed class ChunkSystem : ModSystem
         {
             Main.instance.TilesRenderer.PreDrawTiles(true, false, false);
 
-            solid_tiles.DrawChunksToChunkTarget(Main.graphics.GraphicsDevice);
-            solid_tiles.RenderChunksWithLighting(screenSizeLightingBuffer, light_map_renderer);
+            solid_tiles.DoRenderTiles(Main.graphics.GraphicsDevice, screenSizeLightingBuffer, light_map_renderer);
+            
+            Main.instance.DrawTileCracks(1, Main.LocalPlayer.hitReplace);
+            Main.instance.DrawTileCracks(1, Main.LocalPlayer.hitTile);
 
             Main.instance.DrawTileEntities(true, true, false);
 
