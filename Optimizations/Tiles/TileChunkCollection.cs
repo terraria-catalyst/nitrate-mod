@@ -61,17 +61,18 @@ internal sealed class TileChunkCollection : ChunkCollection
                     continue;
                 }
 
-                if (SolidLayer)
-                {
-                    Main.instance.TilesRenderer.DrawTile_LiquidBehindTile(SolidLayer, false, -1, chunkPositionWorld, Vector2.Zero, tileX, tileY, tile);
-                }
-
                 if (AnimatedTileRegistry.IsTilePossiblyAnimated(tile.TileType))
                 {
                     chunk.AnimatedPoints.Add(new Point(tileX, tileY));
                 }
                 else
                 {
+                    if (SolidLayer)
+                    {
+                        // Main.instance.TilesRenderer.DrawTile_LiquidBehindTile(SolidLayer, false, -1, chunkPositionWorld, Vector2.Zero, tileX, tileY, tile);
+                        ModifiedTileDrawing.DrawTile_LiquidBehindTile(SolidLayer, false, -1, chunkPositionWorld, Vector2.Zero, tileX, tileY, tile);
+                    }
+
                     ModifiedTileDrawing.DrawSingleTile(false, SolidLayer, tileX, tileY, chunkPositionWorld);
                 }
             }
@@ -186,6 +187,11 @@ internal sealed class TileChunkCollection : ChunkCollection
 
                 if (TileLoader.PreDraw(tilePoint.X, tilePoint.Y, tile.type, Main.spriteBatch))
                 {
+                    if (SolidLayer)
+                    {
+                        Main.instance.TilesRenderer.DrawTile_LiquidBehindTile(SolidLayer, false, -1, Main.screenPosition, Vector2.Zero, tilePoint.X, tilePoint.Y, tile);
+                    }
+
                     // Main.NewText(new Vector2(tilePoint.X * 16, tilePoint.Y * 16));
                     ModifiedTileDrawing.DrawSingleTile(true, SolidLayer, tilePoint.X, tilePoint.Y, Main.screenPosition);
                 }

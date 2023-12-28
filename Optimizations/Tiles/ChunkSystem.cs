@@ -281,9 +281,7 @@ internal sealed class ChunkSystem : ModSystem
         unsafe
         {
             fixed (Color* ptr = &colorBuffer[0])
-            {
                 lightingBuffer.SetDataPointerEXT(0, null, (IntPtr)ptr, colorBuffer.Length);
-            }
         }
     }
 

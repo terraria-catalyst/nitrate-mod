@@ -4,8 +4,6 @@ using Nitrate.API.Tiles;
 using Nitrate.Utilities;
 using System;
 using Terraria;
-using Terraria.GameContent;
-using Terraria.ID;
 
 namespace Nitrate.Optimizations.Tiles;
 
