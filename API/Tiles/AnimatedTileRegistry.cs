@@ -63,7 +63,6 @@ public sealed class AnimatedTileRegistry : ModSystem
     {
         { TileID.Plants, TileAnimatedType.SpecialPoint },
         { TileID.Torches, TileAnimatedType.Passive | TileAnimatedType.Interactable },
-        { TileID.Trees, TileAnimatedType.SpecialPoint }, // TODO: Necessary?
         { TileID.ClosedDoor, TileAnimatedType.Interactable }, // TODO: Necessary?
         { TileID.OpenDoor, TileAnimatedType.Interactable }, // TODO: Necessary?
         { TileID.Heart, TileAnimatedType.Passive },
@@ -81,7 +80,6 @@ public sealed class AnimatedTileRegistry : ModSystem
         { TileID.JunglePlants, TileAnimatedType.SpecialPoint },
         { TileID.JungleVines, TileAnimatedType.SpecialPoint },
         { TileID.MushroomPlants, TileAnimatedType.SpecialPoint },
-        // TileID.MushroomTrees
         { TileID.Plants2, TileAnimatedType.SpecialPoint },
         { TileID.JunglePlants2, TileAnimatedType.SpecialPoint },
         { TileID.Hellforge, TileAnimatedType.Passive },
