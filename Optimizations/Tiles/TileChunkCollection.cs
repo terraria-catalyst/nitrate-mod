@@ -78,7 +78,7 @@ internal sealed class TileChunkCollection : ChunkCollection
 
     public override void DrawChunksToChunkTarget(GraphicsDevice device)
     {
-        if (ScreenTarget_AffectedByLighting is null)
+        if (ScreenTarget is null)
         {
             return;
         }
@@ -90,7 +90,7 @@ internal sealed class TileChunkCollection : ChunkCollection
             ((RenderTarget2D)binding.RenderTarget).RenderTargetUsage = RenderTargetUsage.PreserveContents;
         }
 
-        device.SetRenderTarget(ScreenTarget_AffectedByLighting);
+        device.SetRenderTarget(ScreenTarget);
         device.Clear(Color.Transparent);
 
         Main.spriteBatch.Begin(
@@ -128,25 +128,7 @@ internal sealed class TileChunkCollection : ChunkCollection
             }
 
             Main.spriteBatch.Draw(target, new Vector2(chunkArea.X, chunkArea.Y) - screenPosition, Color.White);
-        }
 
-        Main.spriteBatch.End();
-
-        device.SetRenderTarget(ScreenTarget_AffectedByLighting);
-        device.Clear(Color.Transparent);
-
-        Main.spriteBatch.Begin(
-            SpriteSortMode.Deferred,
-            BlendState.AlphaBlend,
-            SamplerState.PointClamp,
-            DepthStencilState.None,
-            RasterizerState.CullNone,
-            null,
-            Main.GameViewMatrix.TransformationMatrix
-        );
-
-        foreach (Chunk chunk in Loaded.Values)
-        {
             foreach (Point tilePoint in chunk.AnimatedPoints)
             {
                 Tile tile = Framing.GetTileSafely(tilePoint);
