@@ -18,6 +18,8 @@ internal sealed class TileChunkCollection : ChunkCollection
     {
         Chunk chunk = Loaded[key];
         RenderTarget2D target = chunk.RenderTarget;
+        
+        chunk.AnimatedPoints.Clear();
 
         GraphicsDevice device = Main.graphics.GraphicsDevice;
 

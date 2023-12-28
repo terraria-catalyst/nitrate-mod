@@ -13,6 +13,8 @@ internal sealed class WallChunkCollection : ChunkCollection
         Chunk chunk = Loaded[key];
         RenderTarget2D target = chunk.RenderTarget;
 
+        chunk.AnimatedPoints.Clear();
+
         GraphicsDevice device = Main.graphics.GraphicsDevice;
 
         device.SetRenderTarget(target);
@@ -57,7 +59,8 @@ internal sealed class WallChunkCollection : ChunkCollection
                 {
                     chunk.AnimatedPoints.Add(new Point(tileX, tileY));
                 }
-                // ModifiedWallDrawing.DrawSingleWall(tileX, tileY, chunkPositionWorld);
+
+                ModifiedTileDrawing.DrawSingleWall(false, tileX, tileY, chunkPositionWorld);
             }
         }
 
@@ -123,6 +126,7 @@ internal sealed class WallChunkCollection : ChunkCollection
             foreach (Point wallPoint in chunk.AnimatedPoints)
             {
                 // ModifiedWallDrawing.DrawSingleWallMostlyUnmodified(wallPoint.X, wallPoint.Y, new Vector2(key.X * ChunkSystem.CHUNK_SIZE, key.Y * ChunkSystem.CHUNK_SIZE));
+                ModifiedTileDrawing.DrawSingleWall(true, wallPoint.X, wallPoint.Y, Main.screenPosition);
             }
         }
 
