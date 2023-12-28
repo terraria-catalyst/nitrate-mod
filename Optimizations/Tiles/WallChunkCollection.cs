@@ -53,11 +53,6 @@ internal sealed class WallChunkCollection : ChunkCollection
 
                 Tile tile = Framing.GetTileSafely(tileX, tileY);
 
-                if ( /*!tile.HasTile*/ tile.WallType <= WallID.None)
-                {
-                    continue;
-                }
-
                 if (AnimatedTileRegistry.IsWallPossiblyAnimated(tile.WallType))
                 {
                     chunk.AnimatedPoints.Add(new Point(tileX, tileY));

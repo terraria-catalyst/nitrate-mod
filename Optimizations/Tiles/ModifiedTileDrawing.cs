@@ -1414,7 +1414,9 @@ internal static class ModifiedTileDrawing
             return;
         }
 
-        if (wall <= 0 || wd.FullTile(x, y) || wall == 318 && !wd._shouldShowInvisibleWalls || tile.invisibleWall() && !wd._shouldShowInvisibleWalls)
+        // Don't check FullTile because we want walls to draw behind tiles as
+        // they lie on different chunk layers.
+        if (wall <= 0 || (vanilla && wd.FullTile(x, y)) || wall == 318 && !wd._shouldShowInvisibleWalls || tile.invisibleWall() && !wd._shouldShowInvisibleWalls)
         {
             return;
         }
