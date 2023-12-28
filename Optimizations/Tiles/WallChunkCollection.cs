@@ -69,7 +69,7 @@ internal sealed class WallChunkCollection : ChunkCollection
 
     public override void DrawChunksToChunkTarget(GraphicsDevice device)
     {
-        if (ScreenTarget is null)
+        if (ScreenTarget_AffectedByLighting is null)
         {
             return;
         }
@@ -81,7 +81,7 @@ internal sealed class WallChunkCollection : ChunkCollection
             ((RenderTarget2D)binding.RenderTarget).RenderTargetUsage = RenderTargetUsage.PreserveContents;
         }
 
-        device.SetRenderTarget(ScreenTarget);
+        device.SetRenderTarget(ScreenTarget_AffectedByLighting);
         device.Clear(Color.Transparent);
 
         Main.spriteBatch.Begin(

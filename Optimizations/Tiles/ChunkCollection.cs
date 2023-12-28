@@ -13,7 +13,9 @@ internal abstract class ChunkCollection
 
     public readonly List<Point> NeedsPopulating = new();
 
-    public RenderTarget2D? ScreenTarget { get; set; }
+    public RenderTarget2D? ScreenTarget_AffectedByLighting { get; set; }
+
+    public RenderTarget2D? ScreenTarget_NotAffectedByLighting { get; set; }
 
     public virtual void LoadChunk(Point key)
     {
@@ -44,7 +46,7 @@ internal abstract class ChunkCollection
 
     public virtual void RenderChunksWithLighting(RenderTarget2D? screenSizeLightingBuffer, Lazy<Effect> lightMapRenderer)
     {
-        if (ScreenTarget is null || screenSizeLightingBuffer is null)
+        if (ScreenTarget_AffectedByLighting is null || ScreenTarget_NotAffectedByLighting is null || screenSizeLightingBuffer is null)
         {
             return;
         }
@@ -60,7 +62,18 @@ internal abstract class ChunkCollection
 
         lightMapRenderer.Value.Parameters["lightMap"].SetValue(screenSizeLightingBuffer);
 
-        Main.spriteBatch.Draw(ScreenTarget, Vector2.Zero, Color.White);
+        Main.spriteBatch.Draw(ScreenTarget_AffectedByLighting, Vector2.Zero, Color.White);
+        Main.spriteBatch.End();
+
+        Main.spriteBatch.Begin(
+            SpriteSortMode.Immediate,
+            BlendState.AlphaBlend,
+            SamplerState.PointClamp,
+            DepthStencilState.None,
+            RasterizerState.CullNone
+        );
+
+        Main.spriteBatch.Draw(ScreenTarget_NotAffectedByLighting, Vector2.Zero, Color.White);
         Main.spriteBatch.End();
     }
 
@@ -78,8 +91,11 @@ internal abstract class ChunkCollection
                     chunk.Dispose();
                 }
 
-                ScreenTarget?.Dispose();
-                ScreenTarget = null;
+                ScreenTarget_AffectedByLighting?.Dispose();
+                ScreenTarget_AffectedByLighting = null;
+                
+                ScreenTarget_NotAffectedByLighting?.Dispose();
+                ScreenTarget_NotAffectedByLighting = null;
             });
 
             Loaded.Clear();

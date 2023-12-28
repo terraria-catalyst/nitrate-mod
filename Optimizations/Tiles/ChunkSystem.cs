@@ -105,7 +105,8 @@ internal sealed class ChunkSystem : ModSystem
 
             foreach (ChunkCollection chunkCollection in chunk_collections)
             {
-                chunkCollection.ScreenTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
+                chunkCollection.ScreenTarget_AffectedByLighting = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
+                chunkCollection.ScreenTarget_NotAffectedByLighting = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
             }
 
             screenSizeLightingBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
@@ -127,8 +128,11 @@ internal sealed class ChunkSystem : ModSystem
 
             foreach (ChunkCollection chunkCollection in chunk_collections)
             {
-                chunkCollection.ScreenTarget?.Dispose();
-                chunkCollection.ScreenTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
+                chunkCollection.ScreenTarget_AffectedByLighting?.Dispose();
+                chunkCollection.ScreenTarget_AffectedByLighting = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
+
+                chunkCollection.ScreenTarget_NotAffectedByLighting?.Dispose();
+                chunkCollection.ScreenTarget_NotAffectedByLighting = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
             }
 
             screenSizeLightingBuffer?.Dispose();
@@ -398,7 +402,7 @@ internal sealed class ChunkSystem : ModSystem
             // FIX: Last parameter (intoRenderTargets) is TRUE because it is
             // required for special counts to actually clear.
             Main.instance.TilesRenderer.PreDrawTiles(false, false, true);
-            
+
             non_solid_tiles.DoRenderTiles(Main.graphics.GraphicsDevice, screenSizeLightingBuffer, light_map_renderer, Main.spriteBatch.TryEnd(out SpriteBatchUtil.SpriteBatchSnapshot snapshot) ? snapshot : null);
 
             Main.instance.DrawTileEntities(false, false, false);
