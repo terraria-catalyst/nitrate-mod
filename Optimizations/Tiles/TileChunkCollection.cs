@@ -4,7 +4,6 @@ using Nitrate.API.Tiles;
 using Nitrate.Utilities;
 using System;
 using Terraria;
-using Terraria.DataStructures;
 using Terraria.GameContent;
 using Terraria.Graphics.Capture;
 using Terraria.ModLoader;
@@ -64,7 +63,10 @@ internal sealed class TileChunkCollection : ChunkCollection
                 {
                     chunk.AnimatedPoints.Add(new Point(tileX, tileY));
                 }
-                // ModifiedTileDrawing.DrawSingleTile(chunkPositionWorld, Vector2.Zero, tileX, tileY);
+                else
+                {
+                    ModifiedTileDrawing.DrawSingleTile(false, SolidLayer, tileX, tileY, chunkPositionWorld);
+                }
             }
         }
 
@@ -136,9 +138,6 @@ internal sealed class TileChunkCollection : ChunkCollection
                     continue;
                 }
 
-                // Main.instance.TilesRenderer.DrawSingleTile(new TileDrawInfo(), true, 0, new Vector2(tilePoint.X * 16, tilePoint.Y * 16), Vector2.Zero, tilePoint.X, tilePoint.Y);
-
-                // TODO: Check IsTileDrawLayerSolid, solidLayer, DrawTile_LiquidBehindTile
                 if (!TextureAssets.Tile[tile.type].IsLoaded)
                 {
                     Main.instance.LoadTiles(tile.type);
@@ -146,8 +145,8 @@ internal sealed class TileChunkCollection : ChunkCollection
 
                 if (TileLoader.PreDraw(tilePoint.X, tilePoint.Y, tile.type, Main.spriteBatch))
                 {
-                    // ModifiedTileDrawing.StillHandleSpecialsBecauseTerrariaWasPoorlyProgrammed(tile.type, true, tilePoint.X, tilePoint.Y, tile.frameX, tile.frameY, tile);
-                    Main.instance.TilesRenderer.DrawSingleTile(new TileDrawInfo(), true, 0, new Vector2(tilePoint.X * 16, tilePoint.Y * 16), Vector2.Zero, tilePoint.X, tilePoint.Y);
+                    // Main.NewText(new Vector2(tilePoint.X * 16, tilePoint.Y * 16));
+                    ModifiedTileDrawing.DrawSingleTile(true, SolidLayer, tilePoint.X, tilePoint.Y, Main.screenPosition);
                 }
 
                 TileLoader.PostDraw(tilePoint.X, tilePoint.Y, tile.type, Main.spriteBatch);
@@ -174,8 +173,6 @@ internal sealed class TileChunkCollection : ChunkCollection
 
         byte martianWhite = (byte)(100f + 150f * Main.martianLight);
         Main.instance.TilesRenderer._martianGlow = new Color(martianWhite, martianWhite, martianWhite, 0);
-
-        TileDrawInfo drawInfo = Main.instance.TilesRenderer._currentTileDrawInfo.Value!;
 
         DrawChunksToChunkTarget(graphicsGraphicsDevice);
         RenderChunksWithLighting(screenSizeLightingBuffer, lightMapRenderer);
