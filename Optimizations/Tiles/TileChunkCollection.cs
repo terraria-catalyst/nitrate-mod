@@ -187,8 +187,11 @@ internal sealed class TileChunkCollection : ChunkCollection
 
         if (SolidLayer)
         {
+            bool drawToScreen = Main.drawToScreen;
+            Main.drawToScreen = true;
             Main.instance.DrawTileCracks(1, Main.LocalPlayer.hitReplace);
             Main.instance.DrawTileCracks(1, Main.LocalPlayer.hitTile);
+            Main.drawToScreen = drawToScreen;
         }
 
         Main.instance.TilesRenderer.DrawSpecialTilesLegacy(unscaledPosition, offscreenRange);
