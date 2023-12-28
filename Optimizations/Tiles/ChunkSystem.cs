@@ -382,12 +382,7 @@ internal sealed class ChunkSystem : ModSystem
 
         c.EmitDelegate(() =>
         {
-            Main.spriteBatch.TryEnd(out SpriteBatchUtil.SpriteBatchSnapshot s);
-
-            walls.DrawChunksToChunkTarget(Main.graphics.GraphicsDevice);
-            walls.RenderChunksWithLighting(screenSizeLightingBuffer, light_map_renderer);
-
-            Main.spriteBatch.Begin(s.SortMode, s.BlendState, s.SamplerState, s.DepthStencilState, s.RasterizerState, s.Effect, s.TransformMatrix);
+            walls.DoRenderWalls(Main.graphics.GraphicsDevice, screenSizeLightingBuffer, light_map_renderer, Main.spriteBatch.TryEnd(out SpriteBatchUtil.SpriteBatchSnapshot s) ? s : null);
 
             Main.instance.DrawTileCracks(2, Main.LocalPlayer.hitReplace);
             Main.instance.DrawTileCracks(2, Main.LocalPlayer.hitTile);

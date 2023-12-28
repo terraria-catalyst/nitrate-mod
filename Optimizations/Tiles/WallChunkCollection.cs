@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Nitrate.API.Tiles;
+using Nitrate.Utilities;
 using System;
 using Terraria;
 
@@ -135,5 +136,35 @@ internal sealed class WallChunkCollection : ChunkCollection
         Main.spriteBatch.End();
 
         device.SetRenderTargets(bindings);
+    }
+
+    public void DoRenderWalls(GraphicsDevice graphicsDevice, RenderTarget2D? screenSizeLightingBuffer, Lazy<Effect> lightMapRenderer, SpriteBatchUtil.SpriteBatchSnapshot? snapshot)
+    {
+        DrawChunksToChunkTarget(graphicsDevice);
+        RenderChunksWithLighting(screenSizeLightingBuffer, lightMapRenderer);
+
+        if (snapshot.HasValue)
+        {
+            Main.tileBatch.Begin();
+            Main.spriteBatch.BeginWithSnapshot(snapshot.Value);
+        }
+
+        foreach (Point key in Loaded.Keys)
+        {
+            Chunk chunk = Loaded[key];
+
+            foreach (Point wallPoint in chunk.AnimatedPoints)
+            {
+                // ModifiedWallDrawing.DrawSingleWallMostlyUnmodified(wallPoint.X, wallPoint.Y, new Vector2(key.X * ChunkSystem.CHUNK_SIZE, key.Y * ChunkSystem.CHUNK_SIZE));
+                ModifiedTileDrawing.DrawSingleWall(true, wallPoint.X, wallPoint.Y, Main.screenPosition);
+            }
+        }
+
+        if (snapshot.HasValue)
+        {
+            Main.tileBatch.End();
+            Main.spriteBatch.End();
+            Main.spriteBatch.BeginWithSnapshot(snapshot.Value);
+        }
     }
 }

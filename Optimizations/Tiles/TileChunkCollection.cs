@@ -142,7 +142,7 @@ internal sealed class TileChunkCollection : ChunkCollection
         device.SetRenderTargets(bindings);
     }
 
-    public void DoRenderTiles(GraphicsDevice graphicsGraphicsDevice, RenderTarget2D? screenSizeLightingBuffer, Lazy<Effect> lightMapRenderer, SpriteBatchUtil.SpriteBatchSnapshot? snapshot)
+    public void DoRenderTiles(GraphicsDevice graphicsDevice, RenderTarget2D? screenSizeLightingBuffer, Lazy<Effect> lightMapRenderer, SpriteBatchUtil.SpriteBatchSnapshot? snapshot)
     {
         Vector2 unscaledPosition = Main.Camera.UnscaledPosition;
         Vector2 offscreenRange = Vector2.Zero; /*new(Main.offScreenRange, Main.offScreenRange);*/
@@ -158,7 +158,7 @@ internal sealed class TileChunkCollection : ChunkCollection
         byte martianWhite = (byte)(100f + 150f * Main.martianLight);
         Main.instance.TilesRenderer._martianGlow = new Color(martianWhite, martianWhite, martianWhite, 0);
 
-        DrawChunksToChunkTarget(graphicsGraphicsDevice);
+        DrawChunksToChunkTarget(graphicsDevice);
         RenderChunksWithLighting(screenSizeLightingBuffer, lightMapRenderer);
 
         if (snapshot.HasValue)
