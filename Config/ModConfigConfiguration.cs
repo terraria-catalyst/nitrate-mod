@@ -25,6 +25,10 @@ internal sealed class ModConfigConfiguration : IConfiguration
         [DefaultValue(false)]
         [UsedImplicitly(ImplicitUseKindFlags.Access | ImplicitUseKindFlags.Assign)]
         public bool ExperimentalTileRendererWarning { get; set; }
+        
+        [DefaultValue(true)]
+        [UsedImplicitly(ImplicitUseKindFlags.Access | ImplicitUseKindFlags.Assign)]
+        public bool UsesNewLaserRulerRendering { get; set; }
 
         /*[DefaultValue(true)]
         [UsedImplicitly(ImplicitUseKindFlags.Access | ImplicitUseKindFlags.Assign)]
@@ -41,5 +45,10 @@ internal sealed class ModConfigConfiguration : IConfiguration
     bool IConfiguration.DisabledExperimentalTileRendererWarning {
         get => Config.ExperimentalTileRendererWarning;
         set => Config.ExperimentalTileRendererWarning = value;
+    }
+
+    bool IConfiguration.UsesNewLaserRulerRendering {
+        get => Config.UsesNewLaserRulerRendering;
+        set => Config.UsesNewLaserRulerRendering = value;
     }
 }

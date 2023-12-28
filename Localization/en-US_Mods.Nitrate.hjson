@@ -16,6 +16,11 @@ Configs: {
 			Label: Faster Cursor
 			Tooltip: Rewrites cursor rendering to be considerably more responsive and not tied to game framerate.
 		}
+
+		UsesNewLaserRulerRendering: {
+			Label: Uses New Laser Ruler Rendering
+			Tooltip: Uses a new laser ruler rendering system which increases its performance vastly.
+		}
 	}
 }
 

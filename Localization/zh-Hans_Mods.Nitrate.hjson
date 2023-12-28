@@ -16,6 +16,11 @@ Configs: {
 			Label: 更快的光标
 			Tooltip: 重写光标的渲染, 大幅度提高其响应速度并使其不受游戏帧率的限制.
 		}
+
+		UsesNewLaserRulerRendering: {
+			// Label: Uses New Laser Ruler Rendering
+			// Tooltip: ""
+		}
 	}
 }
 
