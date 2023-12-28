@@ -37,9 +37,9 @@ internal sealed class WallChunkCollection : ChunkCollection
             RasterizerState.CullNone
         );
 
-        for (int i = 0; i < size_tiles; i++)
+        for (int i = -1; i < size_tiles + 1; i++)
         {
-            for (int j = 0; j < size_tiles; j++)
+            for (int j = -1; j < size_tiles + 1; j++)
             {
                 int tileX = chunkPositionTile.X + i;
                 int tileY = chunkPositionTile.Y + j;
