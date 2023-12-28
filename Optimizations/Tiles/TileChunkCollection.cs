@@ -182,6 +182,55 @@ internal sealed class TileChunkCollection : ChunkCollection
             Main.spriteBatch.BeginWithSnapshot(snapshot.Value);
         }
 
+        FnaVector2 screenPosition = Main.screenPosition;
+        Rectangle screenArea = new((int)screenPosition.X, (int)screenPosition.Y, Main.screenWidth, Main.screenHeight);
+
+        foreach (Point key in Loaded.Keys)
+        {
+            Chunk chunk = Loaded[key];
+            RenderTarget2D target = chunk.RenderTarget;
+
+            Rectangle chunkArea = new(key.X * ChunkSystem.CHUNK_SIZE, key.Y * ChunkSystem.CHUNK_SIZE, target.Width, target.Height);
+
+            if (!chunkArea.Intersects(screenArea))
+            {
+                continue;
+            }
+
+            // This should never happen, something catastrophic happened if it did.
+            // The check here is because rendering disposed targets generally has strange behaviour and doesn't always throw exceptions.
+            // Therefore this check needs to be made as it's more robust.
+            if (target.IsDisposed)
+            {
+                throw new Exception("Attempted to render a disposed chunk.");
+            }
+
+            Main.spriteBatch.Draw(target, new Vector2(chunkArea.X, chunkArea.Y) - screenPosition, Color.White);
+
+            foreach (Point tilePoint in chunk.AnimatedPoints)
+            {
+                Tile tile = Framing.GetTileSafely(tilePoint);
+
+                if (!tile.HasTile)
+                {
+                    continue;
+                }
+
+                if (!TextureAssets.Tile[tile.type].IsLoaded)
+                {
+                    Main.instance.LoadTiles(tile.type);
+                }
+
+                if (TileLoader.PreDraw(tilePoint.X, tilePoint.Y, tile.type, Main.spriteBatch))
+                {
+                    // Main.NewText(new Vector2(tilePoint.X * 16, tilePoint.Y * 16));
+                    ModifiedTileDrawing.DrawSingleTile(true, SolidLayer, tilePoint.X, tilePoint.Y, Main.screenPosition);
+                }
+
+                TileLoader.PostDraw(tilePoint.X, tilePoint.Y, tile.type, Main.spriteBatch);
+            }
+        }
+
         if (SolidLayer)
         {
             bool drawToScreen = Main.drawToScreen;
