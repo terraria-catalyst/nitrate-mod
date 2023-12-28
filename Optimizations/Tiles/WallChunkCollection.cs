@@ -53,7 +53,7 @@ internal sealed class WallChunkCollection : ChunkCollection
 
                 if (AnimatedTileRegistry.IsWallPossiblyAnimated(tile.WallType))
                 {
-                    chunk.AnimatedPoints.Add(new Point(tileX, tileY));
+                    chunk.AnimatedPoints.Add(new AnimatedPoint(tileX, tileY, AnimatedPointType.AnimatedTile));
                 }
                 else
                 {
@@ -135,7 +135,7 @@ internal sealed class WallChunkCollection : ChunkCollection
 
         if (snapshot.HasValue)
         {
-            Main.tileBatch.Begin();
+            Main.tileBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
             Main.spriteBatch.BeginWithSnapshot(snapshot.Value);
         }
 
@@ -143,8 +143,13 @@ internal sealed class WallChunkCollection : ChunkCollection
         {
             Chunk chunk = Loaded[key];
 
-            foreach (Point wallPoint in chunk.AnimatedPoints)
+            foreach (AnimatedPoint wallPoint in chunk.AnimatedPoints)
             {
+                if (wallPoint.Type != AnimatedPointType.AnimatedTile)
+                {
+                    continue;
+                }
+
                 // ModifiedWallDrawing.DrawSingleWallMostlyUnmodified(wallPoint.X, wallPoint.Y, new Vector2(key.X * ChunkSystem.CHUNK_SIZE, key.Y * ChunkSystem.CHUNK_SIZE));
                 // Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(wallPoint.X * 16 - (int)Main.screenPosition.X, wallPoint.Y * 16 - (int)Main.screenPosition.Y, 16, 16), Color.Red);
                 ModifiedTileDrawing.DrawSingleWall(true, wallPoint.X, wallPoint.Y, Main.screenPosition);

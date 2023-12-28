@@ -14,7 +14,7 @@ internal sealed class Chunk : IDisposable
 
     public RenderTarget2D RenderTarget { get; }
 
-    public List<Point> AnimatedPoints { get; } = new();
+    public List<AnimatedPoint> AnimatedPoints { get; } = new();
 
     public void Dispose()
     {

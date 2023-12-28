@@ -17,10 +17,6 @@ using Terraria.ModLoader;
 
 namespace Nitrate.Optimizations.Tiles;
 
-// TODO:
-// Make sure other effects such as dusts/tile cracks are rendered as well.
-// Ensure water squares can draw behind tiles.
-// Maybe make RenderTiles2 still run for the non-solid layer and tile deco/animated tiles?
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class ChunkSystem : ModSystem
 {
