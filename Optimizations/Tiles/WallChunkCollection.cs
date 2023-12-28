@@ -57,10 +57,7 @@ internal sealed class WallChunkCollection : ChunkCollection
                 {
                     chunk.AnimatedPoints.Add(new Point(tileX, tileY));
                 }
-                else
-                {
-                    ModifiedWallDrawing.DrawSingleWall(tileX, tileY, chunkPositionWorld);
-                }
+                // ModifiedWallDrawing.DrawSingleWall(tileX, tileY, chunkPositionWorld);
             }
         }
 
@@ -125,7 +122,7 @@ internal sealed class WallChunkCollection : ChunkCollection
 
             foreach (Point wallPoint in chunk.AnimatedPoints)
             {
-                ModifiedWallDrawing.DrawSingleWallMostlyUnmodified(wallPoint.X, wallPoint.Y, new Vector2(key.X * ChunkSystem.CHUNK_SIZE, key.Y * ChunkSystem.CHUNK_SIZE));
+                // ModifiedWallDrawing.DrawSingleWallMostlyUnmodified(wallPoint.X, wallPoint.Y, new Vector2(key.X * ChunkSystem.CHUNK_SIZE, key.Y * ChunkSystem.CHUNK_SIZE));
             }
         }
 

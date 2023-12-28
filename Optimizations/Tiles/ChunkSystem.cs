@@ -398,10 +398,8 @@ internal sealed class ChunkSystem : ModSystem
             // FIX: Last parameter (intoRenderTargets) is TRUE because it is
             // required for special counts to actually clear.
             Main.instance.TilesRenderer.PreDrawTiles(false, false, true);
-
-            Main.spriteBatch.TryEnd(out _);
-
-            non_solid_tiles.DoRenderTiles(Main.graphics.GraphicsDevice, screenSizeLightingBuffer, light_map_renderer);
+            
+            non_solid_tiles.DoRenderTiles(Main.graphics.GraphicsDevice, screenSizeLightingBuffer, light_map_renderer, Main.spriteBatch.TryEnd(out SpriteBatchUtil.SpriteBatchSnapshot snapshot) ? snapshot : null);
 
             Main.instance.DrawTileEntities(false, false, false);
 
@@ -418,11 +416,9 @@ internal sealed class ChunkSystem : ModSystem
         c.EmitDelegate(() =>
         {
             Main.instance.TilesRenderer.PreDrawTiles(true, false, false);
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.Transform);
 
-            solid_tiles.DoRenderTiles(Main.graphics.GraphicsDevice, screenSizeLightingBuffer, light_map_renderer);
-            
-            Main.instance.DrawTileCracks(1, Main.LocalPlayer.hitReplace);
-            Main.instance.DrawTileCracks(1, Main.LocalPlayer.hitTile);
+            solid_tiles.DoRenderTiles(Main.graphics.GraphicsDevice, screenSizeLightingBuffer, light_map_renderer, Main.spriteBatch.TryEnd(out SpriteBatchUtil.SpriteBatchSnapshot snapshot) ? snapshot : null);
 
             Main.instance.DrawTileEntities(true, true, false);
 

@@ -1,10 +1,12 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Nitrate.API.Tiles;
+using Nitrate.Utilities;
 using System;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent;
+using Terraria.Graphics.Capture;
 using Terraria.ModLoader;
 
 namespace Nitrate.Optimizations.Tiles;
@@ -62,10 +64,7 @@ internal sealed class TileChunkCollection : ChunkCollection
                 {
                     chunk.AnimatedPoints.Add(new Point(tileX, tileY));
                 }
-                else
-                {
-                    ModifiedTileDrawing.DrawSingleTile(chunkPositionWorld, Vector2.Zero, tileX, tileY);
-                }
+                // ModifiedTileDrawing.DrawSingleTile(chunkPositionWorld, Vector2.Zero, tileX, tileY);
             }
         }
 
@@ -147,7 +146,7 @@ internal sealed class TileChunkCollection : ChunkCollection
 
                 if (TileLoader.PreDraw(tilePoint.X, tilePoint.Y, tile.type, Main.spriteBatch))
                 {
-                    ModifiedTileDrawing.StillHandleSpecialsBecauseTerrariaWasPoorlyProgrammed(tile.type, true, tilePoint.X, tilePoint.Y, tile.frameX, tile.frameY, tile);
+                    // ModifiedTileDrawing.StillHandleSpecialsBecauseTerrariaWasPoorlyProgrammed(tile.type, true, tilePoint.X, tilePoint.Y, tile.frameX, tile.frameY, tile);
                     Main.instance.TilesRenderer.DrawSingleTile(new TileDrawInfo(), true, 0, new Vector2(tilePoint.X * 16, tilePoint.Y * 16), Vector2.Zero, tilePoint.X, tilePoint.Y);
                 }
 
@@ -160,9 +159,49 @@ internal sealed class TileChunkCollection : ChunkCollection
         device.SetRenderTargets(bindings);
     }
 
-    public void DoRenderTiles(GraphicsDevice graphicsGraphicsDevice, RenderTarget2D? screenSizeLightingBuffer, Lazy<Effect> lightMapRenderer)
+    public void DoRenderTiles(GraphicsDevice graphicsGraphicsDevice, RenderTarget2D? screenSizeLightingBuffer, Lazy<Effect> lightMapRenderer, SpriteBatchUtil.SpriteBatchSnapshot? snapshot)
     {
+        Vector2 unscaledPosition = Main.Camera.UnscaledPosition;
+        Vector2 offscreenRange = Vector2.Zero; /*new(Main.offScreenRange, Main.offScreenRange);*/
+
+        if (!SolidLayer)
+        {
+            Main.critterCage = true;
+        }
+
+        Main.instance.TilesRenderer.EnsureWindGridSize();
+        Main.instance.TilesRenderer.ClearLegacyCachedDraws();
+
+        byte martianWhite = (byte)(100f + 150f * Main.martianLight);
+        Main.instance.TilesRenderer._martianGlow = new Color(martianWhite, martianWhite, martianWhite, 0);
+
+        TileDrawInfo drawInfo = Main.instance.TilesRenderer._currentTileDrawInfo.Value!;
+
         DrawChunksToChunkTarget(graphicsGraphicsDevice);
         RenderChunksWithLighting(screenSizeLightingBuffer, lightMapRenderer);
+
+        if (snapshot.HasValue)
+        {
+            Main.spriteBatch.BeginWithSnapshot(snapshot.Value);
+        }
+
+        if (SolidLayer)
+        {
+            Main.instance.DrawTileCracks(1, Main.LocalPlayer.hitReplace);
+            Main.instance.DrawTileCracks(1, Main.LocalPlayer.hitTile);
+        }
+
+        Main.instance.TilesRenderer.DrawSpecialTilesLegacy(unscaledPosition, offscreenRange);
+
+        if (TileObject.objectPreview.Active && Main.LocalPlayer.cursorItemIconEnabled && Main.placementPreview && !CaptureManager.Instance.Active)
+        {
+            Main.instance.LoadTiles(TileObject.objectPreview.Type);
+            TileObject.DrawPreview(Main.spriteBatch, TileObject.objectPreview, unscaledPosition - offscreenRange);
+        }
+
+        if (snapshot.HasValue)
+        {
+            Main.spriteBatch.TryEnd(out _);
+        }
     }
 }
