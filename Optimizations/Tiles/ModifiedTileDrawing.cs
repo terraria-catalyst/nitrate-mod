@@ -1414,7 +1414,7 @@ internal static class ModifiedTileDrawing
             return;
         }
 
-        if (wall <= 0 || !wd.FullTile(i, j) || wall == 318 && !wd._shouldShowInvisibleWalls || tile.invisibleWall() && !wd._shouldShowInvisibleWalls)
+        if (wall <= 0 || wd.FullTile(i, j) || wall == 318 && !wd._shouldShowInvisibleWalls || tile.invisibleWall() && !wd._shouldShowInvisibleWalls)
         {
             return;
         }
