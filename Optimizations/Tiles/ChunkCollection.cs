@@ -7,6 +7,7 @@ using System.Linq;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent;
+using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace Nitrate.Optimizations.Tiles;
@@ -94,7 +95,7 @@ internal abstract class ChunkCollection
     public virtual void RemoveOutOfBoundsAndPopulate(int topX, int bottomX, int topY, int bottomY)
     {
         List<Point> removeList = new();
-        
+
         foreach (Point key in Loaded.Keys)
         {
             if (key.X >= topX && key.X <= bottomX && key.Y >= topY && key.Y <= bottomY)
@@ -105,7 +106,7 @@ internal abstract class ChunkCollection
             UnloadChunk(key);
             removeList.Add(key);
         }
-        
+
         foreach (Point key in removeList)
         {
             Loaded.Remove(key);
@@ -115,7 +116,7 @@ internal abstract class ChunkCollection
         {
             PopulateChunk(key);
         }
-        
+
         NeedsPopulating.Clear();
     }
 }
@@ -164,7 +165,7 @@ internal sealed class TileChunkCollection : ChunkCollection
 
                 Tile tile = Framing.GetTileSafely(tileX, tileY);
 
-                if (!tile.HasTile)
+                if (!tile.HasTile || Main.instance.TilesRenderer.IsTileDrawLayerSolid(tile.type) != SolidLayer)
                 {
                     continue;
                 }
