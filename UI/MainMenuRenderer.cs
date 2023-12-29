@@ -75,7 +75,7 @@ internal sealed class MainMenuRenderer : ModSystem
         string nitrateWarning = "Menu.NitrateWarning".LocalizeNitrate();
         drawText(nitrateWarning, new FnaVector2(padding, padding + charHeight), Color.PaleVioletRed, 0f, FnaVector2.Zero, new FnaVector2(small_text_scale));
 
-        Rectangle giveUsMoneyBox = new(padding, mainBox.Y + mainBox.Height + 6 + padding, 425, (int)(charHeight + (charHeight * small_text_scale)));
+        Rectangle giveUsMoneyBox = new(padding, mainBox.Y + mainBox.Height + 6 + padding, 425, (int)(charHeight + charHeight * small_text_scale));
         BoxRenderer.DrawBox(Main.spriteBatch, giveUsMoneyBox);
 
         string giveUsMoney = "Menu.GiveUsMoney".LocalizeNitrate();
