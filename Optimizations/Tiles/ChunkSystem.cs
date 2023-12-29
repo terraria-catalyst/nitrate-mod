@@ -74,6 +74,8 @@ internal sealed class ChunkSystem : ModSystem
         TileStateChangedListener.OnTileSingleStateChange += TileStateChanged;
         TileStateChangedListener.OnWallSingleStateChange += WallStateChanged;
 
+        DynamicTileVisibilityListener.OnVisibilityChange += TileVisibilityChanged;
+
         // Disable RenderX methods in relation to tile rendering. These methods
         // are responsible for drawing the tile render target in vanilla.
         IL_Main.RenderTiles += CancelVanillaRendering;
@@ -360,6 +362,17 @@ internal sealed class ChunkSystem : ModSystem
         if (!walls.NeedsPopulating.Contains(chunkKey))
         {
             walls.NeedsPopulating.Add(chunkKey);
+        }
+    }
+
+    private static void TileVisibilityChanged(DynamicTileVisibilityListener.VisibilityType types)
+    {
+        foreach (ChunkCollection chunkCollection in chunk_collections)
+        {
+            foreach (Point chunkKey in chunkCollection.Loaded.Keys)
+            {
+                chunkCollection.NeedsPopulating.Add(chunkKey);
+            }
         }
     }
 
