@@ -33,7 +33,9 @@ Menu: {
 		'''
 	GiveUsMoney: Consider supporting us!
 	Patreon: "[c/FF424D:Patreon]: [c/7289DA:{0}] <-- (clickable!)"
-	Ignore: Patreon:
+	PatreonPrefix: Patreon:
+	Discord: "[c/5865F2:Discord]: [c/7289DA:{0}]"
+	DiscordPrefix: Discord:
 	SIMD: Supports SIMD: {0}
 	NETVersion: .NET Version: {0}
 	OS: OS: {0}

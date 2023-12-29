@@ -75,25 +75,38 @@ internal sealed class MainMenuRenderer : ModSystem
         string nitrateWarning = "Menu.NitrateWarning".LocalizeNitrate();
         drawText(nitrateWarning, new FnaVector2(padding, padding + charHeight), Color.PaleVioletRed, 0f, FnaVector2.Zero, new FnaVector2(small_text_scale));
 
-        Rectangle giveUsMoneyBox = new(padding, mainBox.Y + mainBox.Height + 6 + padding, 425, (int)(charHeight + charHeight * small_text_scale));
+        Rectangle giveUsMoneyBox = new(padding, mainBox.Y + mainBox.Height + 6 + padding, 425, (int)(charHeight + charHeight * small_text_scale * 2));
         BoxRenderer.DrawBox(Main.spriteBatch, giveUsMoneyBox);
 
         string giveUsMoney = "Menu.GiveUsMoney".LocalizeNitrate();
         const string condescending = ";)";
         string patreon = "Menu.Patreon".LocalizeNitrate(PATREON);
+        string discord = "Menu.Discord".LocalizeNitrate(DISCORD);
         drawText(giveUsMoney, new FnaVector2(padding, giveUsMoneyBox.Y), Color.White, 0f, FnaVector2.Zero, FnaVector2.One);
         drawText(condescending, new FnaVector2(padding + font.MeasureString(giveUsMoney).X + title_version_spacing, giveUsMoneyBox.Y + charHeight * ((1f - small_text_scale) / 2f)), Color.White, 0f, FnaVector2.Zero, new FnaVector2(small_text_scale));
         drawText(patreon, new FnaVector2(padding, giveUsMoneyBox.Y + charHeight), Color.White, 0f, FnaVector2.Zero, new FnaVector2(small_text_scale));
+        drawText(discord, new FnaVector2(padding, giveUsMoneyBox.Y + charHeight * 2), Color.White, 0f, FnaVector2.Zero, new FnaVector2(small_text_scale));
 
-        string ignore = "Menu.Ignore".LocalizeNitrate();
-        float ignoreWidth = font.MeasureString(ignore).X * small_text_scale;
-        float clickableWidth = font.MeasureString(PATREON).X * small_text_scale;
-        float clickableHeight = charHeight * small_text_scale;
-        Rectangle clickableBox = new((int)(padding + ignoreWidth), (int)(giveUsMoneyBox.Y + charHeight), (int)clickableWidth, (int)clickableHeight);
+        string patreonPrefix = "Menu.PatreonPrefix".LocalizeNitrate();
+        float patreonPrefixWidth = font.MeasureString(patreonPrefix).X * small_text_scale;
+        float patreonClickableWidth = font.MeasureString(PATREON).X * small_text_scale;
+        float patreonClickableHeight = charHeight * small_text_scale;
+        Rectangle patreonBox = new((int)(padding + patreonPrefixWidth), (int)(giveUsMoneyBox.Y + charHeight), (int)patreonClickableWidth, (int)patreonClickableHeight);
 
-        if (Main.mouseLeft && Main.mouseLeftRelease && clickableBox.Intersects(new Rectangle(Main.mouseX, Main.mouseY, 1, 1)))
+        if (Main.mouseLeft && Main.mouseLeftRelease && patreonBox.Intersects(new Rectangle(Main.mouseX, Main.mouseY, 1, 1)))
         {
             Utils.OpenToURL($"https://{PATREON}");
+        }
+
+        string discordPrefix = "Menu.PatreonPrefix".LocalizeNitrate();
+        float discordPrefixWidth = font.MeasureString(discordPrefix).X * small_text_scale;
+        float discordClickableWidth = font.MeasureString(DISCORD).X * small_text_scale;
+        float discordClickableHeight = charHeight * small_text_scale;
+        Rectangle discordBox = new((int)(padding + discordPrefixWidth), (int)(giveUsMoneyBox.Y + charHeight), (int)discordClickableWidth, (int)discordClickableHeight);
+
+        if (Main.mouseLeft && Main.mouseLeftRelease && discordBox.Intersects(new Rectangle(Main.mouseX, Main.mouseY, 1, 1)))
+        {
+            Utils.OpenToURL($"https://{DISCORD}");
         }
 
         Rectangle debugBox = new(padding, giveUsMoneyBox.Y + giveUsMoneyBox.Height + 6 + padding, 425, (int)(charHeight * 4 * small_text_scale));

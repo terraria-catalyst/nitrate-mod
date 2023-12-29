@@ -21,7 +21,12 @@ public sealed class NitrateMod : Mod
     /// <summary>
     ///     The Patreon link for Team Catalyst, Nitrate's development team.
     /// </summary>
-    public const string PATREON = "patreon.com/TeamCatalyst";
+    public const string PATREON = "www.patreon.com/TeamCatalyst";
+
+    /// <summary>
+    ///     The Discord invite to the Team Catalyst Discord server.
+    /// </summary>
+    public const string DISCORD = "www.discord.gg/vPTUZcvXjg";
 
     public static IConfiguration Configuration => ModContent.GetInstance<NitrateMod>().configuration;
 
