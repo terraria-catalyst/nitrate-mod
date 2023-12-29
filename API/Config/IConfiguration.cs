@@ -23,4 +23,9 @@ public interface IConfiguration
     ///     disabled.
     /// </summary>
     bool DisabledExperimentalTileRendererWarning { get; set; }
+    
+    /// <summary>
+    ///     If the new laser ruler rendering system should be used over the vanilla one.
+    /// </summary>
+    bool UsesNewLaserRulerRendering { get; set; }
 }
