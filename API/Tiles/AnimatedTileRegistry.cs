@@ -429,7 +429,7 @@ public sealed class AnimatedTileRegistry : ModSystem
             }
         }
     }
-    
+
     public static void RegisterTile(int tileId, TileAnimatedType type)
     {
         if (!tiles.ContainsKey(tileId))
@@ -441,7 +441,7 @@ public sealed class AnimatedTileRegistry : ModSystem
             tiles[tileId] |= type;
         }
     }
-    
+
     public static void RegisterWall(int wallId, TileAnimatedType type)
     {
         if (!walls.ContainsKey(wallId))
@@ -469,8 +469,10 @@ public sealed class AnimatedTileRegistry : ModSystem
                                                              TileID.Sets.TreeSapling[tileId] ||
                                                              IsTileDynamicallyAnimated(tileId);
 
+    // TODO: TEMPORARY: Disable support for these dynamically animated tiles until we figure out a better way to handle them.
     // Main::tileShine2?
-    private static bool IsTileDynamicallyAnimated(int tileId) => TileID.Sets.CorruptBiomeSight[tileId] || TileID.Sets.CrimsonBiomeSight[tileId] || TileID.Sets.HallowBiomeSight[tileId] || Main.tileSpelunker[tileId] || IsTileDangerous(tileId);
+    // private static bool IsTileDynamicallyAnimated(int tileId) => TileID.Sets.CorruptBiomeSight[tileId] || TileID.Sets.CrimsonBiomeSight[tileId] || TileID.Sets.HallowBiomeSight[tileId] || Main.tileSpelunker[tileId] || IsTileDangerous(tileId);
+    private static bool IsTileDynamicallyAnimated(int tileId) => false;
 
     private static bool IsTileDangerous(int tileId) => TileID.Sets.Boulders[tileId] || /*Minecart.IsPressurePlate()*/ tileId == TileID.MinecartTrack ||
                                                        tileId == TileID.CrispyHoneyBlock ||
