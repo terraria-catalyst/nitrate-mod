@@ -1562,4 +1562,24 @@ internal static class ModifiedTileDrawing
             WallLoader.PostDraw(x, y, wall, Main.spriteBatch);
         }
     }
+
+    public static void DrawLiquidBehindTiles()
+    {
+        Vector2 unscaledPosition = Main.Camera.UnscaledPosition;
+        Vector2 vector = Vector2.Zero;
+        Main.instance.TilesRenderer.GetScreenDrawArea(unscaledPosition, vector + (Main.Camera.UnscaledPosition - Main.Camera.ScaledPosition), out var firstTileX, out var lastTileX, out var firstTileY, out var lastTileY);
+
+        for (int i = firstTileY; i < lastTileY + 4; i++)
+        {
+            for (int j = firstTileX - 2; j < lastTileX + 2; j++)
+            {
+                Tile tile = Main.tile[j, i];
+
+                if (tile != null)
+                {
+                    Main.instance.TilesRenderer.DrawTile_LiquidBehindTile(true, false, -1, unscaledPosition, vector, j, i, tile);
+                }
+            }
+        }
+    }
 }
