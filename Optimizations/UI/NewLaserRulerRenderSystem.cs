@@ -40,7 +40,7 @@ internal sealed class NewLaserRulerRenderSystem : ModSystem
 
         cursor.GotoNext(MoveType.After, instr => instr.MatchBrfalse(out ILLabel _));
         cursor.GotoNext(MoveType.After, instr => instr.MatchBrfalse(out ILLabel _));
-        cursor.Index++;
+        cursor.Index += 2; // Skip 'ret' and 'ldsfld' instructions.
 
         cursor.EmitDelegate<Func<bool>>(() =>
         {
@@ -143,6 +143,7 @@ internal sealed class NewLaserRulerRenderSystem : ModSystem
 
         ILLabel label = cursor.DefineLabel();
         cursor.Emit(OpCodes.Brfalse, label);
+        cursor.Emit(OpCodes.Pop);
         cursor.Emit(OpCodes.Ret);
         cursor.MarkLabel(label);
     }
