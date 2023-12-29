@@ -51,6 +51,8 @@ public sealed class TileStateChangedListener : ModSystem
         // On_Player.PlaceThing_TryReplacingTiles += TryReplacingTiles;
         // On_Player.PlaceThing_TryReplacingWalls += TryReplacingWalls;
         On_WorldGen.ReplaceTIle_DoActualReplacement += DoActualReplacement;
+
+        On_Player.TileInteractionsUse += TileInteractionsUse;
     }
 
     private static bool PlaceTile(On_WorldGen.orig_PlaceTile orig, int i, int j, int type, bool mute, bool forced, int plr, int style)
@@ -156,5 +158,11 @@ public sealed class TileStateChangedListener : ModSystem
     {
         orig(targetType, targetStyle, topLeftX, topLeftY, t);
         OnTileSingleStateChange?.Invoke(topLeftX, topLeftY);
+    }
+
+    private static void TileInteractionsUse(On_Player.orig_TileInteractionsUse orig, Player self, int myX, int myY)
+    {
+        orig(self, myX, myY);
+        OnTileSingleStateChange?.Invoke(myX, myY);
     }
 }
