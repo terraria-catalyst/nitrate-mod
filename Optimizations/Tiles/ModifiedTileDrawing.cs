@@ -1078,7 +1078,7 @@ internal static class ModifiedTileDrawing
             case 638:
                 if (true)
                 {
-                    Main.instance.TilesRenderer.CrawlToTopOfVineAndAddSpecialPoint(y, x);
+                    CrawlToTopOfVineAndAddSpecialPoint(y, x);
                 }
 
                 break;
@@ -1580,6 +1580,31 @@ internal static class ModifiedTileDrawing
                     Main.instance.TilesRenderer.DrawTile_LiquidBehindTile(true, false, -1, unscaledPosition, vector, j, i, tile);
                 }
             }
+        }
+    }
+
+    private static void CrawlToTopOfVineAndAddSpecialPoint(int j, int i)
+    {
+        int y = j;
+
+        for (int num = j - 1; num > 0; num--)
+        {
+            Tile tile = Main.tile[i, num];
+
+            if (WorldGen.SolidTile(i, num) || !tile.active())
+            {
+                y = num + 1;
+
+                break;
+            }
+        }
+
+        Point item = new Point(i, y);
+
+        if (!Main.instance.TilesRenderer._vineRootsPositions.Contains(item))
+        {
+            Main.instance.TilesRenderer._vineRootsPositions.Add(item);
+            Main.instance.TilesRenderer.AddSpecialPoint(i, y, TileDrawing.TileCounterType.Vine);
         }
     }
 }
