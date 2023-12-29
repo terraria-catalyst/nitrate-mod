@@ -155,7 +155,7 @@ internal sealed class TileChunkCollection : ChunkCollection
         byte martianWhite = (byte)(100f + 150f * Main.martianLight);
         Main.instance.TilesRenderer._martianGlow = new Color(martianWhite, martianWhite, martianWhite, 0);
 
-        Main.tileBatch.Begin();
+        Main.tileBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
         ModifiedTileDrawing.DrawLiquidBehindTiles();
         Main.tileBatch.End();
 
