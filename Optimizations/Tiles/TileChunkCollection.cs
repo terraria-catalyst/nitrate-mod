@@ -186,14 +186,8 @@ internal sealed class TileChunkCollection : ChunkCollection
                     {
                         Main.instance.LoadTiles(tile.type);
                     }
-
-                    if (TileLoader.PreDraw(tilePoint.X, tilePoint.Y, tile.type, Main.spriteBatch))
-                    {
-                        // Main.NewText(new Vector2(tilePoint.X * 16, tilePoint.Y * 16));
-                        ModifiedTileDrawing.DrawSingleTile(true, SolidLayer, tilePoint.X, tilePoint.Y, Main.screenPosition);
-                    }
-
-                    TileLoader.PostDraw(tilePoint.X, tilePoint.Y, tile.type, Main.spriteBatch);
+                    
+                    ModifiedTileDrawing.DrawSingleTile(true, SolidLayer, tilePoint.X, tilePoint.Y, Main.screenPosition);
                 }
             }
         }

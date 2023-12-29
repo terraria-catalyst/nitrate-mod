@@ -53,13 +53,18 @@ internal static class ModifiedTileDrawing
 
         if (vanilla)
         {
+            Main.screenPosition += new Vector2(Main.offScreenRange);
+
             if (TileLoader.PreDraw(j, i, type, Main.spriteBatch))
             {
+                Main.screenPosition -= new Vector2(Main.offScreenRange);
                 AddSpecialPointsForTile(tile, x, y);
                 DrawSingleTile_Inner(vanilla, solid, x, y, screenPosition, Vector2.Zero, tile, type);
             }
 
+            Main.screenPosition += new Vector2(Main.offScreenRange);
             TileLoader.PostDraw(j, i, type, Main.spriteBatch);
+            Main.screenPosition -= new Vector2(Main.offScreenRange);
         }
         else
         {
