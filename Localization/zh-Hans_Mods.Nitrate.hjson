@@ -18,8 +18,8 @@ Configs: {
 		}
 
 		UsesNewLaserRulerRendering: {
-			// Label: Uses New Laser Ruler Rendering
-			// Tooltip: ""
+			Label: 使用新的激光标尺渲染
+			Tooltip: 使用新的激光标尺渲染系统, 大幅度提高其性能.
 		}
 	}
 }
