@@ -32,7 +32,6 @@ public sealed class DynamicTileVisibilityListener : ModSystem
     private static bool oldSpelunker;
     private static bool oldDangersense;
     private static bool oldEcho;
-    private static bool oldEchoMonolith;
     private static bool oldBiomeSight;
 
     public override void PostUpdateEverything()
