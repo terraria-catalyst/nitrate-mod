@@ -47,6 +47,7 @@ internal sealed class ChunkSystem : ModSystem
     private const int chunk_offscreen_buffer = 1;
 
     private const int lighting_buffer_offscreen_range_tiles = 1;
+    private const int edge_threshold = 3;
 
     private static readonly TileChunkCollection solid_tiles = new() { SolidLayer = true };
     private static readonly TileChunkCollection non_solid_tiles = new() { SolidLayer = false };
@@ -331,18 +332,42 @@ internal sealed class ChunkSystem : ModSystem
         int chunkX = (int)Math.Floor(i / (CHUNK_SIZE / 16.0));
         int chunkY = (int)Math.Floor(j / (CHUNK_SIZE / 16.0));
 
-        Point chunkKey = new(chunkX, chunkY);
-
-        foreach (ChunkCollection chunkCollection in new [] { non_solid_tiles, solid_tiles })
+        List<Point> chunkKeys = new()
         {
-            if (!chunkCollection.Loaded.ContainsKey(chunkKey))
-            {
-                return;
-            }
+            new Point(chunkX, chunkY),
+        };
 
-            if (!chunkCollection.NeedsPopulating.Contains(chunkKey))
+        if (i % CHUNK_SIZE < edge_threshold)
+        {
+            chunkKeys.Add(new Point(chunkX - 1, chunkY));
+        }
+        else if (i % CHUNK_SIZE > CHUNK_SIZE - edge_threshold)
+        {
+            chunkKeys.Add(new Point(chunkX + 1, chunkY));
+        }
+
+        if (j % CHUNK_SIZE < edge_threshold)
+        {
+            chunkKeys.Add(new Point(chunkX, chunkY - 1));
+        }
+        else if (j % CHUNK_SIZE > CHUNK_SIZE - edge_threshold)
+        {
+            chunkKeys.Add(new Point(chunkX, chunkY + 1));
+        }
+
+        foreach (TileChunkCollection chunkCollection in new[] { non_solid_tiles, solid_tiles })
+        {
+            foreach (Point chunkKey in chunkKeys)
             {
-                chunkCollection.NeedsPopulating.Add(chunkKey);
+                if (!chunkCollection.Loaded.ContainsKey(chunkKey))
+                {
+                    return;
+                }
+
+                if (!chunkCollection.NeedsPopulating.Contains(chunkKey))
+                {
+                    chunkCollection.NeedsPopulating.Add(chunkKey);
+                }
             }
         }
     }
@@ -352,16 +377,40 @@ internal sealed class ChunkSystem : ModSystem
         int chunkX = (int)Math.Floor(i / (CHUNK_SIZE / 16.0));
         int chunkY = (int)Math.Floor(j / (CHUNK_SIZE / 16.0));
 
-        Point chunkKey = new(chunkX, chunkY);
-
-        if (!walls.Loaded.ContainsKey(chunkKey))
+        List<Point> chunkKeys = new()
         {
-            return;
+            new Point(chunkX, chunkY),
+        };
+
+        if (i % CHUNK_SIZE < edge_threshold)
+        {
+            chunkKeys.Add(new Point(chunkX - 1, chunkY));
+        }
+        else if (i % CHUNK_SIZE > CHUNK_SIZE - edge_threshold)
+        {
+            chunkKeys.Add(new Point(chunkX + 1, chunkY));
         }
 
-        if (!walls.NeedsPopulating.Contains(chunkKey))
+        if (j % CHUNK_SIZE < edge_threshold)
         {
-            walls.NeedsPopulating.Add(chunkKey);
+            chunkKeys.Add(new Point(chunkX, chunkY - 1));
+        }
+        else if (j % CHUNK_SIZE > CHUNK_SIZE - edge_threshold)
+        {
+            chunkKeys.Add(new Point(chunkX, chunkY + 1));
+        }
+
+        foreach (Point chunkKey in chunkKeys)
+        {
+            if (!walls.Loaded.ContainsKey(chunkKey))
+            {
+                return;
+            }
+
+            if (!walls.NeedsPopulating.Contains(chunkKey))
+            {
+                walls.NeedsPopulating.Add(chunkKey);
+            }
         }
     }
 
