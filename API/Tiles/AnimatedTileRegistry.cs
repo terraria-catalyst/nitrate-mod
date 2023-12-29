@@ -97,6 +97,7 @@ public sealed class AnimatedTileRegistry : ModSystem
         { TileID.HallowedPlants, TileAnimatedType.SpecialPoint },
         { TileID.HallowedPlants2, TileAnimatedType.SpecialPoint },
         { TileID.HallowedVines, TileAnimatedType.SpecialPoint },
+        { TileID.DiscoBall, TileAnimatedType.SpecialPoint },
         { TileID.Crystals, TileAnimatedType.Passive }, // Gelatin Crystal
         { TileID.AdamantiteForge, TileAnimatedType.Passive },
         { TileID.MusicBoxes, TileAnimatedType.Passive | TileAnimatedType.Interactable },
