@@ -1,21 +1,18 @@
 ﻿using JetBrains.Annotations;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
-using System.Linq;
-using System.Reflection;
 using Terraria;
 using Terraria.GameContent.Drawing;
 using Terraria.ModLoader;
 
 namespace Nitrate.Optimizations.Tiles;
 
+// TODO: Make sure this doesn't mess with mods.
 /// <summary>
 ///     Speeds up rendering of special tiles such as grass, vines, etc.
-///     TODO Make sure this doesn't mess with mods.
 /// </summary>
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class SpecialTileRenderSystem : ModSystem
@@ -30,7 +27,8 @@ internal sealed class SpecialTileRenderSystem : ModSystem
 
     /// <summary>
     ///     Overrides the vanilla
-    ///     <see cref="TileDrawing.DrawVines"/> method to cull vines far away from the local player.
+    ///     <see cref="TileDrawing.DrawVines"/> method to cull vines far away
+    ///     from the local player.
     ///     <br />
     ///     By doing this, we can prevent a large majority of the
     ///     <see cref="Main.Draw"/> calls it performs.
@@ -43,8 +41,9 @@ internal sealed class SpecialTileRenderSystem : ModSystem
     {
         ILCursor cursor = new(il);
 
-        // Instead of overriding a specific part of the method like CullFarGrass, this method was short enough to simply
-        // override the entire thing.
+        // Instead of overriding a specific part of the method like
+        // CullFarGrass, this method was short enough to simply override the
+        // entire thing.
         cursor.EmitDelegate(() =>
         {
             Vector2 unscaledPosition = Main.Camera.UnscaledPosition;
@@ -53,15 +52,20 @@ internal sealed class SpecialTileRenderSystem : ModSystem
             topLeftPos.X -= 10;
             Point bottomRightPos = (Main.ViewPosition + Main.ViewSize).ToTileCoordinates();
             bottomRightPos.X += 10;
-            
-            int num = 6;
+
+            const int num = 6;
             int num2 = Main.instance.TilesRenderer._specialsCount[num];
-            for (int i = 0; i < num2; i++) {
+
+            for (int i = 0; i < num2; i++)
+            {
                 Point point = Main.instance.TilesRenderer._specialPositions[num][i];
                 int x = point.X;
                 int y = point.Y;
+
                 if (x < topLeftPos.X || x > bottomRightPos.X)
+                {
                     continue;
+                }
 
                 Main.instance.TilesRenderer.DrawVineStrip(unscaledPosition, zero, x, y);
             }
@@ -86,8 +90,9 @@ internal sealed class SpecialTileRenderSystem : ModSystem
 
         ILLabel continueLabel = il.DefineLabel();
         ILLabel finishLabel = il.DefineLabel();
-        
+
         cursor.Emit(OpCodes.Dup);
+
         cursor.EmitDelegate<Func<Point, bool>>(point =>
         {
             Point topLeftPos = Main.ViewPosition.ToTileCoordinates();
@@ -96,7 +101,7 @@ internal sealed class SpecialTileRenderSystem : ModSystem
             Point bottomRightPos = (Main.ViewPosition + Main.ViewSize).ToTileCoordinates();
             bottomRightPos.X += 2;
             bottomRightPos.Y += 2;
-            
+
             return point.X >= topLeftPos.X && point.X <= bottomRightPos.X && point.Y >= topLeftPos.Y && point.Y <= bottomRightPos.Y;
         });
 
@@ -104,7 +109,7 @@ internal sealed class SpecialTileRenderSystem : ModSystem
         cursor.Emit(OpCodes.Brtrue, finishLabel);
         cursor.Emit(OpCodes.Pop);
         cursor.Emit(OpCodes.Br, continueLabel);
-            
+
         int saveIndex = cursor.Index;
 
         // Move to the last callvirt instruction to mark the 'continue' part of the loop.
