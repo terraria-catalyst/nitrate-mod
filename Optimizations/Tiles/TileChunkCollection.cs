@@ -207,7 +207,9 @@ internal sealed class TileChunkCollection : ChunkCollection
             Main.drawToScreen = drawToScreen;
         }
 
+        Main.screenPosition += new Vector2(Main.offScreenRange, Main.offScreenRange);
         Main.instance.TilesRenderer.DrawSpecialTilesLegacy(unscaledPosition, offscreenRange);
+        Main.screenPosition -= new Vector2(Main.offScreenRange, Main.offScreenRange);
 
         if (TileObject.objectPreview.Active && Main.LocalPlayer.cursorItemIconEnabled && Main.placementPreview && !CaptureManager.Instance.Active)
         {
