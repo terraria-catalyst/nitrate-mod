@@ -107,4 +107,17 @@ internal static class SpriteBatchUtil
 
         return new TemporaryRestartContext(spriteBatch, graphicsDevice, snapshot);
     }
+    
+    public static void BeginWithSnapshot(this SpriteBatch spriteBatch, SpriteBatchSnapshot snapshot)
+    {
+        spriteBatch.Begin(
+            snapshot.SortMode,
+            snapshot.BlendState,
+            snapshot.SamplerState,
+            snapshot.DepthStencilState,
+            snapshot.RasterizerState,
+            snapshot.Effect,
+            snapshot.TransformMatrix
+        );
+    }
 }
