@@ -38,7 +38,8 @@ internal sealed class NewLaserRulerRenderSystem : ModSystem
     {
         ILCursor cursor = new(il);
 
-        cursor.GotoNext(instr => instr.MatchBrtrue(out ILLabel _));
+        cursor.GotoNext(MoveType.After, instr => instr.MatchBrfalse(out ILLabel _));
+        cursor.GotoNext(MoveType.After, instr => instr.MatchBrfalse(out ILLabel _));
         cursor.Index++;
 
         cursor.EmitDelegate<Func<bool>>(() =>
