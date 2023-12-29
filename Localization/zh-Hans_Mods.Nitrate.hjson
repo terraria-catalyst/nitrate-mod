@@ -33,7 +33,9 @@ Menu: {
 		'''
 	GiveUsMoney: 请考虑支持我们!
 	Patreon: "[c/FF424D:Patreon]: [c/7289DA:{0}] <-- (这里可以点!)"
-	Ignore: Patreon:
+	PatreonPrefix: Patreon:
+	Discord: "[c/5865F2:Discord]: [c/7289DA:{0}]"
+	DiscordPrefix: Discord:
 	SIMD: 支持SIMD: {0}
 	NETVersion: .NET版本: {0}
 	OS: 操作系统: {0}

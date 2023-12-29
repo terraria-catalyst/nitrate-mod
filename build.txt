@@ -2,4 +2,4 @@ displayName = Nitrate
 author = Oli & tomat
 version = 0.1.6
 side = Client
-homepage = https://catalyst.tomat.dev/
+homepage = https://discord.gg/vPTUZcvXjg/
