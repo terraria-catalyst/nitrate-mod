@@ -47,6 +47,10 @@ public sealed class TileStateChangedListener : ModSystem
         On_WorldGen.paintCoatTile += CoatWall;
 
         On_NetMessage.DecompressTileBlock_Inner += DecompressTileBlock;
+
+        // On_Player.PlaceThing_TryReplacingTiles += TryReplacingTiles;
+        // On_Player.PlaceThing_TryReplacingWalls += TryReplacingWalls;
+        On_WorldGen.ReplaceTIle_DoActualReplacement += DoActualReplacement;
     }
 
     private static bool PlaceTile(On_WorldGen.orig_PlaceTile orig, int i, int j, int type, bool mute, bool forced, int plr, int style)
@@ -130,5 +134,27 @@ public sealed class TileStateChangedListener : ModSystem
                 OnTileSingleStateChange?.Invoke(i, j);
             }
         }
+    }
+
+    /*private static bool TryReplacingTiles(On_Player.orig_PlaceThing_TryReplacingTiles orig, Player self, bool canUse)
+    {
+        bool result = orig(self, canUse);
+        OnTileSingleStateChange?.Invoke(Player.tileTargetX, Player.tileTargetY);
+
+        return result;
+    }
+
+    private static bool TryReplacingWalls(On_Player.orig_PlaceThing_TryReplacingWalls orig, Player self, bool canUse)
+    {
+        bool result = orig(self, canUse);
+        OnWallSingleStateChange?.Invoke(Player.tileTargetX, Player.tileTargetY);
+
+        return result;
+    }*/
+
+    private static void DoActualReplacement(On_WorldGen.orig_ReplaceTIle_DoActualReplacement orig, ushort targetType, int targetStyle, int topLeftX, int topLeftY, Tile t)
+    {
+        orig(targetType, targetStyle, topLeftX, topLeftY, t);
+        OnTileSingleStateChange?.Invoke(topLeftX, topLeftY);
     }
 }
