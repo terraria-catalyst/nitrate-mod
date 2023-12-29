@@ -88,7 +88,7 @@ internal sealed class ChunkSystem : ModSystem
         IL_Main.DoDraw_WallsAndBlacks += NewDrawWalls;
         IL_Main.DoDraw_Tiles_NonSolid += NewDrawNonSolidTiles;
         IL_Main.DoDraw_Tiles_Solid += NewDrawSolidTiles;
-        On_Main.DoDraw_WallsTilesNPCs += HookBeforeDrawingToPopulateLightingBuffer;
+        On_Main.DoDraw_WallsTilesNPCs += HookBeforeDrawingToPopulateLightingBufferAndHandleStuffThatShouldHappenWhenDrawingToScreen;
 
         Main.RunOnMainThread(() =>
         {
@@ -535,8 +535,23 @@ internal sealed class ChunkSystem : ModSystem
         c.Emit(OpCodes.Ret);
     }
 
-    private static void HookBeforeDrawingToPopulateLightingBuffer(On_Main.orig_DoDraw_WallsTilesNPCs orig, Main self)
+    private static void HookBeforeDrawingToPopulateLightingBufferAndHandleStuffThatShouldHappenWhenDrawingToScreen(On_Main.orig_DoDraw_WallsTilesNPCs orig, Main self)
     {
+        bool old = Main.drawToScreen;
+        Main.drawToScreen = true;
+        Main.tileBatch.Begin();
+        Main.instance.DrawWaters(true);
+        Main.tileBatch.End();
+
+        Main.drawToScreen = false;
+        int oldRange = Main.offScreenRange;
+        Main.offScreenRange = 0;
+        Main.tileBatch.Begin();
+        Main.instance.DrawBackground();
+        Main.tileBatch.End();
+        Main.drawToScreen = old;
+        Main.offScreenRange = oldRange;
+
         PopulateLightingBuffer();
         TransferTileSpaceBufferToScreenSpaceBuffer(Main.graphics.GraphicsDevice);
         orig(self);
