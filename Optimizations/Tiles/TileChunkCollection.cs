@@ -150,6 +150,8 @@ internal sealed class TileChunkCollection : ChunkCollection
         Main.instance.TilesRenderer.EnsureWindGridSize();
         Main.instance.TilesRenderer.ClearLegacyCachedDraws();
 
+        Main.instance.TilesRenderer.ClearCachedTileDraws(SolidLayer);
+
         byte martianWhite = (byte)(100f + 150f * Main.martianLight);
         Main.instance.TilesRenderer._martianGlow = new Color(martianWhite, martianWhite, martianWhite, 0);
 
