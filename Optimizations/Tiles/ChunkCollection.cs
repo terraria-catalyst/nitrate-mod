@@ -59,6 +59,10 @@ internal abstract class ChunkCollection
         );
 
         lightMapRenderer.Value.Parameters["lightMap"].SetValue(screenSizeLightingBuffer);
+        lightMapRenderer.Value.Parameters["size"].SetValue(new Vector2(screenSizeLightingBuffer.Width, screenSizeLightingBuffer.Height));
+
+        // The offset vector is the amount of pixels from the corner the first tile is.
+        lightMapRenderer.Value.Parameters["offset"].SetValue(new Vector2(16) - new Vector2(Main.screenPosition.X % 16, Main.screenPosition.Y % 16));
 
         Main.spriteBatch.Draw(ScreenTarget, Vector2.Zero, Color.White);
         Main.spriteBatch.End();
@@ -104,11 +108,15 @@ internal abstract class ChunkCollection
             Loaded.Remove(key);
         }
 
-        foreach (Point key in NeedsPopulating)
+        // Only repopulate chunks once every 4 frames, like vanilla does with tiles.
+        if (Main.GameUpdateCount % 4 == 0)
         {
-            PopulateChunk(key);
-        }
+            foreach (Point key in NeedsPopulating)
+            {
+                PopulateChunk(key);
+            }
 
-        NeedsPopulating.Clear();
+            NeedsPopulating.Clear();
+        }
     }
 }
