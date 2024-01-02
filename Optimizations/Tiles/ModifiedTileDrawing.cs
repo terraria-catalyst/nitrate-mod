@@ -386,7 +386,7 @@ internal static class ModifiedTileDrawing
         }
         else
         {
-            DrawBasicTile(screenPosition, screenOffset, x, y, drawData, rectangle, vector);
+            DrawBasicTile(vanilla, screenPosition, screenOffset, x, y, drawData, rectangle, vector);
         }
 
         if (Main.tileGlowMask[drawData.tileCache.type] != -1)
@@ -635,7 +635,7 @@ internal static class ModifiedTileDrawing
         }
     }
 
-    private static void DrawBasicTile(FnaVector2 screenPosition, FnaVector2 screenOffset, int tileX, int tileY, TileDrawInfo drawData, Rectangle normalTileRect, FnaVector2 normalTilePosition)
+    private static void DrawBasicTile(bool vanilla, FnaVector2 screenPosition, FnaVector2 screenOffset, int tileX, int tileY, TileDrawInfo drawData, Rectangle normalTileRect, FnaVector2 normalTilePosition)
     {
         TileDrawing td = Main.instance.TilesRenderer;
 
@@ -982,8 +982,14 @@ internal static class ModifiedTileDrawing
 
         if (Lighting.NotRetro && td._tileSolid[drawData.typeCache] && !drawData.tileCache.halfBrick() && !TileID.Sets.DontDrawTileSliced[drawData.tileCache.type])
         {
-            //td.DrawSingleTile_SlicedBlock(normalTilePosition, tileX, tileY, drawData);
-            Main.spriteBatch.Draw(drawData.drawTexture, normalTilePosition, new Rectangle(drawData.tileFrameX + drawData.addFrX, drawData.tileFrameY + drawData.addFrY, drawData.tileWidth, drawData.tileHeight), drawData.finalColor, 0f, TileDrawing._zero, 1f, drawData.tileSpriteEffect, 0f);
+            if (vanilla)
+            {
+                td.DrawSingleTile_SlicedBlock(normalTilePosition, tileX, tileY, drawData);
+            }
+            else
+            {
+                Main.spriteBatch.Draw(drawData.drawTexture, normalTilePosition, new Rectangle(drawData.tileFrameX + drawData.addFrX, drawData.tileFrameY + drawData.addFrY, drawData.tileWidth, drawData.tileHeight), drawData.finalColor, 0f, TileDrawing._zero, 1f, drawData.tileSpriteEffect, 0f);
+            }
 
             return;
         }
