@@ -1580,7 +1580,7 @@ internal static class ModifiedTileDrawing
             {
                 Tile tile = Main.tile[j, i];
 
-                if (tile != null)
+                if (tile.HasTile)
                 {
                     Main.instance.TilesRenderer.DrawTile_LiquidBehindTile(true, false, -1, unscaledPosition, vector, j, i, tile);
                 }
