@@ -2,7 +2,9 @@ using JetBrains.Annotations;
 using Nitrate.API.Config;
 using Nitrate.Config;
 using System;
+using System.Diagnostics;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using Terraria.ModLoader;
 
 namespace Nitrate;
@@ -69,5 +71,13 @@ public sealed class NitrateMod : Mod
         base.Unload();
 
         configuration = IConfiguration.NULL;
+    }
+
+#pragma warning disable CA2255
+    [ModuleInitializer]
+#pragma warning restore CA2255
+    internal static void ModuleInitializer()
+    {
+        Debugger.Break();
     }
 }
