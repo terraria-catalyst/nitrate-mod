@@ -1,18 +1,26 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Nitrate.API.Listeners;
 using Nitrate.API.Tiles;
 using Nitrate.Utilities;
 using System;
 using Terraria;
 using Terraria.GameContent;
+using Terraria.GameContent.Drawing;
 using Terraria.Graphics.Capture;
-using Terraria.ModLoader;
 
 namespace Nitrate.Optimizations.Tiles;
 
 internal sealed class TileChunkCollection : ChunkCollection
 {
     public bool SolidLayer { get; init; }
+
+    private DynamicTileVisibilityListener.VisibilityType dynamicVisibilityTypes;
+
+    public TileChunkCollection()
+    {
+        DynamicTileVisibilityListener.OnVisibilityChange += TrackTileVisibility;
+    }
 
     public override void PopulateChunk(Point key)
     {
@@ -62,6 +70,10 @@ internal sealed class TileChunkCollection : ChunkCollection
                 }
 
                 if (AnimatedTileRegistry.IsTilePossiblyAnimated(tile.TileType))
+                {
+                    chunk.AnimatedPoints.Add(new AnimatedPoint(tileX, tileY, AnimatedPointType.AnimatedTile));
+                }
+                else if (IsTileDynamic(tile, tileX, tileY))
                 {
                     chunk.AnimatedPoints.Add(new AnimatedPoint(tileX, tileY, AnimatedPointType.AnimatedTile));
                 }
@@ -186,7 +198,7 @@ internal sealed class TileChunkCollection : ChunkCollection
                     {
                         Main.instance.LoadTiles(tile.type);
                     }
-                    
+
                     ModifiedTileDrawing.DrawSingleTile(true, SolidLayer, tilePoint.X, tilePoint.Y, Main.screenPosition);
                 }
             }
@@ -215,5 +227,38 @@ internal sealed class TileChunkCollection : ChunkCollection
         {
             Main.spriteBatch.TryEnd(out _);
         }
+    }
+
+    private void TrackTileVisibility(DynamicTileVisibilityListener.VisibilityType types)
+    {
+        dynamicVisibilityTypes = types;
+    }
+
+    private bool IsTileDynamic(Tile tile, int x, int y)
+    {
+        if (dynamicVisibilityTypes == 0)
+        {
+            return false;
+        }
+
+        bool res = false;
+
+        if (dynamicVisibilityTypes.HasFlag(DynamicTileVisibilityListener.VisibilityType.Dangersense))
+        {
+            res |= Main.LocalPlayer.dangerSense && TileDrawing.IsTileDangerous(x, y, Main.LocalPlayer, tile, tile.TileType);
+        }
+
+        if (dynamicVisibilityTypes.HasFlag(DynamicTileVisibilityListener.VisibilityType.Spelunker))
+        {
+            res |= Main.LocalPlayer.findTreasure && Main.IsTileSpelunkable(x, y, tile.TileType, tile.TileFrameX, tile.TileFrameY);
+        }
+
+        if (dynamicVisibilityTypes.HasFlag(DynamicTileVisibilityListener.VisibilityType.BiomeSight))
+        {
+            Color unused = default;
+            res |= Main.IsTileBiomeSightable(x, y, tile.TileType, tile.TileFrameX, tile.TileFrameY, ref unused);
+        }
+
+        return res;
     }
 }

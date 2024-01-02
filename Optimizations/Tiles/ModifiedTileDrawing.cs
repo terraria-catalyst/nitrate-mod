@@ -33,9 +33,25 @@ internal static class ModifiedTileDrawing
         int j = x;
         int i = y;
 
-        if (!WorldGen.InWorld(x, y))
+        // Covered by temporary check below.
+        /*if (!WorldGen.InWorld(x, y))
         {
             return;
+        }*/
+
+        // TODO: Properly handle cases where this actually throws.
+        // Currently, occasional crashes occur in methods like
+        // EmitLivingTreeLeaf_Below because of an IOOB exception due to stupid,
+        // direct indexing of Main::tile instead of using Framing.GetTileSafely.
+        for (int xx = x - 1; xx <= x + 1; xx++)
+        {
+            for (int yy = y - 1; yy <= y + 1; yy++)
+            {
+                if (!WorldGen.InWorld(xx, yy))
+                {
+                    return;
+                }
+            }
         }
 
         Tile tile = Framing.GetTileSafely(x, y);
@@ -106,7 +122,7 @@ internal static class ModifiedTileDrawing
             Main.instance.TilesRenderer.GetTileOutlineInfo(x, y, drawData.typeCache, ref drawData.tileLight, ref highlightTexture, ref highlightColor);
         }
 
-        if (Main.LocalPlayer.dangerSense && TileDrawing.IsTileDangerous(x, y, Main.LocalPlayer, drawData.tileCache, drawData.typeCache))
+        /*if (Main.LocalPlayer.dangerSense && TileDrawing.IsTileDangerous(x, y, Main.LocalPlayer, drawData.tileCache, drawData.typeCache))
         {
             if (drawData.tileLight.R < byte.MaxValue)
             {
@@ -184,7 +200,7 @@ internal static class ModifiedTileDrawing
                     dust.noLightEmittence = true;
                 }
             }
-        }
+        }*/
 
         if (IsActiveAndNotPaused)
         {
