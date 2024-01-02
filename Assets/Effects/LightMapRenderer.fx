@@ -8,6 +8,8 @@ float2 offset;
 // Color matrix for the 3x3 tile area.
 static float4 c[9];
 
+float globalBrightness;
+
 sampler2D LightSampler = sampler_state
 {
     Texture = (lightMap);
@@ -46,15 +48,17 @@ float4 PixelShaderFunction(float2 TexCoord : TEXCOORD0) : COLOR0
         c[i] = tex2D(LightSampler, TexCoord + float2(x * oneTile.x, y * oneTile.y));
     }
 
-    float dx3 = dx * 3;
-    float dy3 = dy * 3;
+    int indexX = 0;
+    indexX += (dx < 0.75f) * (dx > 0.25f);
+    indexX += ((dx <= 1) * (dx > 0.75f)) * 2;
 
-    int indexX = (int)(dx3 - frac(dx3));
-    int indexY = (int)(dy3 - frac(dy3));
+    int indexY = 0;
+    indexY += (dy < 0.75f) * (dy > 0.25f);
+    indexY += ((dy <= 1) * (dy > 0.75f)) * 2;
 
     int index = (indexY * 3) + indexX;
 
-    return tex2D(chunkTexture, TexCoord) * ((c[4] + c[index]) / 2);
+    return tex2D(chunkTexture, TexCoord) * ((c[4] + c[index]) / 2) * globalBrightness;
 }
 
 technique Technique1
