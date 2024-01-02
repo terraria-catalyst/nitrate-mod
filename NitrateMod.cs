@@ -2,7 +2,6 @@ using JetBrains.Annotations;
 using Nitrate.API.Config;
 using Nitrate.Config;
 using System;
-using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using Terraria.ModLoader;
@@ -78,6 +77,5 @@ public sealed class NitrateMod : Mod
 #pragma warning restore CA2255
     internal static void ModuleInitializer()
     {
-        Debugger.Break();
     }
 }
