@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.Graphics.Effects;
+using Terraria.Graphics.Light;
 using Terraria.ModLoader;
 
 namespace Nitrate.Optimizations.Tiles;
@@ -262,19 +263,16 @@ internal sealed class ChunkSystem : ModSystem
             return;
         }
 
-        FasterParallel.For(0, colorBuffer.Length, (inclusive, exclusive, _) =>
+        for (int i = 0; i < colorBuffer.Length; i++)
         {
-            for (int i = inclusive; i < exclusive; i++)
-            {
-                int x = i % lightingBuffer.Width;
-                int y = i / lightingBuffer.Width;
+            int x = i % lightingBuffer.Width;
+            int y = i / lightingBuffer.Width;
 
-                colorBuffer[i] = Lighting.GetColor(
-                    (int)(Main.screenPosition.X / 16) + x - lighting_buffer_offscreen_range_tiles,
-                    (int)(Main.screenPosition.Y / 16) + y - lighting_buffer_offscreen_range_tiles
-                );
-            }
-        });
+            colorBuffer[i] = Lighting.GetColor(
+                (int)(Main.screenPosition.X / 16) + x - lighting_buffer_offscreen_range_tiles,
+                (int)(Main.screenPosition.Y / 16) + y - lighting_buffer_offscreen_range_tiles
+            );
+        }
 
         // SetDataPointerEXT skips some overhead.
         unsafe
