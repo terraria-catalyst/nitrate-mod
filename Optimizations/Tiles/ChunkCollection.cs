@@ -60,7 +60,11 @@ internal abstract class ChunkCollection
 
         lightMapRenderer.Value.Parameters["lightMap"].SetValue(screenSizeLightingBuffer);
         lightMapRenderer.Value.Parameters["size"].SetValue(new Vector2(screenSizeLightingBuffer.Width, screenSizeLightingBuffer.Height));
-        lightMapRenderer.Value.Parameters["globalBrightness"].SetValue(Lighting.GlobalBrightness);
+
+        // TODO: Lighting.GetColor actually takes GlobalBrightness into account.
+        // Do we care?
+        // lightMapRenderer.Value.Parameters["globalBrightness"].SetValue(Lighting.GlobalBrightness);
+        lightMapRenderer.Value.Parameters["globalBrightness"].SetValue(1f);
 
         // The offset vector is the amount of pixels from the corner the first tile is.
         lightMapRenderer.Value.Parameters["offset"].SetValue(new Vector2(16) - new Vector2(Main.screenPosition.X % 16, Main.screenPosition.Y % 16));
