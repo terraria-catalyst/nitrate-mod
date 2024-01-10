@@ -17,17 +17,129 @@ namespace Nitrate.API.Tiles;
 ///     may expect logic that runs every frame/every tile draw.
 /// </summary>
 /// <remarks>
-///     Inheritance from <see cref="ModSystem"/> is not an API guarantee but
-///     rather an implementation detail.
-///     <br />
 ///     Tiles and walls known to this registry are essentially flagged as "to be
 ///     drawn manually". The way in which this manifests may differ depending on
 ///     how it is used, but the rewritten Nitrate tile renderer uses this data
 ///     to allow special tiles to render themselves like normal, since it'd
 ///     otherwise be extremely out of scope.
 /// </remarks>
-public sealed class AnimatedTileRegistry : ModSystem
+public static class AnimatedTileRegistry
 {
+    private sealed class AnimatedTileRegistryImpl : ModSystem
+    {
+        public override void Load()
+        {
+            base.Load();
+
+            foreach (KeyValuePair<int, TileAnimatedType> pair in vanilla_tiles)
+            {
+                tiles.Add(pair.Key, pair.Value);
+            }
+
+            foreach (KeyValuePair<int, TileAnimatedType> pair in vanilla_walls)
+            {
+                walls.Add(pair.Key, pair.Value);
+            }
+        }
+
+        public override void PostSetupContent()
+        {
+            base.PostSetupContent();
+
+            foreach (ModTile tile in TileLoader.tiles)
+            {
+                // PreDraw
+                // PostDraw
+                // AnimationFrameHeight > 0
+                // IsDoor
+                // IsTileDangerous
+                // IsTileBiomeSightable
+                // IsTileSpelunkable
+                // SetSpriteEffects
+                // SetDrawPositions
+                // AnimateTile
+                // AnimateIndividualTile
+                // DrawEffects
+                // TileFrame
+                // RightClick
+                // MouseOver
+                // MouseOverFar
+                // IsLockedChest
+                // UnlockChest
+                // LockChest
+
+                Type tileType = tile.GetType();
+                bool animated = false;
+
+                animated |= IsMethodOverridden(tileType, nameof(tile.PreDraw));
+                animated |= IsMethodOverridden(tileType, nameof(tile.PostDraw));
+                animated |= tile.AnimationFrameHeight > 0;
+                animated |= IsMethodOverridden(tileType, "get_" + nameof(tile.AnimationFrameHeight));
+                animated |= IsMethodOverridden(tileType, "set_" + nameof(tile.AnimationFrameHeight));
+                animated |= tile.IsDoor;
+                animated |= IsMethodOverridden(tileType, nameof(tile.IsTileDangerous));
+                animated |= IsMethodOverridden(tileType, nameof(tile.IsTileBiomeSightable));
+                animated |= IsMethodOverridden(tileType, nameof(tile.IsTileSpelunkable));
+                animated |= IsMethodOverridden(tileType, nameof(tile.SetSpriteEffects));
+                animated |= IsMethodOverridden(tileType, nameof(tile.SetDrawPositions));
+                animated |= IsMethodOverridden(tileType, nameof(tile.AnimateTile));
+                animated |= IsMethodOverridden(tileType, nameof(tile.AnimateIndividualTile));
+                animated |= IsMethodOverridden(tileType, nameof(tile.DrawEffects));
+                animated |= IsMethodOverridden(tileType, nameof(tile.TileFrame));
+                animated |= IsMethodOverridden(tileType, nameof(tile.RightClick));
+                animated |= IsMethodOverridden(tileType, nameof(tile.MouseOver));
+                animated |= IsMethodOverridden(tileType, nameof(tile.MouseOverFar));
+                animated |= IsMethodOverridden(tileType, nameof(tile.IsLockedChest));
+                animated |= IsMethodOverridden(tileType, nameof(tile.UnlockChest));
+                animated |= IsMethodOverridden(tileType, nameof(tile.LockChest));
+
+                if (!animated)
+                {
+                    continue;
+                }
+
+                if (!tiles.ContainsKey(tile.Type))
+                {
+                    tiles.Add(tile.Type, TileAnimatedType.ModdedAutoDetect);
+                }
+                else
+                {
+                    tiles[tile.Type] |= TileAnimatedType.ModdedAutoDetect;
+                }
+            }
+
+            foreach (ModWall wall in WallLoader.walls)
+            {
+                // PreDraw
+                // PostDraw
+                // AnimateWall
+                // WallFrame
+
+                Type wallType = wall.GetType();
+                bool animated = false;
+
+                animated |= IsMethodOverridden(wallType, nameof(wall.PreDraw));
+                animated |= IsMethodOverridden(wallType, nameof(wall.PostDraw));
+                animated |= IsMethodOverridden(wallType, nameof(wall.AnimateWall));
+                animated |= IsMethodOverridden(wallType, nameof(wall.WallFrame));
+
+                if (!animated)
+                {
+                    continue;
+                }
+
+                if (!walls.ContainsKey(wall.Type))
+                {
+                    walls.Add(wall.Type, TileAnimatedType.ModdedAutoDetect);
+                }
+                else
+                {
+                    walls[wall.Type] |= TileAnimatedType.ModdedAutoDetect;
+                }
+            }
+        }
+    }
+
     /// <summary>
     ///     Different types of well-known reasons for being considered
     ///     "animated". No logic in Nitrate relies on this, but it may be useful
@@ -318,118 +430,6 @@ public sealed class AnimatedTileRegistry : ModSystem
 
     private static readonly Dictionary<int, TileAnimatedType> tiles = new();
     private static readonly Dictionary<int, TileAnimatedType> walls = new();
-
-    public override void Load()
-    {
-        base.Load();
-
-        foreach (KeyValuePair<int, TileAnimatedType> pair in vanilla_tiles)
-        {
-            tiles.Add(pair.Key, pair.Value);
-        }
-
-        foreach (KeyValuePair<int, TileAnimatedType> pair in vanilla_walls)
-        {
-            walls.Add(pair.Key, pair.Value);
-        }
-    }
-
-    public override void PostSetupContent()
-    {
-        base.PostSetupContent();
-
-        foreach (ModTile tile in TileLoader.tiles)
-        {
-            // PreDraw
-            // PostDraw
-            // AnimationFrameHeight > 0
-            // IsDoor
-            // IsTileDangerous
-            // IsTileBiomeSightable
-            // IsTileSpelunkable
-            // SetSpriteEffects
-            // SetDrawPositions
-            // AnimateTile
-            // AnimateIndividualTile
-            // DrawEffects
-            // TileFrame
-            // RightClick
-            // MouseOver
-            // MouseOverFar
-            // IsLockedChest
-            // UnlockChest
-            // LockChest
-
-            Type tileType = tile.GetType();
-            bool animated = false;
-
-            animated |= IsMethodOverridden(tileType, nameof(tile.PreDraw));
-            animated |= IsMethodOverridden(tileType, nameof(tile.PostDraw));
-            animated |= tile.AnimationFrameHeight > 0;
-            animated |= IsMethodOverridden(tileType, "get_" + nameof(tile.AnimationFrameHeight));
-            animated |= IsMethodOverridden(tileType, "set_" + nameof(tile.AnimationFrameHeight));
-            animated |= tile.IsDoor;
-            animated |= IsMethodOverridden(tileType, nameof(tile.IsTileDangerous));
-            animated |= IsMethodOverridden(tileType, nameof(tile.IsTileBiomeSightable));
-            animated |= IsMethodOverridden(tileType, nameof(tile.IsTileSpelunkable));
-            animated |= IsMethodOverridden(tileType, nameof(tile.SetSpriteEffects));
-            animated |= IsMethodOverridden(tileType, nameof(tile.SetDrawPositions));
-            animated |= IsMethodOverridden(tileType, nameof(tile.AnimateTile));
-            animated |= IsMethodOverridden(tileType, nameof(tile.AnimateIndividualTile));
-            animated |= IsMethodOverridden(tileType, nameof(tile.DrawEffects));
-            animated |= IsMethodOverridden(tileType, nameof(tile.TileFrame));
-            animated |= IsMethodOverridden(tileType, nameof(tile.RightClick));
-            animated |= IsMethodOverridden(tileType, nameof(tile.MouseOver));
-            animated |= IsMethodOverridden(tileType, nameof(tile.MouseOverFar));
-            animated |= IsMethodOverridden(tileType, nameof(tile.IsLockedChest));
-            animated |= IsMethodOverridden(tileType, nameof(tile.UnlockChest));
-            animated |= IsMethodOverridden(tileType, nameof(tile.LockChest));
-
-            if (!animated)
-            {
-                continue;
-            }
-
-            if (!tiles.ContainsKey(tile.Type))
-            {
-                tiles.Add(tile.Type, TileAnimatedType.ModdedAutoDetect);
-            }
-            else
-            {
-                tiles[tile.Type] |= TileAnimatedType.ModdedAutoDetect;
-            }
-        }
-
-        foreach (ModWall wall in WallLoader.walls)
-        {
-            // PreDraw
-            // PostDraw
-            // AnimateWall
-            // WallFrame
-
-            Type wallType = wall.GetType();
-            bool animated = false;
-
-            animated |= IsMethodOverridden(wallType, nameof(wall.PreDraw));
-            animated |= IsMethodOverridden(wallType, nameof(wall.PostDraw));
-            animated |= IsMethodOverridden(wallType, nameof(wall.AnimateWall));
-            animated |= IsMethodOverridden(wallType, nameof(wall.WallFrame));
-
-            if (!animated)
-            {
-                continue;
-            }
-
-            if (!walls.ContainsKey(wall.Type))
-            {
-                walls.Add(wall.Type, TileAnimatedType.ModdedAutoDetect);
-            }
-            else
-            {
-                walls[wall.Type] |= TileAnimatedType.ModdedAutoDetect;
-            }
-        }
-    }
 
     public static void RegisterTile(int tileId, TileAnimatedType type)
     {

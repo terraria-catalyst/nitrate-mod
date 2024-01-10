@@ -14,15 +14,12 @@ namespace Nitrate.API.Rendering;
 /// </summary>
 /// <remarks>
 ///     This system splits rendering logic into two parts: updating ([the
-///     execution] of actions) that occurs in <see cref="PostUpdateEverything"/>
-///     and rendering (drawing of the render target), which occurs in a detour
-///     targeting <see cref="Main.DrawProjectiles"/> (in post).
-///     <br />
-///     Inheritance from <see cref="ModSystem"/> is not an API guarantee but
-///     rather an implementation detail.
+///     execution] of actions) that occurs in
+///     <see cref="ModSystem.PostUpdateEverything"/> and rendering (drawing of
+///     the render target), which occurs in a detour targeting
+///     <see cref="Main.DrawProjectiles"/> (in post).
 /// </remarks>
-[UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
-public sealed class ActionableRenderTargetSystem : ModSystem
+public static class ActionableRenderTargetSystem
 {
     private sealed class DefaultActionableRenderTarget : IActionableRenderTarget
     {
@@ -52,98 +49,102 @@ public sealed class ActionableRenderTargetSystem : ModSystem
         }
     }
 
+    [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
+    private sealed class ActionableRenderTargetSystemImpl : ModSystem
+    {
+        public override void Load()
+        {
+            base.Load();
+
+            On_Main.DrawProjectiles += DrawRenderTargets;
+            Main.OnResolutionChanged += TargetsNeedResizing;
+        }
+
+        public override void Unload()
+        {
+            base.Unload();
+
+            On_Main.DrawProjectiles -= DrawRenderTargets;
+            Main.OnResolutionChanged -= TargetsNeedResizing;
+
+            Main.RunOnMainThread(() =>
+            {
+                foreach (IActionableRenderTarget target in targets.Values)
+                {
+                    target.Dispose();
+                }
+            });
+        }
+
+        public override void PostUpdateEverything()
+        {
+            base.PostUpdateEverything();
+
+            if (Main.gameMenu || Main.dedServ)
+            {
+                return;
+            }
+
+            GraphicsDevice device = Main.graphics.GraphicsDevice;
+
+            foreach (IActionableRenderTarget target in targets.Values)
+            {
+                RenderTargetBinding[] bindings = device.GetRenderTargets();
+
+                device.SetRenderTarget(target.RenderTarget);
+                device.Clear(Color.Transparent);
+
+                foreach (Action action in target.Actions)
+                {
+                    action.Invoke();
+                }
+
+                device.SetRenderTargets(bindings);
+                target.Finish();
+            }
+        }
+
+        private static void DrawRenderTargets(On_Main.orig_DrawProjectiles orig, Main self)
+        {
+            orig(self);
+
+            Main.spriteBatch.Begin(
+                SpriteSortMode.Immediate,
+                BlendState.AlphaBlend,
+                SamplerState.PointWrap,
+                DepthStencilState.None,
+                RasterizerState.CullNone,
+                null,
+                Main.GameViewMatrix.TransformationMatrix
+            );
+
+            foreach (string id in targets.Keys)
+            {
+                Main.spriteBatch.Draw(targets[id].RenderTarget, Vector2.Zero, Color.White);
+            }
+
+            Main.spriteBatch.End();
+        }
+
+        private static void TargetsNeedResizing(FnaVector2 _)
+        {
+            Main.RunOnMainThread(() =>
+            {
+                foreach (string id in targets.Keys)
+                {
+                    IActionableRenderTarget target = targets[id];
+                    target.Dispose();
+                    targets[id] = target.ReinitForResize();
+                }
+            });
+        }
+    }
+
     /// <summary>
     ///     The dictionary of render targets and their associated rendering
     ///     data.
     /// </summary>
     private static readonly Dictionary<string, IActionableRenderTarget> targets = new();
-
-    public override void Load()
-    {
-        base.Load();
-
-        On_Main.DrawProjectiles += DrawRenderTargets;
-        Main.OnResolutionChanged += TargetsNeedResizing;
-    }
-
-    public override void Unload()
-    {
-        base.Unload();
-
-        On_Main.DrawProjectiles -= DrawRenderTargets;
-        Main.OnResolutionChanged -= TargetsNeedResizing;
-
-        Main.RunOnMainThread(() =>
-        {
-            foreach (IActionableRenderTarget target in targets.Values)
-            {
-                target.Dispose();
-            }
-        });
-    }
-
-    public override void PostUpdateEverything()
-    {
-        base.PostUpdateEverything();
-
-        if (Main.gameMenu || Main.dedServ)
-        {
-            return;
-        }
-
-        GraphicsDevice device = Main.graphics.GraphicsDevice;
-
-        foreach (IActionableRenderTarget target in targets.Values)
-        {
-            RenderTargetBinding[] bindings = device.GetRenderTargets();
-
-            device.SetRenderTarget(target.RenderTarget);
-            device.Clear(Color.Transparent);
-
-            foreach (Action action in target.Actions)
-            {
-                action.Invoke();
-            }
-
-            device.SetRenderTargets(bindings);
-            target.Finish();
-        }
-    }
-
-    private static void DrawRenderTargets(On_Main.orig_DrawProjectiles orig, Main self)
-    {
-        orig(self);
-
-        Main.spriteBatch.Begin(
-            SpriteSortMode.Immediate,
-            BlendState.AlphaBlend,
-            SamplerState.PointWrap,
-            DepthStencilState.None,
-            RasterizerState.CullNone,
-            null,
-            Main.GameViewMatrix.TransformationMatrix
-        );
-
-        foreach (string id in targets.Keys)
-        {
-            Main.spriteBatch.Draw(targets[id].RenderTarget, Vector2.Zero, Color.White);
-        }
-
-        Main.spriteBatch.End();
-    }
-
-    private static void TargetsNeedResizing(FnaVector2 _)
-    {
-        Main.RunOnMainThread(() =>
-        {
-            foreach (string id in targets.Keys)
-            {
-                IActionableRenderTarget target = targets[id];
-                target.Dispose();
-                targets[id] = target.ReinitForResize();
-            }
-        });
-    }
 
     /// <summary>
     ///     Registers a default render target for use with a drawing action or

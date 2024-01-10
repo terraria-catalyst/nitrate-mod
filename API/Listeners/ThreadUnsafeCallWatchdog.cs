@@ -10,26 +10,37 @@ namespace Nitrate.API.Listeners;
 ///     A toggleable watchdog that may capture common thread-unsafe calls in
 ///     various newly-parallelized callsites.
 /// </summary>
-/// <remarks>
-///     Inheritance from <see cref="ModSystem"/> is not an API guarantee but
-///     rather an implementation detail.
-/// </remarks>
-[UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
-public sealed class ThreadUnsafeCallWatchdog : ModSystem
+public static class ThreadUnsafeCallWatchdog
 {
+    [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
+    private sealed class ThreadUnsafeCallWatchdogImpl : ModSystem
+    {
+        public override void Load()
+        {
+            base.Load();
+
+            On_Lighting.AddLight_int_int_float_float_float += AddLight_int_int_float_float_float;
+        }
+
+        private static void AddLight_int_int_float_float_float(On_Lighting.orig_AddLight_int_int_float_float_float orig, int i, int j, float r, float g, float b)
+        {
+            if (Enabled)
+            {
+                actions.Add(() => orig(i, j, r, g, b));
+
+                return;
+            }
+
+            orig(i, j, r, g, b);
+        }
+    }
+
     /// <summary>
     ///     Whether the watchdog is currently enabled.
     /// </summary>
     public static bool Enabled { get; private set; }
 
     private static readonly ConcurrentBag<Action> actions = new();
-
-    public override void Load()
-    {
-        base.Load();
-
-        On_Lighting.AddLight_int_int_float_float_float += AddLight_int_int_float_float_float;
-    }
 
     /// <summary>
     ///     Enables the watchdog.
@@ -53,17 +64,5 @@ public sealed class ThreadUnsafeCallWatchdog : ModSystem
         }
 
         actions.Clear();
-    }
-
-    private static void AddLight_int_int_float_float_float(On_Lighting.orig_AddLight_int_int_float_float_float orig, int i, int j, float r, float g, float b)
-    {
-        if (Enabled)
-        {
-            actions.Add(() => orig(i, j, r, g, b));
-
-            return;
-        }
-
-        orig(i, j, r, g, b);
     }
 }
