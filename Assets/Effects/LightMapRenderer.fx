@@ -1,14 +1,13 @@
 sampler chunkTexture : register(s0);
 
 texture lightMap;
+texture overrideMap;
 
 float2 size;
 float2 offset;
 
 // Color matrix for the 3x3 tile area.
 static float4 c[9];
-
-float globalBrightness;
 
 sampler2D LightSampler = sampler_state
 {
@@ -20,8 +19,24 @@ sampler2D LightSampler = sampler_state
     Mipfilter = POINT;
 };
 
+sampler2D OverrideSampler = sampler_state
+{
+    Texture = (overrideMap);
+    AddressU = CLAMP;
+    AddressV = CLAMP;
+    MagFilter = POINT;
+    MinFilter = POINT;
+    Mipfilter = POINT;
+};
+
 float4 PixelShaderFunction(float2 TexCoord : TEXCOORD0) : COLOR0
 {
+    float4 override = tex2D(OverrideSampler, TexCoord);
+
+    if (any(override)) {
+        return tex2D(chunkTexture, TexCoord) * override;
+    }
+
     // 2D vector containing normalised values (0..1) for the dimensions of one pixel.
     float2 onePixel = 1 / size;
 
@@ -58,7 +73,7 @@ float4 PixelShaderFunction(float2 TexCoord : TEXCOORD0) : COLOR0
 
     int index = (indexY * 3) + indexX;
 
-    return tex2D(chunkTexture, TexCoord) * ((c[4] + c[index]) / 2) * globalBrightness;
+    return tex2D(chunkTexture, TexCoord) * ((c[4] + c[index]) / 2);
 }
 
 technique Technique1

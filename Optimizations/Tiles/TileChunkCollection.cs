@@ -73,10 +73,10 @@ internal sealed class TileChunkCollection : ChunkCollection
                 {
                     chunk.AnimatedPoints.Add(new AnimatedPoint(tileX, tileY, AnimatedPointType.AnimatedTile));
                 }
-                else if (IsTileDynamic(tile, tileX, tileY))
+                /*else if (IsTileDynamic(tile, tileX, tileY))
                 {
                     chunk.AnimatedPoints.Add(new AnimatedPoint(tileX, tileY, AnimatedPointType.AnimatedTile));
-                }
+                }*/
                 else
                 {
                     ModifiedTileDrawing.DrawSingleTile(false, SolidLayer, tileX, tileY, chunkPositionWorld);
@@ -149,7 +149,7 @@ internal sealed class TileChunkCollection : ChunkCollection
         device.SetRenderTargets(bindings);
     }
 
-    public void DoRenderTiles(GraphicsDevice graphicsDevice, RenderTarget2D? screenSizeLightingBuffer, Lazy<Effect> lightMapRenderer, SpriteBatchUtil.SpriteBatchSnapshot? snapshot)
+    public void DoRenderTiles(GraphicsDevice graphicsDevice, RenderTarget2D? screenSizeLightingBuffer, RenderTarget2D? screenSizeOverrideBuffer, Lazy<Effect> lightMapRenderer, SpriteBatchUtil.SpriteBatchSnapshot? snapshot)
     {
         Vector2 unscaledPosition = Main.Camera.UnscaledPosition;
         Vector2 offscreenRange = Vector2.Zero; /*new(Main.offScreenRange, Main.offScreenRange);*/
@@ -172,7 +172,7 @@ internal sealed class TileChunkCollection : ChunkCollection
         Main.tileBatch.End();
 
         DrawChunksToChunkTarget(graphicsDevice);
-        RenderChunksWithLighting(screenSizeLightingBuffer, lightMapRenderer);
+        RenderChunksWithLighting(screenSizeLightingBuffer, screenSizeOverrideBuffer, lightMapRenderer);
 
         if (snapshot.HasValue)
         {
@@ -234,31 +234,52 @@ internal sealed class TileChunkCollection : ChunkCollection
         dynamicVisibilityTypes = types;
     }
 
-    private bool IsTileDynamic(Tile tile, int x, int y)
+    public bool TryGetDynamicLighting(int x, int y, Color lightColor, ref Color color)
     {
+        if (!WorldGen.InWorld(x, y))
+        {
+            return false;
+        }
+
+        Tile tile = Main.tile[x, y];
+
         if (dynamicVisibilityTypes == 0)
         {
             return false;
         }
 
-        bool res = false;
-
         if (dynamicVisibilityTypes.HasFlag(DynamicTileVisibilityListener.VisibilityType.Dangersense))
         {
-            res |= Main.LocalPlayer.dangerSense && TileDrawing.IsTileDangerous(x, y, Main.LocalPlayer, tile, tile.TileType);
+            if (Main.LocalPlayer.dangerSense && TileDrawing.IsTileDangerous(x, y, Main.LocalPlayer, tile, tile.TileType))
+            {
+                color = new(255, Math.Max(lightColor.G, (byte)50), Math.Max(lightColor.B, (byte)50));
+
+                return true;
+            }
         }
 
         if (dynamicVisibilityTypes.HasFlag(DynamicTileVisibilityListener.VisibilityType.Spelunker))
         {
-            res |= Main.LocalPlayer.findTreasure && Main.IsTileSpelunkable(x, y, tile.TileType, tile.TileFrameX, tile.TileFrameY);
+            if(Main.LocalPlayer.findTreasure && Main.IsTileSpelunkable(x, y, tile.TileType, tile.TileFrameX, tile.TileFrameY))
+            {
+                color = new(Math.Max(lightColor.R, (byte)200), Math.Max(lightColor.G, (byte)170), lightColor.B);
+
+                return true;
+            }
         }
 
         if (dynamicVisibilityTypes.HasFlag(DynamicTileVisibilityListener.VisibilityType.BiomeSight))
         {
-            Color unused = default;
-            res |= Main.IsTileBiomeSightable(x, y, tile.TileType, tile.TileFrameX, tile.TileFrameY, ref unused);
+            Color sightColor = Color.White;
+
+            if(Main.IsTileBiomeSightable(x, y, tile.TileType, tile.TileFrameX, tile.TileFrameY, ref sightColor))
+            {
+                color = new(Math.Max(lightColor.R, sightColor.R), Math.Max(lightColor.G, sightColor.G), Math.Max(lightColor.B, sightColor.B));
+
+                return true;
+            }
         }
 
-        return res;
+        return false;
     }
 }

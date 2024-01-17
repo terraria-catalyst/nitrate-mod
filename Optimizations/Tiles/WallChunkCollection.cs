@@ -128,10 +128,10 @@ internal sealed class WallChunkCollection : ChunkCollection
         device.SetRenderTargets(bindings);
     }
 
-    public void DoRenderWalls(GraphicsDevice graphicsDevice, RenderTarget2D? screenSizeLightingBuffer, Lazy<Effect> lightMapRenderer, SpriteBatchUtil.SpriteBatchSnapshot? snapshot)
+    public void DoRenderWalls(GraphicsDevice graphicsDevice, RenderTarget2D? screenSizeLightingBuffer, RenderTarget2D? screenSizeOverrideBuffer, Lazy<Effect> lightMapRenderer, SpriteBatchUtil.SpriteBatchSnapshot? snapshot)
     {
         DrawChunksToChunkTarget(graphicsDevice);
-        RenderChunksWithLighting(screenSizeLightingBuffer, lightMapRenderer);
+        RenderChunksWithLighting(screenSizeLightingBuffer, screenSizeOverrideBuffer, lightMapRenderer);
 
         if (snapshot.HasValue)
         {

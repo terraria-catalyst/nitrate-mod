@@ -42,7 +42,7 @@ internal abstract class ChunkCollection
 
     public abstract void DrawChunksToChunkTarget(GraphicsDevice device);
 
-    public virtual void RenderChunksWithLighting(RenderTarget2D? screenSizeLightingBuffer, Lazy<Effect> lightMapRenderer)
+    public virtual void RenderChunksWithLighting(RenderTarget2D? screenSizeLightingBuffer, RenderTarget2D? screenSizeOverrideBuffer, Lazy<Effect> lightMapRenderer)
     {
         if (ScreenTarget is null || screenSizeLightingBuffer is null)
         {
@@ -59,12 +59,14 @@ internal abstract class ChunkCollection
         );
 
         lightMapRenderer.Value.Parameters["lightMap"].SetValue(screenSizeLightingBuffer);
-        lightMapRenderer.Value.Parameters["size"].SetValue(new Vector2(screenSizeLightingBuffer.Width, screenSizeLightingBuffer.Height));
 
-        // TODO: Lighting.GetColor actually takes GlobalBrightness into account.
-        // Do we care?
-        // lightMapRenderer.Value.Parameters["globalBrightness"].SetValue(Lighting.GlobalBrightness);
-        lightMapRenderer.Value.Parameters["globalBrightness"].SetValue(1f);
+        // If not set it will default to being empty which will not apply any override colors.
+        if (screenSizeOverrideBuffer is not null)
+        {
+            lightMapRenderer.Value.Parameters["overrideMap"].SetValue(screenSizeOverrideBuffer);
+        }
+
+        lightMapRenderer.Value.Parameters["size"].SetValue(new Vector2(screenSizeLightingBuffer.Width, screenSizeLightingBuffer.Height));
 
         // The offset vector is the amount of pixels from the corner the first tile is.
         lightMapRenderer.Value.Parameters["offset"].SetValue(new Vector2(16) - new Vector2(Main.screenPosition.X % 16, Main.screenPosition.Y % 16));
