@@ -60,6 +60,8 @@ internal abstract class ChunkCollection
 
         lightMapRenderer.Value.Parameters["lightMap"].SetValue(screenSizeLightingBuffer);
 
+        lightMapRenderer.Value.Parameters["applyOverride"].SetValue(Main.LocalPlayer.dangerSense || Main.LocalPlayer.findTreasure || Main.LocalPlayer.biomeSight);
+
         // If not set it will default to being empty which will not apply any override colors.
         if (screenSizeOverrideBuffer is not null)
         {

@@ -13,7 +13,6 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.Graphics.Effects;
-using Terraria.Graphics.Light;
 using Terraria.ModLoader;
 
 namespace Nitrate.Optimizations.Tiles;

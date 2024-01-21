@@ -9,6 +9,8 @@ float2 offset;
 // Color matrix for the 3x3 tile area.
 static float4 c[9];
 
+bool applyOverride;
+
 sampler2D LightSampler = sampler_state
 {
     Texture = (lightMap);
@@ -33,7 +35,7 @@ float4 PixelShaderFunction(float2 TexCoord : TEXCOORD0) : COLOR0
 {
     float4 override = tex2D(OverrideSampler, TexCoord);
 
-    if (any(override)) {
+    if (applyOverride && any(override)) {
         return tex2D(chunkTexture, TexCoord) * override;
     }
 
