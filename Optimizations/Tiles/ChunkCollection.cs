@@ -15,6 +15,8 @@ internal abstract class ChunkCollection
 
     public RenderTarget2D? ScreenTarget { get; set; }
 
+    public virtual bool ApplyOverride => Main.LocalPlayer.dangerSense || Main.LocalPlayer.findTreasure || Main.LocalPlayer.biomeSight;
+
     public virtual void LoadChunk(Point key)
     {
         RenderTarget2D target = new(
@@ -60,7 +62,7 @@ internal abstract class ChunkCollection
 
         lightMapRenderer.Value.Parameters["lightMap"].SetValue(screenSizeLightingBuffer);
 
-        lightMapRenderer.Value.Parameters["applyOverride"].SetValue(Main.LocalPlayer.dangerSense || Main.LocalPlayer.findTreasure || Main.LocalPlayer.biomeSight);
+        lightMapRenderer.Value.Parameters["applyOverride"].SetValue(ApplyOverride);
 
         // If not set it will default to being empty which will not apply any override colors.
         if (screenSizeOverrideBuffer is not null)

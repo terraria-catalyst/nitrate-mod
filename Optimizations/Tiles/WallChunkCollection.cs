@@ -9,6 +9,8 @@ namespace Nitrate.Optimizations.Tiles;
 
 internal sealed class WallChunkCollection : ChunkCollection
 {
+    public override bool ApplyOverride => false;
+
     public override void PopulateChunk(Point key)
     {
         Chunk chunk = Loaded[key];

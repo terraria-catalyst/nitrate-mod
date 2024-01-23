@@ -122,7 +122,9 @@ internal static class ModifiedTileDrawing
             Main.instance.TilesRenderer.GetTileOutlineInfo(x, y, drawData.typeCache, ref drawData.tileLight, ref highlightTexture, ref highlightColor);
         }
 
-        /*if (Main.LocalPlayer.dangerSense && TileDrawing.IsTileDangerous(x, y, Main.LocalPlayer, drawData.tileCache, drawData.typeCache))
+        if (vanilla)
+        {
+            if (Main.LocalPlayer.dangerSense && TileDrawing.IsTileDangerous(x, y, Main.LocalPlayer, drawData.tileCache, drawData.typeCache))
         {
             if (drawData.tileLight.R < byte.MaxValue)
             {
@@ -200,7 +202,8 @@ internal static class ModifiedTileDrawing
                     dust.noLightEmittence = true;
                 }
             }
-        }*/
+        }
+        }
 
         if (IsActiveAndNotPaused)
         {
