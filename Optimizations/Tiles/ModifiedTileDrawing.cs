@@ -43,9 +43,9 @@ internal static class ModifiedTileDrawing
         // Currently, occasional crashes occur in methods like
         // EmitLivingTreeLeaf_Below because of an IOOB exception due to stupid,
         // direct indexing of Main::tile instead of using Framing.GetTileSafely.
-        for (int xx = x - 1; xx <= x + 1; xx++)
+        for (int xx = x - 2; xx <= x + 2; xx++)
         {
-            for (int yy = y - 1; yy <= y + 1; yy++)
+            for (int yy = y - 2; yy <= y + 2; yy++)
             {
                 if (!WorldGen.InWorld(xx, yy))
                 {
