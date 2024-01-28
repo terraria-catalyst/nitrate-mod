@@ -11,6 +11,8 @@ static float4 c[9];
 
 bool applyOverride;
 
+matrix gameViewMatrix;
+
 sampler2D LightSampler = sampler_state
 {
     Texture = (lightMap);

@@ -64,6 +64,8 @@ internal abstract class ChunkCollection
 
         lightMapRenderer.Value.Parameters["applyOverride"].SetValue(ApplyOverride);
 
+        lightMapRenderer.Value.Parameters["gameViewMatrix"].SetValue(Main.GameViewMatrix.TransformationMatrix);
+
         // If not set it will default to being empty which will not apply any override colors.
         if (screenSizeOverrideBuffer is not null)
         {

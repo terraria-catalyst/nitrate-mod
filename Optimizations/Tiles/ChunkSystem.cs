@@ -95,9 +95,6 @@ internal sealed class ChunkSystem : ModSystem
 
         Main.RunOnMainThread(() =>
         {
-            // Clear any previous targets if vanilla tile rendering was previously enabled.
-            Main.instance.ReleaseTargets();
-
             lightingBuffer = new RenderTarget2D(
                 Main.graphics.GraphicsDevice,
                 (int)Math.Ceiling(Main.screenWidth / 16f) + lighting_buffer_offscreen_range_tiles * 2,
