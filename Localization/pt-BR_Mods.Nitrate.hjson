@@ -13,7 +13,7 @@ Configs: {
 		}
 
 		FasterCursor: {
-			Label: Cursor mais Rápido
+			Label: Cursor Mais Rápido
 			Tooltip: Reprograma a renderização do cursor para ser consideravelmente mais responsiva e independente da taxa de quadros do jogo.
 		}
 
