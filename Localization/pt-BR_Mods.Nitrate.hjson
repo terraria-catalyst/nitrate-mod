@@ -1,0 +1,51 @@
+Configs: {
+	NitrateConfig: {
+		DisplayName: Configuração de Nitrate
+
+		ExperimentalTileRenderer: {
+			Label: Renderização Experimental de Blocos
+			Tooltip: Um tipo de renderização experimental de blocos que é aproximadamente 5x mais rápido que o tipo normal.
+		}
+
+		ExperimentalTileRendererWarning: {
+			Label: Desativar Avisos de Renderização Experimental de Blocos
+			Tooltip: Desativa as mensagens de aviso que aparecem quando a renderização experimental de blocos está ativa.
+		}
+
+		FasterCursor: {
+			Label: Cursor mais Rápido
+			Tooltip: Reprograma a renderização do cursor para ser consideravelmente mais responsiva e independente da taxa de quadros do jogo.
+		}
+
+		UsesNewLaserRulerRendering: {
+			Label: Utilizar Nova Renderização da Régua Mecânica
+			Tooltip: Utiliza um novo tipo de renderização da régua mecânica que melhora seu desempenho imensamente.
+		}
+	}
+}
+
+Menu: {
+	NitrateWarning:
+		'''
+		Tenha em mente que Nitrate ainda está em desenvolvimento ativo. 
+		Recursos podem estar quebrados, ajustados ou removidos/renovados completamente. 
+		Por favor, reporte qualquer problema encontrado e lembre-se de que seu jogo pode crashar!
+		'''
+	GiveUsMoney: Considere nos apoiar!
+	Patreon: "[c/FF424D:Patreon]: [c/7289DA:{0}] <-- (clickável!)"
+	PatreonPrefix: Patreon:
+	Discord: "[c/5865F2:Discord]: [c/7289DA:{0}]"
+	DiscordPrefix: Discord:
+	SIMD: Supporta SIMD: {0}
+	NETVersion: Versão .NET: {0}
+	OS: Sistema Operacional: {0}
+	Architecture: Arquitetura: {0}
+}
+
+StartupMessages.ExperimentalTileRendererWarning:
+	'''
+	Você está atualmente usando a renderização experimental de blocos do Nitrate.
+	Grande parte do aumento de desempenho do Nitrate é resultado deste tipo de renderização,
+	mas ele ainda está em desenvolvimento e pode causar sérios problemas relacionados a gráficos (ou até mesmo crashar seu jogo!).
+	Você pode alternar o uso deste tipo de renderização nas configurações, assim como esta mensagem.
+	'''
