@@ -2,4 +2,5 @@
 
 export const publicizer = createPublicizer("Nitrate");
 
-publicizer.createAssembly("tModLoader").allowVirtuals().publicizeAll();
+publicizer.createAssembly("tModLoader").publicizeAll();
+publicizer.createAssembly("FNA").publicizeAll();
