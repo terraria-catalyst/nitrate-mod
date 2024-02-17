@@ -1,0 +1,37 @@
+name: "🐛 Bug Report"
+description: Create an issue for a bug report.
+title: "<title>"
+labels: [
+  "Bug",
+  "New Issue"
+]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: "Description"
+      description: Please enter an explicit description of your issue.
+    validations:
+      required: true
+  - type: textarea
+    id: reprod
+    attributes:
+      label: "Reproduction steps"
+      description: Please demonstrate the steps to replicate your issue, if known about.
+    validations:
+      required: false
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: "Screenshots"
+      description: Please attach screenshots to help further demonstrate your issue.
+    validations:
+      required: false
+  - type: textarea
+    id: logs
+    attributes:
+      label: "Logs"
+      description: Please copy and paste any relevant log output, if any.
+      render: bash
+    validations:
+      required: false
