@@ -9,8 +9,7 @@ namespace Nitrate.API.Rendering;
 ///     <see cref="ActionableRenderTargetSystem"/>. May hold a list of actions
 ///     to be executed in the context of the render target.
 /// </summary>
-public interface IActionableRenderTarget : IDisposable
-{
+public interface IActionableRenderTarget : IDisposable {
     /// <summary>
     ///     The list of actions to be executed in the context of the render
     ///     target.

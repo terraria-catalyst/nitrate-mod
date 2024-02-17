@@ -4,10 +4,8 @@ using System.Collections.Generic;
 
 namespace Nitrate.Optimizations.Tiles;
 
-internal sealed class Chunk : IDisposable
-{
-    public Chunk(RenderTarget2D renderTarget)
-    {
+internal sealed class Chunk : IDisposable {
+    public Chunk(RenderTarget2D renderTarget) {
         RenderTarget = renderTarget;
     }
 
@@ -15,8 +13,7 @@ internal sealed class Chunk : IDisposable
 
     public List<AnimatedPoint> AnimatedPoints { get; } = new();
 
-    public void Dispose()
-    {
+    public void Dispose() {
         RenderTarget.Dispose();
     }
 }

@@ -4,18 +4,15 @@ using System.Collections.Generic;
 
 namespace Nitrate.API.SIMD;
 
-public static class Simdifier
-{
-    private static readonly List<ISimdifier> simdifiers = new()
-    {
+public static class Simdifier {
+    private static readonly List<ISimdifier> simdifiers = new() {
         new Vector2Simdifier(),
     };
 
     /// <summary>
     ///     Registers a "simdifier".
     /// </summary>
-    public static void RegisterSimdifier(ISimdifier simdifier)
-    {
+    public static void RegisterSimdifier(ISimdifier simdifier) {
         simdifiers.Add(simdifier);
     }
 
@@ -23,10 +20,8 @@ public static class Simdifier
     ///     "Simdifies" a method.
     /// </summary>
     /// <param name="c">The cursor of the method to "simdify."</param>
-    public static void Simdify(ILCursor c)
-    {
-        foreach (ISimdifier simdifier in simdifiers)
-        {
+    public static void Simdify(ILCursor c) {
+        foreach (var simdifier in simdifiers) {
             c.Index = 0;
             simdifier.Simdify(c);
         }

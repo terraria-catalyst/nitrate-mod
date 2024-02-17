@@ -7,18 +7,16 @@ using Terraria;
 
 namespace Nitrate.Optimizations.Tiles;
 
-internal sealed class WallChunkCollection : ChunkCollection
-{
+internal sealed class WallChunkCollection : ChunkCollection {
     public override bool ApplyOverride => false;
 
-    public override void PopulateChunk(Point key)
-    {
-        Chunk chunk = Loaded[key];
-        RenderTarget2D target = chunk.RenderTarget;
+    public override void PopulateChunk(Point key) {
+        var chunk = Loaded[key];
+        var target = chunk.RenderTarget;
 
         chunk.AnimatedPoints.Clear();
 
-        GraphicsDevice device = Main.graphics.GraphicsDevice;
+        var device = Main.graphics.GraphicsDevice;
 
         device.SetRenderTarget(target);
         device.Clear(Color.Transparent);
@@ -39,26 +37,21 @@ internal sealed class WallChunkCollection : ChunkCollection
             RasterizerState.CullNone
         );
 
-        for (int i = -1; i < size_tiles + 1; i++)
-        {
-            for (int j = -1; j < size_tiles + 1; j++)
-            {
-                int tileX = chunkPositionTile.X + i;
-                int tileY = chunkPositionTile.Y + j;
+        for (var i = -1; i < size_tiles + 1; i++) {
+            for (var j = -1; j < size_tiles + 1; j++) {
+                var tileX = chunkPositionTile.X + i;
+                var tileY = chunkPositionTile.Y + j;
 
-                if (!WorldGen.InWorld(tileX, tileY))
-                {
+                if (!WorldGen.InWorld(tileX, tileY)) {
                     continue;
                 }
 
-                Tile tile = Framing.GetTileSafely(tileX, tileY);
+                var tile = Framing.GetTileSafely(tileX, tileY);
 
-                if (AnimatedTileRegistry.IsWallPossiblyAnimated(tile.WallType))
-                {
+                if (AnimatedTileRegistry.IsWallPossiblyAnimated(tile.WallType)) {
                     chunk.AnimatedPoints.Add(new AnimatedPoint(tileX, tileY, AnimatedPointType.AnimatedTile));
                 }
-                else
-                {
+                else {
                     // Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(tileX * 16 - (int)chunkPositionWorld.X, tileY * 16 - (int)chunkPositionWorld.Y, 16, 16), Color.Yellow);
                     ModifiedTileDrawing.DrawSingleWall(false, tileX, tileY, chunkPositionWorld);
                 }
@@ -71,17 +64,14 @@ internal sealed class WallChunkCollection : ChunkCollection
         device.SetRenderTargets(null);
     }
 
-    public override void DrawChunksToChunkTarget(GraphicsDevice device)
-    {
-        if (ScreenTarget is null)
-        {
+    public override void DrawChunksToChunkTarget(GraphicsDevice device) {
+        if (ScreenTarget is null) {
             return;
         }
 
-        RenderTargetBinding[] bindings = device.GetRenderTargets();
+        var bindings = device.GetRenderTargets();
 
-        foreach (RenderTargetBinding binding in bindings)
-        {
+        foreach (var binding in bindings) {
             ((RenderTarget2D)binding.RenderTarget).RenderTargetUsage = RenderTargetUsage.PreserveContents;
         }
 
@@ -98,27 +88,24 @@ internal sealed class WallChunkCollection : ChunkCollection
             Main.GameViewMatrix.TransformationMatrix
         );
 
-        FnaVector2 screenPosition = Main.screenPosition;
+        var screenPosition = Main.screenPosition;
 
         Rectangle screenArea = new((int)screenPosition.X, (int)screenPosition.Y, Main.screenWidth, Main.screenHeight);
 
-        foreach (Point key in Loaded.Keys)
-        {
-            Chunk chunk = Loaded[key];
-            RenderTarget2D target = chunk.RenderTarget;
+        foreach (var key in Loaded.Keys) {
+            var chunk = Loaded[key];
+            var target = chunk.RenderTarget;
 
             Rectangle chunkArea = new(key.X * ChunkSystem.CHUNK_SIZE, key.Y * ChunkSystem.CHUNK_SIZE, target.Width, target.Height);
 
-            if (!chunkArea.Intersects(screenArea))
-            {
+            if (!chunkArea.Intersects(screenArea)) {
                 continue;
             }
 
             // This should never happen, something catastrophic happened if it did.
             // The check here is because rendering disposed targets generally has strange behaviour and doesn't always throw exceptions.
             // Therefore this check needs to be made as it's more robust.
-            if (target.IsDisposed)
-            {
+            if (target.IsDisposed) {
                 throw new Exception("Attempted to render a disposed chunk.");
             }
 
@@ -130,25 +117,20 @@ internal sealed class WallChunkCollection : ChunkCollection
         device.SetRenderTargets(bindings);
     }
 
-    public void DoRenderWalls(GraphicsDevice graphicsDevice, RenderTarget2D? screenSizeLightingBuffer, RenderTarget2D? screenSizeOverrideBuffer, Lazy<Effect> lightMapRenderer, SpriteBatchUtil.SpriteBatchSnapshot? snapshot)
-    {
+    public void DoRenderWalls(GraphicsDevice graphicsDevice, RenderTarget2D? screenSizeLightingBuffer, RenderTarget2D? screenSizeOverrideBuffer, Lazy<Effect> lightMapRenderer, SpriteBatchUtil.SpriteBatchSnapshot? snapshot) {
         DrawChunksToChunkTarget(graphicsDevice);
         RenderChunksWithLighting(screenSizeLightingBuffer, screenSizeOverrideBuffer, lightMapRenderer);
 
-        if (snapshot.HasValue)
-        {
+        if (snapshot.HasValue) {
             Main.tileBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
             Main.spriteBatch.BeginWithSnapshot(snapshot.Value);
         }
 
-        foreach (Point key in Loaded.Keys)
-        {
-            Chunk chunk = Loaded[key];
+        foreach (var key in Loaded.Keys) {
+            var chunk = Loaded[key];
 
-            foreach (AnimatedPoint wallPoint in chunk.AnimatedPoints)
-            {
-                if (wallPoint.Type != AnimatedPointType.AnimatedTile)
-                {
+            foreach (var wallPoint in chunk.AnimatedPoints) {
+                if (wallPoint.Type != AnimatedPointType.AnimatedTile) {
                     continue;
                 }
 
@@ -158,8 +140,7 @@ internal sealed class WallChunkCollection : ChunkCollection
             }
         }
 
-        if (snapshot.HasValue)
-        {
+        if (snapshot.HasValue) {
             Main.tileBatch.End();
             Main.spriteBatch.End();
             Main.spriteBatch.BeginWithSnapshot(snapshot.Value);

@@ -17,8 +17,7 @@ namespace Nitrate;
 ///     <see cref="ModSystem"/>.
 /// </remarks>
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
-public sealed class NitrateMod : Mod
-{
+public sealed class NitrateMod : Mod {
     /// <summary>
     ///     The Patreon link for Team Catalyst, Nitrate's development team.
     /// </summary>
@@ -33,8 +32,7 @@ public sealed class NitrateMod : Mod
 
     private IConfiguration configuration = new ModConfigConfiguration();
 
-    public override void Load()
-    {
+    public override void Load() {
         base.Load();
 
         Logger.Info("              .......              ");
@@ -60,13 +58,12 @@ public sealed class NitrateMod : Mod
         Logger.Info("Nitrate is free and open-source software, available @ https://github.com/terraria-catalyst/Nitrate under the GNU Affero General Public License, version 3.");
         Logger.Info("tModLoader makes it difficult to distribute licenses, you may view a copy @ https://github.com/terraria-catalyst/Nitrate/blob/master/LICENSE.txt.");
         Logger.Info("Supports SIMD: " + Vector.IsHardwareAccelerated);
-        Logger.Info(".NET Version: " + Environment.Version);
-        Logger.Info("OS: " + Environment.OSVersion);
-        Logger.Info("Architecture: " + (Environment.Is64BitOperatingSystem ? "x64" : "x86"));
+        Logger.Info(".NET Version: "  + Environment.Version);
+        Logger.Info("OS: "            + Environment.OSVersion);
+        Logger.Info("Architecture: "  + (Environment.Is64BitOperatingSystem ? "x64" : "x86"));
     }
 
-    public override void Unload()
-    {
+    public override void Unload() {
         base.Unload();
 
         configuration = IConfiguration.NULL;
@@ -74,8 +71,6 @@ public sealed class NitrateMod : Mod
 
 #pragma warning disable CA2255
     [ModuleInitializer]
+    internal static void ModuleInitializer() { }
 #pragma warning restore CA2255
-    internal static void ModuleInitializer()
-    {
-    }
 }

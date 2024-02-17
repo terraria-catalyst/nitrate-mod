@@ -6,15 +6,13 @@ using Terraria.ModLoader.Config;
 
 namespace Nitrate.Config;
 
-internal sealed class ModConfigConfiguration : IConfiguration
-{
+internal sealed class ModConfigConfiguration : IConfiguration {
     /// <summary>
     ///     The <see cref="ModConfig"/> implementation of Nitrate's
     ///     <see cref="IConfiguration"/>.
     /// </summary>
     [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
-    private sealed class NitrateConfig : ModConfig
-    {
+    private sealed class NitrateConfig : ModConfig {
         public override ConfigScope Mode => ConfigScope.ClientSide;
 
         [ReloadRequired]
@@ -25,7 +23,7 @@ internal sealed class ModConfigConfiguration : IConfiguration
         [DefaultValue(false)]
         [UsedImplicitly(ImplicitUseKindFlags.Access | ImplicitUseKindFlags.Assign)]
         public bool ExperimentalTileRendererWarning { get; set; }
-        
+
         [DefaultValue(true)]
         [UsedImplicitly(ImplicitUseKindFlags.Access | ImplicitUseKindFlags.Assign)]
         public bool UsesNewLaserRulerRendering { get; set; }

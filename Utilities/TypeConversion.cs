@@ -5,11 +5,14 @@ namespace Nitrate.Utilities;
 /// <summary>
 ///     Basic type conversion utilities.
 /// </summary>
-internal static class TypeConversion
-{
+internal static class TypeConversion {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static SimdMatrix ToSimd(this FnaMatrix matrix) => Unsafe.As<FnaMatrix, SimdMatrix>(ref matrix);
+    public static SimdMatrix ToSimd(this FnaMatrix matrix) {
+        return Unsafe.As<FnaMatrix, SimdMatrix>(ref matrix);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static FnaMatrix ToFna(this SimdMatrix matrix) => Unsafe.As<SimdMatrix, FnaMatrix>(ref matrix);
+    public static FnaMatrix ToFna(this SimdMatrix matrix) {
+        return Unsafe.As<SimdMatrix, FnaMatrix>(ref matrix);
+    }
 }
