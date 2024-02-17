@@ -1,6 +1,7 @@
 .vs/
 .vscode/
 .idea/
+.catalyst/
 
 bin/
 obj/
