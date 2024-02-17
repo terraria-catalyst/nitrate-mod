@@ -3,14 +3,16 @@
 namespace Nitrate.API.Config;
 
 /// <summary>
-///     Configuration for <see cref="NitrateMod"/>.
-///     <br />
-///     In an effort to stay mostly decoupled from tModLoader, the actual
-///     implementation that deals with retrieving and saving configuration
-///     values is abstracted away, only being accessed through properties.
+///     <see cref="NitrateMod"/> configuration.
 /// </summary>
-public interface IConfiguration
-{
+/// <remarks>
+///     In an effort to remain decoupled from tModLoader and its configuration
+///     system, the configuration is defined as an interface.
+/// </remarks>
+public interface IConfiguration {
+    /// <summary>
+    ///     A no-op, &quot;null&quot; configuration.
+    /// </summary>
     public static readonly IConfiguration NULL = new NullConfiguration();
 
     /// <summary>
@@ -23,7 +25,7 @@ public interface IConfiguration
     ///     disabled.
     /// </summary>
     bool DisabledExperimentalTileRendererWarning { get; set; }
-    
+
     /// <summary>
     ///     If the new laser ruler rendering system should be used over the vanilla one.
     /// </summary>

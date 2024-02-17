@@ -20,16 +20,14 @@ namespace Nitrate.Optimizations.ParallelizedUpdating;
 ///     (typically) isn't dependent on the states of other dust.
 /// </summary>
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
-internal sealed class DustUpdateParallelismSystem : ModSystem
-{
+internal sealed class DustUpdateParallelismSystem : ModSystem {
     private static readonly MethodInfo update_dust_filler = Info.OfMethod("Nitrate", "Nitrate.Optimizations.ParallelizedUpdating.DustUpdateParallelismSystem", "UpdateDustFiller");
     private static readonly MethodInfo inner_update_dust = Info.OfMethod("Nitrate", "Nitrate.Optimizations.ParallelizedUpdating.DustUpdateParallelismSystem", "InnerUpdateDust");
     private static MethodBody? updateDustBody;
 
     private ILHook? updateDustFillerHook;
 
-    public override void OnModLoad()
-    {
+    public override void OnModLoad() {
         base.OnModLoad();
 
         IL_Dust.UpdateDust += il => updateDustBody = il.Body;
@@ -37,28 +35,25 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
         IL_Dust.UpdateDust += UpdateDustMakeThreadStaticParallel;
     }
 
-    public override void Unload()
-    {
+    public override void Unload() {
         base.Unload();
 
         updateDustFillerHook?.Dispose();
         updateDustFillerHook = null;
     }
 
-    private static void UpdateDustMakeThreadStaticParallel(ILContext il)
-    {
+    private static void UpdateDustMakeThreadStaticParallel(ILContext il) {
         // Rewrites Dust::UpdateDust to use our thread-static fields instead of
         // local variables and constant values.
 
         ILCursor c = new(il);
-        ILLabel skipLabel = c.DefineLabel();
+        var skipLabel = c.DefineLabel();
 
         ILLabel? loopLabel = null;
         c.GotoNext(MoveType.Before, x => x.MatchBr(out loopLabel));
         c.Emit(OpCodes.Br, skipLabel);
 
-        if (loopLabel is null)
-        {
+        if (loopLabel is null) {
             throw new Exception("Could not find loop label");
         }
 
@@ -71,22 +66,22 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
 
     [UsedImplicitly(ImplicitUseKindFlags.Access)]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void InnerUpdateDust()
-    {
+    private static void InnerUpdateDust() {
         ThreadUnsafeCallWatchdog.Enable();
 
-        FasterParallel.For(0, Main.maxDust, (inclusive, exclusive, _) =>
-        {
-            UpdateDustFiller(inclusive, exclusive);
-        });
+        FasterParallel.For(
+            0,
+            Main.maxDust,
+            (inclusive, exclusive, _) => {
+                UpdateDustFiller(inclusive, exclusive);
+            }
+        );
 
         ThreadUnsafeCallWatchdog.Disable();
     }
 
-    private static void UpdateDustFillerEdit(ILContext il)
-    {
-        if (updateDustBody is null)
-        {
+    private static void UpdateDustFillerEdit(ILContext il) {
+        if (updateDustBody is null) {
             throw new Exception("Could not find Dust::UpdateDust method body");
         }
 
@@ -100,11 +95,10 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
         c.Emit(OpCodes.Ldarg_1);
 
         // Dynamically find the local index of the actual loop index variable.
-        int loopVariableIndex = -1;
+        var loopVariableIndex = -1;
         c.GotoPrev(x => x.MatchLdloc(out loopVariableIndex));
 
-        if (loopVariableIndex == -1)
-        {
+        if (loopVariableIndex == -1) {
             throw new Exception("Could not find loop variable index");
         }
 
@@ -123,8 +117,6 @@ internal sealed class DustUpdateParallelismSystem : ModSystem
 
     // ReSharper disable UnusedParameter.Local
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private static void UpdateDustFiller(int inclusive, int exclusive)
-    {
-    }
+    private static void UpdateDustFiller(int inclusive, int exclusive) { }
     // ReSharper restore UnusedParameter.Local
 }

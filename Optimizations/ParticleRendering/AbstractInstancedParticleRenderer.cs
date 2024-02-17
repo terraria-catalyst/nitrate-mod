@@ -7,8 +7,7 @@ using Terraria.ModLoader;
 
 namespace Nitrate.Optimizations.ParticleRendering;
 
-internal abstract class AbstractInstancedParticleRenderer<TParticle> : ModSystem where TParticle : unmanaged
-{
+internal abstract class AbstractInstancedParticleRenderer<TParticle> : ModSystem where TParticle : unmanaged {
     protected VertexBuffer? VertexBuffer;
     protected IndexBuffer? IndexBuffer;
     protected DynamicVertexBuffer? InstanceBuffer;
@@ -18,69 +17,64 @@ internal abstract class AbstractInstancedParticleRenderer<TParticle> : ModSystem
 
     protected abstract Lazy<Effect> InstanceParticleRenderer { get; }
 
-    protected AbstractInstancedParticleRenderer(int particleCount, string targetName)
-    {
+    protected AbstractInstancedParticleRenderer(int particleCount, string targetName) {
         Particles = new TParticle[particleCount];
         this.targetName = targetName;
     }
 
-    public override void Load()
-    {
+    public override void Load() {
         base.Load();
 
-        GraphicsDevice device = Main.graphics.GraphicsDevice;
+        var device = Main.graphics.GraphicsDevice;
 
-        Main.RunOnMainThread(() =>
-        {
-            VertexBuffer = new VertexBuffer(device, typeof(VertexPositionTexture), ParticleRendererConstants.PARTICLE.Length, BufferUsage.None);
-            IndexBuffer = new IndexBuffer(device, IndexElementSize.SixteenBits, ParticleRendererConstants.PARTICLE_INDICES.Length, BufferUsage.None);
+        Main.RunOnMainThread(
+            () => {
+                VertexBuffer = new VertexBuffer(device, typeof(VertexPositionTexture), ParticleRendererConstants.PARTICLE.Length, BufferUsage.None);
+                IndexBuffer = new IndexBuffer(device, IndexElementSize.SixteenBits, ParticleRendererConstants.PARTICLE_INDICES.Length, BufferUsage.None);
 
-            VertexBuffer.SetData(0, ParticleRendererConstants.PARTICLE, 0, ParticleRendererConstants.PARTICLE.Length, VertexPositionTexture.VertexDeclaration.VertexStride);
-            IndexBuffer.SetData(0, ParticleRendererConstants.PARTICLE_INDICES, 0, ParticleRendererConstants.PARTICLE_INDICES.Length);
+                VertexBuffer.SetData(0, ParticleRendererConstants.PARTICLE, 0, ParticleRendererConstants.PARTICLE.Length, VertexPositionTexture.VertexDeclaration.VertexStride);
+                IndexBuffer.SetData(0, ParticleRendererConstants.PARTICLE_INDICES, 0, ParticleRendererConstants.PARTICLE_INDICES.Length);
 
-            InstanceBuffer = new DynamicVertexBuffer(device, ParticleRendererConstants.INSTANCE_DATA, Particles.Length, BufferUsage.None);
+                InstanceBuffer = new DynamicVertexBuffer(device, ParticleRendererConstants.INSTANCE_DATA, Particles.Length, BufferUsage.None);
 
-            _ = InstanceParticleRenderer.Value;
+                _ = InstanceParticleRenderer.Value;
 
-            ParticleAtlas = MakeAtlas();
-        });
+                ParticleAtlas = MakeAtlas();
+            }
+        );
     }
 
-    public override void PostSetupContent()
-    {
+    public override void PostSetupContent() {
         base.PostSetupContent();
 
         ActionableRenderTargetSystem.RegisterRenderTarget(targetName);
     }
 
-    public override void Unload()
-    {
+    public override void Unload() {
         base.Unload();
 
-        Main.RunOnMainThread(() =>
-        {
-            VertexBuffer?.Dispose();
-            IndexBuffer?.Dispose();
+        Main.RunOnMainThread(
+            () => {
+                VertexBuffer?.Dispose();
+                IndexBuffer?.Dispose();
 
-            InstanceBuffer?.Dispose();
-        });
+                InstanceBuffer?.Dispose();
+            }
+        );
     }
 
     protected abstract Texture2D MakeAtlas();
 }
 
-internal static class ParticleRendererConstants
-{
-    internal static readonly VertexPositionTexture[] PARTICLE =
-    {
+internal static class ParticleRendererConstants {
+    internal static readonly VertexPositionTexture[] PARTICLE = {
         new(Vector3.Zero, Vector2.Zero),
         new(Vector3.UnitX, Vector2.UnitX),
         new(new Vector3(1, 1, 0), Vector2.One),
         new(Vector3.UnitY, Vector2.UnitY),
     };
 
-    internal static readonly short[] PARTICLE_INDICES =
-    {
+    internal static readonly short[] PARTICLE_INDICES = {
         0, 1, 2, 2, 3, 0,
     };
 

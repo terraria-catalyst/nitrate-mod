@@ -7,29 +7,22 @@ using System.Reflection;
 
 namespace Nitrate.SIMD;
 
-internal abstract class AbstractSimdifier : ISimdifier
-{
+internal abstract class AbstractSimdifier : ISimdifier {
     private readonly Dictionary<string, MethodInfo> instanceRemap = new();
 
-    public virtual void Simdify(ILCursor c)
-    {
+    public virtual void Simdify(ILCursor c) {
         // Replace method calls from the old type to the new type.
-        foreach (Instruction instr in c.Instrs)
-        {
-            if (instr.OpCode != OpCodes.Call)
-            {
+        foreach (var instr in c.Instrs) {
+            if (instr.OpCode != OpCodes.Call) {
                 continue;
             }
 
-            if (instr.Operand is not MethodReference methodReference)
-            {
+            if (instr.Operand is not MethodReference methodReference) {
                 continue;
             }
 
-            foreach (KeyValuePair<string, MethodInfo> remap in instanceRemap)
-            {
-                if (methodReference.FullName != remap.Key)
-                {
+            foreach (var remap in instanceRemap) {
+                if (methodReference.FullName != remap.Key) {
                     continue;
                 }
 
@@ -38,8 +31,7 @@ internal abstract class AbstractSimdifier : ISimdifier
         }
     }
 
-    protected void ReplaceCall(string fromSignature, string toName)
-    {
+    protected void ReplaceCall(string fromSignature, string toName) {
         instanceRemap.Add(fromSignature, GetType().GetMethod(toName, BindingFlags.Static | BindingFlags.NonPublic)!);
     }
 }

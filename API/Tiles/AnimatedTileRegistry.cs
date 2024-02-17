@@ -23,53 +23,24 @@ namespace Nitrate.API.Tiles;
 ///     to allow special tiles to render themselves like normal, since it'd
 ///     otherwise be extremely out of scope.
 /// </remarks>
-public static class AnimatedTileRegistry
-{
-    private sealed class AnimatedTileRegistryImpl : ModSystem
-    {
-        public override void Load()
-        {
+public static class AnimatedTileRegistry {
+    private sealed class AnimatedTileRegistryImpl : ModSystem {
+        public override void Load() {
             base.Load();
 
-            foreach (KeyValuePair<int, TileAnimatedType> pair in vanilla_tiles)
-            {
+            foreach (var pair in vanilla_tiles)
                 tiles.Add(pair.Key, pair.Value);
-            }
 
-            foreach (KeyValuePair<int, TileAnimatedType> pair in vanilla_walls)
-            {
+            foreach (var pair in vanilla_walls)
                 walls.Add(pair.Key, pair.Value);
-            }
         }
 
-        public override void PostSetupContent()
-        {
+        public override void PostSetupContent() {
             base.PostSetupContent();
 
-            foreach (ModTile tile in TileLoader.tiles)
-            {
-                // PreDraw
-                // PostDraw
-                // AnimationFrameHeight > 0
-                // IsDoor
-                // IsTileDangerous
-                // IsTileBiomeSightable
-                // IsTileSpelunkable
-                // SetSpriteEffects
-                // SetDrawPositions
-                // AnimateTile
-                // AnimateIndividualTile
-                // DrawEffects
-                // TileFrame
-                // RightClick
-                // MouseOver
-                // MouseOverFar
-                // IsLockedChest
-                // UnlockChest
-                // LockChest
-
-                Type tileType = tile.GetType();
-                bool animated = false;
+            foreach (var tile in TileLoader.tiles) {
+                var tileType = tile.GetType();
+                var animated = false;
 
                 animated |= IsMethodOverridden(tileType, nameof(tile.PreDraw));
                 animated |= IsMethodOverridden(tileType, nameof(tile.PostDraw));
@@ -94,29 +65,17 @@ public static class AnimatedTileRegistry
                 animated |= IsMethodOverridden(tileType, nameof(tile.LockChest));
 
                 if (!animated)
-                {
                     continue;
-                }
 
                 if (!tiles.ContainsKey(tile.Type))
-                {
                     tiles.Add(tile.Type, TileAnimatedType.ModdedAutoDetect);
-                }
                 else
-                {
                     tiles[tile.Type] |= TileAnimatedType.ModdedAutoDetect;
-                }
             }
 
-            foreach (ModWall wall in WallLoader.walls)
-            {
-                // PreDraw
-                // PostDraw
-                // AnimateWall
-                // WallFrame
-
-                Type wallType = wall.GetType();
-                bool animated = false;
+            foreach (var wall in WallLoader.walls) {
+                var wallType = wall.GetType();
+                var animated = false;
 
                 animated |= IsMethodOverridden(wallType, nameof(wall.PreDraw));
                 animated |= IsMethodOverridden(wallType, nameof(wall.PostDraw));
@@ -124,18 +83,12 @@ public static class AnimatedTileRegistry
                 animated |= IsMethodOverridden(wallType, nameof(wall.WallFrame));
 
                 if (!animated)
-                {
                     continue;
-                }
 
                 if (!walls.ContainsKey(wall.Type))
-                {
                     walls.Add(wall.Type, TileAnimatedType.ModdedAutoDetect);
-                }
                 else
-                {
                     walls[wall.Type] |= TileAnimatedType.ModdedAutoDetect;
-                }
             }
         }
     }
@@ -146,32 +99,30 @@ public static class AnimatedTileRegistry
     ///     for other consumers.
     /// </summary>
     [Flags]
-    public enum TileAnimatedType
-    {
+    public enum TileAnimatedType {
         /// <summary>
         ///     Animated-through-interaction tiles like chests.
         /// </summary>
-        Interactable     = 0b0001,
+        Interactable     = 1 << 0,
 
         /// <summary>
         ///     Passively animated tiles like Blue Starry Blocks.
         /// </summary>
-        Passive          = 0b0010,
+        Passive          = 1 << 1,
 
         /// <summary>
         ///     Tiles which provide special points like trees and master mode
         ///     relics.
         /// </summary>
-        SpecialPoint     = 0b0100,
+        SpecialPoint     = 1 << 2,
 
         /// <summary>
         ///     Automatically detected modded tiles which *may* be animated.
         /// </summary>
-        ModdedAutoDetect = 0b1000,
+        ModdedAutoDetect = 1 << 3,
     }
 
-    private static readonly Dictionary<int, TileAnimatedType> vanilla_tiles = new()
-    {
+    private static readonly Dictionary<int, TileAnimatedType> vanilla_tiles = new() {
         { TileID.Plants, TileAnimatedType.SpecialPoint },
         { TileID.Torches, TileAnimatedType.Passive | TileAnimatedType.Interactable },
         { TileID.ClosedDoor, TileAnimatedType.Interactable }, // TODO: Necessary?
@@ -413,8 +364,7 @@ public static class AnimatedTileRegistry
         { TileID.RainbowMossBrick, TileAnimatedType.Passive },
     };
 
-    private static readonly Dictionary<int, TileAnimatedType> vanilla_walls = new()
-    {
+    private static readonly Dictionary<int, TileAnimatedType> vanilla_walls = new() {
         { WallID.Waterfall,           TileAnimatedType.Passive },
         { WallID.Lavafall,            TileAnimatedType.Passive },
         { WallID.ArcaneRunes,         TileAnimatedType.Passive },
@@ -431,77 +381,48 @@ public static class AnimatedTileRegistry
     private static readonly Dictionary<int, TileAnimatedType> tiles = new();
     private static readonly Dictionary<int, TileAnimatedType> walls = new();
 
-    public static void RegisterTile(int tileId, TileAnimatedType type)
-    {
-        if (!tiles.ContainsKey(tileId))
-        {
+    public static void RegisterTile(int tileId, TileAnimatedType type) {
+        if (!tiles.ContainsKey(tileId)) {
             tiles.Add(tileId, type);
         }
-        else
-        {
+        else {
             tiles[tileId] |= type;
         }
     }
 
-    public static void RegisterWall(int wallId, TileAnimatedType type)
-    {
-        if (!walls.ContainsKey(wallId))
-        {
+    public static void RegisterWall(int wallId, TileAnimatedType type) {
+        if (!walls.ContainsKey(wallId)) {
             walls.Add(wallId, type);
         }
-        else
-        {
+        else {
             walls[wallId] |= type;
         }
     }
 
     // Also keep DontDrawTileSliced in mind?
-    public static bool IsTilePossiblyAnimated(int tileId) => tiles.ContainsKey(tileId) ||
-                                                             ShouldSwayInWind(tileId) ||
-                                                             TileID.Sets.GetsCheckedForLeaves[tileId] ||
-                                                             TileID.Sets.CommonSapling[tileId] ||
-                                                             TileID.Sets.IsVine[tileId] ||
-                                                             TileID.Sets.VineThreads[tileId] ||
-                                                             TileID.Sets.ReverseVineThreads[tileId] ||
-                                                             TileID.Sets.BasicChest[tileId] ||
-                                                             TileID.Sets.BasicChestFake[tileId] ||
-                                                             TileID.Sets.Torch[tileId] ||
-                                                             TileID.Sets.Campfire[tileId] ||
-                                                             TileID.Sets.TreeSapling[tileId] ||
-                                                             IsTileDynamicallyAnimated(tileId);
+    public static bool IsTilePossiblyAnimated(int tileId) {
+        return tiles.ContainsKey(tileId) || ShouldSwayInWind(tileId) || TileID.Sets.GetsCheckedForLeaves[tileId] || TileID.Sets.CommonSapling[tileId] || TileID.Sets.IsVine[tileId] || TileID.Sets.VineThreads[tileId] || TileID.Sets.ReverseVineThreads[tileId] || TileID.Sets.BasicChest[tileId] || TileID.Sets.BasicChestFake[tileId] || TileID.Sets.Torch[tileId] || TileID.Sets.Campfire[tileId] || TileID.Sets.TreeSapling[tileId] || IsTileDynamicallyAnimated(tileId);
+    }
 
     // TODO: TEMPORARY: Disable support for these dynamically animated tiles until we figure out a better way to handle them.
     // Main::tileShine2?
     // private static bool IsTileDynamicallyAnimated(int tileId) => TileID.Sets.CorruptBiomeSight[tileId] || TileID.Sets.CrimsonBiomeSight[tileId] || TileID.Sets.HallowBiomeSight[tileId] || Main.tileSpelunker[tileId] || IsTileDangerous(tileId);
-    private static bool IsTileDynamicallyAnimated(int tileId) => false;
+    private static bool IsTileDynamicallyAnimated(int tileId) {
+        return false;
+    }
 
-    private static bool IsTileDangerous(int tileId) => TileID.Sets.Boulders[tileId] || /*Minecart.IsPressurePlate()*/ tileId == TileID.MinecartTrack ||
-                                                       tileId == TileID.CrispyHoneyBlock ||
-                                                       tileId == TileID.Cactus ||
-                                                       tileId == 32 ||
-                                                       tileId == 69 ||
-                                                       tileId == 48 ||
-                                                       tileId == 232 ||
-                                                       tileId == 352 ||
-                                                       tileId == 483 ||
-                                                       tileId == 482 ||
-                                                       tileId == 481 ||
-                                                       tileId == 51 ||
-                                                       tileId == 229 ||
-                                                       tileId == 37 ||
-                                                       tileId == 58 ||
-                                                       tileId == 76 ||
-                                                       tileId == 162;
+    private static bool IsTileDangerous(int tileId) {
+        return TileID.Sets.Boulders[tileId] || /*Minecart.IsPressurePlate()*/ tileId == TileID.MinecartTrack || tileId == TileID.CrispyHoneyBlock || tileId == TileID.Cactus || tileId == 32 || tileId == 69 || tileId == 48 || tileId == 232 || tileId == 352 || tileId == 483 || tileId == 482 || tileId == 481 || tileId == 51 || tileId == 229 || tileId == 37 || tileId == 58 || tileId == 76 || tileId == 162;
+    }
 
-    public static bool IsWallPossiblyAnimated(int tileId) => walls.ContainsKey(tileId);
+    public static bool IsWallPossiblyAnimated(int tileId) {
+        return walls.ContainsKey(tileId);
+    }
 
     // ReSharper disable once SuggestBaseTypeForParameter
-    private static bool IsMethodOverridden(Type type, string methodName)
-    {
-        foreach (MethodInfo method in type.GetMethods(BindingFlags.Instance | BindingFlags.Public).Where(x => x.Name == methodName))
-        {
-            if (method.GetBaseDefinition().DeclaringType != method.DeclaringType)
-            {
+    private static bool IsMethodOverridden(Type type, string methodName) {
+        foreach (var method in type.GetMethods(BindingFlags.Instance | BindingFlags.Public).Where(x => x.Name == methodName)) {
+            if (method.GetBaseDefinition().DeclaringType != method.DeclaringType) {
                 return true;
             }
         }
@@ -510,5 +431,8 @@ public static class AnimatedTileRegistry
     }
 
     /*Main.SettingsEnabled_TilesSwayInWind &&*/
-    private static bool ShouldSwayInWind(int tileId) => TileID.Sets.SwaysInWindBasic[tileId] /*&& tileId != 227*/;
+    private static bool ShouldSwayInWind(int tileId) {
+        return TileID.Sets.SwaysInWindBasic[tileId];
+        /*&& tileId != 227*/
+    }
 }

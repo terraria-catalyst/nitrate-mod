@@ -19,10 +19,8 @@ namespace Nitrate.API.Rendering;
 ///     the render target), which occurs in a detour targeting
 ///     <see cref="Main.DrawProjectiles"/> (in post).
 /// </remarks>
-public static class ActionableRenderTargetSystem
-{
-    private sealed class DefaultActionableRenderTarget : IActionableRenderTarget
-    {
+public static class ActionableRenderTargetSystem {
+    private sealed class DefaultActionableRenderTarget : IActionableRenderTarget {
         public List<Action> Actions { get; } = new();
 
         public RenderTarget2D RenderTarget { get; } = new(
@@ -36,76 +34,65 @@ public static class ActionableRenderTargetSystem
             RenderTargetUsage.PreserveContents
         );
 
-        public void Finish()
-        {
+        public void Finish() {
             Actions.Clear();
         }
 
-        public IActionableRenderTarget ReinitForResize() => new DefaultActionableRenderTarget();
+        public IActionableRenderTarget ReinitForResize() {
+            return new DefaultActionableRenderTarget();
+        }
 
-        public void Dispose()
-        {
+        public void Dispose() {
             RenderTarget.Dispose();
         }
     }
 
     [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
-    private sealed class ActionableRenderTargetSystemImpl : ModSystem
-    {
-        public override void Load()
-        {
+    private sealed class ActionableRenderTargetSystemImpl : ModSystem {
+        public override void Load() {
             base.Load();
 
             On_Main.DrawProjectiles += DrawRenderTargets;
             Main.OnResolutionChanged += TargetsNeedResizing;
         }
 
-        public override void Unload()
-        {
+        public override void Unload() {
             base.Unload();
 
             On_Main.DrawProjectiles -= DrawRenderTargets;
             Main.OnResolutionChanged -= TargetsNeedResizing;
 
-            Main.RunOnMainThread(() =>
-            {
-                foreach (IActionableRenderTarget target in targets.Values)
-                {
-                    target.Dispose();
+            Main.RunOnMainThread(
+                () => {
+                    foreach (var target in targets.Values)
+                        target.Dispose();
                 }
-            });
+            );
         }
 
-        public override void PostUpdateEverything()
-        {
+        public override void PostUpdateEverything() {
             base.PostUpdateEverything();
 
             if (Main.gameMenu || Main.dedServ)
-            {
                 return;
-            }
 
-            GraphicsDevice device = Main.graphics.GraphicsDevice;
+            var device = Main.graphics.GraphicsDevice;
 
-            foreach (IActionableRenderTarget target in targets.Values)
-            {
-                RenderTargetBinding[] bindings = device.GetRenderTargets();
+            foreach (var target in targets.Values) {
+                var bindings = device.GetRenderTargets();
 
                 device.SetRenderTarget(target.RenderTarget);
                 device.Clear(Color.Transparent);
 
-                foreach (Action action in target.Actions)
-                {
+                foreach (var action in target.Actions)
                     action.Invoke();
-                }
 
                 device.SetRenderTargets(bindings);
                 target.Finish();
             }
         }
 
-        private static void DrawRenderTargets(On_Main.orig_DrawProjectiles orig, Main self)
-        {
+        private static void DrawRenderTargets(On_Main.orig_DrawProjectiles orig, Main self) {
             orig(self);
 
             Main.spriteBatch.Begin(
@@ -118,25 +105,22 @@ public static class ActionableRenderTargetSystem
                 Main.GameViewMatrix.TransformationMatrix
             );
 
-            foreach (string id in targets.Keys)
-            {
+            foreach (var id in targets.Keys)
                 Main.spriteBatch.Draw(targets[id].RenderTarget, Vector2.Zero, Color.White);
-            }
 
             Main.spriteBatch.End();
         }
 
-        private static void TargetsNeedResizing(FnaVector2 _)
-        {
-            Main.RunOnMainThread(() =>
-            {
-                foreach (string id in targets.Keys)
-                {
-                    IActionableRenderTarget target = targets[id];
-                    target.Dispose();
-                    targets[id] = target.ReinitForResize();
+        private static void TargetsNeedResizing(FnaVector2 _) {
+            Main.RunOnMainThread(
+                () => {
+                    foreach (var id in targets.Keys) {
+                        var target = targets[id];
+                        target.Dispose();
+                        targets[id] = target.ReinitForResize();
+                    }
                 }
-            });
+            );
         }
     }
 
@@ -151,8 +135,7 @@ public static class ActionableRenderTargetSystem
     ///     list of drawing actions.
     /// </summary>
     /// <param name="id">The ID of the render target and its layer.</param>
-    public static void RegisterRenderTarget(string id)
-    {
+    public static void RegisterRenderTarget(string id) {
         RegisterRenderTarget(id, static () => new DefaultActionableRenderTarget());
     }
 
@@ -165,12 +148,8 @@ public static class ActionableRenderTargetSystem
     ///     A function returning the target to render (to be executed on the
     ///     main thread).
     /// </param>
-    public static void RegisterRenderTarget(string id, Func<IActionableRenderTarget> target)
-    {
-        Main.RunOnMainThread(() =>
-        {
-            targets[id] = target();
-        });
+    public static void RegisterRenderTarget(string id, Func<IActionableRenderTarget> target) {
+        Main.RunOnMainThread(() => targets[id] = target());
     }
 
     /// <summary>
@@ -178,8 +157,7 @@ public static class ActionableRenderTargetSystem
     /// </summary>
     /// <param name="id">The ID of the render target to render to.</param>
     /// <param name="renderAction">The action to be executed.</param>
-    public static void QueueRenderAction(string id, Action renderAction)
-    {
+    public static void QueueRenderAction(string id, Action renderAction) {
         targets[id].Actions.Add(renderAction);
     }
 }

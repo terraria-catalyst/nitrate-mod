@@ -2,8 +2,7 @@
 
 namespace Nitrate.Config;
 
-internal sealed class NullConfiguration : IConfiguration
-{
+internal sealed class NullConfiguration : IConfiguration {
     bool IConfiguration.UsesExperimentalTileRenderer {
         get => false;
         set { }
