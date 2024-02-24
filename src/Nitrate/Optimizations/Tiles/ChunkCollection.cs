@@ -11,12 +11,16 @@ internal abstract class ChunkCollection {
     public Dictionary<Point, Chunk> Loaded { get; } = new();
 
     public readonly List<Point> NeedsPopulating = new();
+    public readonly List<Point> NeedsRePopulating = new();
+    public readonly List<Point> Rendered = new();
 
     public RenderTarget2D? ScreenTarget { get; set; }
 
     public virtual bool ApplyOverride => Main.LocalPlayer.dangerSense || Main.LocalPlayer.findTreasure || Main.LocalPlayer.biomeSight;
 
     public virtual void LoadChunk(Point key) {
+        if (NeedsPopulating.Contains(key)) return;
+        
         RenderTarget2D target = new(
             Main.graphics.GraphicsDevice,
             ChunkSystem.CHUNK_SIZE,
@@ -76,7 +80,7 @@ internal abstract class ChunkCollection {
     }
 
     public virtual void DisposeAllChunks() {
-        List<Chunk> loadedCopy = Loaded.Values.ToList();
+        var loadedCopy = Loaded.Values;
 
         // Capture a copy that wasn't cleared to avoid memory leaks.
         Main.RunOnMainThread(
@@ -97,17 +101,15 @@ internal abstract class ChunkCollection {
     public virtual void RemoveOutOfBoundsAndPopulate(int topX, int bottomX, int topY, int bottomY) {
         List<Point> removeList = new();
 
-        foreach (var key in Loaded.Keys) {
-            if (key.X >= topX && key.X <= bottomX && key.Y >= topY && key.Y <= bottomY) {
+        var copy = Loaded;
+        foreach (var key in copy.Keys) {
+            if ((key.X >= topX && key.X <= bottomX && key.Y >= topY && key.Y <= bottomY) || NeedsPopulating.Contains(key)) {
                 continue;
             }
 
             UnloadChunk(key);
-            removeList.Add(key);
-        }
-
-        foreach (var key in removeList) {
             Loaded.Remove(key);
+            Rendered.Remove(key);
         }
 
         // Only repopulate chunks once every 4 frames, like vanilla does with tiles.
@@ -116,7 +118,10 @@ internal abstract class ChunkCollection {
                 PopulateChunk(key);
             }
 
+            Rendered.AddRange(NeedsPopulating.Except(NeedsRePopulating));
             NeedsPopulating.Clear();
+            NeedsPopulating.AddRange(NeedsRePopulating);
+            NeedsRePopulating.Clear();
         }
     }
 }

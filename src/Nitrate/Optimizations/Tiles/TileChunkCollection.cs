@@ -58,6 +58,12 @@ internal sealed class TileChunkCollection : ChunkCollection {
 
                 var tile = Framing.GetTileSafely(tileX, tileY);
 
+                if (!Rendered.Contains(key) && tile.frameX == -1) {
+                    StopRender(device);
+                    NeedsRePopulating.Add(key);
+                    return;
+                }
+
                 if (!tile.HasTile || Main.instance.TilesRenderer.IsTileDrawLayerSolid(tile.type) != SolidLayer) {
                     continue;
                 }
@@ -74,13 +80,17 @@ internal sealed class TileChunkCollection : ChunkCollection {
                 }
             }
         }
+        
+        StopRender(device);
+    }
 
+    public void StopRender(GraphicsDevice device) {
         Main.tileBatch.End();
         Main.spriteBatch.End();
 
         device.SetRenderTargets(null);
     }
-
+    
     public override void DrawChunksToChunkTarget(GraphicsDevice device) {
         if (ScreenTarget is null) {
             return;
