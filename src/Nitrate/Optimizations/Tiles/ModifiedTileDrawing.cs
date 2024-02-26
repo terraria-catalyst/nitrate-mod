@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using Nitrate.Optimizations.ParticleRendering;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent;
@@ -194,16 +193,7 @@ internal static class ModifiedTileDrawing {
 
         if (IsActiveAndNotPaused) {
             if (!Lighting.UpdateEveryFrame || new FastRandom(Main.TileFrameSeed).WithModifier(x, y).Next(4) == 0) {
-                if (LivingTreeLeafDrawing.random.NextBool(25000)) {
-                    switch (drawData.typeCache) {
-                        case 192:
-                            LivingTreeLeafDrawing.EmitLivingTreeLeaf(x, y, 910);
-                            break;
-                        case 384:
-                            LivingTreeLeafDrawing.EmitLivingTreeLeaf(x, y, 914);
-                            break;
-                    }
-                }
+                Main.instance.TilesRenderer.DrawTiles_EmitParticles(y, x, drawData.tileCache, drawData.typeCache, drawData.tileFrameX, drawData.tileFrameY, drawData.tileLight);
             }
 
             drawData.tileLight = Main.instance.TilesRenderer.DrawTiles_GetLightOverride(x, y, drawData.tileCache, drawData.typeCache, drawData.tileFrameX, drawData.tileFrameY, drawData.tileLight);

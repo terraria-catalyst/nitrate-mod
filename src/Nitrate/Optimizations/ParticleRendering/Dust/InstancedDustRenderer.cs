@@ -10,6 +10,9 @@ using ReLogic.Content;
 using System;
 using Terraria;
 using Terraria.GameContent;
+using Terraria.Graphics.Shaders;
+using Terraria.ID;
+using Terraria.ModLoader;
 
 namespace Nitrate.Optimizations.ParticleRendering.Dust;
 
@@ -82,7 +85,7 @@ internal sealed class InstancedDustRenderer : AbstractInstancedParticleRenderer<
                     var dust = Main.dust[i];
 
                     // Something has gone seriously wrong if the atlas is null.
-                    if (dust.active && ParticleAtlas is not null) {
+                    if (dust.type <= DustID.Count && dust.active && ParticleAtlas is not null) {
                         float halfWidth = (int)(dust.frame.Width / 2f);
                         float halfHeight = (int)(dust.frame.Height / 2f);
 
@@ -120,7 +123,70 @@ internal sealed class InstancedDustRenderer : AbstractInstancedParticleRenderer<
                 }
             }
         );
-
         InstanceBuffer?.SetData(Particles, 0, Particles.Length, SetDataOptions.None);
+        
+        Rectangle rectangle = new Rectangle((int)Main.screenPosition.X - 1000, (int)Main.screenPosition.Y - 1050, Main.screenWidth + 2000, Main.screenHeight + 2100);
+        ArmorShaderData armorShaderData = null;
+        Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, null, Main.Transform);
+        for (var i = 0; i < Particles.Length; i++) {
+            var dust = Main.dust[i];
+
+            if (dust.active && dust.type >= DustID.Count) {
+                if (new Rectangle((int)dust.position.X, (int)dust.position.Y, 4, 4).Intersects(rectangle)) {
+                    float scale = dust.GetVisualScale();
+                    if (dust.shader != armorShaderData) {
+                        Main.spriteBatch.End();
+                        armorShaderData = dust.shader;
+                        if (armorShaderData == null) {
+                            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                                SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, null,
+                                Main.Transform);
+                        } 
+                        else {
+                            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                                SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, null,
+                                Main.Transform);
+                            dust.shader.Apply(null);
+                        }
+                    }
+
+                    Color newColor = Lighting.GetColor((int)(dust.position.X + 4.0) / 16, (int)(dust.position.Y + 4.0) / 16);
+                    Color alpha = dust.GetAlpha(newColor);
+                    ModDust dust2 = DustLoader.GetDust(dust.type);
+                    if (dust2 != null) {
+                        if (dust2.PreDraw(dust)) {
+                            dust2.Draw(dust, alpha, scale);
+                        }
+
+                        if (alpha == Color.Black) {
+                            dust.active = false;
+                        }
+                    } 
+                    else {
+                        Main.spriteBatch.Draw(TextureAssets.Dust.Value, dust.position - Main.screenPosition, new Rectangle?(dust.frame), alpha, dust.GetVisualRotation(), new Vector2(4f, 4f), scale, SpriteEffects.None, 0.0f);
+                        if (dust.color.PackedValue != 0U) {
+                            Color color = dust.GetColor(alpha);
+                            if (color.PackedValue != 0U) {
+                                Main.spriteBatch.Draw(TextureAssets.Dust.Value,
+                                    dust.position - Main.screenPosition,
+                                    new Rectangle?(dust.frame), color,
+                                    dust.GetVisualRotation(), new Vector2(4f, 4f), scale, SpriteEffects.None,
+                                    0.0f);
+                            }
+                        }
+
+                        if (alpha == Color.Black) {
+                            dust.active = false;
+                        }
+                    }
+                } 
+                else {
+                    dust.active = false;
+                }
+            }
+        }
+
+        Main.spriteBatch.End();
+        Main.pixelShader.CurrentTechnique.Passes[0].Apply();
     }
 }
