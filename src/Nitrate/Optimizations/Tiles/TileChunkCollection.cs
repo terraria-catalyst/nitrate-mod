@@ -4,10 +4,13 @@ using Nitrate.API.Listeners;
 using Nitrate.API.Tiles;
 using Nitrate.Utilities;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.GameContent.Drawing;
 using Terraria.Graphics.Capture;
+using Terraria.ModLoader;
 
 namespace Nitrate.Optimizations.Tiles;
 
@@ -57,8 +60,14 @@ internal sealed class TileChunkCollection : ChunkCollection {
                 }
 
                 var tile = Framing.GetTileSafely(tileX, tileY);
+                
+                if (tile.frameX == -1) {
+                    if (!FailedPopulations.TryAdd(key, 0)) {
+                        FailedPopulations[key]++;
+                    }
+                }
 
-                if (!Rendered.Contains(key) && tile.frameX == -1) {
+                if (FailedPopulations.TryGetValue(key, out byte value) && value < 6 && tile.frameX == -1) {
                     StopRender(device);
                     NeedsRePopulating.Add(key);
                     return;
@@ -84,7 +93,7 @@ internal sealed class TileChunkCollection : ChunkCollection {
         StopRender(device);
     }
 
-    public void StopRender(GraphicsDevice device) {
+    private void StopRender(GraphicsDevice device) {
         Main.tileBatch.End();
         Main.spriteBatch.End();
 

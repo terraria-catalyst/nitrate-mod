@@ -11,8 +11,8 @@ internal abstract class ChunkCollection {
     public Dictionary<Point, Chunk> Loaded { get; } = new();
 
     public readonly List<Point> NeedsPopulating = new();
-    public readonly List<Point> NeedsRePopulating = new();
-    public readonly List<Point> Rendered = new();
+    protected readonly List<Point> NeedsRePopulating = new();
+    protected readonly Dictionary<Point, byte> FailedPopulations = new();
 
     public RenderTarget2D? ScreenTarget { get; set; }
 
@@ -99,8 +99,6 @@ internal abstract class ChunkCollection {
     }
 
     public virtual void RemoveOutOfBoundsAndPopulate(int topX, int bottomX, int topY, int bottomY) {
-        List<Point> removeList = new();
-
         var copy = Loaded;
         foreach (var key in copy.Keys) {
             if ((key.X >= topX && key.X <= bottomX && key.Y >= topY && key.Y <= bottomY) || NeedsPopulating.Contains(key)) {
@@ -109,7 +107,7 @@ internal abstract class ChunkCollection {
 
             UnloadChunk(key);
             Loaded.Remove(key);
-            Rendered.Remove(key);
+            FailedPopulations.Remove(key);
         }
 
         // Only repopulate chunks once every 4 frames, like vanilla does with tiles.
@@ -117,8 +115,13 @@ internal abstract class ChunkCollection {
             foreach (var key in NeedsPopulating) {
                 PopulateChunk(key);
             }
-
-            Rendered.AddRange(NeedsPopulating.Except(NeedsRePopulating));
+            
+            foreach (var key in NeedsPopulating.Except(NeedsRePopulating)) {
+                if (!FailedPopulations.TryAdd(key, 6)) {
+                    FailedPopulations[key] = 6;
+                }
+            }
+            
             NeedsPopulating.Clear();
             NeedsPopulating.AddRange(NeedsRePopulating);
             NeedsRePopulating.Clear();
