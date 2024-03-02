@@ -16,7 +16,18 @@ public static class ThreadUnsafeCallWatchdog {
         public override void Load() {
             base.Load();
 
+            On_Lighting.AddLight_int_int_int_float += On_LightingOnAddLight_int_int_int_float;
             On_Lighting.AddLight_int_int_float_float_float += AddLight_int_int_float_float_float;
+        }
+
+        private static void On_LightingOnAddLight_int_int_int_float(On_Lighting.orig_AddLight_int_int_int_float orig, int i, int j, int torchId, float lightAmount) {
+            if (Enabled) {
+                actions.Add(() => orig(i, j, torchId, lightAmount));
+
+                return;
+            }
+
+            orig(i, j, torchId, lightAmount);
         }
 
         private static void AddLight_int_int_float_float_float(On_Lighting.orig_AddLight_int_int_float_float_float orig, int i, int j, float r, float g, float b) {
