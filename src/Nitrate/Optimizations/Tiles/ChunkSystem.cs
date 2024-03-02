@@ -1,21 +1,21 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using System.Collections.Generic;
+using JetBrains.Annotations;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using Nitrate.API.Listeners;
-using Nitrate.API.Threading;
-using Nitrate.Utilities;
 using ReLogic.Content;
-using System;
-using System.Collections.Generic;
+using TeamCatalyst.Nitrate.API.Listeners;
+using TeamCatalyst.Nitrate.API.Threading;
+using TeamCatalyst.Nitrate.Utilities;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.Graphics.Effects;
 using Terraria.ModLoader;
 
-namespace Nitrate.Optimizations.Tiles;
+namespace TeamCatalyst.Nitrate.Optimizations.Tiles;
 
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class ChunkSystem : ModSystem {

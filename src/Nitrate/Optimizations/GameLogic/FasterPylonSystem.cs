@@ -1,14 +1,13 @@
-﻿using JetBrains.Annotations;
-using Microsoft.Xna.Framework;
+﻿using System;
+using JetBrains.Annotations;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent;
 using Terraria.ModLoader;
 
-namespace Nitrate.Optimizations.GameLogic;
+namespace TeamCatalyst.Nitrate.Optimizations.GameLogic;
 
 /// <summary>
 ///     Optimizes internal code for pylons.

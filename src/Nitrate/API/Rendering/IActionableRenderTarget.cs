@@ -1,8 +1,8 @@
-﻿using Microsoft.Xna.Framework.Graphics;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework.Graphics;
 
-namespace Nitrate.API.Rendering;
+namespace TeamCatalyst.Nitrate.API.Rendering;
 
 /// <summary>
 ///     An actionable render target used in the

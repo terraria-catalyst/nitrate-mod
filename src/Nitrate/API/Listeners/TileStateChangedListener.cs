@@ -1,9 +1,9 @@
-﻿using JetBrains.Annotations;
-using System.IO;
+﻿using System.IO;
+using JetBrains.Annotations;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace Nitrate.API.Listeners;
+namespace TeamCatalyst.Nitrate.API.Listeners;
 
 /// <summary>
 ///     Provides event hooks for when the state of a tile or wall changes.

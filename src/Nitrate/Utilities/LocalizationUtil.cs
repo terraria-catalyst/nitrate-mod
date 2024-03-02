@@ -1,6 +1,6 @@
 ﻿using Terraria.Localization;
 
-namespace Nitrate.Utilities;
+namespace TeamCatalyst.Nitrate.Utilities;
 
 internal static class LocalizationUtil {
     public static string Localize(this string key, params object?[] args) {

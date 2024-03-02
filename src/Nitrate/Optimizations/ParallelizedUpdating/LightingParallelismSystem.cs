@@ -1,15 +1,15 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using JetBrains.Annotations;
 using Microsoft.Xna.Framework;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using Nitrate.API.Threading;
 using ReLogic.Threading;
-using System;
+using TeamCatalyst.Nitrate.API.Threading;
 using Terraria;
 using Terraria.Graphics.Light;
 using Terraria.ModLoader;
 
-namespace Nitrate.Optimizations.ParallelizedUpdating;
+namespace TeamCatalyst.Nitrate.Optimizations.ParallelizedUpdating;
 
 /// <summary>
 ///     Minor optimisation that makes some aspects of lighting use this mod's

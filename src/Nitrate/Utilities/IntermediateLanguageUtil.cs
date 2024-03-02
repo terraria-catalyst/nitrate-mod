@@ -1,10 +1,10 @@
-﻿using Mono.Cecil.Cil;
+﻿using System;
+using System.Linq;
+using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.Utils;
-using System;
-using System.Linq;
 
-namespace Nitrate.Utilities;
+namespace TeamCatalyst.Nitrate.Utilities;
 
 /// <summary>
 ///     Basic utilities for dealing with IL.

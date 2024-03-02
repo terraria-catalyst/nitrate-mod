@@ -1,11 +1,11 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 
-namespace Nitrate.Optimizations.Tiles;
+namespace TeamCatalyst.Nitrate.Optimizations.Tiles;
 
 internal abstract class ChunkCollection {
     public Dictionary<Point, Chunk> Loaded { get; } = new();

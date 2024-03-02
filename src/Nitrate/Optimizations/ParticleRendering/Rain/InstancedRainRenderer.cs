@@ -1,15 +1,15 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using JetBrains.Annotations;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Nitrate.API.Rendering;
-using Nitrate.API.Threading;
-using Nitrate.Utilities;
 using ReLogic.Content;
-using System;
+using TeamCatalyst.Nitrate.API.Rendering;
+using TeamCatalyst.Nitrate.API.Threading;
+using TeamCatalyst.Nitrate.Utilities;
 using Terraria;
 using Terraria.GameContent;
 
-namespace Nitrate.Optimizations.ParticleRendering.Rain;
+namespace TeamCatalyst.Nitrate.Optimizations.ParticleRendering.Rain;
 
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal class InstancedRainRenderer : AbstractInstancedParticleRenderer<ParticleInstance> {

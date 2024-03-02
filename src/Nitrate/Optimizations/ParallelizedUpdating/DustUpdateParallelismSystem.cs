@@ -1,19 +1,19 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using JetBrains.Annotations;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
-using Nitrate.API.Listeners;
-using Nitrate.API.SIMD;
-using Nitrate.API.Threading;
-using Nitrate.Utilities;
-using System;
-using System.Reflection;
-using System.Runtime.CompilerServices;
+using TeamCatalyst.Nitrate.API.Listeners;
+using TeamCatalyst.Nitrate.API.SIMD;
+using TeamCatalyst.Nitrate.API.Threading;
+using TeamCatalyst.Nitrate.Utilities;
 using Terraria;
 using Terraria.ModLoader;
 using MethodBody = Mono.Cecil.Cil.MethodBody;
 
-namespace Nitrate.Optimizations.ParallelizedUpdating;
+namespace TeamCatalyst.Nitrate.Optimizations.ParallelizedUpdating;
 
 /// <summary>
 ///     Rewrites the dust update method to use parallelism since dust updating
@@ -21,8 +21,8 @@ namespace Nitrate.Optimizations.ParallelizedUpdating;
 /// </summary>
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class DustUpdateParallelismSystem : ModSystem {
-    private static readonly MethodInfo update_dust_filler = Info.OfMethod("Nitrate", "Nitrate.Optimizations.ParallelizedUpdating.DustUpdateParallelismSystem", "UpdateDustFiller");
-    private static readonly MethodInfo inner_update_dust = Info.OfMethod("Nitrate", "Nitrate.Optimizations.ParallelizedUpdating.DustUpdateParallelismSystem", "InnerUpdateDust");
+    private static readonly MethodInfo update_dust_filler = Info.OfMethod("Nitrate", "TeamCatalyst.Nitrate.Optimizations.ParallelizedUpdating.DustUpdateParallelismSystem", "UpdateDustFiller");
+    private static readonly MethodInfo inner_update_dust = Info.OfMethod("Nitrate", "TeamCatalyst.Nitrate.Optimizations.ParallelizedUpdating.DustUpdateParallelismSystem", "InnerUpdateDust");
     private static MethodBody? updateDustBody;
 
     private ILHook? updateDustFillerHook;

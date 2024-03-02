@@ -1,6 +1,6 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent;
@@ -11,7 +11,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.Utilities;
 
-namespace Nitrate.Optimizations.Tiles;
+namespace TeamCatalyst.Nitrate.Optimizations.Tiles;
 
 internal static class ModifiedTileDrawing {
     private static bool IsActiveAndNotPaused => Main.instance.IsActive && !Main.gamePaused;

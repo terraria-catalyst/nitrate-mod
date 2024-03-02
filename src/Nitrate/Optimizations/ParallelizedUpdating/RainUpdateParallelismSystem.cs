@@ -1,11 +1,11 @@
 ﻿using JetBrains.Annotations;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using Nitrate.API.Threading;
+using TeamCatalyst.Nitrate.API.Threading;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace Nitrate.Optimizations.ParallelizedUpdating;
+namespace TeamCatalyst.Nitrate.Optimizations.ParallelizedUpdating;
 
 /// <summary>
 ///     Rewrites the rain update method to use parallelism since rain updating
