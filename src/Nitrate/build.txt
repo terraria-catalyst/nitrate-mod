@@ -1,5 +1,5 @@
 displayName = Nitrate
 author = Oli & tomat
-version = 0.3.2
+version = 0.3.3
 side = Client
 homepage = https://discord.gg/vPTUZcvXjg/
