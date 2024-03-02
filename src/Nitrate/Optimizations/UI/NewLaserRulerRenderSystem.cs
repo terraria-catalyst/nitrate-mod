@@ -1,14 +1,14 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using JetBrains.Annotations;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
 
-namespace Nitrate.Optimizations.UI;
+namespace TeamCatalyst.Nitrate.Optimizations.UI;
 
 /// <summary>
 ///     Replaces the default laser ruler rendering system with a much more optimized one.

@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace Nitrate.SIMD;
+namespace TeamCatalyst.Nitrate.SIMD;
 
 internal sealed class Vector2Simdifier : AbstractSimdifier {
     public Vector2Simdifier() {

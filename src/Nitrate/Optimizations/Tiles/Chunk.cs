@@ -1,8 +1,8 @@
-﻿using Microsoft.Xna.Framework.Graphics;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework.Graphics;
 
-namespace Nitrate.Optimizations.Tiles;
+namespace TeamCatalyst.Nitrate.Optimizations.Tiles;
 
 internal sealed class Chunk : IDisposable {
     public Chunk(RenderTarget2D renderTarget) {

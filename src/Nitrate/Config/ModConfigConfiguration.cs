@@ -1,10 +1,10 @@
-﻿using JetBrains.Annotations;
-using Nitrate.API.Config;
-using System.ComponentModel;
+﻿using System.ComponentModel;
+using JetBrains.Annotations;
+using TeamCatalyst.Nitrate.API.Config;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 
-namespace Nitrate.Config;
+namespace TeamCatalyst.Nitrate.Config;
 
 internal sealed class ModConfigConfiguration : IConfiguration {
     /// <summary>

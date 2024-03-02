@@ -1,8 +1,8 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 
-namespace Nitrate.Utilities;
+namespace TeamCatalyst.Nitrate.Utilities;
 
 internal static class SpriteBatchUtil {
     public readonly struct SpriteBatchSnapshot {

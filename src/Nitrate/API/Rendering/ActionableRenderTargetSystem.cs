@@ -1,12 +1,12 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using System.Collections.Generic;
+using JetBrains.Annotations;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace Nitrate.API.Rendering;
+namespace TeamCatalyst.Nitrate.API.Rendering;
 
 /// <summary>
 ///     Handles the registration of and rendering of render targets that deal

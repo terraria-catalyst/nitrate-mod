@@ -1,6 +1,6 @@
 ﻿using MonoMod.Cil;
 
-namespace Nitrate.API.SIMD;
+namespace TeamCatalyst.Nitrate.API.SIMD;
 
 /// <summary>
 ///     Simdifies a method body.

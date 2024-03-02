@@ -5,7 +5,7 @@ using System.Reflection;
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace Nitrate.API.Tiles;
+namespace TeamCatalyst.Nitrate.API.Tiles;
 
 /// <summary>
 ///     Keeps track of "animated" tiles, which are any tiles that have logic
