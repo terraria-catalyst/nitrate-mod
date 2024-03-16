@@ -21,6 +21,11 @@ Configs: {
 			Label: Uses New Laser Ruler Rendering
 			Tooltip: Uses a new laser ruler rendering system which increases its performance vastly.
 		}
+
+		UsesAsyncSceneMetrics: {
+			Label: Uses Async Scene Metrics
+			Tooltip: ""
+		}
 	}
 }
 

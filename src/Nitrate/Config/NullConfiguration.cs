@@ -17,4 +17,9 @@ internal sealed class NullConfiguration : IConfiguration {
         get => false;
         set { }
     }
+
+    bool IConfiguration.UsesAsyncSceneMetrics {
+        get => false;
+        set { }
+    }
 }
