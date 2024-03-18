@@ -23,8 +23,8 @@ Configs: {
 		}
 
 		UsesAsyncSceneMetrics: {
-			// Label: Uses Async Scene Metrics
-			// Tooltip: ""
+			Label: 使用异步场景度量
+			Tooltip: ""
 		}
 	}
 }
