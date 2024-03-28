@@ -1,3 +1,6 @@
 [submodule "catalyst"]
 	path = catalyst
 	url = https://github.com/terraria-catalyst/catalyst.git
+[submodule "tModLoader"]
+	path = tModLoader
+	url = https://github.com/terraria-catalyst/tModLoader.git
