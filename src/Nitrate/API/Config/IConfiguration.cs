@@ -30,4 +30,9 @@ public interface IConfiguration {
     ///     If the new laser ruler rendering system should be used over the vanilla one.
     /// </summary>
     bool UsesNewLaserRulerRendering { get; set; }
+    
+    /// <summary>
+    ///     If the async scene metrics feature should be enabled
+    /// </summary>
+    bool UsesAsyncSceneMetrics { get; set; }
 }

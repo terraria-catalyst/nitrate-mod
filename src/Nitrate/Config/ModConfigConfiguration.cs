@@ -27,6 +27,10 @@ internal sealed class ModConfigConfiguration : IConfiguration {
         [DefaultValue(true)]
         [UsedImplicitly(ImplicitUseKindFlags.Access | ImplicitUseKindFlags.Assign)]
         public bool UsesNewLaserRulerRendering { get; set; }
+        
+        [DefaultValue(true)]
+        [UsedImplicitly(ImplicitUseKindFlags.Access | ImplicitUseKindFlags.Assign)]
+        public bool UsesAsyncSceneMetrics { get; set; }
 
         /*[DefaultValue(true)]
         [UsedImplicitly(ImplicitUseKindFlags.Access | ImplicitUseKindFlags.Assign)]
@@ -48,5 +52,10 @@ internal sealed class ModConfigConfiguration : IConfiguration {
     bool IConfiguration.UsesNewLaserRulerRendering {
         get => Config.UsesNewLaserRulerRendering;
         set => Config.UsesNewLaserRulerRendering = value;
+    }
+
+    bool IConfiguration.UsesAsyncSceneMetrics {
+        get => Config.UsesAsyncSceneMetrics;
+        set => Config.UsesAsyncSceneMetrics = value;
     }
 }

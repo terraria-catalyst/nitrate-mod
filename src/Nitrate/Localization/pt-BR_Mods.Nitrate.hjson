@@ -21,6 +21,11 @@ Configs: {
 			Label: Utilizar Nova Renderização da Régua Mecânica
 			Tooltip: Utiliza um novo tipo de renderização da régua mecânica que melhora seu desempenho imensamente.
 		}
+
+		UsesAsyncSceneMetrics: {
+			// Label: Uses Async Scene Metrics
+			// Tooltip: ""
+		}
 	}
 }
 
