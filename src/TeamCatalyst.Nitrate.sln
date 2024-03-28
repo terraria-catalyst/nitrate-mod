@@ -5,6 +5,16 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nitrate", "Nitrate\Nitrate.csproj", "{F42F7107-EA9C-47EF-BF59-81A2CAAE4348}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Terraria", "..\tModLoader\src\Nitrate\Terraria\Terraria.csproj", "{8D2C0FF7-7525-4EC5-9365-C9DEC1E048CC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReLogic", "..\tModLoader\src\Nitrate\ReLogic\ReLogic.csproj", "{652217BB-734C-47C7-B338-2050DCC5E513}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FNA.Core", "..\tModLoader\FNA\FNA.Core.csproj", "{907D6682-A6F0-4000-AF1A-C36C1179E783}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tModPorter", "..\tModLoader\tModPorter\tModPorter\tModPorter.csproj", "{FD4F262E-D3EA-4DA5-9EBD-8804722A53E4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tModLoader.BuildTasks", "..\tModLoader\tModBuildTasks\tModLoader.BuildTasks.csproj", "{01582ED6-4CC3-4552-9364-720C5F3CA8A8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +25,26 @@ Global
 		{F42F7107-EA9C-47EF-BF59-81A2CAAE4348}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F42F7107-EA9C-47EF-BF59-81A2CAAE4348}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F42F7107-EA9C-47EF-BF59-81A2CAAE4348}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D2C0FF7-7525-4EC5-9365-C9DEC1E048CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D2C0FF7-7525-4EC5-9365-C9DEC1E048CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D2C0FF7-7525-4EC5-9365-C9DEC1E048CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D2C0FF7-7525-4EC5-9365-C9DEC1E048CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{652217BB-734C-47C7-B338-2050DCC5E513}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{652217BB-734C-47C7-B338-2050DCC5E513}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{652217BB-734C-47C7-B338-2050DCC5E513}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{652217BB-734C-47C7-B338-2050DCC5E513}.Release|Any CPU.Build.0 = Release|Any CPU
+		{907D6682-A6F0-4000-AF1A-C36C1179E783}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{907D6682-A6F0-4000-AF1A-C36C1179E783}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{907D6682-A6F0-4000-AF1A-C36C1179E783}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{907D6682-A6F0-4000-AF1A-C36C1179E783}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FD4F262E-D3EA-4DA5-9EBD-8804722A53E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD4F262E-D3EA-4DA5-9EBD-8804722A53E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD4F262E-D3EA-4DA5-9EBD-8804722A53E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD4F262E-D3EA-4DA5-9EBD-8804722A53E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{01582ED6-4CC3-4552-9364-720C5F3CA8A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01582ED6-4CC3-4552-9364-720C5F3CA8A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01582ED6-4CC3-4552-9364-720C5F3CA8A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01582ED6-4CC3-4552-9364-720C5F3CA8A8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
