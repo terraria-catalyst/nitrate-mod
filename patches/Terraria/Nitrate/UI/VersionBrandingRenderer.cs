@@ -19,12 +19,7 @@ namespace Terraria.Nitrate.UI;
 /// </summary>
 internal sealed class VersionBrandingRenderer
 {
-	/// <summary>
-	///		
-	/// </summary>
-	/// <param name="Text"></param>
-	/// <param name="Buttons"></param>
-	public readonly record struct VersionBrandingRecord(Func<string> Text, Func<List<TitleLinkButton>> Buttons, Func<string> Name, Func<Asset<Texture2D>?> Icon);
+	public readonly record struct VersionBrandingRecord(Func<string> Text, Func<List<TitleLinkButton>> Buttons, Func<Asset<Texture2D>> Icon);
 
 	/// <summary>
 	///		Vanilla branding and text.
@@ -32,7 +27,6 @@ internal sealed class VersionBrandingRenderer
 	public static VersionBrandingRecord Vanilla = new(
 		GetVanillaVersionText,
 		() => Main.TitleLinks,
-		() => "Terraria",
 		() => UICommon.IconVanilla
 	);
 
@@ -42,7 +36,6 @@ internal sealed class VersionBrandingRenderer
 	public static VersionBrandingRecord Tml = new(
 		GetTmlVersionText,
 		() => Main.tModLoaderTitleLinks,
-		() => "tModLoader",
 		() => UICommon.IconTml
 	);
 
@@ -52,7 +45,6 @@ internal sealed class VersionBrandingRenderer
 	public static VersionBrandingRecord Nitrate = new(
 		GetNitrateVersionText,
 		() => Main.nitrateLinks,
-		() => "Nitrate",
 		() => UICommon.IconNitrate
 	);
 
