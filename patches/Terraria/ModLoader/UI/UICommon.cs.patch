@@ -1,0 +1,29 @@
+--- src/tModLoader/Terraria/ModLoader/UI/UICommon.cs
++++ src/Nitrate/Terraria/ModLoader/UI/UICommon.cs
+@@ -132,11 +_,16 @@
+ 	public static Asset<Texture2D> InfoDisplayPageArrowTexture { get; internal set; }
+ 	public static Asset<Texture2D> tModLoaderTitleLinkButtonsTexture { get; internal set; }
+ 	public static Asset<Texture2D> CopyCodeButtonTexture { get; internal set; }
++	internal static Asset<Texture2D> IconVanilla { get; set; }
++	internal static Asset<Texture2D> IconTml { get; set; }
++	internal static Asset<Texture2D> IconNitrate { get; set; }
+ 
+ 	internal static void LoadTextures()
+ 	{
+ 		Asset<Texture2D> LoadEmbeddedTexture(string name)
+ 			=> ModLoader.ManifestAssets.Request<Texture2D>($"Terraria.ModLoader.{name}");
++		Asset<Texture2D> LoadEmbeddedNitrateTexture(string name)
++			=> ModLoader.ManifestAssets.Request<Texture2D>($"Terraria.Nitrate.{name}");
+ 
+ 		ButtonErrorTexture = LoadEmbeddedTexture("UI.ButtonError");
+ 		//ButtonConfigTexture = LoadEmbeddedTexture("Config.UI.ButtonConfig");
+@@ -161,5 +_,9 @@
+ 		InfoDisplayPageArrowTexture = LoadEmbeddedTexture("UI.InfoDisplayPageArrow");
+ 		tModLoaderTitleLinkButtonsTexture = LoadEmbeddedTexture("UI.tModLoaderTitleLinkButtons");
+ 		CopyCodeButtonTexture = LoadEmbeddedTexture("UI.CopyCodeButton");
++
++		IconVanilla = LoadEmbeddedNitrateTexture("UI.Icon_Vanilla");
++		IconTml = LoadEmbeddedNitrateTexture("UI.Icon_TML");
++		IconNitrate = LoadEmbeddedNitrateTexture("UI.Icon_Nitrate");
+ 	}
+ }

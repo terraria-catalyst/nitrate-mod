@@ -1,0 +1,34 @@
+--- src/tModLoader/Terraria/Main.TML.cs
++++ src/Nitrate/Terraria/Main.TML.cs
+@@ -25,6 +_,7 @@
+ using Terraria.ModLoader.Config;
+ using System.Net.Http;
+ using Newtonsoft.Json.Linq;
++using Terraria.Nitrate.UI;
+ 
+ namespace Terraria;
+ 
+@@ -51,6 +_,8 @@
+ 	private double _partialWorldEventUpdates = 0f;
+ 
+ 	public static List<TitleLinkButton> tModLoaderTitleLinks = new List<TitleLinkButton>();
++	internal static List<TitleLinkButton> nitrateLinks = new();
++	private static readonly VersionBrandingRenderer versionBrandingRenderer = new(VersionBrandingRenderer.Vanilla, VersionBrandingRenderer.Tml, VersionBrandingRenderer.Nitrate);
+ 
+ 	private static readonly HttpClient client = new HttpClient();
+ 
+@@ -512,12 +_,14 @@
+ 	
+ 	private static void DrawtModLoaderSocialMediaButtons(Microsoft.Xna.Framework.Color menuColor, float upBump)
+ 	{
++		/*
+ 		List<TitleLinkButton> titleLinks = tModLoaderTitleLinks;
+ 		Vector2 anchorPosition = new Vector2(18f, (float)(screenHeight - 26 - 22) - upBump);
+ 		for (int i = 0; i < titleLinks.Count; i++) {
+ 			titleLinks[i].Draw(spriteBatch, anchorPosition);
+ 			anchorPosition.X += 30f;
+ 		}
++		*/
+ 	}
+ 
+ 	/// <summary>

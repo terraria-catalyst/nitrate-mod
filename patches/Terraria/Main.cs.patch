@@ -1,0 +1,120 @@
+--- src/tModLoader/Terraria/Main.cs
++++ src/Nitrate/Terraria/Main.cs
+@@ -44460,10 +_,14 @@
+ 
+ 		float num110 = 0f;
+ 		if (!WorldGen.drunkWorldGen && menuMode == 0) {
++			// Don't manually draw link buttons, moved to VersionBrandingRenderer. - Nitrate
++			// See: rewrite of DrawVersionNumber
++			/*
+ 			DrawSocialMediaButtons(color, num110);
+ 			num110 += 32f;
+ 
+ 			DrawtModLoaderSocialMediaButtons(color, num110);
++			*/
+ 		}
+ 
+ 		if (!WorldGen.drunkWorldGen) {
+@@ -44651,35 +_,43 @@
+ 
+ 	private static void DrawSocialMediaButtons(Microsoft.Xna.Framework.Color menuColor, float upBump)
+ 	{
++		/*
+ 		List<TitleLinkButton> titleLinks = TitleLinks;
+ 		Vector2 anchorPosition = new Vector2(18f, (float)(screenHeight - 26) - upBump);
+ 		for (int i = 0; i < titleLinks.Count; i++) {
+ 			titleLinks[i].Draw(spriteBatch, anchorPosition);
+ 			anchorPosition.X += 30f;
+ 		}
++		*/
+ 	}
+ 
++	// NITRATE: Method name "DrawVersionNumber" is no longer accurate.
++	// Important logic has been moved to VersionBrandingRenderer.
+ 	private static void DrawVersionNumber(Microsoft.Xna.Framework.Color menuColor, float upBump)
+ 	{
+-		string supportMessage = Language.GetTextValue("tModLoader.PatreonSupport");
+-		string patreonShortURL = @"patreon.com/tModLoader";
+-		bool showPatreon = SocialAPI.Mode != SocialMode.Steam;
+-
+-		// Show number of mods - 1 such as to show number of enabled mods that are not tModLoader itself
+-		string modsMessage = Language.GetTextValue("tModLoader.MenuModsEnabled", Math.Max(0, ModLoader.ModLoader.Mods.Length - 1));
+-		
+-		//TODO: FUTURE
+-		//if (ModLoader.Core.GOGModUpdateChecker.ModUpdatesAvailable > 0) {
+-		//	modsMessage += " " + Language.GetTextValue("tModLoader.MenuModUpdatesAvailable", ModLoader.Core.GOGModUpdateChecker.ModUpdatesAvailable);
+-		//}
+-
+-		/*
+-		string text = versionNumber;
+-		*/
+-		string text = ModLoader.ModLoader.versionedName + (showPatreon ? Environment.NewLine + supportMessage : "") + (menuMode == 0 ? Environment.NewLine : "") + Environment.NewLine + "Terraria " + versionNumber;
+-		Vector2 origin = FontAssets.MouseText.Value.MeasureString(text);
+-		origin.X *= 0.5f;
+-		origin.Y *= 0.5f;
++		versionBrandingRenderer.Draw(Main.spriteBatch, menuColor, upBump);
++		// versionBrandingRenderer.Update(); // Updating in a draw method is sad... TODO
++
++		// string supportMessage = Language.GetTextValue("tModLoader.PatreonSupport");
++		// string patreonShortURL = @"patreon.com/tModLoader";
++		// bool showPatreon = SocialAPI.Mode != SocialMode.Steam;
++		// 
++		// // Show number of mods - 1 such as to show number of enabled mods that are not tModLoader itself
++		// string modsMessage = Language.GetTextValue("tModLoader.MenuModsEnabled", Math.Max(0, ModLoader.ModLoader.Mods.Length - 1));
++		// 
++		// //TODO: FUTURE
++		// //if (ModLoader.Core.GOGModUpdateChecker.ModUpdatesAvailable > 0) {
++		// //	modsMessage += " " + Language.GetTextValue("tModLoader.MenuModUpdatesAvailable", ModLoader.Core.GOGModUpdateChecker.ModUpdatesAvailable);
++		// //}
++		// 
++		// /*
++		// string text = versionNumber;
++		// */
++		// string text = ModLoader.ModLoader.versionedName + (showPatreon ? Environment.NewLine + supportMessage : "") + (menuMode == 0 ? Environment.NewLine : "") + Environment.NewLine + "Terraria " + versionNumber;
++
++		// Vector2 origin = FontAssets.MouseText.Value.MeasureString(text);
++		// origin.X *= 0.5f;
++		// origin.Y *= 0.5f;
+ 		for (int i = 0; i < 5; i++) {
+ 			Microsoft.Xna.Framework.Color color = Microsoft.Xna.Framework.Color.Black;
+ 			if (i == 4) {
+@@ -44704,7 +_,7 @@
+ 			if (i == 3)
+ 				num2 = 2;
+ 
+-			spriteBatch.DrawString(FontAssets.MouseText.Value, text, new Vector2(origin.X + (float)num + 10f, (float)screenHeight - origin.Y + (float)num2 - 2f - upBump), color, 0f, origin, 1f, SpriteEffects.None, 0f);
++			// spriteBatch.DrawString(FontAssets.MouseText.Value, text, new Vector2(origin.X + (float)num + 10f, (float)screenHeight - origin.Y + (float)num2 - 2f - upBump), color, 0f, origin, 1f, SpriteEffects.None, 0f);
+ 
+ 			// Developer mode button.
+ 			if (menuMode == 0 /*&& !ModCompile.DeveloperMode*/) {
+@@ -44733,18 +_,18 @@
+ 			}
+ 
+ 			// TML Patreon.
+-			if (showPatreon) {
+-				var font = FontAssets.MouseText.Value;
+-				var patreonOrigin = font.MeasureString(supportMessage);
+-				Vector2 urlSize = font.MeasureString(patreonShortURL);
+-
+-				spriteBatch.DrawString(font, patreonShortURL, new Vector2(patreonOrigin.X + num + 10f, screenHeight - patreonOrigin.Y + num2 - 2f - (int)upBump), color, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+-
+-				if (i == 4 && mouseLeftRelease && mouseLeft && new Microsoft.Xna.Framework.Rectangle((int)patreonOrigin.X + 10, screenHeight - (int)urlSize.Y - 2 - (int)upBump, (int)urlSize.X, (int)patreonOrigin.Y).Contains(new Microsoft.Xna.Framework.Point(mouseX, mouseY)) && hasFocus) {
+-					SoundEngine.PlaySound(SoundID.MenuOpen);
+-					Utils.OpenToURL("https://www.patreon.com/tModLoader");
+-				}
+-			}
++			// if (showPatreon) {
++			// 	var font = FontAssets.MouseText.Value;
++			// 	var patreonOrigin = font.MeasureString(supportMessage);
++			// 	Vector2 urlSize = font.MeasureString(patreonShortURL);
++			// 
++			// 	spriteBatch.DrawString(font, patreonShortURL, new Vector2(patreonOrigin.X + num + 10f, screenHeight - patreonOrigin.Y + num2 - 2f - (int)upBump), color, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
++			// 
++			// 	if (i == 4 && mouseLeftRelease && mouseLeft && new Microsoft.Xna.Framework.Rectangle((int)patreonOrigin.X + 10, screenHeight - (int)urlSize.Y - 2 - (int)upBump, (int)urlSize.X, (int)patreonOrigin.Y).Contains(new Microsoft.Xna.Framework.Point(mouseX, mouseY)) && hasFocus) {
++			// 		SoundEngine.PlaySound(SoundID.MenuOpen);
++			// 		Utils.OpenToURL("https://www.patreon.com/tModLoader");
++			// 	}
++			// }
+ 
+ 			// ModPack
+ 			if (ModOrganizer.ModPackActive != null) {
