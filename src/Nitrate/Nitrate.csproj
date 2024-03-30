@@ -1,6 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <Import Project="../../catalyst/Mod.Build.targets"/>
+    <Import Project="../../catalyst/Mod.Build.targets" />
 
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
@@ -11,14 +11,5 @@
 
         <AssemblyPublicizerPaths>$(AssemblyPublicizerPaths);$(MSBuildThisFileDirectory)nitrate.publicizer.js</AssemblyPublicizerPaths>
     </PropertyGroup>
-
-    <ItemGroup>
-        <None Remove="Assets\**\*.xnb"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <PackageReference Include="Fody" Version="6.8.0" PrivateAssets="all"/>
-        <PackageReference Include="InfoOf.Fody" Version="2.1.1"/>
-    </ItemGroup>
 
 </Project>
