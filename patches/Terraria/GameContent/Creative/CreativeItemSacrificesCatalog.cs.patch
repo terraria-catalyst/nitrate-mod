@@ -1,0 +1,11 @@
+--- src/tModLoader/Terraria/GameContent/Creative/CreativeItemSacrificesCatalog.cs
++++ src/Nitrate/Terraria/GameContent/Creative/CreativeItemSacrificesCatalog.cs
+@@ -24,7 +_,7 @@
+ 			if (array2.Length >= 3 && ItemID.Search.TryGetId(array2[0], out var id)) {
+ 				int value = 0;
+ 				bool flag = false;
+-				string text2 = array2[1].ToLower();
++				string text2 = array2[1].ToLower(System.Globalization.CultureInfo.InvariantCulture);
+ 				switch (text2) {
+ 					case "":
+ 					case "a":

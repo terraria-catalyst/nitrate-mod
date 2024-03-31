@@ -10,8 +10,9 @@ internal static class Languages
 	private static readonly Dictionary<string, GameCulture> cultures = new();
 	internal static readonly Dictionary<GameCulture.CultureName, GameCulture> namedCultures = new();
 
+	// Vanilla-supported languages.
 	public static readonly GameCulture en_US =		MakeCulture("en-US",	"English (United States)",	"English (United States)",	CommonOneMany,	legacyId: 1, workshopName: "english");
-	public static readonly GameCulture de_DE =		MakeCulture("de-DE",	"Deutsch",					"German",					 CommonOneMany,	legacyId: 2, workshopName: "german");
+	public static readonly GameCulture de_DE =		MakeCulture("de-DE",	"Deutsch",					"German",					CommonOneMany,	legacyId: 2, workshopName: "german");
 	public static readonly GameCulture it_IT =		MakeCulture("it-IT",	"Italiano",					"Italian",					CommonOneMany,	legacyId: 3, workshopName: "italian");
 	public static readonly GameCulture fr_FR =		MakeCulture("fr-FR",	"Français",					"French",					French,			legacyId: 4, workshopName: "french");
 	public static readonly GameCulture es_ES =		MakeCulture("es-ES",	"Español",					"Spanish",					CommonOneMany,	legacyId: 5, workshopName: "spanish");
@@ -19,6 +20,10 @@ internal static class Languages
 	public static readonly GameCulture zh_Hans =	MakeCulture("zh-Hans",	"简体中文",					"Chinese (Simplified)",		CommonOther,	legacyId: 7, workshopName: "schinese");
 	public static readonly GameCulture pt_BR =		MakeCulture("pt-BR",	"Português (Brasil)",		"Portuguese (Brazil)",		CommonOneMany,	legacyId: 8, workshopName: "portuguese");
 	public static readonly GameCulture pl_PL =		MakeCulture("pl-PL",	"Polski",					"Polish",					Polish,			legacyId: 9, workshopName: "polish");
+
+	// Unofficial languages (current roster temporary, demonstrative)
+	public static readonly GameCulture ja_JP = MakeCulture("ja-JP", "日本語", "Japanese", UnknownTodo);
+	public static readonly GameCulture tr_TR = MakeCulture("tr-TR", "Türkçe", "Turkish", UnknownTodo);
 
 	public static GameCulture Default => en_US;
 
@@ -81,6 +86,11 @@ internal static class Languages
 	}
 
 	private static int CommonOther(int count, int mod_i10, int mod_i100)
+	{
+		return 0;
+	}
+
+	private static int UnknownTodo(int count, int mod_i10, int mod_i100)
 	{
 		return 0;
 	}
