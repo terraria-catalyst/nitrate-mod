@@ -1,0 +1,135 @@
+--- src/tModLoader/Terraria/Localization/GameCulture.cs
++++ src/Nitrate/Terraria/Localization/GameCulture.cs
+@@ -1,13 +_,15 @@
++using System;
+ using System.Collections.Generic;
+ using System.Diagnostics;
+ using System.Globalization;
+-using System.Linq;
++using Terraria.Nitrate.Localization;
+ 
+ namespace Terraria.Localization;
+ 
+ [DebuggerDisplay("{Name}")]
+ public class GameCulture
+ {
++	[Obsolete("Nitrate rewrites localization, hard-coded CultureName enum should be avoided")]
+ 	public enum CultureName
+ 	{
+ 		English = 1,
+@@ -22,42 +_,66 @@
+ 		Unknown = 9999
+ 	}
+ 
+-	private static Dictionary<CultureName, GameCulture> _NamedCultures;
+-	private static Dictionary<int, GameCulture> _legacyCultures;
+ 	public readonly CultureInfo CultureInfo;
++
++	public string LanguageName { get; }
++
++	public string EnglishName { get; }
++
++	public string WorkshopName { get; }
++
++	public Func<int, int> CardinalPluralRule { get; }
++
++	[Obsolete("Nitrate rewrites localization, legacy language IDs should be avoided")]
+ 	public readonly int LegacyId;
+ 
+-	public static IEnumerable<GameCulture> KnownCultures => _legacyCultures.Values;
++	public static IEnumerable<GameCulture> KnownCultures => Languages.GetCultures();
+ 
+-	public static GameCulture DefaultCulture { get; set; }
++	public static GameCulture DefaultCulture {
++		get => Languages.Default;
++		set {
++			// TODO: Nitrate makes this a no-op; should it be supported?
++		}
++	}
+ 
+ 	public bool IsActive => Language.ActiveCulture == this;
+ 
+ 	public string Name => CultureInfo.Name;
+ 
++	[Obsolete("Nitrate rewrites localization, hard-coded CultureName enum should be avoided")]
+ 	public static GameCulture FromCultureName(CultureName name)
+ 	{
++		/*
+ 		if (!_NamedCultures.ContainsKey(name))
+ 			return DefaultCulture;
+ 
+ 		return _NamedCultures[name];
++		*/
++
++		return Languages.namedCultures.TryGetValue(name, out var culture) ? culture : DefaultCulture;
+ 	}
+ 
++	[Obsolete("Nitrate rewrites localization, legacy language IDs should be avoided")]
+ 	public static GameCulture FromLegacyId(int id)
+ 	{
+ 		if (id < 1)
+ 			id = 1;
+ 
++		/*
+ 		if (!_legacyCultures.ContainsKey(id))
+ 			return DefaultCulture;
+ 
+ 		return _legacyCultures[id];
++		*/
++		return FromCultureName((CultureName)id);
+ 	}
+ 
+-	public static GameCulture FromName(string name) => _legacyCultures.Values.SingleOrDefault((GameCulture culture) => culture.Name == name) ?? DefaultCulture;
++	public static GameCulture FromName(string name) => Languages.FromCodeOrDefault(name);
+ 
+ 	static GameCulture()
+ 	{
++		// Initialization moved to Nitrate.
++		/*
+ 		_NamedCultures = new Dictionary<CultureName, GameCulture> {
+ 			{ CultureName.English, new GameCulture("en-US", 1) },
+ 			{ CultureName.German, new GameCulture("de-DE", 2) },
+@@ -71,20 +_,43 @@
+ 		};
+ 
+ 		DefaultCulture = _NamedCultures[CultureName.English];
++		*/
+ 	}
+ 
++	[Obsolete("Nitrate rewrites localization, use other overload", error: true)]
+ 	public GameCulture(string name, int legacyId)
+ 	{
+ 		CultureInfo = new CultureInfo(name);
+ 		LegacyId = legacyId;
+ 		RegisterLegacyCulture(this, legacyId);
++
++		// Nitrate: stub these values to ensure no nulls at runtime.
++		// Not great.
++		LanguageName = EnglishName = name;
++		WorkshopName = "english";
++		CardinalPluralRule = _ => 0;
++	}
++
++	public GameCulture(string languageCode, string languageName, string englishName, int legacyId, string workshopName, Func<int, int> cardinalPluralRule)
++	{
++		CultureInfo = new CultureInfo(languageCode);
++		LanguageName = languageName;
++		EnglishName = englishName;
++		WorkshopName = workshopName ?? "english";
++		CardinalPluralRule = cardinalPluralRule;
++
++#pragma warning disable CS0618 // Type or member is obsolete
++		LegacyId = legacyId;
++#pragma warning restore CS0618 // Type or member is obsolete
+ 	}
+ 
+ 	private static void RegisterLegacyCulture(GameCulture culture, int legacyId)
+ 	{
++		/*
+ 		if (_legacyCultures == null)
+ 			_legacyCultures = new Dictionary<int, GameCulture>();
+ 
+ 		_legacyCultures.Add(legacyId, culture);
++		*/
+ 	}
+ }

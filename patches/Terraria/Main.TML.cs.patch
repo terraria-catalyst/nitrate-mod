@@ -1,19 +1,23 @@
 --- src/tModLoader/Terraria/Main.TML.cs
 +++ src/Nitrate/Terraria/Main.TML.cs
-@@ -25,6 +_,7 @@
+@@ -25,6 +_,8 @@
  using Terraria.ModLoader.Config;
  using System.Net.Http;
  using Newtonsoft.Json.Linq;
 +using Terraria.Nitrate.UI;
++using Terraria.Nitrate.UI.States;
  
  namespace Terraria;
  
-@@ -51,6 +_,8 @@
+@@ -51,6 +_,11 @@
  	private double _partialWorldEventUpdates = 0f;
  
  	public static List<TitleLinkButton> tModLoaderTitleLinks = new List<TitleLinkButton>();
 +	internal static List<TitleLinkButton> nitrateLinks = new();
 +	private static readonly VersionBrandingRenderer versionBrandingRenderer = new(VersionBrandingRenderer.Vanilla, VersionBrandingRenderer.Tml, VersionBrandingRenderer.Nitrate);
++
++	private static UILanguageSelectMenu languageSelectMenu_InitialLanguageSelect = new(true);
++	private static UILanguageSelectMenu languageSelectMenu = new(false);
  
  	private static readonly HttpClient client = new HttpClient();
  

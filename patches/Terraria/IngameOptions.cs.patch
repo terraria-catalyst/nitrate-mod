@@ -1,0 +1,25 @@
+--- src/tModLoader/Terraria/IngameOptions.cs
++++ src/Nitrate/Terraria/IngameOptions.cs
+@@ -9,6 +_,7 @@
+ using Terraria.Localization;
+ using Terraria.ModLoader;
+ using Terraria.ModLoader.UI;
++using Terraria.Nitrate.Localization;
+ using Terraria.Social;
+ using Terraria.UI;
+ using Terraria.UI.Gamepad;
+@@ -118,10 +_,10 @@
+ 			skipRightSlot[i] = false;
+ 		}
+ 
+-		bool flag = GameCulture.FromCultureName(GameCulture.CultureName.Russian).IsActive || GameCulture.FromCultureName(GameCulture.CultureName.Portuguese).IsActive || GameCulture.FromCultureName(GameCulture.CultureName.Polish).IsActive || GameCulture.FromCultureName(GameCulture.CultureName.French).IsActive;
+-		bool isActive = GameCulture.FromCultureName(GameCulture.CultureName.Polish).IsActive;
+-		bool isActive2 = GameCulture.FromCultureName(GameCulture.CultureName.German).IsActive;
+-		bool flag2 = GameCulture.FromCultureName(GameCulture.CultureName.Italian).IsActive || GameCulture.FromCultureName(GameCulture.CultureName.Spanish).IsActive;
++		bool flag = Languages.ru_RU.IsActive || Languages.pt_BR.IsActive || Languages.pl_PL.IsActive || Languages.fr_FR.IsActive;
++		bool isActive = Languages.pl_PL.IsActive;
++		bool isActive2 = Languages.de_DE.IsActive;
++		bool flag2 = Languages.it_IT.IsActive || Languages.es_ES.IsActive;
+ 		bool flag3 = false;
+ 		int num = 70;
+ 		float scale = 0.75f;

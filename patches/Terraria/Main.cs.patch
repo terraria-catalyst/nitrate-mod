@@ -1,5 +1,65 @@
 --- src/tModLoader/Terraria/Main.cs
 +++ src/Nitrate/Terraria/Main.cs
+@@ -74,6 +_,7 @@
+ using Terraria.ModLoader.IO;
+ using Terraria.ModLoader.UI;
+ using Terraria.Net;
++using Terraria.Nitrate.Localization;
+ using Terraria.ObjectData;
+ using Terraria.Social;
+ using Terraria.Social.Steam;
+@@ -9554,8 +_,8 @@
+ 		base.GraphicsDevice.DeviceLost += GraphicsDeviceLost;
+ 		base.GraphicsDevice.DeviceReset += GraphicsDeviceLost;
+ 		base.GraphicsDevice.DeviceResetting += GraphicsDeviceLost;
+-		if (_needsLanguageSelect)
+-			menuMode = 1212;
++		// if (_needsLanguageSelect)
++		// 	menuMode = 1212;
+ 
+ 		_achievements = new AchievementManager();
+ 		_achievementAdvisor = new AchievementAdvisor();
+@@ -9733,6 +_,12 @@
+ 		CacheSupportedDisplaySizes();
+ 		ContentSamples.RebuildItemCreativeSortingIDsAfterRecipesAreSetUp();
+ 		ContentSamples.CommonlyUsedContentSamples.PrepareAfterEverythingElseLoaded();
++
++		// Nitrate: Prompt language select here (after assets are loaded).
++		if (_needsLanguageSelect) {
++			menuMode = 888;
++			MenuUI.SetState(languageSelectMenu_InitialLanguageSelect);
++		}
+ 	}
+ 
+ 	private IEnumerator LoadMusic_InSteps()
+@@ -39761,7 +_,7 @@
+ 		string text = "";
+ 		float num4 = 215f;
+ 		int startX = 0;
+-		if (GameCulture.FromCultureName(GameCulture.CultureName.Russian).IsActive) {
++		if (Languages.ru_RU.IsActive) {
+ 			startX = -50;
+ 			num4 += 50f;
+ 		}
+@@ -42613,7 +_,8 @@
+ 				array9[num20] = Lang.menu[103].Value;
+ 				if (selectedMenu == num20) {
+ 					SoundEngine.PlaySound(10);
+-					menuMode = 1213;
++					menuMode = 888;
++					MenuUI.SetState(languageSelectMenu);
+ 				}
+ 
+ 				// TML settings
+@@ -43755,7 +_,7 @@
+ 		SkipMenuEnumeration:
+ 
+ 		if (menuMode == 888) {
+-			if (!_blockFancyUIWhileLoading)
++			if (!_blockFancyUIWhileLoading && Assets is not null)
+ 				MenuUI.Draw(spriteBatch, gameTime);
+ 		}
+ 		else {
 @@ -44460,10 +_,14 @@
  
  		float num110 = 0f;
@@ -15,6 +75,15 @@
  		}
  
  		if (!WorldGen.drunkWorldGen) {
+@@ -44559,7 +_,7 @@
+ 
+ 	private void OnSubmitServerPassword()
+ 	{
+-		string text = "-autoshutdown -password \"" + ConvertToSafeArgument(Netplay.ServerPassword) + "\" -lang " + Language.ActiveCulture.LegacyId;
++		string text = "-autoshutdown -password \"" + ConvertToSafeArgument(Netplay.ServerPassword) + "\" -language " + Language.ActiveCulture.Name;
+ 		if (Platform.IsLinux)
+ 			text = ((IntPtr.Size != 8) ? (text + " -x86") : (text + " -x64"));
+ 
 @@ -44651,35 +_,43 @@
  
  	private static void DrawSocialMediaButtons(Microsoft.Xna.Framework.Color menuColor, float upBump)
