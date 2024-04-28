@@ -1,14 +1,14 @@
 --- src/tModLoader/Terraria/ModLoader/UI/UICommon.cs
 +++ src/Nitrate/Terraria/ModLoader/UI/UICommon.cs
-@@ -132,11 +_,16 @@
- 	public static Asset<Texture2D> InfoDisplayPageArrowTexture { get; internal set; }
- 	public static Asset<Texture2D> tModLoaderTitleLinkButtonsTexture { get; internal set; }
- 	public static Asset<Texture2D> CopyCodeButtonTexture { get; internal set; }
-+	internal static Asset<Texture2D> IconVanilla { get; set; }
-+	internal static Asset<Texture2D> IconTml { get; set; }
-+	internal static Asset<Texture2D> IconNitrate { get; set; }
+@@ -8,6 +_,7 @@
+ using Terraria.GameContent.UI.Elements;
+ using Terraria.ID;
+ using Terraria.Localization;
++using Terraria.Nitrate.UI;
+ using Terraria.UI;
  
- 	internal static void LoadTextures()
+ namespace Terraria.ModLoader.UI;
+@@ -143,6 +_,8 @@
  	{
  		Asset<Texture2D> LoadEmbeddedTexture(string name)
  			=> ModLoader.ManifestAssets.Request<Texture2D>($"Terraria.ModLoader.{name}");
@@ -17,13 +17,13 @@
  
  		ButtonErrorTexture = LoadEmbeddedTexture("UI.ButtonError");
  		//ButtonConfigTexture = LoadEmbeddedTexture("Config.UI.ButtonConfig");
-@@ -161,5 +_,9 @@
+@@ -173,5 +_,9 @@
  		InfoDisplayPageArrowTexture = LoadEmbeddedTexture("UI.InfoDisplayPageArrow");
  		tModLoaderTitleLinkButtonsTexture = LoadEmbeddedTexture("UI.tModLoaderTitleLinkButtons");
  		CopyCodeButtonTexture = LoadEmbeddedTexture("UI.CopyCodeButton");
 +
-+		IconVanilla = LoadEmbeddedNitrateTexture("UI.Icon_Vanilla");
-+		IconTml = LoadEmbeddedNitrateTexture("UI.Icon_TML");
-+		IconNitrate = LoadEmbeddedNitrateTexture("UI.Icon_Nitrate");
++		VersionBrandingRenderer.Vanilla.Icon = LoadEmbeddedNitrateTexture("UI.Icon_Vanilla");
++		VersionBrandingRenderer.Tml.Icon = LoadEmbeddedNitrateTexture("UI.Icon_TML");
++		VersionBrandingRenderer.Nitrate.Icon = LoadEmbeddedNitrateTexture("UI.Icon_Nitrate");
  	}
  }

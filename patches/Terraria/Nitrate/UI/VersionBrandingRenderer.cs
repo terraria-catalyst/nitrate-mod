@@ -1,5 +1,8 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
@@ -7,8 +10,6 @@ using ReLogic.Graphics;
 using Terraria.DataStructures;
 using Terraria.GameContent;
 using Terraria.ID;
-using Terraria.Localization;
-using Terraria.ModLoader.UI;
 
 namespace Terraria.Nitrate.UI;
 
@@ -17,125 +18,111 @@ namespace Terraria.Nitrate.UI;
 ///		<br />
 ///		Supports selecting different mods (vanilla, tML, Nitrate).
 /// </summary>
-internal sealed class VersionBrandingRenderer
+internal sealed class VersionBrandingRenderer(params VersionBrandingRenderer.VersionBrandingRecord[] records)
 {
-	public readonly record struct VersionBrandingRecord(Func<string> Text, Func<List<TitleLinkButton>> Buttons, Func<Asset<Texture2D>> Icon);
+	public class VersionBrandingRecord(Func<string> getText)
+	{
+		public string Text => getText();
+
+		public List<TitleLinkButton> Buttons { get; } = [];
+
+		public Asset<Texture2D>? Icon { get; set; }
+
+		private readonly Func<string> getText = getText;
+	}
 
 	/// <summary>
 	///		Vanilla branding and text.
 	/// </summary>
-	public static VersionBrandingRecord Vanilla = new(
-		GetVanillaVersionText,
-		() => Main.TitleLinks,
-		() => UICommon.IconVanilla
-	);
+	public static VersionBrandingRecord Vanilla = new(() => "Terraria " + Main.versionNumber);
 
 	/// <summary>
 	///		tModLoader branding and text.
 	/// </summary>
-	public static VersionBrandingRecord Tml = new(
-		GetTmlVersionText,
-		() => Main.tModLoaderTitleLinks,
-		() => UICommon.IconTml
-	);
+	public static VersionBrandingRecord Tml = new(() => ModLoader.ModLoader.versionedName);
 
 	/// <summary>
 	///		Nitrate branding and text.
 	/// </summary>
-	public static VersionBrandingRecord Nitrate = new(
-		GetNitrateVersionText,
-		() => Main.nitrateLinks,
-		() => UICommon.IconNitrate
-	);
+	public static VersionBrandingRecord Nitrate = new(() => "Nitrate vTODO");
 
-	private static Asset<Texture2D> panelGrayscale;
-	private static Asset<Texture2D> categoryPanelBorder;
-	private VersionBrandingRecord[] records;
+	private const int brand_button_size = 32;
+	private const int brand_button_padding = 4;
+	private const int brand_button_size_with_padding = brand_button_size + brand_button_padding;
+	private const int content_padding = 10;
+	private const int link_icon_size = 30;
+	private const int link_icon_offset = 0;
+
+	private static Asset<Texture2D>? panelGrayscale;
+	private static Asset<Texture2D>? categoryPanelBorder;
 	private int selected;
-
-
-	public VersionBrandingRenderer(params VersionBrandingRecord[] records)
-	{
-		this.records = records;
-	}
 
 	public void Draw(SpriteBatch sb, Color menuColor, float upBump)
 	{
-		static void drawIcon(SpriteBatch sb, Texture2D texture, Vector2 location, int index, ref int selected, int buttonSize)
+		static void drawIcon(SpriteBatch sb, Texture2D texture, Vector2 location, int index, ref int selected, int buttonSize, ref bool anyHovered)
 		{
-			const int icon_off = 0;
+			if (panelGrayscale is null || categoryPanelBorder is null)
+				return;
 
 			var hitbox = new Rectangle((int)location.X, (int)location.Y, buttonSize, buttonSize);
-			var hovered = hitbox.Intersects(new Rectangle((int)Main.MouseScreen.X, (int)Main.MouseScreen.Y, 1, 1));
+			bool hovered = hitbox.Intersects(new Rectangle((int)Main.MouseScreen.X, (int)Main.MouseScreen.Y, 1, 1));
+			anyHovered |= hovered;
 
 			Utils.DrawSplicedPanel(sb, panelGrayscale.Value, hitbox.X, hitbox.Y, hitbox.Width, hitbox.Height, 10, 10, 10, 10, selected == index ? new Color(152, 175, 235) : Colors.InventoryDefaultColor);
-
-			// if (selected == index)
-			// 	Utils.DrawSplicedPanel(sb, categoryPanelHighlight.Value, hitbox.X + 2, hitbox.Y + 2, hitbox.Width - 4, hitbox.Height - 4, 10, 10, 10, 10, Color.White);
 			
 			if (hovered) {
+				// TODO: Update logic in draw loop.
 				if (Main.mouseLeft)
 					selected = index;
 			
 				Utils.DrawSplicedPanel(sb, categoryPanelBorder.Value, hitbox.X, hitbox.Y, hitbox.Width, hitbox.Height, 10, 10, 10, 10, Color.White);
 			}
 
-			sb.Draw(texture, new Vector2(location.X + icon_off, location.Y + icon_off), Color.White);
+			sb.Draw(texture, new Vector2(location.X + link_icon_offset, location.Y + link_icon_offset), Color.White);
 		}
 
-		static bool tryInit()
-		{
-			if (Main.Assets is null)
-				return false;
-
-			panelGrayscale = Main.Assets.Request<Texture2D>("Images/UI/CharCreation/PanelGrayscale");
-			categoryPanelBorder = Main.Assets.Request<Texture2D>("Images/UI/CharCreation/CategoryPanelBorder");
-			return true;
-		}
-
-		if (!tryInit())
+		if (!EnsureAssetsAreInitialized())
 			return;
-
-		const int button_size = 32;
-		const int padding = 4;
-		const int content_padding = 10;
-		const int title_link_size = 30;
 
 		// Draw record list.
 		{
 
-			int offY = (Main.screenHeight - ((button_size + padding) * records.Length));
+			int offY = Main.screenHeight - (brand_button_size_with_padding * records.Length);
 
-			for (var i = records.Length - 1; i >= 0; i--) {
-				var record = records[i];
+			bool anyHovered = false;
+			for (int i = records.Length - 1; i >= 0; i--) {
+				VersionBrandingRecord record = records[i];
 
-				if (record.Icon() is not { } icon || !icon.IsLoaded)
+				if (record.Icon is not { } icon || !icon.IsLoaded)
 					continue;
 
-				drawIcon(sb, icon.Value, new Vector2(padding, offY), i, ref selected, button_size);
+				drawIcon(sb, icon.Value, new Vector2(brand_button_padding, offY), i, ref selected, brand_button_size, ref anyHovered);
 
-				offY += button_size + padding;
+				offY += brand_button_size_with_padding;
 			}
 		}
 
 		// Draw current record.
 		{
-			if (GetCurrentRecord() is not { } record)
+			if (!TryGetCurrentRecord(out var record))
 				return;
 
-			var text = record.Text();
-			var origin = FontAssets.MouseText.Value.MeasureString(text) * 0.5f;
+			string text = record.Text;
+			Vector2 origin = FontAssets.MouseText.Value.MeasureString(text) * 0.5f;
 
-			for (var i = 0; i < 5; i++) {
-				var color = Color.Black;
+			// 4 offsets for immitating stroke, 1 for drawing the text in a readable color.
+			for (int i = 0; i < 5; i++) {
+				Color textColor = Color.Black;
+
+				// Draw with the actual color for the last iteration.
 				if (i == 4) {
-					color = menuColor;
-					color.R = (byte)((255 + color.R) / 2);
-					color.G = (byte)((255 + color.R) / 2);
-					color.B = (byte)((255 + color.R) / 2);
+					textColor = menuColor;
+					textColor.R = (byte)((255 + textColor.R) / 2);
+					textColor.G = (byte)((255 + textColor.R) / 2);
+					textColor.B = (byte)((255 + textColor.R) / 2);
 				}
 
-				color.A = (byte)((float)(int)color.A * 0.3f);
+				textColor.A = (byte)(textColor.A * 0.3f);
 
 				int offX = 0;
 				int offY = 0;
@@ -152,60 +139,44 @@ internal sealed class VersionBrandingRenderer
 					if (i == 3)
 						offY = 2;
 
-					offX += button_size + content_padding;
+					offX += brand_button_size + content_padding;
 				}
 
-				// Draw text.
-				sb.DrawString(FontAssets.MouseText.Value, text, new Vector2(origin.X + offX, Main.screenHeight - origin.Y + offY - 2f - upBump), color, 0f, origin, 1f, SpriteEffects.None, 0f);
+				// Draw the text.
+				sb.DrawString(FontAssets.MouseText.Value, text, new Vector2(origin.X + offX, Main.screenHeight - origin.Y + offY - 2f - upBump), textColor, 0f, origin, 1f, SpriteEffects.None, 0f);
 			}
 
 			// Draw link buttons.
-			var links = record.Buttons();
-			var anchor = new Vector2(button_size + content_padding + (title_link_size / 2), Main.screenHeight - origin.Y - 2f - upBump - title_link_size);
-			foreach (var link in links) {
+			var anchor = new Vector2(brand_button_size + content_padding + (link_icon_size / 2), Main.screenHeight - origin.Y - 2f - upBump - link_icon_size);
+			foreach (var link in record.Buttons) {
 				link.Draw(sb, anchor);
-				anchor.X += title_link_size;
+				anchor.X += link_icon_size;
 			}
 		}
 	}
 
-	/*public void Update()
-	{
-		// TODO
-	}*/
-
-	private VersionBrandingRecord? GetCurrentRecord()
+	private bool TryGetCurrentRecord([NotNullWhen(returnValue: true)] out VersionBrandingRecord? record)
 	{
 		selected = Math.Clamp(selected, 0, records.Length);
-		if (records.Length <= 0)
-			return null;
+		if (records.Length <= 0) {
+			record = null;
+			return false;
+		}
 
-		return records[selected];
+		record = records[selected];
+		return true;
 	}
 
-	// Taken from tML's implementation of Main::DrawVersionNumber.
-	internal static string GetTmlVersionText()
+	private static bool EnsureAssetsAreInitialized()
 	{
-		// TODO: Reimplement support for Patreon message? (tML has this)
-		// Probably not: tML has a title link button now.
+		if (panelGrayscale is not null && categoryPanelBorder is not null)
+			return true;
 
-		string supportMessage = Language.GetTextValue("tModLoader.PatreonSupport");
-		// string patreonShortURL = @"patreon.com/tModLoader";
-		// bool showPatreon = SocialAPI.Mode != SocialMode.Steam;
+		if (Main.Assets is null)
+			return false;
 
-		// Show number of mods - 1 such as to show number of enabled mods that are not tModLoader itself
-		// string modsMessage = Language.GetTextValue("tModLoader.MenuModsEnabled", Math.Max(0, ModLoader.ModLoader.Mods.Length - 1));
-
-		return ModLoader.ModLoader.versionedName /*+ (showPatreon ? Environment.NewLine + supportMessage : "")*/;
-	}
-
-	internal static string GetVanillaVersionText()
-	{
-		return "Terraria " + Main.versionNumber;
-	}
-
-	internal static string GetNitrateVersionText()
-	{
-		return "Nitrate vTODO";
+		panelGrayscale = Main.Assets.Request<Texture2D>("Images/UI/CharCreation/PanelGrayscale");
+		categoryPanelBorder = Main.Assets.Request<Texture2D>("Images/UI/CharCreation/CategoryPanelBorder");
+		return true;
 	}
 }
