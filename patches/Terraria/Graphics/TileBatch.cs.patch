@@ -1,0 +1,48 @@
+--- src/tModLoader/Terraria/Graphics/TileBatch.cs
++++ src/Nitrate/Terraria/Graphics/TileBatch.cs
+@@ -1,14 +_,11 @@
+ using System;
+-#if FNA
+ using System.Collections.Generic;
+-#endif
+-using System.Runtime.CompilerServices;
+ using Microsoft.Xna.Framework;
+ using Microsoft.Xna.Framework.Graphics;
+ 
+ namespace Terraria.Graphics;
+ 
+-#if XNA
++/*
+ public class TileBatch
+ {
+ 	private struct SpriteData
+@@ -327,14 +_,6 @@
+ 				}
+ 			}
+ 
+-			//TODO:
+-			// Decompilation bugfix.
+-			// Remove this change whenever ICSharpCode.Decompiler 8.0.0 or 8.0.0.*-preview3 releases.
+-
+-			/*
+-			int offsetInBytes = _vertexBufferPosition * System.Runtime.CompilerServices.Unsafe.SizeOf<VertexPositionColorTexture>() * 4;
+-			_vertexBuffer.SetData(offsetInBytes, _vertices, 0, num3 * 4, System.Runtime.CompilerServices.Unsafe.SizeOf<VertexPositionColorTexture>(), options);
+-			*/
+ 			int offsetInBytes = _vertexBufferPosition * sizeof(VertexPositionColorTexture) * 4;
+ 			_vertexBuffer.SetData(offsetInBytes, _vertices, 0, num3 * 4, sizeof(VertexPositionColorTexture), options);
+ 
+@@ -349,7 +_,8 @@
+ 		}
+ 	}
+ }
+-#else
++*/
++
+ public class TileBatch : IDisposable
+ {
+ 	private class TextureComparer : IComparer<BatchDrawInfo>
+@@ -735,4 +_,3 @@
+ 		}
+ 	}
+ }
+-#endif

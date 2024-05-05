@@ -1,0 +1,31 @@
+--- src/tModLoader/Terraria/Netplay.cs
++++ src/Nitrate/Terraria/Netplay.cs
+@@ -791,11 +_,7 @@
+ 			array = memoryStream.ToArray();
+ 		}
+ 
+-#if NETCORE
+ 		while (!abortBroadcastThread) {
+-#else
+-		while (true) {
+-#endif
+ 			int num2 = 0;
+ 			for (int i = 0; i < 255; i++) {
+ 				if (Main.player[i].active)
+@@ -826,16 +_,12 @@
+ 	public static void StopBroadCasting()
+ 	{
+ 		if (broadcastThread != null) {
+-#if NETCORE
+ 			// Thread.Abort() is not supported as of .NET 5
+ 			abortBroadcastThread = true;
+ 
+ 			while (broadcastThread.IsAlive) {
+ 				Thread.Sleep(1);
+ 			}
+-#else
+-			broadcastThread.Abort();
+-#endif
+ 			broadcastThread = null;
+ 		}
+ 

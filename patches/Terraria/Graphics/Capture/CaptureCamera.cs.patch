@@ -1,0 +1,115 @@
+--- src/tModLoader/Terraria/Graphics/Capture/CaptureCamera.cs
++++ src/Nitrate/Terraria/Graphics/Capture/CaptureCamera.cs
+@@ -15,9 +_,7 @@
+ 
+ internal class CaptureCamera : IDisposable
+ {
+-#if NETCORE
+ 	enum ImageFormat { Png }
+-#endif
+ 
+ 	private class CaptureChunk
+ 	{
+@@ -215,24 +_,8 @@
+ 			return false;
+ 
+ 		try {
+-#if !NETCORE
+-			if (!Platform.IsWindows) {
+-#endif
+-				using FileStream stream = File.Create(filename);
++			using FileStream stream = File.Create(filename);
+-				PlatformUtilities.SavePng(stream, width, height, width, height, _outputData);
++			PlatformUtilities.SavePng(stream, width, height, width, height, _outputData);
+-#if !NETCORE
+-			}
+-			else {
+-				using Bitmap bitmap = new Bitmap(width, height);
+-				System.Drawing.Rectangle rect = new System.Drawing.Rectangle(0, 0, width, height);
+-				BitmapData bitmapData = bitmap.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppPArgb);
+-				IntPtr scan = bitmapData.Scan0;
+-				Marshal.Copy(_outputData, 0, scan, width * height * 4);
+-				bitmap.UnlockBits(bitmapData);
+-				bitmap.Save(filename, imageFormat);
+-				bitmap.Dispose();
+-			}
+-#endif
+ 
+ 			return true;
+ 		}
+@@ -249,58 +_,25 @@
+ 		if (!Utils.TryCreatingDirectory(text))
+ 			return;
+ 
+-#if !NETCORE
+-		if (!Platform.IsWindows) {
+-#endif
+-			int elementCount = texture.Width * texture.Height * 4;
++		int elementCount = texture.Width * texture.Height * 4;
+-			texture.GetData(_outputData, 0, elementCount);
++		texture.GetData(_outputData, 0, elementCount);
+-			int num = 0;
++		int num = 0;
+-			int num2 = 0;
++		int num2 = 0;
+-			for (int i = 0; i < height; i++) {
++		for (int i = 0; i < height; i++) {
+-				for (int j = 0; j < width; j++) {
++			for (int j = 0; j < width; j++) {
+-					_outputData[num2] = _outputData[num];
++				_outputData[num2] = _outputData[num];
+-					_outputData[num2 + 1] = _outputData[num + 1];
++				_outputData[num2 + 1] = _outputData[num + 1];
+-					_outputData[num2 + 2] = _outputData[num + 2];
++				_outputData[num2 + 2] = _outputData[num + 2];
+-					_outputData[num2 + 3] = _outputData[num + 3];
++				_outputData[num2 + 3] = _outputData[num + 3];
+-					num += 4;
++				num += 4;
+-					num2 += 4;
++				num2 += 4;
+-				}
++			}
+ 
+-				num += texture.Width - width << 2;
++			num += texture.Width - width << 2;
+-			}
++		}
+ 
+-			using FileStream stream = File.Create(text2);
++		using FileStream stream = File.Create(text2);
+-			PlatformUtilities.SavePng(stream, width, height, width, height, _outputData);
++		PlatformUtilities.SavePng(stream, width, height, width, height, _outputData);
+-#if !NETCORE
+-			return;
+-		}
+-
+-		using Bitmap bitmap = new Bitmap(width, height);
+-		System.Drawing.Rectangle rect = new System.Drawing.Rectangle(0, 0, width, height);
+-		int elementCount2 = texture.Width * texture.Height * 4;
+-		texture.GetData(_outputData, 0, elementCount2);
+-		int num3 = 0;
+-		int num4 = 0;
+-		for (int k = 0; k < height; k++) {
+-			for (int l = 0; l < width; l++) {
+-				byte b = _outputData[num3 + 2];
+-				_outputData[num4 + 2] = _outputData[num3];
+-				_outputData[num4] = b;
+-				_outputData[num4 + 1] = _outputData[num3 + 1];
+-				_outputData[num4 + 3] = _outputData[num3 + 3];
+-				num3 += 4;
+-				num4 += 4;
+-			}
+-
+-			num3 += texture.Width - width << 2;
+-		}
+-
+-		BitmapData bitmapData = bitmap.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppPArgb);
+-		IntPtr scan = bitmapData.Scan0;
+-		Marshal.Copy(_outputData, 0, scan, width * height * 4);
+-		bitmap.UnlockBits(bitmapData);
+-		bitmap.Save(text2, imageFormat);
+-#endif
+ 	}
+ 
+ 	private void FinishCapture()

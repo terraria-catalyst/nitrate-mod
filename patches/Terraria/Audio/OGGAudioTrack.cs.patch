@@ -1,0 +1,12 @@
+--- src/tModLoader/Terraria/Audio/OGGAudioTrack.cs
++++ src/Nitrate/Terraria/Audio/OGGAudioTrack.cs
+@@ -1,4 +_,3 @@
+-#if !SERVER
+ using System;
+ using System.Collections.Generic;
+ using System.IO;
+@@ -93,4 +_,3 @@
+ 		_vorbisReader.Dispose();
+ 	}
+ }
+-#endif

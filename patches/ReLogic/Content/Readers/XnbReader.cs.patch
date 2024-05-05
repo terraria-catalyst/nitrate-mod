@@ -1,0 +1,42 @@
+--- src/tModLoader/ReLogic/Content/Readers/XnbReader.cs
++++ src/Nitrate/ReLogic/Content/Readers/XnbReader.cs
+@@ -4,15 +_,15 @@
+ using System.Threading;
+ using System.Threading.Tasks;
+ using Microsoft.Xna.Framework.Content;
+-using Microsoft.Xna.Framework.Graphics;
+ 
+ namespace ReLogic.Content.Readers;
+ 
+ public class XnbReader : IAssetReader, IDisposable
+ {
+-	// Added by TML.
++	// TML: Add LoadOnMainThread<T>
+ 	public static class LoadOnMainThread<T>
+ 	{
++		// ReSharper disable once StaticMemberInGenericType - Intentional.
+ 		public static bool Value;
+ 	}
+ 
+@@ -42,17 +_,18 @@
+ 		_contentLoader = new ThreadLocal<InternalContentManager>(() => new InternalContentManager(services));
+ 	}
+ 
+-	/*
+-	public T FromStream<T>(Stream stream) where T : class
+-	*/
++	// TML: Implement newly-added async FromStream<T> (method signature change).
++	// public T FromStream<T>(Stream stream) where T : class
+ 	public async ValueTask<T> FromStream<T>(Stream stream, MainThreadCreationContext mainThreadCtx) where T : class
+ 	{
+ 		InternalContentManager value = _contentLoader.Value;
+ 
++		// BEGIN TML: Add check for waiting for main thread context and asserting completion.
+ 		if (LoadOnMainThread<T>.Value) {
+ 			await mainThreadCtx;
+ 			Debug.Assert(mainThreadCtx.IsCompleted);
+ 		}
++		// END TML
+ 
+ 		value.SetStream(stream);
+ 		return value.Load<T>();

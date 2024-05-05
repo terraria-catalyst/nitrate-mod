@@ -1,0 +1,16 @@
+--- src/tModLoader/Terraria/ModLoader/UI/UIMemoryBar.cs
++++ src/Nitrate/Terraria/ModLoader/UI/UIMemoryBar.cs
+@@ -95,13 +_,8 @@
+ 	{
+ 		_memoryBarItems.Clear();
+ 
+-#if WINDOWS //TODO: 64bit?
+-		_maxMemory = Environment.Is64BitOperatingSystem ? 4294967296 : 3221225472;
+-		long availableMemory = _maxMemory; // CalculateAvailableMemory(maxMemory); This is wrong, 4GB is not shared.
+-#else
+ 		_maxMemory = GetTotalMemory();
+ 		long availableMemory = _maxMemory; //This is wrong; this is assuming tML is the only thing running. Can't find an alternative, but is less likely to confuse users under current design
+-#endif
+ 
+ 		long totalModMemory = 0;
+ 		int i = 0;

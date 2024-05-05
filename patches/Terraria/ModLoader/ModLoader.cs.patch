@@ -1,0 +1,14 @@
+--- src/tModLoader/Terraria/ModLoader/ModLoader.cs
++++ src/Nitrate/Terraria/ModLoader/ModLoader.cs
+@@ -45,11 +_,7 @@
+ 
+ 	public static string versionedName => (BuildInfo.Purpose != BuildInfo.BuildPurpose.Stable) ? BuildInfo.versionedNameDevFriendly : BuildInfo.versionedName;
+ 
+-#if NETCORE
+ 	public static string CompressedPlatformRepresentation => (Platform.IsWindows ? "w" : (Platform.IsLinux ? "l" : "m")) + (InstallVerifier.DistributionPlatform == DistributionPlatform.GoG ? "g" : "s") + "c";
+-#else
+-	public static string CompressedPlatformRepresentation => "w" + (InstallVerifier.IsGoG ? "g" : "s") + "n";
+-#endif
+ 
+ 	public static string ModPath => ModOrganizer.modPath;
+ 

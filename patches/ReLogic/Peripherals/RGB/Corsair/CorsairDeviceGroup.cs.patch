@@ -1,0 +1,28 @@
+--- src/tModLoader/ReLogic/Peripherals/RGB/Corsair/CorsairDeviceGroup.cs
++++ src/Nitrate/ReLogic/Peripherals/RGB/Corsair/CorsairDeviceGroup.cs
+@@ -17,9 +_,7 @@
+ 	private readonly List<RgbDevice> _devices = new List<RgbDevice>();
+ 	private State _state;
+ 	private readonly VendorColorProfile _colorProfiles;
+-#if NETCORE
+ 	private bool _initializationFailed;
+-#endif
+ 
+ 	public CorsairDeviceGroup(VendorColorProfile colorProfiles)
+ 	{
+@@ -31,7 +_,6 @@
+ 		if (_state == State.AnyDevicesAdded)
+ 			return;
+ 
+-#if NETCORE
+ 		if (_initializationFailed)
+ 			return;
+ 
+@@ -44,7 +_,6 @@
+ 
+ 			return;
+ 		}
+-#endif
+ 
+ 		try {
+ 			if (_state < State.HandshakeCompleted) {

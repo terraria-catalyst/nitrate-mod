@@ -1,0 +1,12 @@
+--- src/tModLoader/Terraria/ModLoader/Core/AssemblyManager.cs
++++ src/Nitrate/Terraria/ModLoader/Core/AssemblyManager.cs
+@@ -1,4 +_,3 @@
+-#if NETCORE
+ using log4net;
+ using System;
+ using System.Collections.Generic;
+@@ -464,4 +_,3 @@
+ 		}
+ 	}
+ }
+-#endif

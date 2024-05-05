@@ -1,0 +1,71 @@
+--- src/tModLoader/ReLogic/Content/Readers/PngReader.cs
++++ src/Nitrate/ReLogic/Content/Readers/PngReader.cs
+@@ -19,45 +_,33 @@
+ 		_graphicsDevice = graphicsDevice;
+ 		_colorProcessingCache = new ThreadLocal<Color[]>();
+ 	}
+-	
+-	// Implemented by TML.
++
++	// TML: Implement GetAssociatedTypes()
++	// Nitrate: Obsolete GetAssociatedTypes()
++	[Obsolete("Unused API", error: true)]
+ 	public Type[] GetAssociatedTypes() => new[] { typeof(Texture2D) };
+ 
+-	/*
+-	public T FromStream<T>(Stream stream) where T : class
+-	*/
++	// TML: Implement newly-added async FromStream<T> (method signature change).
++	// public T FromStream<T>(Stream stream) where T : class
+ 	public async ValueTask<T> FromStream<T>(Stream stream, MainThreadCreationContext mainThreadCtx) where T : class
+ 	{
+ 		if (typeof(T) != typeof(Texture2D))
+ 			throw AssetLoadException.FromInvalidReader<PngReader, T>();
+ 
+-#if NETCORE
++
+ 		IntPtr img = FNA3D.ReadImageStream(stream, out int width, out int height, out int len);
+ 		PreMultiplyAlpha(img, len);
+ 
++		// BEGIN TML: await main threat context and assert completion.
+ 		await mainThreadCtx;
+ 		Debug.Assert(mainThreadCtx.IsCompleted);
++		// END TML
+ 
+ 		var texture2D = new Texture2D(_graphicsDevice, width, height);
+ 		texture2D.SetDataPointerEXT(0, null, img, len);
+ 		FNA3D.FNA3D_Image_Free(img);
+ 
+ 		return texture2D as T;
+-#else
+-		Texture2D texture2D = Texture2D.FromStream(_graphicsDevice, stream);
+-		int num = texture2D.Width * texture2D.Height;
+-		if (!_colorProcessingCache.IsValueCreated || _colorProcessingCache.Value.Length < num)
+-			_colorProcessingCache.Value = new Color[num];
+-
+-		Color[] value = _colorProcessingCache.Value;
+-		texture2D.GetData(value, 0, num);
+-		for (int i = 0; i != num; i++) {
+-			value[i] = Color.FromNonPremultiplied(value[i].ToVector4());
+-		}
+-
+-		texture2D.SetData(value, 0, num);
+-		return texture2D as T;
+-#endif
+ 	}
+ 
+ 	protected virtual void Dispose(bool disposing)
+@@ -75,7 +_,6 @@
+ 		Dispose(disposing: true);
+ 	}
+ 
+-#if NETCORE
+ 	private static unsafe void PreMultiplyAlpha(IntPtr img, int len)
+ 	{
+ 		byte* colors = (byte*)img.ToPointer();
+@@ -87,5 +_,4 @@
+ 			colors[i + 2] = (byte)(colors[i + 2] * a / byte.MaxValue);
+  		}
+  	}
+-#endif
+ }
