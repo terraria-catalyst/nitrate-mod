@@ -11,7 +11,7 @@
 
 	<!-- Project references -->
 	<ItemGroup>
-		<ProjectReference Include="PatchReviewer\PatchReviewer.csproj" />
+		<ProjectReference Include="..\tModLoader\setup\PatchReviewer\PatchReviewer.csproj" />
 	</ItemGroup>
 
 	<!-- Package references -->

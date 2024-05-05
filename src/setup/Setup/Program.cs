@@ -26,6 +26,8 @@ namespace Terraria.ModLoader.Setup
 		/// </summary>
 		[STAThread]
 		static void Main(string[] args) {
+			CreateSymlinks();
+
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 
@@ -262,6 +264,60 @@ $@"<?xml version=""1.0"" encoding=""utf-8""?>
     <tModLoaderSteamPath>{TMLDevSteamDir}</tModLoaderSteamPath>
   </PropertyGroup>
 </Project>";
+		}
+
+		private static void CreateSymlinks()
+		{
+			string[] candidates = ["GoG", "Terraria", "TerrariaNetCore", "tModLoader"];
+			var sourceDirectory = Path.Combine("src", "tModLoader", "patches");
+			var targetDirectory = Path.Combine("patches");
+
+			foreach (var candidate in candidates)
+			{
+				var source = Path.Combine(sourceDirectory, candidate);
+				var target = Path.Combine(targetDirectory, candidate);
+
+				if (!File.Exists(target) && !Directory.Exists(target))
+					CreateSymlink(source, target);
+			}
+		}
+
+		private static void CreateSymlink(string directoryToSymlink, string newPath)
+		{
+			if (!Directory.Exists(directoryToSymlink))
+				throw new DirectoryNotFoundException("Could not find directory to symlink to: " + directoryToSymlink);
+
+			if (Directory.Exists(newPath) || File.Exists(newPath))
+				throw new IOException("Attempted to create symlink at existing file/directory location: " + newPath);
+
+			ProcessStartInfo procInfo;
+			if (OperatingSystem.IsWindows())
+			{
+				// Prefer junctions on Windows because they don't require administrator privileges.
+				// mklink is a cmd command, so run cmd.exe...
+				procInfo = new ProcessStartInfo("cmd.exe")
+				{
+					Arguments = $"/c mklink /j \"{newPath}\" \"{directoryToSymlink}\"",
+					UseShellExecute = true,
+				};
+
+			}
+			else
+			{
+				procInfo = new ProcessStartInfo("ln")
+				{
+					Arguments = $"-s \"{directoryToSymlink}\" \"{newPath}\"",
+					UseShellExecute = true,
+				};
+			}
+
+			var proc = Process.Start(procInfo);
+			if (proc is null)
+				throw new IOException($"Failed to run command: {procInfo.FileName + " " + string.Join(' ', procInfo.Arguments)}");
+
+			proc.WaitForExit();
+			if (proc.ExitCode != 0)
+				throw new IOException($"Failed to run command: {procInfo.FileName + " " + string.Join(' ', procInfo.Arguments)}");
 		}
 	}
 }

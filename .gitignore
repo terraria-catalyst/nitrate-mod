@@ -8,6 +8,12 @@ obj/
 
 *.user
 
+# Ignore symlinked patches from the tModLoader repository.
+patches/GoG
+patches/Terraria
+patches/TerrariaNetCore
+patches/tModLoader
+
 # You should figure out a better way to ignore these.
 # Should they even be ignored?
 EasyXnb.*
