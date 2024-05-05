@@ -1,0 +1,17 @@
+--- src/tModLoader/Terraria/Initializers/AssetInitializer.cs
++++ src/Nitrate/Terraria/Initializers/AssetInitializer.cs
+@@ -41,10 +_,10 @@
+ 		asyncAssetLoader.RequireTypeCreationOnTransfer(typeof(DynamicSpriteFont));
+ 		asyncAssetLoader.RequireTypeCreationOnTransfer(typeof(SpriteFont));
+ 		*/
+-		XnbReader.LoadOnMainThread<Texture2D>.Value = true;
+-		XnbReader.LoadOnMainThread<DynamicSpriteFont>.Value = true;
+-		XnbReader.LoadOnMainThread<SpriteFont>.Value = true;
+-		XnbReader.LoadOnMainThread<Effect>.Value = true;
++		XnbReader.SetLoadOnMainThread<Texture2D>(true);
++		XnbReader.SetLoadOnMainThread<DynamicSpriteFont>(true);
++		XnbReader.SetLoadOnMainThread<SpriteFont>(true);
++		XnbReader.SetLoadOnMainThread<Effect>(true);
+ 		AssetRepository.SetMainThread();
+ 
+ 		/*

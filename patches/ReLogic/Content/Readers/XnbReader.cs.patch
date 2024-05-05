@@ -1,6 +1,6 @@
 --- src/tModLoader/ReLogic/Content/Readers/XnbReader.cs
 +++ src/Nitrate/ReLogic/Content/Readers/XnbReader.cs
-@@ -4,15 +_,15 @@
+@@ -4,18 +_,11 @@
  using System.Threading;
  using System.Threading.Tasks;
  using Microsoft.Xna.Framework.Content;
@@ -8,31 +8,33 @@
  
  namespace ReLogic.Content.Readers;
  
- public class XnbReader : IAssetReader, IDisposable
+-public class XnbReader : IAssetReader, IDisposable
++public partial class XnbReader : IAssetReader, IDisposable
  {
 -	// Added by TML.
-+	// TML: Add LoadOnMainThread<T>
- 	public static class LoadOnMainThread<T>
+-	public static class LoadOnMainThread<T>
+-	{
+-		public static bool Value;
+-	}
+-
+ 	private class InternalContentManager : ContentManager
  	{
-+		// ReSharper disable once StaticMemberInGenericType - Intentional.
- 		public static bool Value;
- 	}
- 
-@@ -42,17 +_,18 @@
+ 		private Stream _stream;
+@@ -42,17 +_,17 @@
  		_contentLoader = new ThreadLocal<InternalContentManager>(() => new InternalContentManager(services));
  	}
  
 -	/*
 -	public T FromStream<T>(Stream stream) where T : class
 -	*/
-+	// TML: Implement newly-added async FromStream<T> (method signature change).
-+	// public T FromStream<T>(Stream stream) where T : class
++	// TML: Implement modified asynchronous signature.
  	public async ValueTask<T> FromStream<T>(Stream stream, MainThreadCreationContext mainThreadCtx) where T : class
  	{
  		InternalContentManager value = _contentLoader.Value;
  
 +		// BEGIN TML: Add check for waiting for main thread context and asserting completion.
- 		if (LoadOnMainThread<T>.Value) {
+-		if (LoadOnMainThread<T>.Value) {
++		if (GetLoadOnMainThread<T>()) {
  			await mainThreadCtx;
  			Debug.Assert(mainThreadCtx.IsCompleted);
  		}

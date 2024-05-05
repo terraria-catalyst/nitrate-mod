@@ -1,0 +1,22 @@
+PENDING COMPATIBILITY PATCHES
+=============================
+
+The following is a list of TODO patches Nitrate needs to make to mod assemblies
+to main BINARY COMPATIBILITY (WE DON'T CARE ABOUT SOURCE COMPATIBILITY).
+
+class ReLogic.Content.Readers.PngReader
+{
+    // Removed by Nitrate.
+    Type[] GetAssociatedTypes() => [typeof(Texture2D)];
+}
+
+ReLogic.Content.Readers.XnbReader
+{
+    // Made private by Nitrate, redirect LoadOnMainThread<T>.Value accesses to
+    // preferred Nitrate API (XnbReader.(Get|Set)LoadOnMainThread<T>())
+    static class LoadOnMainThread<T>
+    {
+        // Converted from field to property.
+        bool Value { get; set; }
+    }
+}

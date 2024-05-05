@@ -1,35 +1,35 @@
 --- src/tModLoader/ReLogic/Content/Readers/PngReader.cs
 +++ src/Nitrate/ReLogic/Content/Readers/PngReader.cs
-@@ -19,45 +_,33 @@
+@@ -19,45 +_,27 @@
  		_graphicsDevice = graphicsDevice;
  		_colorProcessingCache = new ThreadLocal<Color[]>();
  	}
 -	
 -	// Implemented by TML.
-+
-+	// TML: Implement GetAssociatedTypes()
-+	// Nitrate: Obsolete GetAssociatedTypes()
-+	[Obsolete("Unused API", error: true)]
- 	public Type[] GetAssociatedTypes() => new[] { typeof(Texture2D) };
+-	public Type[] GetAssociatedTypes() => new[] { typeof(Texture2D) };
  
 -	/*
 -	public T FromStream<T>(Stream stream) where T : class
 -	*/
-+	// TML: Implement newly-added async FromStream<T> (method signature change).
-+	// public T FromStream<T>(Stream stream) where T : class
++	// TML: Implement modified asynchronous signature.
  	public async ValueTask<T> FromStream<T>(Stream stream, MainThreadCreationContext mainThreadCtx) where T : class
  	{
- 		if (typeof(T) != typeof(Texture2D))
- 			throw AssetLoadException.FromInvalidReader<PngReader, T>();
+-		if (typeof(T) != typeof(Texture2D))
+-			throw AssetLoadException.FromInvalidReader<PngReader, T>();
++		Contracts.AssertValidReaderForAssetType<PngReader, Texture2D, T>();
  
 -#if NETCORE
-+
- 		IntPtr img = FNA3D.ReadImageStream(stream, out int width, out int height, out int len);
+-		IntPtr img = FNA3D.ReadImageStream(stream, out int width, out int height, out int len);
++		nint img = FNA3D.ReadImageStream(stream, out int width, out int height, out int len);
  		PreMultiplyAlpha(img, len);
  
 +		// BEGIN TML: await main threat context and assert completion.
- 		await mainThreadCtx;
- 		Debug.Assert(mainThreadCtx.IsCompleted);
++		{
+-		await mainThreadCtx;
++			await mainThreadCtx;
+-		Debug.Assert(mainThreadCtx.IsCompleted);
++			Debug.Assert(mainThreadCtx.IsCompleted);
++		}
 +		// END TML
  
  		var texture2D = new Texture2D(_graphicsDevice, width, height);
@@ -63,9 +63,13 @@
  	private static unsafe void PreMultiplyAlpha(IntPtr img, int len)
  	{
  		byte* colors = (byte*)img.ToPointer();
-@@ -87,5 +_,4 @@
+@@ -85,7 +_,6 @@
+ 			colors[i] = (byte)(colors[i] * a / byte.MaxValue);
+ 			colors[i + 1] = (byte)(colors[i + 1] * a / byte.MaxValue);
  			colors[i + 2] = (byte)(colors[i + 2] * a / byte.MaxValue);
-  		}
-  	}
+- 		}
+- 	}
 -#endif
++		}
++	}
  }

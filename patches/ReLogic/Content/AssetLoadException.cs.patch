@@ -1,0 +1,12 @@
+--- src/tModLoader/ReLogic/Content/AssetLoadException.cs
++++ src/Nitrate/ReLogic/Content/AssetLoadException.cs
+@@ -11,6 +_,8 @@
+ 	}
+ 
+ 	public static AssetLoadException FromMissingAsset(string assetName, Exception innerException = null) => new AssetLoadException($"Asset could not be found: \"{assetName}\"", innerException);
+-	public static AssetLoadException FromInvalidReader<TReaderType, TAssetType>() => new AssetLoadException($"Asset Reader {typeof(TReaderType).Name} is unable to read {typeof(TAssetType).Name}", null);
++	public static AssetLoadException FromInvalidReader<TReaderType, TAssetType>() => FromInvalidReader<TReaderType>(typeof(TAssetType));
+ 	public static AssetLoadException FromMissingReader(string extension) => new AssetLoadException($"Unable to find asset reader for type {extension}.", null);
++
++	internal static AssetLoadException FromInvalidReader<TReaderType>(Type assetType) => new AssetLoadException($"Asset Reader {typeof(TReaderType).Name} is unable to read {assetType.Name}", null);
+ }

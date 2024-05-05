@@ -1,3 +1,4 @@
 Terraria\WindowsLaunch.cs
 Terraria\Graphics\TileBatch.cs
 Terraria\Properties\Settings.cs
+ReLogic\Content\Readers\IAssetReader.cs
