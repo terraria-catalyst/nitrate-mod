@@ -5,9 +5,9 @@ VisualStudioVersion = 17.1.32319.34
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Terraria.ModLoader.Setup", "Terraria.ModLoader.Setup.csproj", "{ECAD06B8-1A3B-4288-A02C-198A198EF98E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PatchReviewer", "..\tModLoader\setup\PatchReviewer\PatchReviewer.csproj", "{035D12F8-A4DC-4ECB-B619-5F0B3265ED1D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatchReviewer", "..\Terraria.ModLoader\setup\PatchReviewer\PatchReviewer.csproj", "{9D718961-CCBA-48D8-A4BD-D77593D591A2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiffPatch", "..\tModLoader\setup\PatchReviewer\DiffPatch\DiffPatch.csproj", "{46D9A0D8-0B3F-4B7D-9C99-F7DA645F6E02}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiffPatch", "..\Terraria.ModLoader\setup\PatchReviewer\DiffPatch\DiffPatch.csproj", "{E38B9EC9-DF0A-4166-B965-06800DD50CDD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,14 +19,14 @@ Global
 		{ECAD06B8-1A3B-4288-A02C-198A198EF98E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ECAD06B8-1A3B-4288-A02C-198A198EF98E}.Release|Any CPU.ActiveCfg = Debug|Any CPU
 		{ECAD06B8-1A3B-4288-A02C-198A198EF98E}.Release|Any CPU.Build.0 = Debug|Any CPU
-		{035D12F8-A4DC-4ECB-B619-5F0B3265ED1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{035D12F8-A4DC-4ECB-B619-5F0B3265ED1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{035D12F8-A4DC-4ECB-B619-5F0B3265ED1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{035D12F8-A4DC-4ECB-B619-5F0B3265ED1D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{46D9A0D8-0B3F-4B7D-9C99-F7DA645F6E02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{46D9A0D8-0B3F-4B7D-9C99-F7DA645F6E02}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{46D9A0D8-0B3F-4B7D-9C99-F7DA645F6E02}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{46D9A0D8-0B3F-4B7D-9C99-F7DA645F6E02}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D718961-CCBA-48D8-A4BD-D77593D591A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D718961-CCBA-48D8-A4BD-D77593D591A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D718961-CCBA-48D8-A4BD-D77593D591A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D718961-CCBA-48D8-A4BD-D77593D591A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E38B9EC9-DF0A-4166-B965-06800DD50CDD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E38B9EC9-DF0A-4166-B965-06800DD50CDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E38B9EC9-DF0A-4166-B965-06800DD50CDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E38B9EC9-DF0A-4166-B965-06800DD50CDD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
