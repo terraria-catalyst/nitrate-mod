@@ -325,7 +325,7 @@ internal static class Program
 	private static void CreateSymlinks()
 	{
 		string[] candidates = ["GoG", "Terraria", "TerrariaNetCore", "tModLoader",];
-		var sourceDirectory = Path.Combine("src", "tModLoader", "patches");
+		var sourceDirectory = Path.Combine("src", "Terraria.ModLoader", "patches");
 		var targetDirectory = Path.Combine("patches");
 		
 		foreach (var candidate in candidates)

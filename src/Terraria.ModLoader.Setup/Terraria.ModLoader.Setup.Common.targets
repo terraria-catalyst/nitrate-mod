@@ -11,7 +11,7 @@
 
     <!-- Project references -->
     <ItemGroup>
-        <ProjectReference Include="..\tModLoader\setup\PatchReviewer\PatchReviewer.csproj" />
+        <ProjectReference Include="..\Terraria.ModLoader\setup\PatchReviewer\PatchReviewer.csproj" />
     </ItemGroup>
 
     <!-- Package references -->
