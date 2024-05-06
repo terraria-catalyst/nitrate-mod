@@ -21,24 +21,5 @@ if NOT ["%errorlevel%"]==["0"] (
     exit /b %errorlevel%
 )
 
-If "%1"=="auto" (
-	echo building src/setup/setupAuto.csproj
-	dotnet build src/setup/setupAuto.csproj --output "src/setup/bin/Debug/net6.0-windows"
-
-	if NOT ["%errorlevel%"]==["0"] (
-		pause
-		exit /b %errorlevel%
-	)
-
-	"src/setup/bin/Debug/net6.0-windows/setupAuto.exe" %2
-) Else (
-	echo building src/setup/setup.csproj
-	dotnet build src/setup/setup.csproj --output "src/setup/bin/Debug/net6.0-windows"
-
-	if NOT ["%errorlevel%"]==["0"] (
-		pause
-		exit /b %errorlevel%
-	)
-
-	start "" "src/setup/bin/Debug/net6.0-windows/setup.exe" %*
-)
+echo running setup tool
+dotnet run --project src/Terraria.ModLoader.Setup/Terraria.ModLoader.Setup.csproj -c "Release"
