@@ -1,5 +1,5 @@
---- src/tModLoader/Terraria/IngameOptions.cs
-+++ src/Nitrate/Terraria/IngameOptions.cs
+--- src/staging/tModLoader/Terraria/IngameOptions.cs
++++ src/staging/Nitrate/Terraria/IngameOptions.cs
 @@ -9,6 +_,7 @@
  using Terraria.Localization;
  using Terraria.ModLoader;

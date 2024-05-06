@@ -1,5 +1,5 @@
---- src/tModLoader/Terraria/Player.cs
-+++ src/Nitrate/Terraria/Player.cs
+--- src/staging/tModLoader/Terraria/Player.cs
++++ src/staging/Nitrate/Terraria/Player.cs
 @@ -33,6 +_,7 @@
  using Terraria.ModLoader.Exceptions;
  using Terraria.ModLoader.IO;

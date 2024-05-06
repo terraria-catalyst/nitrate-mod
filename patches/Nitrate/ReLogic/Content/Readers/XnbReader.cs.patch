@@ -1,5 +1,5 @@
---- src/tModLoader/ReLogic/Content/Readers/XnbReader.cs
-+++ src/Nitrate/ReLogic/Content/Readers/XnbReader.cs
+--- src/staging/tModLoader/ReLogic/Content/Readers/XnbReader.cs
++++ src/staging/Nitrate/ReLogic/Content/Readers/XnbReader.cs
 @@ -4,18 +_,11 @@
  using System.Threading;
  using System.Threading.Tasks;

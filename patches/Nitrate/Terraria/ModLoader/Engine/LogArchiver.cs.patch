@@ -1,5 +1,5 @@
---- src/tModLoader/Terraria/ModLoader/Engine/LogArchiver.cs
-+++ src/Nitrate/Terraria/ModLoader/Engine/LogArchiver.cs
+--- src/staging/tModLoader/Terraria/ModLoader/Engine/LogArchiver.cs
++++ src/staging/Nitrate/Terraria/ModLoader/Engine/LogArchiver.cs
 @@ -17,12 +_,10 @@
  {
  	private const int MAX_LOGS = 20;

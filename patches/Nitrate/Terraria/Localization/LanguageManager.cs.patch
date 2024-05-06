@@ -1,5 +1,5 @@
---- src/tModLoader/Terraria/Localization/LanguageManager.cs
-+++ src/Nitrate/Terraria/Localization/LanguageManager.cs
+--- src/staging/tModLoader/Terraria/Localization/LanguageManager.cs
++++ src/staging/Nitrate/Terraria/Localization/LanguageManager.cs
 @@ -161,8 +_,9 @@
  				LoadLanguageFromFileTextJson(text2, canCreateCategories: true);
  			}

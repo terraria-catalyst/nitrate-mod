@@ -1,5 +1,5 @@
---- src/tModLoader/ReLogic/Peripherals/RGB/Logitech/LogitechDeviceGroup.cs
-+++ src/Nitrate/ReLogic/Peripherals/RGB/Logitech/LogitechDeviceGroup.cs
+--- src/staging/tModLoader/ReLogic/Peripherals/RGB/Logitech/LogitechDeviceGroup.cs
++++ src/staging/Nitrate/ReLogic/Peripherals/RGB/Logitech/LogitechDeviceGroup.cs
 @@ -9,9 +_,7 @@
  	private readonly List<RgbDevice> _devices = new List<RgbDevice>();
  	private bool _isInitialized;

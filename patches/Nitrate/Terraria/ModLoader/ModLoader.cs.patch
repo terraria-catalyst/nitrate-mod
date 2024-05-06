@@ -1,5 +1,5 @@
---- src/tModLoader/Terraria/ModLoader/ModLoader.cs
-+++ src/Nitrate/Terraria/ModLoader/ModLoader.cs
+--- src/staging/tModLoader/Terraria/ModLoader/ModLoader.cs
++++ src/staging/Nitrate/Terraria/ModLoader/ModLoader.cs
 @@ -45,11 +_,7 @@
  
  	public static string versionedName => (BuildInfo.Purpose != BuildInfo.BuildPurpose.Stable) ? BuildInfo.versionedNameDevFriendly : BuildInfo.versionedName;

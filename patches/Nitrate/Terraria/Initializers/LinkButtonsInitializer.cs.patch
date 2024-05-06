@@ -1,5 +1,5 @@
---- src/tModLoader/Terraria/Initializers/LinkButtonsInitializer.cs
-+++ src/Nitrate/Terraria/Initializers/LinkButtonsInitializer.cs
+--- src/staging/tModLoader/Terraria/Initializers/LinkButtonsInitializer.cs
++++ src/staging/Nitrate/Terraria/Initializers/LinkButtonsInitializer.cs
 @@ -25,6 +_,10 @@
  		titleLinks.Add(MakeSimpleButton("TitleLinks.Twitter", "https://twitter.com/tModLoader", 3));
  		titleLinks.Add(MakeSimpleButton("TitleLinks.Wiki", "https://github.com/tModLoader/tModLoader/wiki", 6));

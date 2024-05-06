@@ -1,5 +1,5 @@
---- src/tModLoader/Terraria/Localization/GameCulture.cs
-+++ src/Nitrate/Terraria/Localization/GameCulture.cs
+--- src/staging/tModLoader/Terraria/Localization/GameCulture.cs
++++ src/staging/Nitrate/Terraria/Localization/GameCulture.cs
 @@ -1,13 +_,15 @@
 +using System;
  using System.Collections.Generic;

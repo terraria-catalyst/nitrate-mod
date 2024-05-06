@@ -1,5 +1,5 @@
---- src/tModLoader/Terraria/Audio/OGGAudioTrack.cs
-+++ src/Nitrate/Terraria/Audio/OGGAudioTrack.cs
+--- src/staging/tModLoader/Terraria/Audio/OGGAudioTrack.cs
++++ src/staging/Nitrate/Terraria/Audio/OGGAudioTrack.cs
 @@ -1,4 +_,3 @@
 -#if !SERVER
  using System;

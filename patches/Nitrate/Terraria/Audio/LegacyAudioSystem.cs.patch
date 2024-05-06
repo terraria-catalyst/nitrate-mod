@@ -1,5 +1,5 @@
---- src/tModLoader/Terraria/Audio/LegacyAudioSystem.cs
-+++ src/Nitrate/Terraria/Audio/LegacyAudioSystem.cs
+--- src/staging/tModLoader/Terraria/Audio/LegacyAudioSystem.cs
++++ src/staging/Nitrate/Terraria/Audio/LegacyAudioSystem.cs
 @@ -67,7 +_,6 @@
  			if (!contentSource.HasAsset(assetPath))
  				continue;

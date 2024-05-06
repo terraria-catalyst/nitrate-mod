@@ -1,6 +1,6 @@
---- src/tModLoader/Terraria/Terraria.csproj
-+++ src/Nitrate/Terraria/Terraria.csproj
-@@ -71,6 +_,7 @@
+--- src/staging/tModLoader/Terraria/Terraria.csproj
++++ src/staging/Nitrate/Terraria/Terraria.csproj
+@@ -68,6 +_,7 @@
  	<!-- Embedded Resources -->
  	<ItemGroup>
  		<EmbeddedResource Include="**\*.png" />

@@ -1,5 +1,5 @@
---- src/tModLoader/ReLogic/Localization/IME/FnaIme.cs
-+++ src/Nitrate/ReLogic/Localization/IME/FnaIme.cs
+--- src/staging/tModLoader/ReLogic/Localization/IME/FnaIme.cs
++++ src/staging/Nitrate/ReLogic/Localization/IME/FnaIme.cs
 @@ -1,6 +_,4 @@
 -#if FNA
  using Microsoft.Xna.Framework.Input;

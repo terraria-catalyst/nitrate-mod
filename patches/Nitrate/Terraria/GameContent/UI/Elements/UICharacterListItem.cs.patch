@@ -1,5 +1,5 @@
---- src/tModLoader/Terraria/GameContent/UI/Elements/UICharacterListItem.cs
-+++ src/Nitrate/Terraria/GameContent/UI/Elements/UICharacterListItem.cs
+--- src/staging/tModLoader/Terraria/GameContent/UI/Elements/UICharacterListItem.cs
++++ src/staging/Nitrate/Terraria/GameContent/UI/Elements/UICharacterListItem.cs
 @@ -8,6 +_,7 @@
  using Terraria.IO;
  using Terraria.Localization;

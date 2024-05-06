@@ -1,5 +1,5 @@
---- src/tModLoader/Terraria/Tile.cs
-+++ src/Nitrate/Terraria/Tile.cs
+--- src/staging/tModLoader/Terraria/Tile.cs
++++ src/staging/Nitrate/Terraria/Tile.cs
 @@ -1,6 +_,3 @@
 -#if MONO
 -using System.Runtime.InteropServices;

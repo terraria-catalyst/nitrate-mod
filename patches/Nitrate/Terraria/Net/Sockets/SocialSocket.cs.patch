@@ -1,5 +1,5 @@
---- src/tModLoader/Terraria/Net/Sockets/SocialSocket.cs
-+++ src/Nitrate/Terraria/Net/Sockets/SocialSocket.cs
+--- src/staging/tModLoader/Terraria/Net/Sockets/SocialSocket.cs
++++ src/staging/Nitrate/Terraria/Net/Sockets/SocialSocket.cs
 @@ -50,11 +_,7 @@
  			ModNet.Debug(_remoteAddress, $"send {size}");
  

@@ -1,5 +1,5 @@
---- src/tModLoader/Terraria/Main.TML.cs
-+++ src/Nitrate/Terraria/Main.TML.cs
+--- src/staging/tModLoader/Terraria/Main.TML.cs
++++ src/staging/Nitrate/Terraria/Main.TML.cs
 @@ -25,6 +_,8 @@
  using Terraria.ModLoader.Config;
  using System.Net.Http;
@@ -21,7 +21,7 @@
  
  	private static readonly HttpClient client = new HttpClient();
  
-@@ -512,12 +_,14 @@
+@@ -519,12 +_,14 @@
  	
  	private static void DrawtModLoaderSocialMediaButtons(Microsoft.Xna.Framework.Color menuColor, float upBump)
  	{

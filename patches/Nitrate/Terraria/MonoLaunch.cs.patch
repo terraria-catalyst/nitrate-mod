@@ -1,5 +1,5 @@
---- src/tModLoader/Terraria/MonoLaunch.cs
-+++ src/Nitrate/Terraria/MonoLaunch.cs
+--- src/staging/tModLoader/Terraria/MonoLaunch.cs
++++ src/staging/Nitrate/Terraria/MonoLaunch.cs
 @@ -1,4 +_,3 @@
 -#if !WINDOWS
  using System;

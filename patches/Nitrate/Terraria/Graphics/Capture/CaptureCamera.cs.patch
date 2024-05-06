@@ -1,5 +1,5 @@
---- src/tModLoader/Terraria/Graphics/Capture/CaptureCamera.cs
-+++ src/Nitrate/Terraria/Graphics/Capture/CaptureCamera.cs
+--- src/staging/tModLoader/Terraria/Graphics/Capture/CaptureCamera.cs
++++ src/staging/Nitrate/Terraria/Graphics/Capture/CaptureCamera.cs
 @@ -15,9 +_,7 @@
  
  internal class CaptureCamera : IDisposable

@@ -1,5 +1,5 @@
---- src/tModLoader/Terraria/ModLoader/Core/ModCompile.cs
-+++ src/Nitrate/Terraria/ModLoader/Core/ModCompile.cs
+--- src/staging/tModLoader/Terraria/ModLoader/Core/ModCompile.cs
++++ src/staging/Nitrate/Terraria/ModLoader/Core/ModCompile.cs
 @@ -1,4 +_,3 @@
 -#if NETCORE
  using Basic.Reference.Assemblies;

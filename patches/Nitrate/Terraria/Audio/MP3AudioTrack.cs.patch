@@ -1,5 +1,5 @@
---- src/tModLoader/Terraria/Audio/MP3AudioTrack.cs
-+++ src/Nitrate/Terraria/Audio/MP3AudioTrack.cs
+--- src/staging/tModLoader/Terraria/Audio/MP3AudioTrack.cs
++++ src/staging/Nitrate/Terraria/Audio/MP3AudioTrack.cs
 @@ -1,4 +_,3 @@
 -#if !SERVER
  using System.IO;

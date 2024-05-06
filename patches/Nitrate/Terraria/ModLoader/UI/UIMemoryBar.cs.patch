@@ -1,5 +1,5 @@
---- src/tModLoader/Terraria/ModLoader/UI/UIMemoryBar.cs
-+++ src/Nitrate/Terraria/ModLoader/UI/UIMemoryBar.cs
+--- src/staging/tModLoader/Terraria/ModLoader/UI/UIMemoryBar.cs
++++ src/staging/Nitrate/Terraria/ModLoader/UI/UIMemoryBar.cs
 @@ -95,13 +_,8 @@
  	{
  		_memoryBarItems.Clear();

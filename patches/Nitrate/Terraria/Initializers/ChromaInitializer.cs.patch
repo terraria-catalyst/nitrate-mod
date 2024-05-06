@@ -1,5 +1,5 @@
---- src/tModLoader/Terraria/Initializers/ChromaInitializer.cs
-+++ src/Nitrate/Terraria/Initializers/ChromaInitializer.cs
+--- src/staging/tModLoader/Terraria/Initializers/ChromaInitializer.cs
++++ src/staging/Nitrate/Terraria/Initializers/ChromaInitializer.cs
 @@ -508,10 +_,6 @@
  
  		LoadSpecialRulesForDevices();

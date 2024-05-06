@@ -1,5 +1,5 @@
---- src/tModLoader/Terraria/Initializers/AssetInitializer.cs
-+++ src/Nitrate/Terraria/Initializers/AssetInitializer.cs
+--- src/staging/tModLoader/Terraria/Initializers/AssetInitializer.cs
++++ src/staging/Nitrate/Terraria/Initializers/AssetInitializer.cs
 @@ -41,10 +_,10 @@
  		asyncAssetLoader.RequireTypeCreationOnTransfer(typeof(DynamicSpriteFont));
  		asyncAssetLoader.RequireTypeCreationOnTransfer(typeof(SpriteFont));

@@ -1,5 +1,5 @@
---- src/tModLoader/Terraria/Social/WeGame/CoreSocialModule.cs
-+++ src/Nitrate/Terraria/Social/WeGame/CoreSocialModule.cs
+--- src/staging/tModLoader/Terraria/Social/WeGame/CoreSocialModule.cs
++++ src/staging/Nitrate/Terraria/Social/WeGame/CoreSocialModule.cs
 @@ -62,20 +_,10 @@
  
  	public void Shutdown()

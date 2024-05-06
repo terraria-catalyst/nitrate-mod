@@ -1,5 +1,5 @@
---- src/tModLoader/ReLogic/OS/Windows/NativeMethods.cs
-+++ src/Nitrate/ReLogic/OS/Windows/NativeMethods.cs
+--- src/staging/tModLoader/ReLogic/OS/Windows/NativeMethods.cs
++++ src/staging/Nitrate/ReLogic/OS/Windows/NativeMethods.cs
 @@ -1,8 +_,5 @@
  using System;
  using System.Runtime.InteropServices;
