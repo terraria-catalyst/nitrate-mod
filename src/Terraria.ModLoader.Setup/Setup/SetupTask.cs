@@ -7,7 +7,7 @@ internal sealed class SetupTask(ITaskInterface taskInterface, params SetupOperat
 	public override bool StartupWarning()
 	{
 		var res = MessageBox.Show(
-			"Any changes in /src will be lost.\r\n",
+			"Any changes in src/staging/ will be lost.\r\n",
 			"Ready for Setup",
 			MessageBoxButtons.OKCancel,
 			MessageBoxIcon.Information

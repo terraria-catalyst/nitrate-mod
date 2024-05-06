@@ -24,19 +24,19 @@ public partial class MainForm : Form, ITaskInterface
 		
 		labelWorkingDirectory.Text = $@"{Directory.GetCurrentDirectory()}";
 		
-		taskButtons[buttonDecompile] = () => new DecompileTask(this, "src/decompiled");
+		taskButtons[buttonDecompile] = () => new DecompileTask(this, "src/staging/decompiled");
 		// Terraria
-		taskButtons[buttonDiffTerraria] = () => new DiffTask(this, "src/decompiled", "src/Terraria", "patches/Terraria");
-		taskButtons[buttonPatchTerraria] = () => new PatchTask(this, "src/decompiled", "src/Terraria", "patches/Terraria");
+		taskButtons[buttonDiffTerraria] = () => new DiffTask(this, "src/staging/decompiled", "src/staging/Terraria", "patches/Terraria");
+		taskButtons[buttonPatchTerraria] = () => new PatchTask(this, "src/staging/decompiled", "src/staging/Terraria", "patches/Terraria");
 		// Terraria .NET Core
-		taskButtons[buttonDiffTerrariaNetCore] = () => new DiffTask(this, "src/Terraria", "src/TerrariaNetCore", "patches/TerrariaNetCore");
-		taskButtons[buttonPatchTerrariaNetCore] = () => new PatchTask(this, "src/Terraria", "src/TerrariaNetCore", "patches/TerrariaNetCore");
+		taskButtons[buttonDiffTerrariaNetCore] = () => new DiffTask(this, "src/staging/Terraria", "src/staging/TerrariaNetCore", "patches/TerrariaNetCore");
+		taskButtons[buttonPatchTerrariaNetCore] = () => new PatchTask(this, "src/staging/Terraria", "src/staging/TerrariaNetCore", "patches/TerrariaNetCore");
 		// tModLoader
-		taskButtons[buttonDiffModLoader] = () => new DiffTask(this, "src/TerrariaNetCore", "src/tModLoader", "patches/tModLoader");
-		taskButtons[buttonPatchModLoader] = () => new PatchTask(this, "src/TerrariaNetCore", "src/tModLoader", "patches/tModLoader");
+		taskButtons[buttonDiffModLoader] = () => new DiffTask(this, "src/staging/TerrariaNetCore", "src/staging/tModLoader", "patches/tModLoader");
+		taskButtons[buttonPatchModLoader] = () => new PatchTask(this, "src/staging/TerrariaNetCore", "src/staging/tModLoader", "patches/tModLoader");
 		// Nitrate
-		taskButtons[buttonDiffNitrate] = () => new DiffTask(this, "src/tModLoader", "src/Nitrate", "../patches");
-		taskButtons[buttonPatchNitrate] = () => new PatchTask(this, "src/tModLoader", "src/Nitrate", "../patches");
+		taskButtons[buttonDiffNitrate] = () => new DiffTask(this, "src/staging/tModLoader", "src/staging/Nitrate", "patches/Nitrate");
+		taskButtons[buttonPatchNitrate] = () => new PatchTask(this, "src/staging/tModLoader", "src/staging/Nitrate", "patches/Nitrate");
 		
 		taskButtons[buttonRegenSource] = () =>
 			new RegenSourceTask(
@@ -112,7 +112,7 @@ public partial class MainForm : Form, ITaskInterface
 	
 	private void menuItemDecompileServer_Click(object sender, EventArgs e)
 	{
-		RunTask(new DecompileTask(this, "src/decompiled_server", true));
+		RunTask(new DecompileTask(this, "src/staging/decompiled_server", true));
 	}
 	
 	private void menuItemFormatCode_Click(object sender, EventArgs e)

@@ -2,9 +2,15 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+
+using Mono.Cecil.Cil;
+
+using MonoMod.Cil;
+using MonoMod.RuntimeDetour;
 
 using Terraria.ModLoader.Properties;
 using Terraria.ModLoader.Setup.Utilities;
@@ -23,6 +29,9 @@ internal static class Program
 	
 	public static string TerrariaServerPath => Path.Combine(TerrariaSteamDir, "TerrariaServer.exe");
 	
+	private static readonly object hookLock = new();
+	private static ILHook ensureSufficientExecutionStackHook;
+	
 	/// <summary>
 	/// The main entry point for the application.
 	/// </summary>
@@ -30,6 +39,7 @@ internal static class Program
 	private static void Main()
 	{
 		CreateSymlinks();
+		HookSufficientExecutionStack();
 		
 		Application.EnableVisualStyles();
 		Application.SetCompatibleTextRenderingDefault(false);
@@ -256,7 +266,7 @@ internal static class Program
 	
 	internal static void UpdateTargetsFiles()
 	{
-		UpdateFileText("src/WorkspaceInfo.targets", GetWorkspaceInfoTargetsText());
+		UpdateFileText("src/staging/WorkspaceInfo.targets", GetWorkspaceInfoTargetsText());
 		var tmlModTargetsContents = File.ReadAllText("patches/tModLoader/Terraria/release_extras/tMLMod.targets");
 		
 		var tmlVersion = Environment.GetEnvironmentVariable("TMLVERSION");
@@ -383,5 +393,25 @@ internal static class Program
 		{
 			throw new IOException($"Failed to run command: {procInfo.FileName + " " + string.Join(' ', procInfo.Arguments)}");
 		}
+	}
+	
+	private static void HookSufficientExecutionStack()
+	{
+		if (ensureSufficientExecutionStackHook is not null)
+		{
+			return;
+		}
+		
+		var method = typeof(Microsoft.CodeAnalysis.Accessibility).Assembly.GetType("Microsoft.CodeAnalysis.StackGuard")!.GetMethod("EnsureSufficientExecutionStack");
+		ensureSufficientExecutionStackHook = new ILHook(
+			method!,
+			_ =>
+			{
+				/*var c = new ILCursor(il);
+				c.GotoNext(MoveType.After, x => x.MatchLdcI4(20));
+				c.Emit(OpCodes.Pop);
+				c.Emit(OpCodes.Ldc_I4, 20 * 2);*/
+			}
+		);
 	}
 }

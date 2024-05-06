@@ -12,7 +12,7 @@ internal sealed class RegenSourceTask(ITaskInterface taskInterface, params Setup
 		if (Settings.Default.PatchMode != 2)
 		{
 			res = MessageBox.Show(
-				"Any changes in /src will be lost.\r\n",
+				"Any changes in src/staging/ will be lost.\r\n",
 				"Ready for Setup",
 				MessageBoxButtons.OKCancel,
 				MessageBoxIcon.Information
@@ -34,7 +34,7 @@ internal sealed class RegenSourceTask(ITaskInterface taskInterface, params Setup
 		}
 		
 		res = MessageBox.Show(
-			"Any changes in /src will be lost.\r\n",
+			"Any changes in src/staging/ will be lost.\r\n",
 			"Ready for Setup",
 			MessageBoxButtons.OKCancel,
 			MessageBoxIcon.Information

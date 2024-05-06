@@ -42,11 +42,11 @@ internal sealed class AutoSetup : ITaskInterface
 	
 	public void DoAuto()
 	{
-		Func<SetupOperation> buttonDecompile = () => new DecompileTask(this, "src/decompiled");
-		Func<SetupOperation> buttonPatchTerraria = () => new PatchTask(this, "src/decompiled", "src/Terraria", "patches/Terraria");
-		Func<SetupOperation> buttonPatchTerrariaNetCore = () => new PatchTask(this, "src/Terraria", "src/TerrariaNetCore", "patches/TerrariaNetCore");
-		Func<SetupOperation> buttonPatchModLoader = () => new PatchTask(this, "src/TerrariaNetCore", "src/tModLoader", "patches/tModLoader");
-		Func<SetupOperation> buttonPatchNitrate = () => new PatchTask(this, "src/tModLoader", "src/Nitrate", "../patches");
+		Func<SetupOperation> buttonDecompile = () => new DecompileTask(this, "src/staging/decompiled");
+		Func<SetupOperation> buttonPatchTerraria = () => new PatchTask(this, "src/staging/decompiled", "src/staging/Terraria", "patches/Terraria");
+		Func<SetupOperation> buttonPatchTerrariaNetCore = () => new PatchTask(this, "src/staging/Terraria", "src/staging/TerrariaNetCore", "patches/TerrariaNetCore");
+		Func<SetupOperation> buttonPatchModLoader = () => new PatchTask(this, "src/staging/TerrariaNetCore", "src/staging/tModLoader", "patches/tModLoader");
+		Func<SetupOperation> buttonPatchNitrate = () => new PatchTask(this, "src/staging/tModLoader", "src/staging/Nitrate", "patches/Nitrate");
 		
 		Func<SetupOperation> buttonRegenSource = () =>
 			new RegenSourceTask(
@@ -62,7 +62,7 @@ internal sealed class AutoSetup : ITaskInterface
 					.Select(b => b()).ToArray()
 			);
 		
-		if (Directory.Exists("src/decompiled"))
+		if (Directory.Exists("src/staging/decompiled"))
 		{
 			Console.WriteLine("decompiled folder found, skipping decompile step");
 			task = () => new SetupTask(this, buttonRegenSource());

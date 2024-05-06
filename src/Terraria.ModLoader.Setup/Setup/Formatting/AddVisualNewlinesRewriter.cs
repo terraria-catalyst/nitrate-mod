@@ -32,9 +32,16 @@ internal sealed class AddVisualNewlinesRewriter : CSharpSyntaxRewriter
 	{
 		if (modifyNodes.Remove(node))
 		{
-			node = node?.WithLeadingTrivia(node.GetLeadingTrivia().Insert(0, SyntaxFactory.EndOfLine(Environment.NewLine)));
+			node = node!.WithLeadingTrivia(node!.GetLeadingTrivia().Insert(0, SyntaxFactory.EndOfLine(Environment.NewLine)));
 		}
 		
-		return base.Visit(node);
+		try
+		{
+			return base.Visit(node);
+		}
+		catch
+		{
+			return null;
+		}
 	}
 }

@@ -21,9 +21,6 @@ internal abstract class SetupOperation(ITaskInterface taskInterface)
 		public Worker Worker { get; } = worker;
 		
 		public WorkItem(string status, Action action) : this(status, _ => action()) { }
-		
-		// ReSharper disable once AsyncVoidLambda
-		public WorkItem(string status, Func<Task> action) : this(status, async _ => await action()) { }
 	}
 	
 	protected void ExecuteParallel(List<WorkItem> items, bool resetProgress = true, int maxDegree = 0)

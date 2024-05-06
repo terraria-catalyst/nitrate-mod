@@ -89,16 +89,15 @@ internal sealed class PatchTask(ITaskInterface taskInterface, string baseDir, st
 		try
 		{
 			CreateDirectory(Program.LOGS_DIR);
-			lock (logFile)
-			{
-				logFile = new StreamWriter(Path.Combine(Program.LOGS_DIR, "patch.log"));
-			}
+			// ReSharper disable once InconsistentlySynchronizedField
+			logFile = new StreamWriter(Path.Combine(Program.LOGS_DIR, "patch.log"));
 			
 			TaskInterface.SetMaxProgress(items.Count);
 			ExecuteParallel(items);
 		}
 		finally
 		{
+			// ReSharper disable once InconsistentlySynchronizedField
 			logFile?.Close();
 		}
 		
@@ -167,6 +166,19 @@ internal sealed class PatchTask(ITaskInterface taskInterface, string baseDir, st
 	private FilePatcher Patch(string patchPath)
 	{
 		var patcher = FilePatcher.FromPatchFile(patchPath);
+		
+		// WEIRD NITRATE PATCH: Forcefully redirect paths for actually reading
+		// the patches since we do weird submodule stuff.
+		if (!patcher.patchFile.basePath.Contains("src/staging/"))
+		{
+			patcher.patchFile.basePath = patcher.patchFile.basePath.Replace("src/", "src/staging/");
+		}
+		
+		if (!patcher.patchFile.patchedPath.Contains("src/staging/"))
+		{
+			patcher.patchFile.patchedPath = patcher.patchFile.patchedPath.Replace("src/", "src/staging/");
+		}
+		
 		patcher.Patch(mode);
 		results.Add(patcher);
 		CreateParentDirectory(patcher.PatchedPath);

@@ -15,9 +15,9 @@ internal sealed class HookGenTask(ITaskInterface taskInterface) : SetupOperation
 {
 	private const string dotnet_sdk_version = "8.0.1";
 	private const string dotnet_target_version = "net8.0";
-	private const string libs_path = "src/tModLoader/Terraria/Libraries";
-	private const string bin_libs_path = $"src/tModLoader/Terraria/bin/Release/{dotnet_target_version}/Libraries";
-	private const string tml_assembly_path = @$"src/tModLoader/Terraria/bin/Release/{dotnet_target_version}/tModLoader.dll";
+	private const string libs_path = "src/staging/tModLoader/Terraria/Libraries";
+	private const string bin_libs_path = $"src/staging/tModLoader/Terraria/bin/Release/{dotnet_target_version}/Libraries";
+	private const string tml_assembly_path = @$"src/staging/tModLoader/Terraria/bin/Release/{dotnet_target_version}/tModLoader.dll";
 	private const string installed_net_refs = $@"\dotnet\packs\Microsoft.NETCore.App.Ref\{dotnet_sdk_version}\ref\{dotnet_target_version}";
 	
 	public override void Run()
