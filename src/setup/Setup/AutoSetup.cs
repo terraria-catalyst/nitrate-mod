@@ -93,7 +93,7 @@ internal sealed class AutoSetup : ITaskInterface
 					throw new OperationCanceledException();
 				}
 			}
-			catch (OperationCanceledException e)
+			catch (OperationCanceledException)
 			{
 				return;
 			}

@@ -3,7 +3,7 @@
   <!-- This file will always be overwritten, do not edit it manually. -->
   <PropertyGroup>
 	<BranchName>tml-fork</BranchName>
-	<CommitSHA>5a42abcdb9a5e6897d371b27a21861e7025fc884</CommitSHA>
+	<CommitSHA>d80c6821c9a832c7024c14de47879bff0e62ad28</CommitSHA>
 	<TerrariaSteamPath>C:\Program Files (x86)\Steam\steamapps\common\Terraria</TerrariaSteamPath>
     <tModLoaderSteamPath>C:\Program Files (x86)\Steam\steamapps\common\tModLoaderDev</tModLoaderSteamPath>
   </PropertyGroup>

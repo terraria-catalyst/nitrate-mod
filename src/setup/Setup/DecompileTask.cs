@@ -407,8 +407,8 @@ internal sealed class DecompileTask : SetupOperation
 				}
 				
 				s.Position = 0;
-				using var fs = new FileStream(path, FileMode.Create, FileAccess.Write);
-				s.CopyTo(fs);
+				await using var fs = new FileStream(path, FileMode.Create, FileAccess.Write);
+				await s.CopyToAsync(fs);
 			}
 		);
 	}

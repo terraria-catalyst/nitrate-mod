@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32319.34
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Terraria.ModLoader.Setup", "Terraria.ModLoader.Setup.csproj", "{ECAD06B8-1A3B-4288-A02C-198A198EF98E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PatchReviewer", "..\tModLoader\setup\PatchReviewer\PatchReviewer.csproj", "{035D12F8-A4DC-4ECB-B619-5F0B3265ED1D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiffPatch", "..\tModLoader\setup\PatchReviewer\DiffPatch\DiffPatch.csproj", "{46D9A0D8-0B3F-4B7D-9C99-F7DA645F6E02}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ECAD06B8-1A3B-4288-A02C-198A198EF98E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECAD06B8-1A3B-4288-A02C-198A198EF98E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECAD06B8-1A3B-4288-A02C-198A198EF98E}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECAD06B8-1A3B-4288-A02C-198A198EF98E}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{035D12F8-A4DC-4ECB-B619-5F0B3265ED1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{035D12F8-A4DC-4ECB-B619-5F0B3265ED1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{035D12F8-A4DC-4ECB-B619-5F0B3265ED1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{035D12F8-A4DC-4ECB-B619-5F0B3265ED1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46D9A0D8-0B3F-4B7D-9C99-F7DA645F6E02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46D9A0D8-0B3F-4B7D-9C99-F7DA645F6E02}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46D9A0D8-0B3F-4B7D-9C99-F7DA645F6E02}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46D9A0D8-0B3F-4B7D-9C99-F7DA645F6E02}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FDF598EF-0C8A-4148-807A-13F6C1A5A033}
+	EndGlobalSection
+EndGlobal

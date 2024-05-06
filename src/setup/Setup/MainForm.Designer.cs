@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace Terraria.ModLoader.Setup
@@ -176,7 +177,7 @@ namespace Terraria.ModLoader.Setup
 			buttonDiffModLoader.Size = new System.Drawing.Size(150, 27);
 			buttonDiffModLoader.TabIndex = 7;
 			buttonDiffModLoader.Text = "Diff tModLoader";
-			toolTipButtons.SetToolTip(buttonDiffModLoader, resources.GetString("buttonDiffModLoader.ToolTip"));
+			toolTipButtons.SetToolTip(buttonDiffModLoader, "Recalculates the tModLoader patches\nDiffs the src/Terraria and src/tModLoader directories\nUse this after making changes then commit the patches directory to the git\nInternally formats the Terraria sources before diffing");
 			buttonDiffModLoader.UseVisualStyleBackColor = true;
 			buttonDiffModLoader.Click += buttonTask_Click;
 			// 
@@ -390,11 +391,11 @@ namespace Terraria.ModLoader.Setup
 			Controls.Add(buttonDecompile);
 			Controls.Add(buttonSetup);
 			Controls.Add(mainMenuStrip);
-			Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
+			Icon = (System.Drawing.Icon)resources.GetObject("icon");
 			MainMenuStrip = mainMenuStrip;
 			Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
 			Name = "MainForm";
-			Text = "tModLoader Dev Setup";
+			Text = "Nitrate Dev Setup";
 			mainMenuStrip.ResumeLayout(false);
 			mainMenuStrip.PerformLayout();
 			ResumeLayout(false);
