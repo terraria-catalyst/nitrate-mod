@@ -1,51 +1,54 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Collections.Generic;
+using System.Linq;
+
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-using System.Collections.Generic;
-using System.Linq;
+namespace Terraria.ModLoader.Setup.Formatting;
 
-namespace Terraria.ModLoader.Setup.Formatting
+internal sealed class NoNewlineBetweenFieldsRewriter : CSharpSyntaxRewriter
 {
-	internal class NoNewlineBetweenFieldsRewriter : CSharpSyntaxRewriter
+	private readonly HashSet<SyntaxToken> modifyTokens = [];
+	
+	public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node)
 	{
-		private HashSet<SyntaxToken> modifyTokens = new HashSet<SyntaxToken>();
-		
-		public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node)
+		TagFieldTokens(node.Members);
+		return base.VisitClassDeclaration(node);
+	}
+	
+	public override SyntaxNode VisitStructDeclaration(StructDeclarationSyntax node)
+	{
+		TagFieldTokens(node.Members);
+		return base.VisitStructDeclaration(node);
+	}
+	
+	private void TagFieldTokens(SyntaxList<MemberDeclarationSyntax> members)
+	{
+		for (var i = 0; i < members.Count - 1; i++)
 		{
-			TagFieldTokens(node.Members);
-			return base.VisitClassDeclaration(node);
-		}
-		
-		public override SyntaxNode VisitStructDeclaration(StructDeclarationSyntax node)
-		{
-			TagFieldTokens(node.Members);
-			return base.VisitStructDeclaration(node);
-		}
-		
-		private void TagFieldTokens(SyntaxList<MemberDeclarationSyntax> members)
-		{
-			for (int i = 0; i < members.Count - 1; i++)
+			if ((members[i] is FieldDeclarationSyntax || members[i] is EventFieldDeclarationSyntax) && members[i].Kind() == members[i + 1].Kind())
 			{
-				if ((members[i] is FieldDeclarationSyntax || members[i] is EventFieldDeclarationSyntax) && members[i].Kind() == members[i + 1].Kind())
-				{
-					Tag(members[i + 1].GetFirstToken());
-				}
+				Tag(members[i + 1].GetFirstToken());
 			}
 		}
-		
-		private void Tag(SyntaxToken token)
+	}
+	
+	private void Tag(SyntaxToken token)
+	{
+		if (token.HasLeadingTrivia && token.LeadingTrivia[0].IsKind(SyntaxKind.EndOfLineTrivia) && token.LeadingTrivia.All(SyntaxUtils.IsWhitespace))
 		{
-			if (token.HasLeadingTrivia && token.LeadingTrivia[0].IsKind(SyntaxKind.EndOfLineTrivia) && token.LeadingTrivia.All(SyntaxUtils.IsWhitespace))
-				modifyTokens.Add(token);
+			modifyTokens.Add(token);
+		}
+	}
+	
+	public override SyntaxToken VisitToken(SyntaxToken token)
+	{
+		if (modifyTokens.Contains(token))
+		{
+			token = token.WithLeadingTrivia(token.LeadingTrivia.Skip(1));
 		}
 		
-		public override SyntaxToken VisitToken(SyntaxToken token)
-		{
-			if (modifyTokens.Contains(token))
-				token = token.WithLeadingTrivia(token.LeadingTrivia.Skip(1));
-			
-			return base.VisitToken(token);
-		}
+		return base.VisitToken(token);
 	}
 }

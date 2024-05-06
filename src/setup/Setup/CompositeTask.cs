@@ -1,47 +1,48 @@
 ﻿using System.Linq;
 
-namespace Terraria.ModLoader.Setup
+namespace Terraria.ModLoader.Setup;
+
+internal abstract class CompositeTask(ITaskInterface taskInterface, params SetupOperation[] tasks) : SetupOperation(taskInterface)
 {
-	public class CompositeTask : SetupOperation
+	private SetupOperation failed;
+	
+	public override bool ConfigurationDialog()
 	{
-		private SetupOperation[] tasks;
-		private SetupOperation failed;
-		
-		public CompositeTask(ITaskInterface taskInterface, params SetupOperation[] tasks) : base(taskInterface)
+		return tasks.All(task => task.ConfigurationDialog());
+	}
+	
+	public override bool Failed()
+	{
+		return failed != null;
+	}
+	
+	public override void FinishedDialog()
+	{
+		if (failed != null)
 		{
-			this.tasks = tasks;
+			failed.FinishedDialog();
 		}
-		
-		public override bool ConfigurationDialog()
-		{
-			return tasks.All(task => task.ConfigurationDialog());
-		}
-		
-		public override bool Failed()
-		{
-			return failed != null;
-		}
-		
-		public override void FinishedDialog()
-		{
-			if (failed != null)
-				failed.FinishedDialog();
-			else
-				foreach (var task in tasks)
-					task.FinishedDialog();
-		}
-		
-		public override void Run()
+		else
 		{
 			foreach (var task in tasks)
 			{
-				task.Run();
-				if (task.Failed())
-				{
-					failed = task;
-					return;
-				}
+				task.FinishedDialog();
 			}
+		}
+	}
+	
+	public override void Run()
+	{
+		foreach (var task in tasks)
+		{
+			task.Run();
+			if (!task.Failed())
+			{
+				continue;
+			}
+			
+			failed = task;
+			return;
 		}
 	}
 }

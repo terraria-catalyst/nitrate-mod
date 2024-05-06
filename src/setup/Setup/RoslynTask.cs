@@ -1,27 +1,27 @@
-﻿using Microsoft.Build.Locator;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.MSBuild;
-
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Terraria.ModLoader.Setup
+using Microsoft.Build.Locator;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.MSBuild;
+
+namespace Terraria.ModLoader.Setup;
+
+internal abstract class RoslynTask(ITaskInterface taskInterface) : SetupOperation(taskInterface)
 {
-	public abstract class RoslynTask : SetupOperation
+	private string projectPath;
+	
+	protected abstract string Status { get; }
+	
+	protected virtual int MaxDegreeOfParallelism => 0;
+	
+	public override bool ConfigurationDialog()
 	{
-		private string projectPath;
-		
-		protected abstract string Status { get; }
-		
-		protected virtual int MaxDegreeOfParallelism => 0;
-		
-		public RoslynTask(ITaskInterface taskInterface) : base(taskInterface) { }
-		
-		public override bool ConfigurationDialog() => (bool)taskInterface.Invoke(
+		return (bool)TaskInterface.Invoke(
 			new Func<bool>(
 				() =>
 				{
@@ -30,7 +30,7 @@ namespace Terraria.ModLoader.Setup
 						FileName = projectPath,
 						InitialDirectory = Path.GetDirectoryName(projectPath) ?? Path.GetFullPath("."),
 						Filter = "C# Project|*.csproj",
-						Title = "Select C# Project"
+						Title = "Select C# Project",
 					};
 					
 					var result = dialog.ShowDialog();
@@ -39,69 +39,64 @@ namespace Terraria.ModLoader.Setup
 				}
 			)
 		);
+	}
+	
+	public override void Run()
+	{
+		RunAsync().GetAwaiter().GetResult();
+	}
+	
+	public async Task RunAsync()
+	{
+		using var workspace = CreateWorkspace();
+		// todo proper error log
+		workspace.WorkspaceFailed += (o, e) => Console.Error.WriteLine(e.Diagnostic.Message);
 		
-		public override void Run() => RunAsync().GetAwaiter().GetResult();
+		Console.WriteLine($"Loading project '{projectPath}'");
 		
-		public async Task RunAsync()
+		// Attach progress reporter, so we print projects as they are loaded.
+		var project = await workspace.OpenProjectAsync(projectPath);
+		var workItems = project.Documents.Select(
+			doc => new WorkItem(
+				Status + " " + doc.Name,
+				async () =>
+				{
+					var newDoc = await Process(doc);
+					if (newDoc.FilePath is null)
+					{
+						throw new InvalidOperationException("New document file path was null");
+					}
+					
+					var before = await doc.GetTextAsync();
+					var after = await newDoc.GetTextAsync();
+					if (before != after)
+					{
+						await File.WriteAllTextAsync(newDoc.FilePath, after.ToString());
+					}
+				}
+			)
+		);
+		
+		ExecuteParallel(workItems.ToList(), maxDegree: MaxDegreeOfParallelism);
+	}
+	
+	private static bool msBuildFound;
+	
+	private MSBuildWorkspace CreateWorkspace()
+	{
+		if (msBuildFound)
 		{
-			using (var workspace = CreateWorkspace())
-			{
-				// todo proper error log
-				workspace.WorkspaceFailed += (o, e) => Console.Error.WriteLine(e.Diagnostic.Message);
-				
-				Console.WriteLine($"Loading project '{projectPath}'");
-				
-				// Attach progress reporter so we print projects as they are loaded.
-				var project = await workspace.OpenProjectAsync(projectPath);
-				var workItems = project.Documents.Select(
-					doc => new WorkItem(
-						Status + " " + doc.Name,
-						async () =>
-						{
-							var newDoc = await Process(doc);
-							
-							var before = await doc.GetTextAsync();
-							var after = await newDoc.GetTextAsync();
-							if (before != after)
-								await File.WriteAllTextAsync(newDoc.FilePath, after.ToString());
-						}
-					)
-				);
-				
-				ExecuteParallel(workItems.ToList(), maxDegree: MaxDegreeOfParallelism);
-			}
-		}
-		
-		//protected virtual bool RequiresCodeAnalysis { get; }
-		
-		private static bool MSBuildFound = false;
-		
-		private MSBuildWorkspace CreateWorkspace()
-		{
-			//if (!RequiresCodeAnalysis)
-			//	return new AdhocWorkspace();
-			
-			if (!MSBuildFound)
-			{
-				taskInterface.SetStatus("Finding MSBuild");
-				var vsInst = MSBuildLocator.QueryVisualStudioInstances().OrderByDescending(inst => inst.Version).First();
-				MSBuildLocator.RegisterInstance(vsInst);
-				taskInterface.SetStatus($"Found MSBuild {vsInst.Version} at {vsInst.MSBuildPath}");
-				MSBuildFound = true;
-			}
-			
 			return MSBuildWorkspace.Create();
 		}
 		
-		protected abstract Task<Document> Process(Document doc);
+		TaskInterface.SetStatus("Finding MSBuild");
+		var vsInst = MSBuildLocator.QueryVisualStudioInstances().OrderByDescending(inst => inst.Version).First();
+		MSBuildLocator.RegisterInstance(vsInst);
+		TaskInterface.SetStatus($"Found MSBuild {vsInst.Version} at {vsInst.MSBuildPath}");
+		msBuildFound = true;
 		
-		private static Project adhocCSharpProject = new AdhocWorkspace().AddProject("", LanguageNames.CSharp);
-		
-		public static async Task<string> TransformSource(string source, CancellationToken cancel, Func<Document, CancellationToken, Task<Document>> transform)
-		{
-			var doc = adhocCSharpProject.AddDocument("", source);
-			doc = await transform(doc, cancel).ConfigureAwait(false);
-			return (await doc.GetTextAsync()).ToString();
-		}
+		return MSBuildWorkspace.Create();
 	}
+	
+	protected abstract Task<Document> Process(Document doc);
 }

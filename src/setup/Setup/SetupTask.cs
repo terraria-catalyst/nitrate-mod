@@ -1,20 +1,18 @@
 ﻿using System.Windows.Forms;
 
-namespace Terraria.ModLoader.Setup
+namespace Terraria.ModLoader.Setup;
+
+internal sealed class SetupTask(ITaskInterface taskInterface, params SetupOperation[] tasks) : CompositeTask(taskInterface, tasks)
 {
-	public class SetupTask : CompositeTask
+	public override bool StartupWarning()
 	{
-		public SetupTask(ITaskInterface taskInterface, params SetupOperation[] tasks) : base(taskInterface, tasks) { }
+		var res = MessageBox.Show(
+			"Any changes in /src will be lost.\r\n",
+			"Ready for Setup",
+			MessageBoxButtons.OKCancel,
+			MessageBoxIcon.Information
+		);
 		
-		public override bool StartupWarning()
-		{
-			return MessageBox.Show(
-					   "Any changes in /src will be lost.\r\n",
-					   "Ready for Setup",
-					   MessageBoxButtons.OKCancel,
-					   MessageBoxIcon.Information
-				   )
-				   == DialogResult.OK;
-		}
+		return res == DialogResult.OK;
 	}
 }

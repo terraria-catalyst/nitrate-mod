@@ -1,54 +1,55 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Formatting;
-using Microsoft.CodeAnalysis.Formatting;
-using Microsoft.CodeAnalysis.Options;
-
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Formatting;
+using Microsoft.CodeAnalysis.Formatting;
+
 using Terraria.ModLoader.Setup.Formatting;
 
-namespace Terraria.ModLoader.Setup
+namespace Terraria.ModLoader.Setup;
+
+internal sealed class FormatTask : SetupOperation
 {
-	public partial class FormatTask : SetupOperation
+	private static readonly AdhocWorkspace workspace = new();
+	
+	static FormatTask()
 	{
-		private static readonly AdhocWorkspace workspace = new();
+		var optionSet = workspace.CurrentSolution.Options;
 		
-		static FormatTask()
-		{
-			var optionSet = workspace.CurrentSolution.Options;
-			
-			// Essentials
-			optionSet = optionSet
-				.WithChangedOption(FormattingOptions.UseTabs, LanguageNames.CSharp, true);
-			
-			// K&R
-			optionSet = optionSet
-				.WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInProperties, false)
-				.WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInAccessors, false)
-				.WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInAnonymousMethods, false)
-				.WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInControlBlocks, false)
-				.WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInAnonymousTypes, false)
-				.WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInObjectCollectionArrayInitializers, false)
-				.WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInLambdaExpressionBody, false);
-			
-			// Fix switch indentation
-			optionSet = optionSet
-				.WithChangedOption(CSharpFormattingOptions.IndentSwitchCaseSection, true)
-				.WithChangedOption(CSharpFormattingOptions.IndentSwitchCaseSectionWhenBlock, false);
-			
-			workspace.TryApplyChanges(workspace.CurrentSolution.WithOptions(optionSet));
-		}
+		// Essentials
+		optionSet = optionSet
+			.WithChangedOption(FormattingOptions.UseTabs, LanguageNames.CSharp, true);
 		
-		public FormatTask(ITaskInterface taskInterface) : base(taskInterface) { }
+		// K&R
+		optionSet = optionSet
+			.WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInProperties, false)
+			.WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInAccessors, false)
+			.WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInAnonymousMethods, false)
+			.WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInControlBlocks, false)
+			.WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInAnonymousTypes, false)
+			.WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInObjectCollectionArrayInitializers, false)
+			.WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInLambdaExpressionBody, false);
 		
-		private static string projectPath; //persist across executions
+		// Fix switch indentation
+		optionSet = optionSet
+			.WithChangedOption(CSharpFormattingOptions.IndentSwitchCaseSection, true)
+			.WithChangedOption(CSharpFormattingOptions.IndentSwitchCaseSectionWhenBlock, false);
 		
-		public override bool ConfigurationDialog() => (bool)taskInterface.Invoke(
+		workspace.TryApplyChanges(workspace.CurrentSolution.WithOptions(optionSet));
+	}
+	
+	public FormatTask(ITaskInterface taskInterface) : base(taskInterface) { }
+	
+	private static string projectPath; //persist across executions
+	
+	public override bool ConfigurationDialog()
+	{
+		return (bool)TaskInterface.Invoke(
 			new Func<bool>(
 				() =>
 				{
@@ -57,7 +58,7 @@ namespace Terraria.ModLoader.Setup
 						FileName = projectPath,
 						InitialDirectory = Path.GetDirectoryName(projectPath) ?? Path.GetFullPath("."),
 						Filter = "C# Project|*.csproj",
-						Title = "Select C# Project"
+						Title = "Select C# Project",
 					};
 					
 					var result = dialog.ShowDialog();
@@ -66,45 +67,52 @@ namespace Terraria.ModLoader.Setup
 				}
 			)
 		);
-		
-		public override void Run()
+	}
+	
+	public override void Run()
+	{
+		var dir = Path.GetDirectoryName(projectPath); //just format all files in the directory
+		if (dir is null)
 		{
-			var dir = Path.GetDirectoryName(projectPath); //just format all files in the directory
-			var workItems = Directory.EnumerateFiles(dir, "*.cs", SearchOption.AllDirectories)
-				.Select(path => new FileInfo(path))
-				.OrderByDescending(f => f.Length)
-				.Select(f => new WorkItem("Formatting: " + f.Name, () => FormatFile(f.FullName, taskInterface.CancellationToken, false)));
-			
-			ExecuteParallel(workItems.ToList());
+			throw new InvalidOperationException("No parent directory: " + projectPath);
 		}
 		
-		public static void FormatFile(string path, CancellationToken cancellationToken, bool aggressive)
+		var workItems = Directory.EnumerateFiles(dir, "*.cs", SearchOption.AllDirectories)
+			.Select(path => new FileInfo(path))
+			.OrderByDescending(f => f.Length)
+			.Select(f => new WorkItem("Formatting: " + f.Name, () => FormatFile(f.FullName, false, TaskInterface.CancellationToken)));
+		
+		ExecuteParallel(workItems.ToList());
+	}
+	
+	public static void FormatFile(string path, bool aggressive, CancellationToken cancellationToken)
+	{
+		var source = File.ReadAllText(path);
+		var formatted = Format(source, cancellationToken, aggressive);
+		if (source != formatted)
 		{
-			string source = File.ReadAllText(path);
-			string formatted = Format(source, cancellationToken, aggressive);
-			if (source != formatted)
-				File.WriteAllText(path, formatted);
+			File.WriteAllText(path, formatted);
+		}
+	}
+	
+	public static SyntaxNode Format(SyntaxNode node, bool aggressive, CancellationToken cancellationToken)
+	{
+		if (aggressive)
+		{
+			node = new NoNewlineBetweenFieldsRewriter().Visit(node);
+			node = new RemoveBracesFromSingleStatementRewriter().Visit(node);
 		}
 		
-		public static SyntaxNode Format(SyntaxNode node, CancellationToken cancellationToken, bool aggressive)
-		{
-			if (aggressive)
-			{
-				node = new NoNewlineBetweenFieldsRewriter().Visit(node);
-				node = new RemoveBracesFromSingleStatementRewriter().Visit(node);
-			}
-			
-			node = new AddVisualNewlinesRewriter().Visit(node);
-			node = new FileScopedNamespaceRewriter().Visit(node);
-			node = Formatter.Format(node, workspace, cancellationToken: cancellationToken);
-			node = new CollectionInitializerFormatter().Visit(node);
-			return node;
-		}
-		
-		public static string Format(string source, CancellationToken cancellationToken, bool aggressive)
-		{
-			var tree = CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(preprocessorSymbols: new[] { "SERVER" }));
-			return Format(tree.GetRoot(), cancellationToken, aggressive).ToFullString();
-		}
+		node = new AddVisualNewlinesRewriter().Visit(node);
+		node = new FileScopedNamespaceRewriter().Visit(node);
+		node = Formatter.Format(node!, workspace, cancellationToken: cancellationToken);
+		node = new CollectionInitializerFormatter().Visit(node);
+		return node;
+	}
+	
+	public static string Format(string source, CancellationToken cancellationToken, bool aggressive)
+	{
+		var tree = CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(preprocessorSymbols: new[] { "SERVER", }));
+		return Format(tree.GetRoot(), aggressive, cancellationToken).ToFullString();
 	}
 }

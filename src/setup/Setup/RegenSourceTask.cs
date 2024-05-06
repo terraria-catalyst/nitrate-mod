@@ -2,44 +2,55 @@ using System.Windows.Forms;
 
 using Terraria.ModLoader.Properties;
 
-namespace Terraria.ModLoader.Setup
+namespace Terraria.ModLoader.Setup;
+
+internal sealed class RegenSourceTask(ITaskInterface taskInterface, params SetupOperation[] tasks) : CompositeTask(taskInterface, tasks)
 {
-	public class RegenSourceTask : CompositeTask
+	public override bool StartupWarning()
 	{
-		public RegenSourceTask(ITaskInterface taskInterface, params SetupOperation[] tasks) : base(taskInterface, tasks) { }
-		
-		public override bool StartupWarning()
+		DialogResult res;
+		if (Settings.Default.PatchMode != 2)
 		{
-			if (Settings.Default.PatchMode == 2)
-			{
-				if (MessageBox.Show(
-						"Patch mode will be reset from fuzzy to offset.\r\n",
-						"Strict Patch Mode",
-						MessageBoxButtons.OKCancel,
-						MessageBoxIcon.Information
-					)
-					!= DialogResult.OK)
-					return false;
-			}
+			res = MessageBox.Show(
+				"Any changes in /src will be lost.\r\n",
+				"Ready for Setup",
+				MessageBoxButtons.OKCancel,
+				MessageBoxIcon.Information
+			);
 			
-			return MessageBox.Show(
-					   "Any changes in /src will be lost.\r\n",
-					   "Ready for Setup",
-					   MessageBoxButtons.OKCancel,
-					   MessageBoxIcon.Information
-				   )
-				   == DialogResult.OK;
+			return res == DialogResult.OK;
 		}
 		
-		public override void Run()
+		res = MessageBox.Show(
+			"Patch mode will be reset from fuzzy to offset.\r\n",
+			"Strict Patch Mode",
+			MessageBoxButtons.OKCancel,
+			MessageBoxIcon.Information
+		);
+		
+		if (res != DialogResult.OK)
 		{
-			if (Settings.Default.PatchMode == 2)
-			{
-				Settings.Default.PatchMode = 1;
-				Settings.Default.Save();
-			}
-			
-			base.Run();
+			return false;
 		}
+		
+		res = MessageBox.Show(
+			"Any changes in /src will be lost.\r\n",
+			"Ready for Setup",
+			MessageBoxButtons.OKCancel,
+			MessageBoxIcon.Information
+		);
+		
+		return res == DialogResult.OK;
+	}
+	
+	public override void Run()
+	{
+		if (Settings.Default.PatchMode == 2)
+		{
+			Settings.Default.PatchMode = 1;
+			Settings.Default.Save();
+		}
+		
+		base.Run();
 	}
 }

@@ -1,35 +1,34 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System;
+
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-using System;
+namespace Terraria.ModLoader.Setup.Formatting;
 
-namespace Terraria.ModLoader.Setup.Formatting
+internal sealed class FileScopedNamespaceRewriter : CSharpSyntaxRewriter
 {
-	public class FileScopedNamespaceRewriter : CSharpSyntaxRewriter
+	public override SyntaxNode VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
 	{
-		public override SyntaxNode VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
-		{
-			var fs = SyntaxFactory.FileScopedNamespaceDeclaration(
-					node.AttributeLists,
-					node.Modifiers,
-					node.NamespaceKeyword,
-					node.Name.WithoutTrailingTrivia(),
-					SyntaxFactory.Token(SyntaxKind.SemicolonToken).WithTrailingTrivia(
-						node.Name.GetTrailingTrivia().Add(SyntaxFactory.EndOfLine(Environment.NewLine))
-					),
-					node.Externs,
-					node.Usings,
-					Unindent(node.Members)
-				)
-				.WithTriviaFrom(node);
-			
-			return fs;
-		}
+		var fs = SyntaxFactory.FileScopedNamespaceDeclaration(
+				node.AttributeLists,
+				node.Modifiers,
+				node.NamespaceKeyword,
+				node.Name.WithoutTrailingTrivia(),
+				SyntaxFactory.Token(SyntaxKind.SemicolonToken).WithTrailingTrivia(
+					node.Name.GetTrailingTrivia().Add(SyntaxFactory.EndOfLine(Environment.NewLine))
+				),
+				node.Externs,
+				node.Usings,
+				Unindent(node.Members)
+			)
+			.WithTriviaFrom(node);
 		
-		private static SyntaxList<MemberDeclarationSyntax> Unindent(SyntaxList<MemberDeclarationSyntax> members)
-		{
-			return new UnindentRewriter().VisitList(members);
-		}
+		return fs;
+	}
+	
+	private static SyntaxList<MemberDeclarationSyntax> Unindent(SyntaxList<MemberDeclarationSyntax> members)
+	{
+		return new UnindentRewriter().VisitList(members);
 	}
 }

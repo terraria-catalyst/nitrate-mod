@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.ComponentModel;
+using System.Windows.Forms;
 
 namespace Terraria.ModLoader.Setup
 {
@@ -7,7 +8,7 @@ namespace Terraria.ModLoader.Setup
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -49,7 +50,6 @@ namespace Terraria.ModLoader.Setup
 			menuItemOptions = new System.Windows.Forms.ToolStripMenuItem();
 			menuItemTerraria = new System.Windows.Forms.ToolStripMenuItem();
 			menuItemTmlPath = new System.Windows.Forms.ToolStripMenuItem();
-			resetTimeStampOptimizationsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			formatDecompiledOutputToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			decompileServerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -271,7 +271,7 @@ namespace Terraria.ModLoader.Setup
 			// 
 			// menuItemOptions
 			// 
-			menuItemOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { menuItemTerraria, menuItemTmlPath, resetTimeStampOptimizationsToolStripMenuItem, formatDecompiledOutputToolStripMenuItem });
+			menuItemOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { menuItemTerraria, menuItemTmlPath, formatDecompiledOutputToolStripMenuItem });
 			menuItemOptions.Name = "menuItemOptions";
 			menuItemOptions.Size = new System.Drawing.Size(61, 20);
 			menuItemOptions.Text = "Options";
@@ -289,13 +289,6 @@ namespace Terraria.ModLoader.Setup
 			menuItemTmlPath.Size = new System.Drawing.Size(268, 22);
 			menuItemTmlPath.Text = "Select Custom TML Output Directory";
 			menuItemTmlPath.Click += menuItemTmlPath_Click;
-			// 
-			// resetTimeStampOptimizationsToolStripMenuItem
-			// 
-			resetTimeStampOptimizationsToolStripMenuItem.Name = "resetTimeStampOptimizationsToolStripMenuItem";
-			resetTimeStampOptimizationsToolStripMenuItem.Size = new System.Drawing.Size(268, 22);
-			resetTimeStampOptimizationsToolStripMenuItem.Text = "Reset TimeStamp Optimizations";
-			resetTimeStampOptimizationsToolStripMenuItem.Click += menuItemResetTimeStampOptmizations_Click;
 			// 
 			// formatDecompiledOutputToolStripMenuItem
 			// 
@@ -410,37 +403,36 @@ namespace Terraria.ModLoader.Setup
 
 		#endregion
 
-		private System.Windows.Forms.Button buttonCancel;
-        private System.Windows.Forms.ProgressBar progressBar;
-        private System.Windows.Forms.Label labelStatus;
-        private System.Windows.Forms.Button buttonSetup;
-        private System.Windows.Forms.Button buttonDecompile;
-        private System.Windows.Forms.Button buttonDiffTerraria;
-        private System.Windows.Forms.Button buttonPatchTerraria;
-        private System.Windows.Forms.Button buttonPatchModLoader;
-        private System.Windows.Forms.Button buttonPatchNitrate;
-        private System.Windows.Forms.Button buttonDiffModLoader;
-        private System.Windows.Forms.Button buttonDiffNitrate;
-        private System.Windows.Forms.ToolTip toolTipButtons;
-        private System.Windows.Forms.MenuStrip mainMenuStrip;
-        private System.Windows.Forms.ToolStripMenuItem menuItemOptions;
-        private System.Windows.Forms.ToolStripMenuItem menuItemTerraria;
-		private System.Windows.Forms.ToolStripMenuItem resetTimeStampOptimizationsToolStripMenuItem;
-        private System.Windows.Forms.Button buttonRegenSource;
-		private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
-		private System.Windows.Forms.ToolStripMenuItem decompileServerToolStripMenuItem;
-		private System.Windows.Forms.ToolStripMenuItem formatCodeToolStripMenuItem;
-		private System.Windows.Forms.ToolStripMenuItem hookGenToolStripMenuItem;
-		private System.Windows.Forms.ToolStripMenuItem patchToolStripMenuItem;
-		private System.Windows.Forms.ToolStripMenuItem exactToolStripMenuItem;
-		private System.Windows.Forms.ToolStripMenuItem offsetToolStripMenuItem;
-		private System.Windows.Forms.ToolStripMenuItem fuzzyToolStripMenuItem;
-		private System.Windows.Forms.ToolStripMenuItem simplifierToolStripMenuItem;
-		private System.Windows.Forms.ToolStripMenuItem formatDecompiledOutputToolStripMenuItem;
-		private System.Windows.Forms.ToolStripMenuItem menuItemTmlPath;
-		private System.Windows.Forms.Button buttonDiffTerrariaNetCore;
-		private System.Windows.Forms.Button buttonPatchTerrariaNetCore;
-		private System.Windows.Forms.Label labelWorkingDirectory;
+		private Button buttonCancel;
+        private ProgressBar progressBar;
+        private Label labelStatus;
+        private Button buttonSetup;
+        private Button buttonDecompile;
+        private Button buttonDiffTerraria;
+        private Button buttonPatchTerraria;
+        private Button buttonPatchModLoader;
+        private Button buttonPatchNitrate;
+        private Button buttonDiffModLoader;
+        private Button buttonDiffNitrate;
+        private ToolTip toolTipButtons;
+        private MenuStrip mainMenuStrip;
+        private ToolStripMenuItem menuItemOptions;
+        private ToolStripMenuItem menuItemTerraria;
+        private Button buttonRegenSource;
+		private ToolStripMenuItem toolsToolStripMenuItem;
+		private ToolStripMenuItem decompileServerToolStripMenuItem;
+		private ToolStripMenuItem formatCodeToolStripMenuItem;
+		private ToolStripMenuItem hookGenToolStripMenuItem;
+		private ToolStripMenuItem patchToolStripMenuItem;
+		private ToolStripMenuItem exactToolStripMenuItem;
+		private ToolStripMenuItem offsetToolStripMenuItem;
+		private ToolStripMenuItem fuzzyToolStripMenuItem;
+		private ToolStripMenuItem simplifierToolStripMenuItem;
+		private ToolStripMenuItem formatDecompiledOutputToolStripMenuItem;
+		private ToolStripMenuItem menuItemTmlPath;
+		private Button buttonDiffTerrariaNetCore;
+		private Button buttonPatchTerrariaNetCore;
+		private Label labelWorkingDirectory;
 	}
 }
 

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- This file will always be overwritten, do not edit it manually. -->
+  <PropertyGroup>
+	<BranchName>tml-fork</BranchName>
+	<CommitSHA>5a42abcdb9a5e6897d371b27a21861e7025fc884</CommitSHA>
+	<TerrariaSteamPath>C:\Program Files (x86)\Steam\steamapps\common\Terraria</TerrariaSteamPath>
+    <tModLoaderSteamPath>C:\Program Files (x86)\Steam\steamapps\common\tModLoaderDev</tModLoaderSteamPath>
+  </PropertyGroup>
+</Project>
