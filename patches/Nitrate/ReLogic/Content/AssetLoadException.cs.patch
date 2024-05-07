@@ -1,5 +1,5 @@
---- src/staging/tModLoader/ReLogic/Content/AssetLoadException.cs
-+++ src/staging/Nitrate/ReLogic/Content/AssetLoadException.cs
+--- src/tModLoader/ReLogic/Content/AssetLoadException.cs
++++ src/Nitrate/ReLogic/Content/AssetLoadException.cs
 @@ -11,6 +_,8 @@
  	}
  

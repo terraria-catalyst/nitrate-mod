@@ -1,5 +1,5 @@
---- src/staging/tModLoader/Terraria/ModLoader/FrameworkVersion.cs
-+++ src/staging/Nitrate/Terraria/ModLoader/FrameworkVersion.cs
+--- src/tModLoader/Terraria/ModLoader/FrameworkVersion.cs
++++ src/Nitrate/Terraria/ModLoader/FrameworkVersion.cs
 @@ -15,22 +_,12 @@
  
  public static class FrameworkVersion

@@ -1,5 +1,5 @@
---- src/staging/tModLoader/ReLogic/Content/Readers/PngReader.cs
-+++ src/staging/Nitrate/ReLogic/Content/Readers/PngReader.cs
+--- src/tModLoader/ReLogic/Content/Readers/PngReader.cs
++++ src/Nitrate/ReLogic/Content/Readers/PngReader.cs
 @@ -19,45 +_,27 @@
  		_graphicsDevice = graphicsDevice;
  		_colorProcessingCache = new ThreadLocal<Color[]>();

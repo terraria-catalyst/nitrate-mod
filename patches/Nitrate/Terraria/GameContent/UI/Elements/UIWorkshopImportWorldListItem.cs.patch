@@ -1,5 +1,5 @@
---- src/staging/tModLoader/Terraria/GameContent/UI/Elements/UIWorkshopImportWorldListItem.cs
-+++ src/staging/Nitrate/Terraria/GameContent/UI/Elements/UIWorkshopImportWorldListItem.cs
+--- src/tModLoader/Terraria/GameContent/UI/Elements/UIWorkshopImportWorldListItem.cs
++++ src/Nitrate/Terraria/GameContent/UI/Elements/UIWorkshopImportWorldListItem.cs
 @@ -5,6 +_,7 @@
  using Terraria.GameContent.UI.States;
  using Terraria.IO;

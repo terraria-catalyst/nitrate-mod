@@ -1,5 +1,5 @@
---- src/staging/tModLoader/Terraria/ModLoader/Core/AssemblyManager.cs
-+++ src/staging/Nitrate/Terraria/ModLoader/Core/AssemblyManager.cs
+--- src/tModLoader/Terraria/ModLoader/Core/AssemblyManager.cs
++++ src/Nitrate/Terraria/ModLoader/Core/AssemblyManager.cs
 @@ -1,4 +_,3 @@
 -#if NETCORE
  using log4net;

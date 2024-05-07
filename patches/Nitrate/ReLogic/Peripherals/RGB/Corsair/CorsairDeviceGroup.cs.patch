@@ -1,5 +1,5 @@
---- src/staging/tModLoader/ReLogic/Peripherals/RGB/Corsair/CorsairDeviceGroup.cs
-+++ src/staging/Nitrate/ReLogic/Peripherals/RGB/Corsair/CorsairDeviceGroup.cs
+--- src/tModLoader/ReLogic/Peripherals/RGB/Corsair/CorsairDeviceGroup.cs
++++ src/Nitrate/ReLogic/Peripherals/RGB/Corsair/CorsairDeviceGroup.cs
 @@ -17,9 +_,7 @@
  	private readonly List<RgbDevice> _devices = new List<RgbDevice>();
  	private State _state;

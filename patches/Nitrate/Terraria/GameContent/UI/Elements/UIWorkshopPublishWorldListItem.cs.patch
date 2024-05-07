@@ -1,5 +1,5 @@
---- src/staging/tModLoader/Terraria/GameContent/UI/Elements/UIWorkshopPublishWorldListItem.cs
-+++ src/staging/Nitrate/Terraria/GameContent/UI/Elements/UIWorkshopPublishWorldListItem.cs
+--- src/tModLoader/Terraria/GameContent/UI/Elements/UIWorkshopPublishWorldListItem.cs
++++ src/Nitrate/Terraria/GameContent/UI/Elements/UIWorkshopPublishWorldListItem.cs
 @@ -4,6 +_,7 @@
  using Terraria.GameContent.UI.States;
  using Terraria.IO;

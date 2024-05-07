@@ -1,5 +1,5 @@
---- src/staging/tModLoader/Terraria/ModLoader/Engine/ServerHangWatchdog.cs
-+++ src/staging/Nitrate/Terraria/ModLoader/Engine/ServerHangWatchdog.cs
+--- src/tModLoader/Terraria/ModLoader/Engine/ServerHangWatchdog.cs
++++ src/Nitrate/Terraria/ModLoader/Engine/ServerHangWatchdog.cs
 @@ -34,72 +_,10 @@
  			Thread.Sleep(1000);
  			if (DateTime.Now - lastCheckin.Value > TIMEOUT) {

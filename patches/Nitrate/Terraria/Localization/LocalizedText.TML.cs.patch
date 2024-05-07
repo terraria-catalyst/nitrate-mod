@@ -1,5 +1,5 @@
---- src/staging/tModLoader/Terraria/Localization/LocalizedText.TML.cs
-+++ src/staging/Nitrate/Terraria/Localization/LocalizedText.TML.cs
+--- src/tModLoader/Terraria/Localization/LocalizedText.TML.cs
++++ src/Nitrate/Terraria/Localization/LocalizedText.TML.cs
 @@ -25,6 +_,9 @@
  	//   other
  	public static int CardinalPluralRule(GameCulture culture, int count)

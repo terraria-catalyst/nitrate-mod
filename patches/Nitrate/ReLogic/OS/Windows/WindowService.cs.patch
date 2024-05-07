@@ -1,5 +1,5 @@
---- src/staging/tModLoader/ReLogic/OS/Windows/WindowService.cs
-+++ src/staging/Nitrate/ReLogic/OS/Windows/WindowService.cs
+--- src/tModLoader/ReLogic/OS/Windows/WindowService.cs
++++ src/Nitrate/ReLogic/OS/Windows/WindowService.cs
 @@ -10,11 +_,7 @@
  	public float GetScaling()
  	{

@@ -76,7 +76,13 @@ internal sealed class DiffTask(ITaskInterface taskInterface, string baseDir, str
 		if (!patchFile.IsEmpty)
 		{
 			CreateParentDirectory(patchPath);
-			File.WriteAllText(patchPath, patchFile.ToString(true));
+			
+			// NITRATE PATCH: Handle unique circumstances for our directories.
+			var fileText = patchFile.ToString(true);
+			fileText = fileText.Replace("--- src/staging/", "--- src/");
+			fileText = fileText.Replace("+++ src/staging/", "+++ src/");
+			
+			File.WriteAllText(patchPath, fileText);
 		}
 		else
 		{

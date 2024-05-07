@@ -1,5 +1,5 @@
---- src/staging/tModLoader/Terraria/Netplay.cs
-+++ src/staging/Nitrate/Terraria/Netplay.cs
+--- src/tModLoader/Terraria/Netplay.cs
++++ src/Nitrate/Terraria/Netplay.cs
 @@ -791,11 +_,7 @@
  			array = memoryStream.ToArray();
  		}

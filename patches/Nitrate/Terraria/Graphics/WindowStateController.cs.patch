@@ -1,5 +1,5 @@
---- src/staging/tModLoader/Terraria/Graphics/WindowStateController.cs
-+++ src/staging/Nitrate/Terraria/Graphics/WindowStateController.cs
+--- src/tModLoader/Terraria/Graphics/WindowStateController.cs
++++ src/Nitrate/Terraria/Graphics/WindowStateController.cs
 @@ -1,70 +_,9 @@
 -#if !NETCORE
 -using System.Drawing;

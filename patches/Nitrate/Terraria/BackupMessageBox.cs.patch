@@ -1,5 +1,5 @@
---- src/staging/tModLoader/Terraria/BackupMessageBox.cs
-+++ src/staging/Nitrate/Terraria/BackupMessageBox.cs
+--- src/tModLoader/Terraria/BackupMessageBox.cs
++++ src/Nitrate/Terraria/BackupMessageBox.cs
 @@ -1,4 +_,3 @@
 -#if NETCORE
  using SDL2;

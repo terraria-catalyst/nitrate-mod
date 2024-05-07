@@ -1,5 +1,5 @@
---- src/staging/tModLoader/Terraria/ModLoader/UI/UICommon.cs
-+++ src/staging/Nitrate/Terraria/ModLoader/UI/UICommon.cs
+--- src/tModLoader/Terraria/ModLoader/UI/UICommon.cs
++++ src/Nitrate/Terraria/ModLoader/UI/UICommon.cs
 @@ -8,6 +_,7 @@
  using Terraria.GameContent.UI.Elements;
  using Terraria.ID;

@@ -1,5 +1,5 @@
---- src/staging/tModLoader/Terraria/Lang.cs
-+++ src/staging/Nitrate/Terraria/Lang.cs
+--- src/tModLoader/Terraria/Lang.cs
++++ src/Nitrate/Terraria/Lang.cs
 @@ -9,6 +_,7 @@
  using Terraria.Localization;
  using Terraria.Map;

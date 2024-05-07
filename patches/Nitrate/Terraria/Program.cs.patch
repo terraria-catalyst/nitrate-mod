@@ -1,5 +1,5 @@
---- src/staging/tModLoader/Terraria/Program.cs
-+++ src/staging/Nitrate/Terraria/Program.cs
+--- src/tModLoader/Terraria/Program.cs
++++ src/Nitrate/Terraria/Program.cs
 @@ -23,13 +_,8 @@
  
  public static partial class Program

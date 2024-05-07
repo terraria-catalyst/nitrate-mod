@@ -1,5 +1,5 @@
---- src/staging/tModLoader/Terraria/Main.TML.cs
-+++ src/staging/Nitrate/Terraria/Main.TML.cs
+--- src/tModLoader/Terraria/Main.TML.cs
++++ src/Nitrate/Terraria/Main.TML.cs
 @@ -25,6 +_,8 @@
  using Terraria.ModLoader.Config;
  using System.Net.Http;

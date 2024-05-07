@@ -1,5 +1,5 @@
---- src/staging/tModLoader/ReLogic/Peripherals/RGB/Razer/RazerDeviceGroup.cs
-+++ src/staging/Nitrate/ReLogic/Peripherals/RGB/Razer/RazerDeviceGroup.cs
+--- src/tModLoader/ReLogic/Peripherals/RGB/Razer/RazerDeviceGroup.cs
++++ src/Nitrate/ReLogic/Peripherals/RGB/Razer/RazerDeviceGroup.cs
 @@ -10,9 +_,7 @@
  	private readonly List<RgbDevice> _devices = new List<RgbDevice>();
  	private bool _isInitialized;

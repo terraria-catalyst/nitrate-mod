@@ -1,5 +1,5 @@
---- src/staging/tModLoader/Terraria/Social/Steam/SteamedWraps.cs
-+++ src/staging/Nitrate/Terraria/Social/Steam/SteamedWraps.cs
+--- src/tModLoader/Terraria/Social/Steam/SteamedWraps.cs
++++ src/Nitrate/Terraria/Social/Steam/SteamedWraps.cs
 @@ -12,6 +_,7 @@
  using Terraria.ModLoader.UI;
  using Terraria.ModLoader.UI.DownloadManager;

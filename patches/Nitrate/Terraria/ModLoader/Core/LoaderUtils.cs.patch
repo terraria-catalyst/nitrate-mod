@@ -1,5 +1,5 @@
---- src/staging/tModLoader/Terraria/ModLoader/Core/LoaderUtils.cs
-+++ src/staging/Nitrate/Terraria/ModLoader/Core/LoaderUtils.cs
+--- src/tModLoader/Terraria/ModLoader/Core/LoaderUtils.cs
++++ src/Nitrate/Terraria/ModLoader/Core/LoaderUtils.cs
 @@ -83,7 +_,6 @@
  	/// <summary> Calls static constructors on the provided type and, optionally, its nested types. </summary>
  	public static void ResetStaticMembers(Type type, bool recursive = true)

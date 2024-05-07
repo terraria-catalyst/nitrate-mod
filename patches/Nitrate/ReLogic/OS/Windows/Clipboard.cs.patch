@@ -1,5 +1,5 @@
---- src/staging/tModLoader/ReLogic/OS/Windows/Clipboard.cs
-+++ src/staging/Nitrate/ReLogic/OS/Windows/Clipboard.cs
+--- src/tModLoader/ReLogic/OS/Windows/Clipboard.cs
++++ src/Nitrate/ReLogic/OS/Windows/Clipboard.cs
 @@ -1,9 +_,5 @@
  using System;
  using System.Threading;
