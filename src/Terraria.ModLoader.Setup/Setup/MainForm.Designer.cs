@@ -71,7 +71,7 @@ namespace Terraria.ModLoader.Setup
 			buttonCancel.Anchor = AnchorStyles.Bottom;
 			buttonCancel.DialogResult = DialogResult.Cancel;
 			buttonCancel.Enabled = false;
-			buttonCancel.Location = new Point(158, 486);
+			buttonCancel.Location = new Point(145, 526);
 			buttonCancel.Margin = new Padding(4, 3, 4, 3);
 			buttonCancel.Name = "buttonCancel";
 			buttonCancel.Size = new Size(96, 27);
@@ -83,29 +83,30 @@ namespace Terraria.ModLoader.Setup
 			// progressBar
 			// 
 			progressBar.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-			progressBar.Location = new Point(14, 452);
+			progressBar.Location = new Point(14, 493);
 			progressBar.Margin = new Padding(4, 3, 4, 3);
 			progressBar.Name = "progressBar";
-			progressBar.Size = new Size(379, 27);
+			progressBar.Size = new Size(356, 27);
 			progressBar.TabIndex = 1;
 			// 
 			// labelStatus
 			// 
 			labelStatus.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
-			labelStatus.Location = new Point(14, 246);
+			labelStatus.BorderStyle = BorderStyle.Fixed3D;
+			labelStatus.Location = new Point(13, 253);
 			labelStatus.Margin = new Padding(4, 0, 4, 0);
 			labelStatus.Name = "labelStatus";
-			labelStatus.Size = new Size(377, 202);
+			labelStatus.Size = new Size(356, 228);
 			labelStatus.TabIndex = 3;
 			labelStatus.TextAlign = ContentAlignment.BottomLeft;
 			// 
 			// buttonSetup
 			// 
 			buttonSetup.Anchor = AnchorStyles.Top;
-			buttonSetup.Location = new Point(52, 48);
+			buttonSetup.Location = new Point(38, 49);
 			buttonSetup.Margin = new Padding(4, 3, 4, 3);
 			buttonSetup.Name = "buttonSetup";
-			buttonSetup.Size = new Size(150, 27);
+			buttonSetup.Size = new Size(150, 26);
 			buttonSetup.TabIndex = 0;
 			buttonSetup.Text = "Setup";
 			toolTipButtons.SetToolTip(buttonSetup, "Complete environment setup for working on tModLoader source\r\nEquivalent to Decompile+Patch+SetupDebug\r\nEdit the source in src/staging/tModLoader then run Diff tModLoader and commit the /patches folder");
@@ -116,10 +117,10 @@ namespace Terraria.ModLoader.Setup
 			// 
 			buttonDecompile.Anchor = AnchorStyles.Top;
 			buttonDecompile.DialogResult = DialogResult.Cancel;
-			buttonDecompile.Location = new Point(210, 48);
+			buttonDecompile.Location = new Point(196, 49);
 			buttonDecompile.Margin = new Padding(4, 3, 4, 3);
 			buttonDecompile.Name = "buttonDecompile";
-			buttonDecompile.Size = new Size(150, 27);
+			buttonDecompile.Size = new Size(150, 26);
 			buttonDecompile.TabIndex = 1;
 			buttonDecompile.Text = "Decompile";
 			toolTipButtons.SetToolTip(buttonDecompile, "Uses ILSpy to decompile Terraria\r\nAlso decompiles server classes not included in the client binary\r\nOutputs to src/staging/decompiled");
@@ -130,10 +131,10 @@ namespace Terraria.ModLoader.Setup
 			// 
 			buttonDiffTerraria.Anchor = AnchorStyles.Top;
 			buttonDiffTerraria.DialogResult = DialogResult.Cancel;
-			buttonDiffTerraria.Location = new Point(52, 82);
+			buttonDiffTerraria.Location = new Point(38, 117);
 			buttonDiffTerraria.Margin = new Padding(4, 3, 4, 3);
 			buttonDiffTerraria.Name = "buttonDiffTerraria";
-			buttonDiffTerraria.Size = new Size(150, 27);
+			buttonDiffTerraria.Size = new Size(150, 26);
 			buttonDiffTerraria.TabIndex = 2;
 			buttonDiffTerraria.Text = "Diff Terraria";
 			toolTipButtons.SetToolTip(buttonDiffTerraria, "Recalculates the Terraria patches\r\nDiffs the src/staging/Terraria directory\r\nUsed for fixing decompilation errors\r\n");
@@ -144,10 +145,10 @@ namespace Terraria.ModLoader.Setup
 			// 
 			buttonPatchTerraria.Anchor = AnchorStyles.Top;
 			buttonPatchTerraria.DialogResult = DialogResult.Cancel;
-			buttonPatchTerraria.Location = new Point(210, 82);
+			buttonPatchTerraria.Location = new Point(196, 117);
 			buttonPatchTerraria.Margin = new Padding(4, 3, 4, 3);
 			buttonPatchTerraria.Name = "buttonPatchTerraria";
-			buttonPatchTerraria.Size = new Size(150, 27);
+			buttonPatchTerraria.Size = new Size(150, 26);
 			buttonPatchTerraria.TabIndex = 3;
 			buttonPatchTerraria.Text = "Patch Terraria";
 			toolTipButtons.SetToolTip(buttonPatchTerraria, "Applies patches to fix decompile errors\r\nLeaves functionality unchanged\r\nPatched source is located in src/staging/Terraria");
@@ -158,10 +159,10 @@ namespace Terraria.ModLoader.Setup
 			// 
 			buttonPatchModLoader.Anchor = AnchorStyles.Top;
 			buttonPatchModLoader.DialogResult = DialogResult.Cancel;
-			buttonPatchModLoader.Location = new Point(210, 149);
+			buttonPatchModLoader.Location = new Point(196, 183);
 			buttonPatchModLoader.Margin = new Padding(4, 3, 4, 3);
 			buttonPatchModLoader.Name = "buttonPatchModLoader";
-			buttonPatchModLoader.Size = new Size(150, 27);
+			buttonPatchModLoader.Size = new Size(150, 26);
 			buttonPatchModLoader.TabIndex = 6;
 			buttonPatchModLoader.Text = "Patch tModLoader";
 			toolTipButtons.SetToolTip(buttonPatchModLoader, "Applies tModLoader patches to Terraria\r\nEdit the source code in src/staging/tModLoader after this phase\r\nInternally formats the Terraria sources before patching");
@@ -172,10 +173,10 @@ namespace Terraria.ModLoader.Setup
 			// 
 			buttonDiffModLoader.Anchor = AnchorStyles.Top;
 			buttonDiffModLoader.DialogResult = DialogResult.Cancel;
-			buttonDiffModLoader.Location = new Point(52, 149);
+			buttonDiffModLoader.Location = new Point(38, 183);
 			buttonDiffModLoader.Margin = new Padding(4, 3, 4, 3);
 			buttonDiffModLoader.Name = "buttonDiffModLoader";
-			buttonDiffModLoader.Size = new Size(150, 27);
+			buttonDiffModLoader.Size = new Size(150, 26);
 			buttonDiffModLoader.TabIndex = 7;
 			buttonDiffModLoader.Text = "Diff tModLoader";
 			toolTipButtons.SetToolTip(buttonDiffModLoader, resources.GetString("buttonDiffModLoader.ToolTip"));
@@ -186,10 +187,10 @@ namespace Terraria.ModLoader.Setup
 			// 
 			buttonPatchNitrate.Anchor = AnchorStyles.Top;
 			buttonPatchNitrate.DialogResult = DialogResult.Cancel;
-			buttonPatchNitrate.Location = new Point(210, 181);
+			buttonPatchNitrate.Location = new Point(196, 215);
 			buttonPatchNitrate.Margin = new Padding(4, 3, 4, 3);
 			buttonPatchNitrate.Name = "buttonPatchNitrate";
-			buttonPatchNitrate.Size = new Size(150, 27);
+			buttonPatchNitrate.Size = new Size(150, 26);
 			buttonPatchNitrate.TabIndex = 8;
 			buttonPatchNitrate.Text = "Patch Nitrate";
 			toolTipButtons.SetToolTip(buttonPatchNitrate, "Apply Nitrate patches");
@@ -200,10 +201,10 @@ namespace Terraria.ModLoader.Setup
 			// 
 			buttonDiffNitrate.Anchor = AnchorStyles.Top;
 			buttonDiffNitrate.DialogResult = DialogResult.Cancel;
-			buttonDiffNitrate.Location = new Point(52, 181);
+			buttonDiffNitrate.Location = new Point(38, 215);
 			buttonDiffNitrate.Margin = new Padding(4, 3, 4, 3);
 			buttonDiffNitrate.Name = "buttonDiffNitrate";
-			buttonDiffNitrate.Size = new Size(150, 27);
+			buttonDiffNitrate.Size = new Size(150, 26);
 			buttonDiffNitrate.TabIndex = 9;
 			buttonDiffNitrate.Text = "Diff Nitrate";
 			toolTipButtons.SetToolTip(buttonDiffNitrate, "Diff Nitrate patches");
@@ -222,7 +223,7 @@ namespace Terraria.ModLoader.Setup
 			// 
 			buttonRegenSource.Anchor = AnchorStyles.Top;
 			buttonRegenSource.DialogResult = DialogResult.Cancel;
-			buttonRegenSource.Location = new Point(52, 216);
+			buttonRegenSource.Location = new Point(38, 81);
 			buttonRegenSource.Margin = new Padding(4, 3, 4, 3);
 			buttonRegenSource.Name = "buttonRegenSource";
 			buttonRegenSource.Size = new Size(308, 27);
@@ -236,10 +237,10 @@ namespace Terraria.ModLoader.Setup
 			// 
 			buttonDiffTerrariaNetCore.Anchor = AnchorStyles.Top;
 			buttonDiffTerrariaNetCore.DialogResult = DialogResult.Cancel;
-			buttonDiffTerrariaNetCore.Location = new Point(52, 116);
+			buttonDiffTerrariaNetCore.Location = new Point(38, 150);
 			buttonDiffTerrariaNetCore.Margin = new Padding(4, 3, 4, 3);
 			buttonDiffTerrariaNetCore.Name = "buttonDiffTerrariaNetCore";
-			buttonDiffTerrariaNetCore.Size = new Size(150, 27);
+			buttonDiffTerrariaNetCore.Size = new Size(150, 26);
 			buttonDiffTerrariaNetCore.TabIndex = 4;
 			buttonDiffTerrariaNetCore.Text = "Diff TerrariaNetCore";
 			toolTipButtons.SetToolTip(buttonDiffTerrariaNetCore, "Recalculates the Terraria patches\r\nDiffs the src/staging/Terraria directory\r\nUsed for fixing decompilation errors\r\n");
@@ -250,10 +251,10 @@ namespace Terraria.ModLoader.Setup
 			// 
 			buttonPatchTerrariaNetCore.Anchor = AnchorStyles.Top;
 			buttonPatchTerrariaNetCore.DialogResult = DialogResult.Cancel;
-			buttonPatchTerrariaNetCore.Location = new Point(210, 116);
+			buttonPatchTerrariaNetCore.Location = new Point(196, 150);
 			buttonPatchTerrariaNetCore.Margin = new Padding(4, 3, 4, 3);
 			buttonPatchTerrariaNetCore.Name = "buttonPatchTerrariaNetCore";
-			buttonPatchTerrariaNetCore.Size = new Size(150, 27);
+			buttonPatchTerrariaNetCore.Size = new Size(150, 26);
 			buttonPatchTerrariaNetCore.TabIndex = 5;
 			buttonPatchTerrariaNetCore.Text = "Patch TerrariaNetCore";
 			toolTipButtons.SetToolTip(buttonPatchTerrariaNetCore, "Applies patches to fix decompile errors\r\nLeaves functionality unchanged\r\nPatched source is located in src/staging/Terraria");
@@ -266,7 +267,7 @@ namespace Terraria.ModLoader.Setup
 			mainMenuStrip.Location = new Point(0, 0);
 			mainMenuStrip.Name = "mainMenuStrip";
 			mainMenuStrip.Padding = new Padding(7, 2, 0, 2);
-			mainMenuStrip.Size = new Size(407, 24);
+			mainMenuStrip.Size = new Size(384, 24);
 			mainMenuStrip.TabIndex = 9;
 			mainMenuStrip.Text = "menuStrip1";
 			mainMenuStrip.ItemClicked += mainMenuStrip_ItemClicked;
@@ -365,16 +366,17 @@ namespace Terraria.ModLoader.Setup
 			// labelWorkingDirectory
 			// 
 			labelWorkingDirectory.AutoEllipsis = true;
-			labelWorkingDirectory.Location = new Point(126, 30);
+			labelWorkingDirectory.BorderStyle = BorderStyle.Fixed3D;
+			labelWorkingDirectory.Location = new Point(119, 24);
 			labelWorkingDirectory.Name = "labelWorkingDirectory";
-			labelWorkingDirectory.Size = new Size(265, 15);
+			labelWorkingDirectory.Size = new Size(251, 18);
 			labelWorkingDirectory.TabIndex = 12;
 			labelWorkingDirectory.Text = "Working Directory Here";
 			// 
 			// label1
 			// 
 			label1.AutoSize = true;
-			label1.Location = new Point(14, 30);
+			label1.Location = new Point(12, 24);
 			label1.Name = "label1";
 			label1.Size = new Size(106, 15);
 			label1.TabIndex = 13;
@@ -384,9 +386,9 @@ namespace Terraria.ModLoader.Setup
 			// 
 			AutoScaleDimensions = new SizeF(7F, 15F);
 			AutoScaleMode = AutoScaleMode.Font;
-			ClientSize = new Size(407, 526);
-			Controls.Add(labelWorkingDirectory);
+			ClientSize = new Size(384, 561);
 			Controls.Add(label1);
+			Controls.Add(labelWorkingDirectory);
 			Controls.Add(buttonPatchTerrariaNetCore);
 			Controls.Add(buttonDiffTerrariaNetCore);
 			Controls.Add(buttonDiffModLoader);
