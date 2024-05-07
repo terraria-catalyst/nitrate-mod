@@ -79,8 +79,14 @@ internal sealed class DiffTask(ITaskInterface taskInterface, string baseDir, str
 			
 			// NITRATE PATCH: Handle unique circumstances for our directories.
 			var fileText = patchFile.ToString(true);
-			fileText = fileText.Replace("--- src/staging/", "--- src/");
-			fileText = fileText.Replace("+++ src/staging/", "+++ src/");
+			var lineEnding = fileText.Contains("\r\n") ? "\r\n" : "\n";
+			var textParts = fileText.Split(lineEnding);
+			if (textParts.Length >= 2)
+			{
+				textParts[0] = textParts[0].Replace("--- src/staging/", "--- src/");
+				textParts[1] = textParts[1].Replace("+++ src/staging/", "+++ src/");
+				fileText = string.Join(lineEnding, textParts);
+			}
 			
 			File.WriteAllText(patchPath, fileText);
 		}
