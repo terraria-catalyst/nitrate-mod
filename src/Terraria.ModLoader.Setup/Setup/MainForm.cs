@@ -66,6 +66,9 @@ public partial class MainForm : Form, ITaskInterface
 			args.Cancel = true;
 			closeOnCancel = true;
 		};
+		
+		FormBorderStyle = FormBorderStyle.FixedSingle;
+		MaximizeBox = false;
 	}
 	
 	public void SetMaxProgress(int max)
