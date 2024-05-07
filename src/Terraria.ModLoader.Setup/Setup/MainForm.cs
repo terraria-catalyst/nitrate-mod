@@ -9,57 +9,14 @@ using Terraria.ModLoader.Properties;
 
 using static Terraria.ModLoader.Setup.Program;
 
-using Timer = System.Windows.Forms.Timer;
-
 namespace Terraria.ModLoader.Setup;
 
 public partial class MainForm : Form, ITaskInterface
 {
-	private class MarqueeWrapper(Label label)
-	{
-		private enum Stage
-		{
-			WaitLeft,
-			ShiftRight,
-			WaitRight,
-			ShiftLeft,
-		}
-		
-		private readonly Timer timer = new()
-		{
-			Interval = 10,
-		};
-		
-		private Stage stage = Stage.WaitLeft;
-		private int position;
-		
-		public void Apply()
-		{
-			timer.Tick += (_, _) =>
-			{
-				Tick();
-			};
-			
-			timer.Start();
-		}
-		
-		private void Tick()
-		{
-			position -= 2;
-			if (Math.Abs(position) > label.Width)
-			{
-				position = label.Width;
-			}
-			
-			label.Padding = new Padding(-1000, 0, 0, 0);
-		}
-	}
-	
 	private CancellationTokenSource cancelSource;
 	
 	private bool closeOnCancel;
 	private readonly IDictionary<Button, Func<SetupOperation>> taskButtons = new Dictionary<Button, Func<SetupOperation>>();
-	private MarqueeWrapper marqueeWrapperLabelWorkingDirectory;
 	
 	public MainForm()
 	{
@@ -112,9 +69,6 @@ public partial class MainForm : Form, ITaskInterface
 		
 		FormBorderStyle = FormBorderStyle.FixedSingle;
 		MaximizeBox = false;
-		
-		marqueeWrapperLabelWorkingDirectory = new MarqueeWrapper(labelWorkingDirectory);
-		marqueeWrapperLabelWorkingDirectory.Apply();
 	}
 	
 	public void SetMaxProgress(int max)
