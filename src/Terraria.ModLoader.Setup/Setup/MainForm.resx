@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
+  <!--
     Microsoft ResX Schema 
-    
+
     Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
     associated with the data types.
-    
+
     Example:
-    
+
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-                
-    There are any number of "resheader" rows that contain simple 
+
+    There are any number of "resheader" rows that contain simple
     name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
     mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
     extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
     read any of the formats listed below.
-    
+
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
     
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
+    value   : The object must be serialized into a byte array
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -117,27 +117,97 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <data name="toolTipButtons.TrayLocation" type="System.Drawing.Point, System.Drawing">
+  <metadata name="toolTipButtons.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
-  </data>
+  </metadata>
   <data name="buttonDiffModLoader.ToolTip" xml:space="preserve">
     <value>Recalculates the tModLoader patches
 Diffs the src/staging/Terraria and src/staging/tModLoader directories
 Use this after making changes then commit the patches directory to the git
-Internally formats the Terraria sources before diffing
-
-</value>
+Internally formats the Terraria sources before diffing</value>
   </data>
-  <data name="mainMenuStrip.TrayLocation" type="System.Drawing.Point, System.Drawing">
+  <metadata name="mainMenuStrip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>149, 17</value>
-  </data>
-  <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="$this.TrayHeight" type="System.Int32, mscorlib">
+  </metadata>
+  <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>58</value>
-  </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>icon.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </metadata>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        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
+        LpD+H1xLdyMNudztAAAAAElFTkSuQmCC
+</value>
   </data>
 </root>
