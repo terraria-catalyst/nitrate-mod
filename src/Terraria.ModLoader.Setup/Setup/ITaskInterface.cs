@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.Threading;
-using System.Windows.Forms;
 
 namespace Terraria.ModLoader.Setup;
 
-internal interface ITaskInterface : IWin32Window
+internal interface ITaskInterface
 {
 	void SetMaxProgress(int max);
 	
