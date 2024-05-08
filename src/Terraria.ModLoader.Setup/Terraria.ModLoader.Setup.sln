@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32319.34
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Terraria.ModLoader.Setup", "Terraria.ModLoader.Setup.csproj", "{ECAD06B8-1A3B-4288-A02C-198A198EF98E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PatchReviewer", "..\Terraria.ModLoader\setup\PatchReviewer\PatchReviewer.csproj", "{9D718961-CCBA-48D8-A4BD-D77593D591A2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatchReviewer", "..\Terraria.ModLoader\setup\PatchReviewer\PatchReviewer.csproj", "{9D718961-CCBA-48D8-A4BD-D77593D591A2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiffPatch", "..\Terraria.ModLoader\setup\PatchReviewer\DiffPatch\DiffPatch.csproj", "{E38B9EC9-DF0A-4166-B965-06800DD50CDD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiffPatch", "..\Terraria.ModLoader\setup\PatchReviewer\DiffPatch\DiffPatch.csproj", "{E38B9EC9-DF0A-4166-B965-06800DD50CDD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Terraria.ModLoader.Setup.Common", "Terraria.ModLoader.Setup.Common\Terraria.ModLoader.Setup.Common.csproj", "{826319C1-2911-4945-8784-3CAE8FED7369}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Terraria.ModLoader.Setup", "Terraria.ModLoader.Setup\Terraria.ModLoader.Setup.csproj", "{8A48B96A-F055-4A12-AA6E-A9AF3A67DA12}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,10 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{ECAD06B8-1A3B-4288-A02C-198A198EF98E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ECAD06B8-1A3B-4288-A02C-198A198EF98E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ECAD06B8-1A3B-4288-A02C-198A198EF98E}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{ECAD06B8-1A3B-4288-A02C-198A198EF98E}.Release|Any CPU.Build.0 = Debug|Any CPU
 		{9D718961-CCBA-48D8-A4BD-D77593D591A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9D718961-CCBA-48D8-A4BD-D77593D591A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9D718961-CCBA-48D8-A4BD-D77593D591A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -27,6 +25,14 @@ Global
 		{E38B9EC9-DF0A-4166-B965-06800DD50CDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E38B9EC9-DF0A-4166-B965-06800DD50CDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E38B9EC9-DF0A-4166-B965-06800DD50CDD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{826319C1-2911-4945-8784-3CAE8FED7369}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{826319C1-2911-4945-8784-3CAE8FED7369}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{826319C1-2911-4945-8784-3CAE8FED7369}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{826319C1-2911-4945-8784-3CAE8FED7369}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A48B96A-F055-4A12-AA6E-A9AF3A67DA12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A48B96A-F055-4A12-AA6E-A9AF3A67DA12}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A48B96A-F055-4A12-AA6E-A9AF3A67DA12}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A48B96A-F055-4A12-AA6E-A9AF3A67DA12}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

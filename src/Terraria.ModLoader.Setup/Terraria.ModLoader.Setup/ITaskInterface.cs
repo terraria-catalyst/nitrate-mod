@@ -5,13 +5,13 @@ namespace Terraria.ModLoader.Setup;
 
 internal interface ITaskInterface
 {
+	CancellationToken CancellationToken { get; }
+
 	void SetMaxProgress(int max);
 	
 	void SetStatus(string status);
 	
 	void SetProgress(int progress);
-	
-	CancellationToken CancellationToken { get; }
 	
 	object Invoke(Delegate action);
 }

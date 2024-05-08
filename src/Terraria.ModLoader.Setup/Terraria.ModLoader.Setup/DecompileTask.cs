@@ -19,9 +19,11 @@ using ICSharpCode.Decompiler.CSharp.Transforms;
 using ICSharpCode.Decompiler.Metadata;
 using ICSharpCode.Decompiler.TypeSystem;
 
-using Terraria.ModLoader.Properties;
+using Terraria.ModLoader.Setup.Properties;
 
 using static Terraria.ModLoader.Setup.Program;
+
+using Settings = Terraria.ModLoader.Setup.Properties.Settings;
 
 namespace Terraria.ModLoader.Setup;
 

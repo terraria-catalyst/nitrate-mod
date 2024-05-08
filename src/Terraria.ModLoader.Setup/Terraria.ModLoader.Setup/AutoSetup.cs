@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -10,13 +10,6 @@ internal sealed class AutoSetup : ITaskInterface
 	private CancellationTokenSource cancelSource;
 	
 	public CancellationToken CancellationToken => cancelSource.Token;
-	
-	public nint Handle => throw new NotImplementedException();
-	
-	public IAsyncResult BeginInvoke(Delegate action)
-	{
-		throw new NotImplementedException();
-	}
 	
 	public object Invoke(Delegate action)
 	{

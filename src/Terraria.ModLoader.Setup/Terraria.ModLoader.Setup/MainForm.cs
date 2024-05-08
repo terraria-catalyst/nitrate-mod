@@ -5,9 +5,11 @@ using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 
-using Terraria.ModLoader.Properties;
+using Terraria.ModLoader.Setup.Properties;
 
 using static Terraria.ModLoader.Setup.Program;
+
+using Settings = Terraria.ModLoader.Setup.Properties.Settings;
 
 namespace Terraria.ModLoader.Setup;
 
@@ -21,11 +23,12 @@ public partial class MainForm : Form, ITaskInterface
 	{
 		FormBorderStyle = FormBorderStyle.FixedSingle;
 		MaximizeBox = false;
-
+		
 		InitializeComponent();
 		
 		labelWorkingDirectoryDisplay.Text = Directory.GetCurrentDirectory();
 		
+#region Task button initialization
 		taskButtons[buttonDecompile] = () => new DecompileTask(this, "src/staging/decompiled");
 		// Terraria
 		taskButtons[buttonDiffTerraria] = () => new DiffTask(this, "src/staging/decompiled", "src/staging/Terraria", "patches/Terraria");
@@ -57,6 +60,7 @@ public partial class MainForm : Form, ITaskInterface
 					.Select(b => taskButtons[b]()).ToArray()
 			);
 		};
+#endregion
 		
 		SetPatchMode(Settings.Default.PatchMode);
 		formatDecompiledOutputToolStripMenuItem.Checked = Settings.Default.FormatAfterDecompiling;
@@ -73,6 +77,9 @@ public partial class MainForm : Form, ITaskInterface
 			closeOnCancel = true;
 		};
 	}
+	
+#region ITaskInterface implementation
+	public CancellationToken CancellationToken => cancelSource.Token;
 	
 	public void SetMaxProgress(int value)
 	{
@@ -103,8 +110,7 @@ public partial class MainForm : Form, ITaskInterface
 			}
 		);
 	}
-	
-	public CancellationToken CancellationToken => cancelSource.Token;
+#endregion
 	
 	private void buttonCancel_Click(object sender, EventArgs e)
 	{

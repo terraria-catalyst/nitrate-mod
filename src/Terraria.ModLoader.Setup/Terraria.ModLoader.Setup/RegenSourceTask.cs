@@ -1,6 +1,8 @@
 using System.Windows.Forms;
 
-using Terraria.ModLoader.Properties;
+using Terraria.ModLoader.Setup.Properties;
+
+using Settings = Terraria.ModLoader.Setup.Properties.Settings;
 
 namespace Terraria.ModLoader.Setup;
 

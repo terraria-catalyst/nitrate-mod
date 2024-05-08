@@ -22,4 +22,4 @@ if NOT ["%errorlevel%"]==["0"] (
 )
 
 echo running setup tool
-dotnet run --project src/Terraria.ModLoader.Setup/Terraria.ModLoader.Setup.csproj -c "Release"
+dotnet run --project src/Terraria.ModLoader.Setup/Terraria.ModLoader.Setup/Terraria.ModLoader.Setup.csproj -c "Release"

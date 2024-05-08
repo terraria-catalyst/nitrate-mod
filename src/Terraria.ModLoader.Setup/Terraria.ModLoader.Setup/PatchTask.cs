@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -11,7 +11,9 @@ using DiffPatch;
 
 using PatchReviewer;
 
-using Terraria.ModLoader.Properties;
+using Terraria.ModLoader.Setup.Properties;
+
+using Settings = Terraria.ModLoader.Setup.Properties.Settings;
 
 namespace Terraria.ModLoader.Setup;
 
