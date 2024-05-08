@@ -75,7 +75,7 @@ namespace Terraria.ModLoader.Setup
 			buttonCancel.Margin = new Padding(4, 3, 4, 3);
 			buttonCancel.Name = "buttonCancel";
 			buttonCancel.Size = new Size(96, 27);
-			buttonCancel.TabIndex = 6;
+			buttonCancel.TabIndex = 14;
 			buttonCancel.Text = "Cancel";
 			buttonCancel.UseVisualStyleBackColor = true;
 			buttonCancel.Click += buttonCancel_Click;
@@ -87,7 +87,7 @@ namespace Terraria.ModLoader.Setup
 			progressBar.Margin = new Padding(4, 3, 4, 3);
 			progressBar.Name = "progressBar";
 			progressBar.Size = new Size(356, 27);
-			progressBar.TabIndex = 1;
+			progressBar.TabIndex = 13;
 			// 
 			// labelStatus
 			// 
@@ -97,7 +97,7 @@ namespace Terraria.ModLoader.Setup
 			labelStatus.Margin = new Padding(4, 0, 4, 0);
 			labelStatus.Name = "labelStatus";
 			labelStatus.Size = new Size(356, 228);
-			labelStatus.TabIndex = 3;
+			labelStatus.TabIndex = 12;
 			labelStatus.TextAlign = ContentAlignment.BottomLeft;
 			// 
 			// buttonSetup
@@ -107,7 +107,7 @@ namespace Terraria.ModLoader.Setup
 			buttonSetup.Margin = new Padding(4, 3, 4, 3);
 			buttonSetup.Name = "buttonSetup";
 			buttonSetup.Size = new Size(150, 26);
-			buttonSetup.TabIndex = 0;
+			buttonSetup.TabIndex = 1;
 			buttonSetup.Text = "Setup";
 			toolTipButtons.SetToolTip(buttonSetup, "Complete environment setup for working on tModLoader source\r\nEquivalent to Decompile+Patch+SetupDebug\r\nEdit the source in src/staging/tModLoader then run Diff tModLoader and commit the /patches folder");
 			buttonSetup.UseVisualStyleBackColor = true;
@@ -121,7 +121,7 @@ namespace Terraria.ModLoader.Setup
 			buttonDecompile.Margin = new Padding(4, 3, 4, 3);
 			buttonDecompile.Name = "buttonDecompile";
 			buttonDecompile.Size = new Size(150, 26);
-			buttonDecompile.TabIndex = 1;
+			buttonDecompile.TabIndex = 2;
 			buttonDecompile.Text = "Decompile";
 			toolTipButtons.SetToolTip(buttonDecompile, "Uses ILSpy to decompile Terraria\r\nAlso decompiles server classes not included in the client binary\r\nOutputs to src/staging/decompiled");
 			buttonDecompile.UseVisualStyleBackColor = true;
@@ -135,7 +135,7 @@ namespace Terraria.ModLoader.Setup
 			buttonDiffTerraria.Margin = new Padding(4, 3, 4, 3);
 			buttonDiffTerraria.Name = "buttonDiffTerraria";
 			buttonDiffTerraria.Size = new Size(150, 26);
-			buttonDiffTerraria.TabIndex = 2;
+			buttonDiffTerraria.TabIndex = 4;
 			buttonDiffTerraria.Text = "Diff Terraria";
 			toolTipButtons.SetToolTip(buttonDiffTerraria, "Recalculates the Terraria patches\r\nDiffs the src/staging/Terraria directory\r\nUsed for fixing decompilation errors\r\n");
 			buttonDiffTerraria.UseVisualStyleBackColor = true;
@@ -149,7 +149,7 @@ namespace Terraria.ModLoader.Setup
 			buttonPatchTerraria.Margin = new Padding(4, 3, 4, 3);
 			buttonPatchTerraria.Name = "buttonPatchTerraria";
 			buttonPatchTerraria.Size = new Size(150, 26);
-			buttonPatchTerraria.TabIndex = 3;
+			buttonPatchTerraria.TabIndex = 5;
 			buttonPatchTerraria.Text = "Patch Terraria";
 			toolTipButtons.SetToolTip(buttonPatchTerraria, "Applies patches to fix decompile errors\r\nLeaves functionality unchanged\r\nPatched source is located in src/staging/Terraria");
 			buttonPatchTerraria.UseVisualStyleBackColor = true;
@@ -163,7 +163,7 @@ namespace Terraria.ModLoader.Setup
 			buttonPatchModLoader.Margin = new Padding(4, 3, 4, 3);
 			buttonPatchModLoader.Name = "buttonPatchModLoader";
 			buttonPatchModLoader.Size = new Size(150, 26);
-			buttonPatchModLoader.TabIndex = 6;
+			buttonPatchModLoader.TabIndex = 9;
 			buttonPatchModLoader.Text = "Patch tModLoader";
 			toolTipButtons.SetToolTip(buttonPatchModLoader, "Applies tModLoader patches to Terraria\r\nEdit the source code in src/staging/tModLoader after this phase\r\nInternally formats the Terraria sources before patching");
 			buttonPatchModLoader.UseVisualStyleBackColor = true;
@@ -177,7 +177,7 @@ namespace Terraria.ModLoader.Setup
 			buttonDiffModLoader.Margin = new Padding(4, 3, 4, 3);
 			buttonDiffModLoader.Name = "buttonDiffModLoader";
 			buttonDiffModLoader.Size = new Size(150, 26);
-			buttonDiffModLoader.TabIndex = 7;
+			buttonDiffModLoader.TabIndex = 8;
 			buttonDiffModLoader.Text = "Diff tModLoader";
 			toolTipButtons.SetToolTip(buttonDiffModLoader, resources.GetString("buttonDiffModLoader.ToolTip"));
 			buttonDiffModLoader.UseVisualStyleBackColor = true;
@@ -191,7 +191,7 @@ namespace Terraria.ModLoader.Setup
 			buttonPatchNitrate.Margin = new Padding(4, 3, 4, 3);
 			buttonPatchNitrate.Name = "buttonPatchNitrate";
 			buttonPatchNitrate.Size = new Size(150, 26);
-			buttonPatchNitrate.TabIndex = 8;
+			buttonPatchNitrate.TabIndex = 11;
 			buttonPatchNitrate.Text = "Patch Nitrate";
 			toolTipButtons.SetToolTip(buttonPatchNitrate, "Apply Nitrate patches");
 			buttonPatchNitrate.UseVisualStyleBackColor = true;
@@ -205,7 +205,7 @@ namespace Terraria.ModLoader.Setup
 			buttonDiffNitrate.Margin = new Padding(4, 3, 4, 3);
 			buttonDiffNitrate.Name = "buttonDiffNitrate";
 			buttonDiffNitrate.Size = new Size(150, 26);
-			buttonDiffNitrate.TabIndex = 9;
+			buttonDiffNitrate.TabIndex = 10;
 			buttonDiffNitrate.Text = "Diff Nitrate";
 			toolTipButtons.SetToolTip(buttonDiffNitrate, "Diff Nitrate patches");
 			buttonDiffNitrate.UseVisualStyleBackColor = true;
@@ -241,7 +241,7 @@ namespace Terraria.ModLoader.Setup
 			buttonDiffTerrariaNetCore.Margin = new Padding(4, 3, 4, 3);
 			buttonDiffTerrariaNetCore.Name = "buttonDiffTerrariaNetCore";
 			buttonDiffTerrariaNetCore.Size = new Size(150, 26);
-			buttonDiffTerrariaNetCore.TabIndex = 4;
+			buttonDiffTerrariaNetCore.TabIndex = 6;
 			buttonDiffTerrariaNetCore.Text = "Diff TerrariaNetCore";
 			toolTipButtons.SetToolTip(buttonDiffTerrariaNetCore, "Recalculates the Terraria patches\r\nDiffs the src/staging/Terraria directory\r\nUsed for fixing decompilation errors\r\n");
 			buttonDiffTerrariaNetCore.UseVisualStyleBackColor = true;
@@ -255,7 +255,7 @@ namespace Terraria.ModLoader.Setup
 			buttonPatchTerrariaNetCore.Margin = new Padding(4, 3, 4, 3);
 			buttonPatchTerrariaNetCore.Name = "buttonPatchTerrariaNetCore";
 			buttonPatchTerrariaNetCore.Size = new Size(150, 26);
-			buttonPatchTerrariaNetCore.TabIndex = 5;
+			buttonPatchTerrariaNetCore.TabIndex = 7;
 			buttonPatchTerrariaNetCore.Text = "Patch TerrariaNetCore";
 			toolTipButtons.SetToolTip(buttonPatchTerrariaNetCore, "Applies patches to fix decompile errors\r\nLeaves functionality unchanged\r\nPatched source is located in src/staging/Terraria");
 			buttonPatchTerrariaNetCore.UseVisualStyleBackColor = true;
@@ -370,7 +370,7 @@ namespace Terraria.ModLoader.Setup
 			labelWorkingDirectory.Location = new Point(119, 24);
 			labelWorkingDirectory.Name = "labelWorkingDirectory";
 			labelWorkingDirectory.Size = new Size(251, 18);
-			labelWorkingDirectory.TabIndex = 12;
+			labelWorkingDirectory.TabIndex = 0;
 			labelWorkingDirectory.Text = "Working Directory Here";
 			// 
 			// label1
