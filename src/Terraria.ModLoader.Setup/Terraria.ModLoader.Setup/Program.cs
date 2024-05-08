@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
-using Terraria.ModLoader.Setup.Properties;
 using Terraria.ModLoader.Setup.Utilities;
 
 using Settings = Terraria.ModLoader.Setup.Properties.Settings;

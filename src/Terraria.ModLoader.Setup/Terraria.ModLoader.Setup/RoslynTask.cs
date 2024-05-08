@@ -8,6 +8,8 @@ using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 
+using Terraria.ModLoader.Setup.Common;
+
 namespace Terraria.ModLoader.Setup;
 
 internal abstract class RoslynTask(ITaskInterface taskInterface) : SetupOperation(taskInterface)

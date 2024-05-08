@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Formatting;
 using Microsoft.CodeAnalysis.Formatting;
 
+using Terraria.ModLoader.Setup.Common;
 using Terraria.ModLoader.Setup.Formatting;
 
 namespace Terraria.ModLoader.Setup;

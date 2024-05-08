@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 using DiffPatch;
+
+using Terraria.ModLoader.Setup.Common;
 
 namespace Terraria.ModLoader.Setup;
 

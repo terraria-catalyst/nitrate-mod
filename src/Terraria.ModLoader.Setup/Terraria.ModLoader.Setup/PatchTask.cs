@@ -11,7 +11,7 @@ using DiffPatch;
 
 using PatchReviewer;
 
-using Terraria.ModLoader.Setup.Properties;
+using Terraria.ModLoader.Setup.Common;
 
 using Settings = Terraria.ModLoader.Setup.Properties.Settings;
 

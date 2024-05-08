@@ -1,4 +1,6 @@
-﻿using System.Windows.Forms;
+using System.Windows.Forms;
+
+using Terraria.ModLoader.Setup.Common;
 
 namespace Terraria.ModLoader.Setup;
 

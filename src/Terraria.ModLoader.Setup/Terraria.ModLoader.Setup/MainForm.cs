@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 
-using Terraria.ModLoader.Setup.Properties;
+using Terraria.ModLoader.Setup.Common;
 
 using static Terraria.ModLoader.Setup.Program;
 

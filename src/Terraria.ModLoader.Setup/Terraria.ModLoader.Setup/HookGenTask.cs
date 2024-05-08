@@ -6,6 +6,8 @@ using Mono.Cecil;
 
 using MonoMod;
 
+using Terraria.ModLoader.Setup.Common;
+
 using HookGenerator = Terraria.ModLoader.Setup.Utilities.HookGenerator;
 
 namespace Terraria.ModLoader.Setup;

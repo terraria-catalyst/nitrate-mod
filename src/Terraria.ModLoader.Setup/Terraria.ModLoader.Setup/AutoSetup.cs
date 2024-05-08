@@ -3,6 +3,8 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 
+using Terraria.ModLoader.Setup.Common;
+
 namespace Terraria.ModLoader.Setup;
 
 internal sealed class AutoSetup : ITaskInterface

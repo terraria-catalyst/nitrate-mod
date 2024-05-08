@@ -1,4 +1,6 @@
-﻿using System.Linq;
+using System.Linq;
+
+using Terraria.ModLoader.Setup.Common;
 
 namespace Terraria.ModLoader.Setup;
 

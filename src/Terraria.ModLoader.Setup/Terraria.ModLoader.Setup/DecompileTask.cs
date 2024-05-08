@@ -19,7 +19,7 @@ using ICSharpCode.Decompiler.CSharp.Transforms;
 using ICSharpCode.Decompiler.Metadata;
 using ICSharpCode.Decompiler.TypeSystem;
 
-using Terraria.ModLoader.Setup.Properties;
+using Terraria.ModLoader.Setup.Common;
 
 using static Terraria.ModLoader.Setup.Program;
 

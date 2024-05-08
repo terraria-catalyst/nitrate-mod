@@ -1,7 +1,9 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Simplification;
+
+using Terraria.ModLoader.Setup.Common;
 
 namespace Terraria.ModLoader.Setup;
 
