@@ -1,16 +1,10 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
-
-using Mono.Cecil.Cil;
-
-using MonoMod.Cil;
-using MonoMod.RuntimeDetour;
 
 using Terraria.ModLoader.Properties;
 using Terraria.ModLoader.Setup.Utilities;
@@ -29,39 +23,49 @@ internal static class Program
 	
 	public static string TerrariaServerPath => Path.Combine(TerrariaSteamDir, "TerrariaServer.exe");
 	
-	private static readonly object hookLock = new();
-	private static ILHook ensureSufficientExecutionStackHook;
+	public static bool IsAutomatic { get; private set; }
 	
 	/// <summary>
 	/// The main entry point for the application.
 	/// </summary>
 	[STAThread]
-	private static void Main()
+	private static void Main(string[] args)
 	{
+		IsAutomatic = args.Contains("--auto");
+
 		CreateSymlinks();
-		HookSufficientExecutionStack();
 		
 		Application.EnableVisualStyles();
 		Application.SetCompatibleTextRenderingDefault(false);
 		
-#if AUTO
+		if (IsAutomatic)
+		{
 			Settings.Default.TerrariaSteamDir = Path.GetFullPath(args[0]);
 			Settings.Default.TMLDevSteamDir = Path.GetFullPath("steam_build");
-
-			if (!Directory.Exists(TMLDevSteamDir))
-				Directory.CreateDirectory(TMLDevSteamDir);
-#else
-		FindTerrariaDirectoryIfNecessary();
-		CreateTmlSteamDirIfNecessary();
-#endif
+			
+			if (!Directory.Exists(TmlDevSteamDir))
+			{
+				Directory.CreateDirectory(TmlDevSteamDir);
+			}
+		}
+		else
+		{
+			FindTerrariaDirectoryIfNecessary();
+			CreateTmlSteamDirIfNecessary();
+		}
+		
 		UpdateTargetsFiles();
-#if AUTO
+		
+		if (IsAutomatic)
+		{
 			Console.WriteLine("Automatic setup start");
 			new AutoSetup().DoAuto();
 			Console.WriteLine("Automatic setup finished");
-#else
-		Application.Run(new MainForm());
-#endif
+		}
+		else
+		{
+			Application.Run(new MainForm());
+		}
 	}
 	
 	public static void RunCmd(
@@ -393,25 +397,5 @@ internal static class Program
 		{
 			throw new IOException($"Failed to run command: {procInfo.FileName + " " + string.Join(' ', procInfo.Arguments)}");
 		}
-	}
-	
-	private static void HookSufficientExecutionStack()
-	{
-		if (ensureSufficientExecutionStackHook is not null)
-		{
-			return;
-		}
-		
-		var method = typeof(Microsoft.CodeAnalysis.Accessibility).Assembly.GetType("Microsoft.CodeAnalysis.StackGuard")!.GetMethod("EnsureSufficientExecutionStack");
-		ensureSufficientExecutionStackHook = new ILHook(
-			method!,
-			_ =>
-			{
-				/*var c = new ILCursor(il);
-				c.GotoNext(MoveType.After, x => x.MatchLdcI4(20));
-				c.Emit(OpCodes.Pop);
-				c.Emit(OpCodes.Ldc_I4, 20 * 2);*/
-			}
-		);
 	}
 }

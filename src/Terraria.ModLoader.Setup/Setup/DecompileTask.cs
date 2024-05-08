@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -135,10 +135,11 @@ internal sealed class DecompileTask : SetupOperation
 			return true;
 		}
 		
-#if AUTO
+		if (IsAutomatic)
+		{
 			Console.WriteLine($"Automatic setup critical failure, can't find both {TerrariaPath} and {TerrariaServerPath}");
 			Environment.Exit(1);
-#endif
+		}
 		
 		return (bool) TaskInterface.Invoke(new Func<bool>(SelectAndSetTerrariaDirectoryDialog));
 	}
@@ -187,11 +188,14 @@ internal sealed class DecompileTask : SetupOperation
 		items.Add(WriteTerrariaProjectFile(mainModule, files, resources, decompiledLibraries));
 		items.Add(WriteCommonConfigurationFile());
 		
-#if AUTO
+		if (IsAutomatic)
+		{
 			ExecuteParallel(items, true, 1);
-#else
-		ExecuteParallel(items);
-#endif
+		}
+		else
+		{
+			ExecuteParallel(items);
+		}
 	}
 	
 	private void AddEmbeddedLibrary(Resource res, IAssemblyResolver resolver, List<WorkItem> items)

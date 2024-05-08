@@ -44,7 +44,7 @@ namespace Terraria.ModLoader.Setup
 			buttonPatchNitrate = new Button();
 			buttonDiffNitrate = new Button();
 			toolTipButtons = new ToolTip(components);
-			buttonRegenSource = new Button();
+			buttonRegenerateSource = new Button();
 			buttonDiffTerrariaNetCore = new Button();
 			buttonPatchTerrariaNetCore = new Button();
 			mainMenuStrip = new MenuStrip();
@@ -61,8 +61,8 @@ namespace Terraria.ModLoader.Setup
 			exactToolStripMenuItem = new ToolStripMenuItem();
 			offsetToolStripMenuItem = new ToolStripMenuItem();
 			fuzzyToolStripMenuItem = new ToolStripMenuItem();
+			labelWorkingDirectoryDisplay = new Label();
 			labelWorkingDirectory = new Label();
-			label1 = new Label();
 			mainMenuStrip.SuspendLayout();
 			SuspendLayout();
 			// 
@@ -219,19 +219,19 @@ namespace Terraria.ModLoader.Setup
 			toolTipButtons.ReshowDelay = 40;
 			toolTipButtons.Popup += toolTipButtons_Popup;
 			// 
-			// buttonRegenSource
+			// buttonRegenerateSource
 			// 
-			buttonRegenSource.Anchor = AnchorStyles.Top;
-			buttonRegenSource.DialogResult = DialogResult.Cancel;
-			buttonRegenSource.Location = new Point(38, 81);
-			buttonRegenSource.Margin = new Padding(4, 3, 4, 3);
-			buttonRegenSource.Name = "buttonRegenSource";
-			buttonRegenSource.Size = new Size(308, 27);
-			buttonRegenSource.TabIndex = 3;
-			buttonRegenSource.Text = "Regenerate Source";
-			toolTipButtons.SetToolTip(buttonRegenSource, "Regenerates all the source files\r\nUse this after pulling from the repo\r\nEquivalent to Setup without Decompile");
-			buttonRegenSource.UseVisualStyleBackColor = true;
-			buttonRegenSource.Click += buttonTask_Click;
+			buttonRegenerateSource.Anchor = AnchorStyles.Top;
+			buttonRegenerateSource.DialogResult = DialogResult.Cancel;
+			buttonRegenerateSource.Location = new Point(38, 81);
+			buttonRegenerateSource.Margin = new Padding(4, 3, 4, 3);
+			buttonRegenerateSource.Name = "buttonRegenerateSource";
+			buttonRegenerateSource.Size = new Size(308, 27);
+			buttonRegenerateSource.TabIndex = 3;
+			buttonRegenerateSource.Text = "Regenerate Source";
+			toolTipButtons.SetToolTip(buttonRegenerateSource, "Regenerates all the source files\r\nUse this after pulling from the repo\r\nEquivalent to Setup without Decompile");
+			buttonRegenerateSource.UseVisualStyleBackColor = true;
+			buttonRegenerateSource.Click += buttonTask_Click;
 			// 
 			// buttonDiffTerrariaNetCore
 			// 
@@ -363,32 +363,32 @@ namespace Terraria.ModLoader.Setup
 			fuzzyToolStripMenuItem.Text = "Fuzzy";
 			fuzzyToolStripMenuItem.Click += fuzzyToolStripMenuItem_Click;
 			// 
+			// labelWorkingDirectoryDisplay
+			// 
+			labelWorkingDirectoryDisplay.AutoEllipsis = true;
+			labelWorkingDirectoryDisplay.BorderStyle = BorderStyle.Fixed3D;
+			labelWorkingDirectoryDisplay.Location = new Point(119, 24);
+			labelWorkingDirectoryDisplay.Name = "labelWorkingDirectoryDisplay";
+			labelWorkingDirectoryDisplay.Size = new Size(251, 18);
+			labelWorkingDirectoryDisplay.TabIndex = 0;
+			labelWorkingDirectoryDisplay.Text = "Working Directory Here";
+			// 
 			// labelWorkingDirectory
 			// 
-			labelWorkingDirectory.AutoEllipsis = true;
-			labelWorkingDirectory.BorderStyle = BorderStyle.Fixed3D;
-			labelWorkingDirectory.Location = new Point(119, 24);
+			labelWorkingDirectory.AutoSize = true;
+			labelWorkingDirectory.Location = new Point(12, 24);
 			labelWorkingDirectory.Name = "labelWorkingDirectory";
-			labelWorkingDirectory.Size = new Size(251, 18);
-			labelWorkingDirectory.TabIndex = 0;
-			labelWorkingDirectory.Text = "Working Directory Here";
-			// 
-			// label1
-			// 
-			label1.AutoSize = true;
-			label1.Location = new Point(12, 24);
-			label1.Name = "label1";
-			label1.Size = new Size(106, 15);
-			label1.TabIndex = 13;
-			label1.Text = "Working Directory:";
+			labelWorkingDirectory.Size = new Size(106, 15);
+			labelWorkingDirectory.TabIndex = 13;
+			labelWorkingDirectory.Text = "Working Directory:";
 			// 
 			// MainForm
 			// 
 			AutoScaleDimensions = new SizeF(7F, 15F);
 			AutoScaleMode = AutoScaleMode.Font;
 			ClientSize = new Size(384, 561);
-			Controls.Add(label1);
 			Controls.Add(labelWorkingDirectory);
+			Controls.Add(labelWorkingDirectoryDisplay);
 			Controls.Add(buttonPatchTerrariaNetCore);
 			Controls.Add(buttonDiffTerrariaNetCore);
 			Controls.Add(buttonDiffModLoader);
@@ -396,7 +396,7 @@ namespace Terraria.ModLoader.Setup
 			Controls.Add(buttonDiffNitrate);
 			Controls.Add(labelStatus);
 			Controls.Add(buttonDiffTerraria);
-			Controls.Add(buttonRegenSource);
+			Controls.Add(buttonRegenerateSource);
 			Controls.Add(buttonPatchModLoader);
 			Controls.Add(buttonPatchTerraria);
 			Controls.Add(progressBar);
@@ -432,7 +432,7 @@ namespace Terraria.ModLoader.Setup
         private MenuStrip mainMenuStrip;
         private ToolStripMenuItem menuItemOptions;
         private ToolStripMenuItem menuItemTerraria;
-        private Button buttonRegenSource;
+        private Button buttonRegenerateSource;
 		private ToolStripMenuItem toolsToolStripMenuItem;
 		private ToolStripMenuItem decompileServerToolStripMenuItem;
 		private ToolStripMenuItem formatCodeToolStripMenuItem;
@@ -446,8 +446,8 @@ namespace Terraria.ModLoader.Setup
 		private ToolStripMenuItem menuItemTmlPath;
 		private Button buttonDiffTerrariaNetCore;
 		private Button buttonPatchTerrariaNetCore;
+		private Label labelWorkingDirectoryDisplay;
 		private Label labelWorkingDirectory;
-		private Label label1;
 	}
 }
 

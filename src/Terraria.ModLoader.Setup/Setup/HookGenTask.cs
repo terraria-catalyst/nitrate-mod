@@ -1,11 +1,10 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Windows;
 
 using Mono.Cecil;
 
 using MonoMod;
-using MonoMod.RuntimeDetour.HookGen;
 
 using HookGenerator = Terraria.ModLoader.Setup.Utilities.HookGenerator;
 

@@ -13,16 +13,18 @@ namespace Terraria.ModLoader.Setup;
 
 public partial class MainForm : Form, ITaskInterface
 {
-	private CancellationTokenSource cancelSource;
-	
-	private bool closeOnCancel;
 	private readonly IDictionary<Button, Func<SetupOperation>> taskButtons = new Dictionary<Button, Func<SetupOperation>>();
+	private CancellationTokenSource cancelSource;
+	private bool closeOnCancel;
 	
 	public MainForm()
 	{
+		FormBorderStyle = FormBorderStyle.FixedSingle;
+		MaximizeBox = false;
+
 		InitializeComponent();
 		
-		labelWorkingDirectory.Text = $@"{Directory.GetCurrentDirectory()}";
+		labelWorkingDirectoryDisplay.Text = Directory.GetCurrentDirectory();
 		
 		taskButtons[buttonDecompile] = () => new DecompileTask(this, "src/staging/decompiled");
 		// Terraria
@@ -38,19 +40,23 @@ public partial class MainForm : Form, ITaskInterface
 		taskButtons[buttonDiffNitrate] = () => new DiffTask(this, "src/staging/tModLoader", "src/staging/Nitrate", "patches/Nitrate");
 		taskButtons[buttonPatchNitrate] = () => new PatchTask(this, "src/staging/tModLoader", "src/staging/Nitrate", "patches/Nitrate");
 		
-		taskButtons[buttonRegenSource] = () =>
-			new RegenSourceTask(
+		taskButtons[buttonRegenerateSource] = () =>
+		{
+			return new RegenSourceTask(
 				this,
 				new[] { buttonPatchTerraria, buttonPatchTerrariaNetCore, buttonPatchModLoader, buttonPatchNitrate, }
 					.Select(b => taskButtons[b]()).ToArray()
 			);
+		};
 		
 		taskButtons[buttonSetup] = () =>
-			new SetupTask(
+		{
+			return new SetupTask(
 				this,
-				new[] { buttonDecompile, buttonRegenSource, }
+				new[] { buttonDecompile, buttonRegenerateSource, }
 					.Select(b => taskButtons[b]()).ToArray()
 			);
+		};
 		
 		SetPatchMode(Settings.Default.PatchMode);
 		formatDecompiledOutputToolStripMenuItem.Checked = Settings.Default.FormatAfterDecompiling;
@@ -66,37 +72,34 @@ public partial class MainForm : Form, ITaskInterface
 			args.Cancel = true;
 			closeOnCancel = true;
 		};
-		
-		FormBorderStyle = FormBorderStyle.FixedSingle;
-		MaximizeBox = false;
 	}
 	
-	public void SetMaxProgress(int max)
+	public void SetMaxProgress(int value)
 	{
 		Invoke(
 			() =>
 			{
-				progressBar.Maximum = max;
+				progressBar.Maximum = value;
 			}
 		);
 	}
 	
-	public void SetStatus(string status)
+	public void SetStatus(string value)
 	{
 		Invoke(
 			() =>
 			{
-				labelStatus.Text = status;
+				labelStatus.Text = value;
 			}
 		);
 	}
 	
-	public void SetProgress(int progress)
+	public void SetProgress(int value)
 	{
 		Invoke(
 			() =>
 			{
-				progressBar.Value = progress;
+				progressBar.Value = value;
 			}
 		);
 	}
