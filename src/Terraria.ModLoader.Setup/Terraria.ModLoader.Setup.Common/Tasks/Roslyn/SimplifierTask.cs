@@ -3,11 +3,9 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Simplification;
 
-using Terraria.ModLoader.Setup.Common;
+namespace Terraria.ModLoader.Setup.Common.Tasks.Roslyn;
 
-namespace Terraria.ModLoader.Setup;
-
-internal sealed class SimplifierTask(ITaskInterface taskInterface) : RoslynTask(taskInterface)
+public sealed class SimplifierTask(ITaskInterface taskInterface) : RoslynTask(taskInterface)
 {
 	protected override string Status => "Simplifying";
 	

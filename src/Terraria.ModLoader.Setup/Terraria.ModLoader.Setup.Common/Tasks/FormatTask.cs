@@ -2,19 +2,17 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using System.Windows.Forms;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Formatting;
 using Microsoft.CodeAnalysis.Formatting;
 
-using Terraria.ModLoader.Setup.Common;
-using Terraria.ModLoader.Setup.Formatting;
+using Terraria.ModLoader.Setup.Common.Tasks.Roslyn.Formatting;
 
-namespace Terraria.ModLoader.Setup;
+namespace Terraria.ModLoader.Setup.Common.Tasks;
 
-internal sealed class FormatTask : SetupOperation
+public sealed class FormatTask : SetupOperation
 {
 	private static readonly AdhocWorkspace workspace = new();
 	
@@ -50,11 +48,11 @@ internal sealed class FormatTask : SetupOperation
 	
 	public override bool ConfigurationDialog()
 	{
-		return (bool)TaskInterface.Invoke(
+		return (bool)TaskInterface.InvokeOnMainThread(
 			new Func<bool>(
 				() =>
 				{
-					var dialog = new OpenFileDialog
+					var dialog = new OpenFileDialogParameters
 					{
 						FileName = projectPath,
 						InitialDirectory = Path.GetDirectoryName(projectPath) ?? Path.GetFullPath("."),
@@ -62,9 +60,9 @@ internal sealed class FormatTask : SetupOperation
 						Title = "Select C# Project",
 					};
 					
-					var result = dialog.ShowDialog();
+					var result = TaskInterface.ShowDialogWithOkFallback(ref dialog);
 					projectPath = dialog.FileName;
-					return result == DialogResult.OK && File.Exists(projectPath);
+					return result == SetupDialogResult.Ok && File.Exists(projectPath);
 				}
 			)
 		);

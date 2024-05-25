@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Terraria.ModLoader.Setup.Co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Terraria.ModLoader.Setup", "Terraria.ModLoader.Setup\Terraria.ModLoader.Setup.csproj", "{8A48B96A-F055-4A12-AA6E-A9AF3A67DA12}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Terraria.ModLoader.Setup.Auto", "Terraria.ModLoader.Setup.Auto\Terraria.ModLoader.Setup.Auto.csproj", "{59248DF2-D23A-496F-821F-9B299B764E31}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{8A48B96A-F055-4A12-AA6E-A9AF3A67DA12}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8A48B96A-F055-4A12-AA6E-A9AF3A67DA12}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8A48B96A-F055-4A12-AA6E-A9AF3A67DA12}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59248DF2-D23A-496F-821F-9B299B764E31}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59248DF2-D23A-496F-821F-9B299B764E31}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59248DF2-D23A-496F-821F-9B299B764E31}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59248DF2-D23A-496F-821F-9B299B764E31}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -6,19 +6,14 @@
         <UseWPF>True</UseWPF>
         <OutputType>WinExe</OutputType>
         <ApplicationIcon>./icon.ico</ApplicationIcon>
+        <Nullable>enable</Nullable>
 
         <NoWarn>CA1416</NoWarn>
-
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Terraria.ModLoader\setup\PatchReviewer\PatchReviewer.csproj" />
-        <ProjectReference Include="..\Terraria.ModLoader.Setup.Common\Terraria.ModLoader.Setup.Common.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <None Update="Properties\Settings.settings" Generator="SettingsSingleFileGenerator" LastGenOutput="Settings.Designer.cs" />
-        <Compile Update="Properties\Settings.Designer.cs" AutoGen="True" DependentUpon="Settings.settings" DesignTimeSharedInput="True" />
+        <ProjectReference Include="..\..\Terraria.ModLoader\setup\PatchReviewer\PatchReviewer.csproj"/>
+        <ProjectReference Include="..\Terraria.ModLoader.Setup.Common\Terraria.ModLoader.Setup.Common.csproj"/>
     </ItemGroup>
 
 </Project>

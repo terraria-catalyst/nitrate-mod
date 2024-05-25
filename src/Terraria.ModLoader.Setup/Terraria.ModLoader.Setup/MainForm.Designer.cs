@@ -51,7 +51,6 @@ namespace Terraria.ModLoader.Setup
 			menuItemOptions = new ToolStripMenuItem();
 			menuItemTerraria = new ToolStripMenuItem();
 			menuItemTmlPath = new ToolStripMenuItem();
-			formatDecompiledOutputToolStripMenuItem = new ToolStripMenuItem();
 			toolsToolStripMenuItem = new ToolStripMenuItem();
 			decompileServerToolStripMenuItem = new ToolStripMenuItem();
 			formatCodeToolStripMenuItem = new ToolStripMenuItem();
@@ -274,7 +273,7 @@ namespace Terraria.ModLoader.Setup
 			// 
 			// menuItemOptions
 			// 
-			menuItemOptions.DropDownItems.AddRange(new ToolStripItem[] { menuItemTerraria, menuItemTmlPath, formatDecompiledOutputToolStripMenuItem });
+			menuItemOptions.DropDownItems.AddRange(new ToolStripItem[] { menuItemTerraria, menuItemTmlPath });
 			menuItemOptions.Name = "menuItemOptions";
 			menuItemOptions.Size = new Size(61, 20);
 			menuItemOptions.Text = "Options";
@@ -292,13 +291,6 @@ namespace Terraria.ModLoader.Setup
 			menuItemTmlPath.Size = new Size(268, 22);
 			menuItemTmlPath.Text = "Select Custom TML Output Directory";
 			menuItemTmlPath.Click += menuItemTmlPath_Click;
-			// 
-			// formatDecompiledOutputToolStripMenuItem
-			// 
-			formatDecompiledOutputToolStripMenuItem.Name = "formatDecompiledOutputToolStripMenuItem";
-			formatDecompiledOutputToolStripMenuItem.Size = new Size(268, 22);
-			formatDecompiledOutputToolStripMenuItem.Text = "Format Decompiled Output";
-			formatDecompiledOutputToolStripMenuItem.Click += formatDecompiledOutputToolStripMenuItem_Click;
 			// 
 			// toolsToolStripMenuItem
 			// 
@@ -442,7 +434,6 @@ namespace Terraria.ModLoader.Setup
 		private ToolStripMenuItem offsetToolStripMenuItem;
 		private ToolStripMenuItem fuzzyToolStripMenuItem;
 		private ToolStripMenuItem simplifierToolStripMenuItem;
-		private ToolStripMenuItem formatDecompiledOutputToolStripMenuItem;
 		private ToolStripMenuItem menuItemTmlPath;
 		private Button buttonDiffTerrariaNetCore;
 		private Button buttonPatchTerrariaNetCore;

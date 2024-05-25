@@ -6,11 +6,9 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-using Terraria.ModLoader.Setup.Common;
+namespace Terraria.ModLoader.Setup.Common.Tasks;
 
-namespace Terraria.ModLoader.Setup;
-
-internal abstract class SetupOperation(ITaskInterface taskInterface)
+public abstract class SetupOperation(ITaskInterface taskInterface)
 {
 	protected delegate void UpdateStatus(string status);
 	
@@ -31,7 +29,7 @@ internal abstract class SetupOperation(ITaskInterface taskInterface)
 		{
 			if (resetProgress)
 			{
-				TaskInterface.SetMaxProgress(items.Count);
+				TaskInterface.MaxProgress = items.Count;
 				Progress = 0;
 			}
 			
@@ -39,7 +37,7 @@ internal abstract class SetupOperation(ITaskInterface taskInterface)
 			
 			void updateStatus()
 			{
-				TaskInterface.SetStatus(string.Join("\r\n", working.Select(r => r.Value)));
+				TaskInterface.UpdateStatus(string.Join("\r\n", working.Select(r => r.Value)));
 			}
 			
 			Parallel.ForEach(
@@ -60,7 +58,7 @@ internal abstract class SetupOperation(ITaskInterface taskInterface)
 					lock (working)
 					{
 						working.Remove(status);
-						TaskInterface.SetProgress(++Progress);
+						TaskInterface.Progress = ++Progress;
 						updateStatus();
 					}
 					

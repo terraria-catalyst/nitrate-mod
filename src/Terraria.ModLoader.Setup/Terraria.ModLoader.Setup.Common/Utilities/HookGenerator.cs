@@ -12,7 +12,7 @@ using Mono.Cecil.Cil;
 using MonoMod;
 using MonoMod.Utils;
 
-namespace Terraria.ModLoader.Setup.Utilities;
+namespace Terraria.ModLoader.Setup.Common.Utilities;
 
 public class HookGenerator
 {

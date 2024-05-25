@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Terraria.ModLoader.Setup.Formatting;
+namespace Terraria.ModLoader.Setup.Common.Tasks.Roslyn.Formatting;
 
 internal sealed class FileScopedNamespaceRewriter : CSharpSyntaxRewriter
 {

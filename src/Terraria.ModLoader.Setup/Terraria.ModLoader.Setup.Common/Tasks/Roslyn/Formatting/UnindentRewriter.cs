@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace Terraria.ModLoader.Setup.Formatting;
+namespace Terraria.ModLoader.Setup.Common.Tasks.Roslyn.Formatting;
 
 internal sealed class UnindentRewriter : CSharpSyntaxRewriter
 {

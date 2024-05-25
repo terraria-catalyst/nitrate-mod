@@ -19,15 +19,9 @@ using ICSharpCode.Decompiler.CSharp.Transforms;
 using ICSharpCode.Decompiler.Metadata;
 using ICSharpCode.Decompiler.TypeSystem;
 
-using Terraria.ModLoader.Setup.Common;
+namespace Terraria.ModLoader.Setup.Common.Tasks;
 
-using static Terraria.ModLoader.Setup.Program;
-
-using Settings = Terraria.ModLoader.Setup.Properties.Settings;
-
-namespace Terraria.ModLoader.Setup;
-
-internal sealed class DecompileTask : SetupOperation
+public sealed class DecompileTask : SetupOperation
 {
 	private class EmbeddedAssemblyResolver : IAssemblyResolver
 	{
@@ -92,12 +86,13 @@ internal sealed class DecompileTask : SetupOperation
 		}
 	}
 	
+	private const bool format_output = true;
+	
 	public static readonly Version CLIENT_VERSION = new("1.4.4.9");
 	public static readonly Version SERVER_VERSION = new("1.4.4.9");
 	
 	private readonly string srcDir;
 	private readonly bool serverOnly;
-	private readonly bool formatOutput = Settings.Default.FormatAfterDecompiling;
 	
 	private ExtendedProjectDecompiler projectDecompiler;
 	
@@ -132,30 +127,30 @@ internal sealed class DecompileTask : SetupOperation
 	
 	public override bool ConfigurationDialog()
 	{
-		if (File.Exists(TerrariaPath) && File.Exists(TerrariaServerPath))
+		if (File.Exists(CommonSetup.TerrariaPath) && File.Exists(CommonSetup.TerrariaServerPath))
 		{
 			return true;
 		}
 		
-		if (IsAutomatic)
+		if (CommonSetup.IsAutomatic)
 		{
-			Console.WriteLine($"Automatic setup critical failure, can't find both {TerrariaPath} and {TerrariaServerPath}");
+			Console.WriteLine($"Automatic setup critical failure, can't find both {CommonSetup.TerrariaPath} and {CommonSetup.TerrariaServerPath}");
 			Environment.Exit(1);
 		}
 		
-		return (bool) TaskInterface.Invoke(new Func<bool>(SelectAndSetTerrariaDirectoryDialog));
+		return (bool) TaskInterface.InvokeOnMainThread(new Func<bool>(CommonSetup.SelectAndSetTerrariaDirectoryDialog));
 	}
 	
 	public override void Run()
 	{
-		TaskInterface.SetStatus("Deleting Old Src");
+		TaskInterface.UpdateStatus("Deleting Old Src");
 		if (Directory.Exists(srcDir))
 		{
 			Directory.Delete(srcDir, true);
 		}
 		
-		var clientModule = serverOnly ? null : ReadModule(TerrariaPath, CLIENT_VERSION);
-		var serverModule = ReadModule(TerrariaServerPath, SERVER_VERSION);
+		var clientModule = serverOnly ? null : ReadModule(CommonSetup.TerrariaPath, CLIENT_VERSION);
+		var serverModule = ReadModule(CommonSetup.TerrariaServerPath, SERVER_VERSION);
 		var mainModule = serverOnly ? serverModule : clientModule;
 		if (mainModule is null)
 		{
@@ -190,7 +185,7 @@ internal sealed class DecompileTask : SetupOperation
 		items.Add(WriteTerrariaProjectFile(mainModule, files, resources, decompiledLibraries));
 		items.Add(WriteCommonConfigurationFile());
 		
-		if (IsAutomatic)
+		if (CommonSetup.IsAutomatic)
 		{
 			ExecuteParallel(items, true, 1);
 		}
@@ -254,7 +249,7 @@ internal sealed class DecompileTask : SetupOperation
 			usingVersionedPath = true;
 		}
 		
-		TaskInterface.SetStatus("Loading " + Path.GetFileName(path));
+		TaskInterface.UpdateStatus("Loading " + Path.GetFileName(path));
 		using var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
 		var module = new PEFile(path, fileStream, PEStreamOptions.PrefetchEntireImage);
 		var assemblyName = new AssemblyName(module.FullName);
@@ -268,7 +263,7 @@ internal sealed class DecompileTask : SetupOperation
 			return module;
 		}
 		
-		TaskInterface.SetStatus("Backup up " + Path.GetFileName(path) + " to " + Path.GetFileName(versionedPath));
+		TaskInterface.UpdateStatus("Backup up " + Path.GetFileName(path) + " to " + Path.GetFileName(versionedPath));
 		File.Copy(path, versionedPath);
 		return module;
 	}
@@ -456,7 +451,7 @@ internal sealed class DecompileTask : SetupOperation
 				}
 				
 				var source = w.ToString();
-				if (formatOutput)
+				if (format_output)
 				{
 					updateStatus("Formatting: " + src.Key);
 					source = FormatTask.Format(source, TaskInterface.CancellationToken, true);

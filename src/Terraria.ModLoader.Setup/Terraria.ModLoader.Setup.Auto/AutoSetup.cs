@@ -1,11 +1,13 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
 
 using Terraria.ModLoader.Setup.Common;
+using Terraria.ModLoader.Setup.Common.Tasks;
 
-namespace Terraria.ModLoader.Setup;
+namespace Terraria.ModLoader.Setup.Auto;
 
 internal sealed class AutoSetup : ITaskInterface
 {
@@ -13,24 +15,19 @@ internal sealed class AutoSetup : ITaskInterface
 	
 	public CancellationToken CancellationToken => cancelSource.Token;
 	
-	public object Invoke(Delegate action)
+	public int MaxProgress { get; set; } = 1;
+	
+	public int Progress
+	{
+		set => Console.WriteLine($"Value: {(float)value / MaxProgress}.");
+	}
+	
+	public object InvokeOnMainThread(Delegate action)
 	{
 		return action.DynamicInvoke();
 	}
 	
-	private int max = 1;
-	
-	public void SetMaxProgress(int value)
-	{
-		max = value;
-	}
-	
-	public void SetProgress(int progress)
-	{
-		Console.WriteLine("Value: {0:P2}.", (float)progress / max);
-	}
-	
-	public void SetStatus(string status)
+	public void UpdateStatus(string status)
 	{
 		Console.WriteLine(status);
 	}
@@ -69,7 +66,7 @@ internal sealed class AutoSetup : ITaskInterface
 	
 	public void DoAuto2(SetupOperation task)
 	{
-		var errorLogFile = Path.Combine(Program.LOGS_DIR, "error.log");
+		var errorLogFile = Path.Combine(CommonSetup.LOGS_DIR, "error.log");
 		try
 		{
 			SetupOperation.DeleteFile(errorLogFile);
@@ -100,8 +97,34 @@ internal sealed class AutoSetup : ITaskInterface
 		}
 		catch (Exception e)
 		{
-			SetStatus(e.Message);
+			UpdateStatus(e.Message);
 			Environment.Exit(1);
 		}
 	}
+	
+#region Settings
+	private readonly Dictionary<string, object> knownSettings = new();
+	private string? settingsPath;
+	
+	public T GetSettings<T>()
+	{
+		return (T)knownSettings[typeof(T).FullName!];
+	}
+	
+	public void SetSettings<T>(T settings)
+	{
+		knownSettings[typeof(T).FullName!] = settings!;
+	}
+	
+	public void LoadSettings(string path)
+	{
+		settingsPath = path;
+		Settings.LoadSettings(path, knownSettings);
+	}
+	
+	public void SaveSettings()
+	{
+		Settings.SaveSettings(settingsPath!, knownSettings);
+	}
+#endregion
 }

@@ -1,12 +1,10 @@
 using System.Linq;
 
-using Terraria.ModLoader.Setup.Common;
+namespace Terraria.ModLoader.Setup.Common.Tasks;
 
-namespace Terraria.ModLoader.Setup;
-
-internal abstract class CompositeTask(ITaskInterface taskInterface, params SetupOperation[] tasks) : SetupOperation(taskInterface)
+public abstract class CompositeTask(ITaskInterface taskInterface, params SetupOperation[] tasks) : SetupOperation(taskInterface)
 {
-	private SetupOperation failed;
+	private SetupOperation? failed;
 	
 	public override bool ConfigurationDialog()
 	{

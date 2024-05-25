@@ -4,20 +4,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Windows.Forms;
-using System.Windows.Forms.Integration;
 
 using DiffPatch;
 
-using PatchReviewer;
+namespace Terraria.ModLoader.Setup.Common.Tasks;
 
-using Terraria.ModLoader.Setup.Common;
-
-using Settings = Terraria.ModLoader.Setup.Properties.Settings;
-
-namespace Terraria.ModLoader.Setup;
-
-internal sealed class PatchTask(ITaskInterface taskInterface, string baseDir, string patchedDir, string patchDir) : SetupOperation(taskInterface)
+public sealed class PatchTask(ITaskInterface taskInterface, string baseDir, string patchedDir, string patchDir) : SetupOperation(taskInterface)
 {
 	private static readonly string[] nonSourceDirs = [ "bin", "obj", ".vs", ];
 	
@@ -39,21 +31,21 @@ internal sealed class PatchTask(ITaskInterface taskInterface, string baseDir, st
 	
 	public override bool StartupWarning()
 	{
-		var res = MessageBox.Show(
-			"Any changes in /" + patchedDir + " that have not been converted to patches will be lost.",
+		var res = taskInterface.ShowDialogWithOkFallback(
 			"Possible loss of data",
-			MessageBoxButtons.OKCancel,
-			MessageBoxIcon.Warning
+			"Any changes in /" + patchedDir + " that have not been converted to patches will be lost.",
+			SetupMessageBoxButtons.OkCancel,
+			SetupMessageBoxIcon.Warning
 		);
 		
-		return res == DialogResult.OK;
+		return res == SetupDialogResult.Ok;
 	}
 	
 	public override void Run()
 	{
-		Program.UpdateTargetsFiles(); //Update branch information
+		CommonSetup.UpdateTargetsFiles(); //Update branch information
 		
-		mode = (Patcher.Mode) Settings.Default.PatchMode;
+		mode = (Patcher.Mode) taskInterface.GetSettings<PatchSettings>().PatchMode;
 		
 		var removedFileList = Path.Combine(patchDir, DiffTask.REMOVED_FILE_LIST);
 		var noCopy = File.Exists(removedFileList) ? [..File.ReadAllLines(removedFileList),] : new HashSet<string>();
@@ -90,11 +82,11 @@ internal sealed class PatchTask(ITaskInterface taskInterface, string baseDir, st
 		
 		try
 		{
-			CreateDirectory(Program.LOGS_DIR);
+			CreateDirectory(CommonSetup.LOGS_DIR);
 			// ReSharper disable once InconsistentlySynchronizedField
-			logFile = new StreamWriter(Path.Combine(Program.LOGS_DIR, "patch.log"));
+			logFile = new StreamWriter(Path.Combine(CommonSetup.LOGS_DIR, "patch.log"));
 			
-			TaskInterface.SetMaxProgress(items.Count);
+			TaskInterface.MaxProgress = items.Count;
 			ExecuteParallel(items);
 		}
 		finally
@@ -105,7 +97,7 @@ internal sealed class PatchTask(ITaskInterface taskInterface, string baseDir, st
 		
 		//Remove files and directories that weren't in patches and original src.
 		
-		TaskInterface.SetStatus("Deleting Old Src Files");
+		TaskInterface.UpdateStatus("Deleting Old Src Files");
 		
 		foreach (var (file, _) in EnumerateSrcFiles(patchedDir))
 		{
@@ -115,29 +107,23 @@ internal sealed class PatchTask(ITaskInterface taskInterface, string baseDir, st
 			}
 		}
 		
-		TaskInterface.SetStatus("Deleting Old Src's Empty Directories");
+		TaskInterface.UpdateStatus("Deleting Old Src's Empty Directories");
 		
 		DeleteEmptyDirs(patchedDir);
 		
-		TaskInterface.SetStatus("Old Src Removed");
+		TaskInterface.UpdateStatus("Old Src Removed");
 		
 		//Show patch reviewer if there were any fuzzy patches.
 		
 		if (fuzzy > 0 || mode == Patcher.Mode.FUZZY && failures > 0)
 		{
-			TaskInterface.Invoke(new Action(() => ShowReviewWindow(results)));
+			TaskInterface.InvokeOnMainThread(new Action(() => ShowReviewWindow(results)));
 		}
 	}
 	
 	private void ShowReviewWindow(IEnumerable<FilePatcher> reviewResults)
 	{
-		var w = new ReviewWindow(reviewResults, commonBasePath: baseDir + '/')
-		{
-			AutoHeaders = true,
-		};
-		
-		ElementHost.EnableModelessKeyboardInterop(w);
-		w.ShowDialog();
+		taskInterface.ShowReviewWindow(reviewResults, baseDir);
 	}
 	
 	public override bool Failed()
@@ -157,11 +143,11 @@ internal sealed class PatchTask(ITaskInterface taskInterface, string baseDir, st
 			return;
 		}
 		
-		MessageBox.Show(
-			$"Patches applied with {failures} failures and {warnings} warnings.\nSee /logs/patch.log for details",
+		taskInterface.ShowDialogWithOkFallback(
 			"Patch Results",
-			MessageBoxButtons.OK,
-			Failed() ? MessageBoxIcon.Error : MessageBoxIcon.Warning
+			$"Patches applied with {failures} failures and {warnings} warnings.\nSee /logs/patch.log for details",
+			SetupMessageBoxButtons.Ok,
+			Failed() ? SetupMessageBoxIcon.Error : SetupMessageBoxIcon.Warning
 		);
 	}
 	

@@ -4,11 +4,9 @@ using System.Linq;
 
 using DiffPatch;
 
-using Terraria.ModLoader.Setup.Common;
+namespace Terraria.ModLoader.Setup.Common.Tasks;
 
-namespace Terraria.ModLoader.Setup;
-
-internal sealed class DiffTask(ITaskInterface taskInterface, string baseDir, string srcDir, string patchDir) : SetupOperation(taskInterface)
+public sealed class DiffTask(ITaskInterface taskInterface, string baseDir, string srcDir, string patchDir) : SetupOperation(taskInterface)
 {
 	private static readonly string[] extensions = [ ".cs", ".csproj", ".ico", ".resx", ".png", "App.config", ".json", ".targets", ".txt", ".bat", ".sh", ];
 	
@@ -37,7 +35,7 @@ internal sealed class DiffTask(ITaskInterface taskInterface, string baseDir, str
 		
 		ExecuteParallel(items);
 		
-		TaskInterface.SetStatus("Deleting Unnecessary Patches");
+		TaskInterface.UpdateStatus("Deleting Unnecessary Patches");
 		foreach (var (file, relPath) in EnumerateFiles(patchDir))
 		{
 			var targetPath = relPath.EndsWith(".patch") ? relPath[..^6] : relPath;
@@ -49,7 +47,7 @@ internal sealed class DiffTask(ITaskInterface taskInterface, string baseDir, str
 		
 		DeleteEmptyDirs(patchDir);
 		
-		TaskInterface.SetStatus("Noting Removed Files");
+		TaskInterface.UpdateStatus("Noting Removed Files");
 		var removedFiles = PatchTask.EnumerateSrcFiles(baseDir)
 			.Where(f => !File.Exists(Path.Combine(srcDir, f.relPath)))
 			.Select(f => f.relPath)

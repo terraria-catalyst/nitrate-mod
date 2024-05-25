@@ -2,17 +2,14 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 
-using Terraria.ModLoader.Setup.Common;
+namespace Terraria.ModLoader.Setup.Common.Tasks.Roslyn;
 
-namespace Terraria.ModLoader.Setup;
-
-internal abstract class RoslynTask(ITaskInterface taskInterface) : SetupOperation(taskInterface)
+public abstract class RoslynTask(ITaskInterface taskInterface) : SetupOperation(taskInterface)
 {
 	private string projectPath;
 	
@@ -22,11 +19,11 @@ internal abstract class RoslynTask(ITaskInterface taskInterface) : SetupOperatio
 	
 	public override bool ConfigurationDialog()
 	{
-		return (bool)TaskInterface.Invoke(
+		return (bool)TaskInterface.InvokeOnMainThread(
 			new Func<bool>(
 				() =>
 				{
-					var dialog = new OpenFileDialog
+					var dialog = new OpenFileDialogParameters
 					{
 						FileName = projectPath,
 						InitialDirectory = Path.GetDirectoryName(projectPath) ?? Path.GetFullPath("."),
@@ -34,9 +31,9 @@ internal abstract class RoslynTask(ITaskInterface taskInterface) : SetupOperatio
 						Title = "Select C# Project",
 					};
 					
-					var result = dialog.ShowDialog();
+					var result = taskInterface.ShowDialogWithOkFallback(ref dialog);
 					projectPath = dialog.FileName;
-					return result == DialogResult.OK && File.Exists(projectPath);
+					return result == SetupDialogResult.Ok && File.Exists(projectPath);
 				}
 			)
 		);
@@ -90,10 +87,10 @@ internal abstract class RoslynTask(ITaskInterface taskInterface) : SetupOperatio
 			return MSBuildWorkspace.Create();
 		}
 		
-		TaskInterface.SetStatus("Finding MSBuild");
+		TaskInterface.UpdateStatus("Finding MSBuild");
 		var vsInst = MSBuildLocator.QueryVisualStudioInstances().OrderByDescending(inst => inst.Version).First();
 		MSBuildLocator.RegisterInstance(vsInst);
-		TaskInterface.SetStatus($"Found MSBuild {vsInst.Version} at {vsInst.MSBuildPath}");
+		TaskInterface.UpdateStatus($"Found MSBuild {vsInst.Version} at {vsInst.MSBuildPath}");
 		msBuildFound = true;
 		
 		return MSBuildWorkspace.Create();

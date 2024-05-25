@@ -6,9 +6,9 @@ using System.Text.RegularExpressions;
 
 using Microsoft.Win32;
 
-namespace Terraria.ModLoader.Setup.Utilities;
+namespace Terraria.ModLoader.Setup.Common.Utilities;
 
-internal static partial class SteamUtils
+public static partial class SteamUtils
 {
 	public const int TERRARIA_APP_ID = 105600;
 	

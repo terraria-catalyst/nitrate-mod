@@ -6,13 +6,13 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Terraria.ModLoader.Setup.Formatting;
+namespace Terraria.ModLoader.Setup.Common.Tasks.Roslyn.Formatting;
 
 internal sealed class AddVisualNewlinesRewriter : CSharpSyntaxRewriter
 {
-	private readonly HashSet<SyntaxNode> modifyNodes = [];
+	private readonly HashSet<SyntaxNode?> modifyNodes = [];
 	
-	public override SyntaxNode VisitBlock(BlockSyntax node)
+	public override SyntaxNode? VisitBlock(BlockSyntax node)
 	{
 		var stmts = node.Statements;
 		for (var i = 0; i < stmts.Count - 1; i++)
@@ -28,13 +28,13 @@ internal sealed class AddVisualNewlinesRewriter : CSharpSyntaxRewriter
 		return base.VisitBlock(node);
 	}
 	
-	public override SyntaxNode Visit(SyntaxNode node)
+	public override SyntaxNode? Visit(SyntaxNode? node)
 	{
 		if (modifyNodes.Remove(node))
 		{
 			node = node!.WithLeadingTrivia(node!.GetLeadingTrivia().Insert(0, SyntaxFactory.EndOfLine(Environment.NewLine)));
 		}
-
+		
 		return base.Visit(node);
 	}
 }

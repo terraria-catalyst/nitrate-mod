@@ -5,13 +5,13 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Terraria.ModLoader.Setup.Formatting;
+namespace Terraria.ModLoader.Setup.Common.Tasks.Roslyn.Formatting;
 
-public class CollectionInitializerFormatter : CSharpSyntaxRewriter
+internal sealed class CollectionInitializerFormatter : CSharpSyntaxRewriter
 {
 	private readonly Dictionary<SyntaxToken, SyntaxToken> changes = new();
 	
-	public override SyntaxNode VisitInitializerExpression(InitializerExpressionSyntax node)
+	public override SyntaxNode? VisitInitializerExpression(InitializerExpressionSyntax node)
 	{
 		if (!node.DescendantTrivia().All(SyntaxUtils.IsWhitespace))
 		{
@@ -90,7 +90,7 @@ public class CollectionInitializerFormatter : CSharpSyntaxRewriter
 		);
 		
 		var closeBrace = node.CloseBraceToken.WithLeadingTrivia(SyntaxTriviaList.Empty);
-		if (node != ((InitializerExpressionSyntax)node.Parent)?.Expressions.Last())
+		if (node != ((InitializerExpressionSyntax)node.Parent!).Expressions.Last())
 		{
 			closeBrace = closeBrace.WithTrailingTrivia(SyntaxTriviaList.Empty);
 		}
