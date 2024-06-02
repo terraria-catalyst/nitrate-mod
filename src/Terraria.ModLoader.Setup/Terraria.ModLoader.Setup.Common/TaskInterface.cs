@@ -62,4 +62,4 @@ public interface ITaskInterface
 	void SaveSettings();
 }
 
-public static partial class TaskInterfaceExtensions { }
+public static partial class TaskInterfaceExtensions;

@@ -12,13 +12,6 @@ public sealed class PatchSettings
 	public int PatchMode { get; set; }
 }
 
-public sealed class HashSettings
-{
-	public string GogClientWinMd5 { get; set; } = string.Empty;
-	
-	public string SteamClientWinMd5 { get; set; } = string.Empty;
-}
-
 public sealed class TerrariaPathSettings
 {
 	public string TerrariaSteamDirectory { get; set; } = string.Empty;
@@ -38,14 +31,6 @@ public static class Settings
 				new PatchSettings
 				{
 					PatchMode = 0,
-				}
-			);
-			
-			taskInterface.SetSettings(
-				new HashSettings
-				{
-					GogClientWinMd5 = "d05cf700a90fc12d7f9ef40f1d303b3a",
-					SteamClientWinMd5 = "22e41c9960f3db473a036e93bbaec671",
 				}
 			);
 			

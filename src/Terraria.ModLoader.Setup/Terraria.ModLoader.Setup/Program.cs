@@ -9,21 +9,22 @@ namespace Terraria.ModLoader.Setup;
 
 internal static class Program
 {
-	/// <summary>
-	/// The main entry point for the application.
-	/// </summary>
 	[STAThread]
-	private static void Main(string[] args)
+	private static void Main()
 	{
 		Application.EnableVisualStyles();
 		Application.SetCompatibleTextRenderingDefault(false);
+		
 		var setup = new MainSetup();
 		CommonSetup.TaskInterface = setup;
-		Settings.InitializeSettings(setup);
-		CommonSetup.CreateSymlinks();
-		FindTerrariaDirectoryIfNecessary();
-		CommonSetup.CreateTmlSteamDirIfNecessary();
-		CommonSetup.UpdateTargetsFiles();
+		{
+			Settings.InitializeSettings(setup);
+			CommonSetup.CreateSymlinks();
+			FindTerrariaDirectoryIfNecessary();
+			CommonSetup.CreateTmlSteamDirIfNecessary();
+			CommonSetup.UpdateTargetsFiles();
+		}
+		
 		Application.Run(setup.Form = new MainForm(setup));
 	}
 	
