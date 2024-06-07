@@ -19,6 +19,7 @@ public sealed class DiffTask(ITaskInterface taskInterface, string baseDir, strin
 	
 	public override void Run()
 	{
+		var status = taskInterface.Progress.CreateStatus(0, 2);
 		var items = new List<WorkItem>();
 		
 		foreach (var (file, relPath) in PatchTask.EnumerateSrcFiles(srcDir))
@@ -35,32 +36,39 @@ public sealed class DiffTask(ITaskInterface taskInterface, string baseDir, strin
 		
 		ExecuteParallel(items);
 		
-		TaskInterface.UpdateStatus("Deleting Unnecessary Patches");
-		foreach (var (file, relPath) in EnumerateFiles(patchDir))
+		status.AddMessage("Deleting Unnecessary Patches");
 		{
-			var targetPath = relPath.EndsWith(".patch") ? relPath[..^6] : relPath;
-			if (!File.Exists(Path.Combine(srcDir, targetPath)))
+			foreach (var (file, relPath) in EnumerateFiles(patchDir))
 			{
-				DeleteFile(file);
+				var targetPath = relPath.EndsWith(".patch") ? relPath[..^6] : relPath;
+				if (!File.Exists(Path.Combine(srcDir, targetPath)))
+				{
+					DeleteFile(file);
+				}
 			}
+			
+			DeleteEmptyDirs(patchDir);
+			status.Current++;
 		}
 		
-		DeleteEmptyDirs(patchDir);
-		
-		TaskInterface.UpdateStatus("Noting Removed Files");
-		var removedFiles = PatchTask.EnumerateSrcFiles(baseDir)
-			.Where(f => !File.Exists(Path.Combine(srcDir, f.relPath)))
-			.Select(f => f.relPath)
-			.ToArray();
-		
-		var removedFileList = Path.Combine(patchDir, REMOVED_FILE_LIST);
-		if (removedFiles.Length > 0)
+		status.AddMessage("Noting Removed Files");
 		{
-			File.WriteAllLines(removedFileList, removedFiles);
-		}
-		else
-		{
-			DeleteFile(removedFileList);
+			var removedFiles = PatchTask.EnumerateSrcFiles(baseDir)
+				.Where(f => !File.Exists(Path.Combine(srcDir, f.relPath)))
+				.Select(f => f.relPath)
+				.ToArray();
+			
+			var removedFileList = Path.Combine(patchDir, REMOVED_FILE_LIST);
+			if (removedFiles.Length > 0)
+			{
+				File.WriteAllLines(removedFileList, removedFiles);
+			}
+			else
+			{
+				DeleteFile(removedFileList);
+			}
+			
+			status.Current++;
 		}
 	}
 	

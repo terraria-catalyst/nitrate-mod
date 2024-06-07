@@ -11,9 +11,11 @@ namespace Terraria.ModLoader.Setup.Common;
 
 public static class CommonSetup
 {
-	public static readonly string LOGS_DIR = Path.Combine("setup", "logs");
+	public const string SETUP_DIR = ".setup";
 	
-	public static readonly string SETTINGS_DIR = Path.Combine("setup", "settings");
+	public static readonly string LOGS_DIR = Path.Combine(SETUP_DIR, "logs");
+	
+	public static readonly string SETTINGS_DIR = Path.Combine(SETUP_DIR, "settings");
 	
 	public static readonly string SETTINGS_PATH = Path.Combine(SETTINGS_DIR, "settings.json");
 	
@@ -29,10 +31,10 @@ public static class CommonSetup
 		{
 			if (IsAutomatic)
 			{
-				return terrariaSteamDirectory ??= TaskInterface.GetSettings<TerrariaPathSettings>().TerrariaSteamDirectory;
+				return terrariaSteamDirectory ??= TaskInterface.Settings.Get<TerrariaPathSettings>().TerrariaSteamDirectory;
 			}
 			
-			return TaskInterface.GetSettings<TerrariaPathSettings>().TerrariaSteamDirectory;
+			return TaskInterface.Settings.Get<TerrariaPathSettings>().TerrariaSteamDirectory;
 		}
 		
 		set
@@ -43,7 +45,7 @@ public static class CommonSetup
 			}
 			else
 			{
-				TaskInterface.GetSettings<TerrariaPathSettings>().TerrariaSteamDirectory = value;
+				TaskInterface.Settings.Get<TerrariaPathSettings>().TerrariaSteamDirectory = value;
 			}
 		}
 	}
@@ -56,10 +58,10 @@ public static class CommonSetup
 		{
 			if (IsAutomatic)
 			{
-				return tmlDeveloperSteamDirectory ??= TaskInterface.GetSettings<TerrariaPathSettings>().TmlDeveloperSteamDirectory;
+				return tmlDeveloperSteamDirectory ??= TaskInterface.Settings.Get<TerrariaPathSettings>().TmlDeveloperSteamDirectory;
 			}
 			
-			return TaskInterface.GetSettings<TerrariaPathSettings>().TmlDeveloperSteamDirectory;
+			return TaskInterface.Settings.Get<TerrariaPathSettings>().TmlDeveloperSteamDirectory;
 		}
 		
 		set
@@ -70,7 +72,7 @@ public static class CommonSetup
 			}
 			else
 			{
-				TaskInterface.GetSettings<TerrariaPathSettings>().TmlDeveloperSteamDirectory = value;
+				TaskInterface.Settings.Get<TerrariaPathSettings>().TmlDeveloperSteamDirectory = value;
 			}
 		}
 	}
@@ -275,7 +277,7 @@ public static class CommonSetup
 	{
 		TerrariaSteamDirectory = path;
 		TmlDeveloperSteamDirectory = string.Empty;
-		TaskInterface.SaveSettings();
+		TaskInterface.Settings.Save();
 		
 		CreateTmlSteamDirIfNecessary();
 		UpdateTargetsFiles();
@@ -289,7 +291,7 @@ public static class CommonSetup
 		}
 		
 		TmlDeveloperSteamDirectory = Path.GetFullPath(Path.Combine(TerrariaSteamDirectory, "..", "tModLoaderDev"));
-		TaskInterface.SaveSettings();
+		TaskInterface.Settings.Save();
 		
 		try
 		{

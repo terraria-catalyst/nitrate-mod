@@ -2,6 +2,7 @@
 .vscode/
 .idea/
 .catalyst/
+.setup/
 
 bin/
 obj/
@@ -16,8 +17,6 @@ patches/tModLoader
 
 # Staging source files.
 src/staging/
-
-setup/
 
 # You should figure out a better way to ignore these.
 # Should they even be ignored?

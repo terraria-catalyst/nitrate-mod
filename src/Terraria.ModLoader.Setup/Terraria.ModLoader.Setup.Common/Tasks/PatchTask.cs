@@ -45,7 +45,7 @@ public sealed class PatchTask(ITaskInterface taskInterface, string baseDir, stri
 	{
 		CommonSetup.UpdateTargetsFiles(); //Update branch information
 		
-		mode = (Patcher.Mode) taskInterface.GetSettings<PatchSettings>().PatchMode;
+		mode = (Patcher.Mode) taskInterface.Settings.Get<PatchSettings>().PatchMode;
 		
 		var removedFileList = Path.Combine(patchDir, DiffTask.REMOVED_FILE_LIST);
 		var noCopy = File.Exists(removedFileList) ? [..File.ReadAllLines(removedFileList),] : new HashSet<string>();
@@ -86,7 +86,7 @@ public sealed class PatchTask(ITaskInterface taskInterface, string baseDir, stri
 			// ReSharper disable once InconsistentlySynchronizedField
 			logFile = new StreamWriter(Path.Combine(CommonSetup.LOGS_DIR, "patch.log"));
 			
-			TaskInterface.MaxProgress = items.Count;
+			// TaskInterface.MaxProgress = items.Count;
 			ExecuteParallel(items);
 		}
 		finally
@@ -97,21 +97,27 @@ public sealed class PatchTask(ITaskInterface taskInterface, string baseDir, stri
 		
 		//Remove files and directories that weren't in patches and original src.
 		
-		TaskInterface.UpdateStatus("Deleting Old Src Files");
-		
-		foreach (var (file, _) in EnumerateSrcFiles(patchedDir))
+		var srcFileDeletionStatus = TaskInterface.Progress.CreateStatus(0, 2);
+		srcFileDeletionStatus.AddMessage("Deleting Old Src Files");
 		{
-			if (!newFiles.Contains(file))
+			foreach (var (file, _) in EnumerateSrcFiles(patchedDir))
 			{
-				File.Delete(file);
+				if (!newFiles.Contains(file))
+				{
+					File.Delete(file);
+				}
 			}
+			
+			srcFileDeletionStatus.Current++;
 		}
 		
-		TaskInterface.UpdateStatus("Deleting Old Src's Empty Directories");
+		srcFileDeletionStatus.AddMessage("Deleting Old Src's Empty Directories");
+		{
+			DeleteEmptyDirs(patchedDir);
+			srcFileDeletionStatus.Current++;
+			srcFileDeletionStatus.AddMessage("Old Src Removed");
+		}
 		
-		DeleteEmptyDirs(patchedDir);
-		
-		TaskInterface.UpdateStatus("Old Src Removed");
 		
 		//Show patch reviewer if there were any fuzzy patches.
 		

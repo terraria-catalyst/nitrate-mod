@@ -27,20 +27,20 @@ public static class Settings
 		
 		// Set initial setting values.
 		{
-			taskInterface.SetSettings(
+			taskInterface.Settings.Set(
 				new PatchSettings
 				{
 					PatchMode = 0,
 				}
 			);
 			
-			taskInterface.SetSettings(new TerrariaPathSettings());
+			taskInterface.Settings.Set(new TerrariaPathSettings());
 		}
 		
 		// Load settings from file if it exists and save it and defaults.
 		{
-			taskInterface.LoadSettings(CommonSetup.SETTINGS_PATH);
-			taskInterface.SaveSettings();
+			taskInterface.Settings.Load(CommonSetup.SETTINGS_PATH);
+			taskInterface.Settings.Save();
 		}
 	}
 	

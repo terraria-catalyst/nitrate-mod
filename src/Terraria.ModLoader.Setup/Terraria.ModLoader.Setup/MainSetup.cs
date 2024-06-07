@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
@@ -16,26 +17,25 @@ internal sealed class MainSetup : IDialogTaskInterface, IPatchReviewerInterface
 {
 	public CancellationToken CancellationToken => Form!.CancelSource.Token;
 	
-	public int MaxProgress
-	{
-		set { InvokeOnMainThread(() => { Form!.ProgressBar.Maximum = value; }); }
-	}
+	public IProgressManager Progress { get; } = new ProgressManager();
 	
-	public int Progress
-	{
-		set { InvokeOnMainThread(() => { Form!.ProgressBar.Value = value; }); }
-	}
+	public ISettingsManager Settings { get; } = new SettingsManager();
 	
 	public MainForm? Form { get; set; }
 	
-	public void UpdateStatus(string value)
+	public MainSetup()
 	{
-		Form!.Invoke(
-			() =>
+		Progress.OnProgressChanged += () =>
+		{
+			if (Form is null)
 			{
-				Form.LabelStatus.Text = value;
+				return;
 			}
-		);
+			
+			Form.ProgressBar.Maximum = Progress.AllProgress.Max;
+			Form.ProgressBar.Value = Progress.AllProgress.Current;
+			Form.LabelStatus.Text = string.Join('\n', Progress.PendingStatuses.SelectMany(x => x.Messages));
+		};
 	}
 	
 	public object InvokeOnMainThread(Delegate action)
@@ -91,12 +91,12 @@ internal sealed class MainSetup : IDialogTaskInterface, IPatchReviewerInterface
 	public void LoadSettings(string path)
 	{
 		settingsPath = path;
-		Settings.LoadSettings(path, knownSettings);
+		Common.Settings.LoadSettings(path, knownSettings);
 	}
 	
 	public void SaveSettings()
 	{
-		Settings.SaveSettings(settingsPath!, knownSettings);
+		Common.Settings.SaveSettings(settingsPath!, knownSettings);
 	}
 #endregion
 }

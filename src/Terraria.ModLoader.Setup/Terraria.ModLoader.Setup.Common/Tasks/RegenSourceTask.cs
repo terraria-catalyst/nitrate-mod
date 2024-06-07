@@ -5,7 +5,7 @@ public sealed class RegenSourceTask(ITaskInterface taskInterface, params SetupOp
 	public override bool StartupWarning()
 	{
 		SetupDialogResult res;
-		if (taskInterface.GetSettings<PatchSettings>().PatchMode != 2)
+		if (taskInterface.Settings.Get<PatchSettings>().PatchMode != 2)
 		{
 			res = taskInterface.ShowDialogWithOkFallback(
 				"Ready for Setup",
@@ -41,10 +41,10 @@ public sealed class RegenSourceTask(ITaskInterface taskInterface, params SetupOp
 	
 	public override void Run()
 	{
-		if (taskInterface.GetSettings<PatchSettings>().PatchMode == 2)
+		if (taskInterface.Settings.Get<PatchSettings>().PatchMode == 2)
 		{
-			taskInterface.GetSettings<PatchSettings>().PatchMode = 1;
-			taskInterface.SaveSettings();
+			taskInterface.Settings.Get<PatchSettings>().PatchMode = 1;
+			taskInterface.Settings.Save();
 		}
 		
 		base.Run();

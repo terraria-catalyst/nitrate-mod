@@ -143,14 +143,21 @@ public sealed class DecompileTask : SetupOperation
 	
 	public override void Run()
 	{
-		TaskInterface.UpdateStatus("Deleting Old Src");
-		if (Directory.Exists(srcDir))
+		var status = TaskInterface.Progress.CreateStatus(0, 2);
+		
+		status.AddMessage("Deleting Old Src");
 		{
-			Directory.Delete(srcDir, true);
+			if (Directory.Exists(srcDir))
+			{
+				Directory.Delete(srcDir, true);
+			}
+			
+			status.Current++;
 		}
 		
-		var clientModule = serverOnly ? null : ReadModule(CommonSetup.TerrariaPath, CLIENT_VERSION);
-		var serverModule = ReadModule(CommonSetup.TerrariaServerPath, SERVER_VERSION);
+		var clientModule = serverOnly ? null : ReadModule(CommonSetup.TerrariaPath, CLIENT_VERSION, status);
+		var serverModule = ReadModule(CommonSetup.TerrariaServerPath, SERVER_VERSION, status);
+		status.Current++;
 		var mainModule = serverOnly ? serverModule : clientModule;
 		if (mainModule is null)
 		{
@@ -187,7 +194,7 @@ public sealed class DecompileTask : SetupOperation
 		
 		if (CommonSetup.IsAutomatic)
 		{
-			ExecuteParallel(items, true, 1);
+			ExecuteParallel(items, 1);
 		}
 		else
 		{
@@ -239,7 +246,7 @@ public sealed class DecompileTask : SetupOperation
 		);
 	}
 	
-	private PEFile ReadModule(string path, Version version)
+	private PEFile ReadModule(string path, Version version, ProgressStatus status)
 	{
 		var usingVersionedPath = false;
 		var versionedPath = path.Insert(path.LastIndexOf('.'), $"_v{version}");
@@ -249,7 +256,7 @@ public sealed class DecompileTask : SetupOperation
 			usingVersionedPath = true;
 		}
 		
-		TaskInterface.UpdateStatus("Loading " + Path.GetFileName(path));
+		status.AddMessage("Loading " + Path.GetFileName(path));
 		using var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
 		var module = new PEFile(path, fileStream, PEStreamOptions.PrefetchEntireImage);
 		var assemblyName = new AssemblyName(module.FullName);
@@ -263,7 +270,7 @@ public sealed class DecompileTask : SetupOperation
 			return module;
 		}
 		
-		TaskInterface.UpdateStatus("Backup up " + Path.GetFileName(path) + " to " + Path.GetFileName(versionedPath));
+		status.AddMessage("Backup up " + Path.GetFileName(path) + " to " + Path.GetFileName(versionedPath));
 		File.Copy(path, versionedPath);
 		return module;
 	}

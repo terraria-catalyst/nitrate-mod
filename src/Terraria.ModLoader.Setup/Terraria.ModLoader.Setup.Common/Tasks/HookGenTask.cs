@@ -20,10 +20,12 @@ public sealed class HookGenTask(ITaskInterface taskInterface) : SetupOperation(t
 	
 	public override void Run()
 	{
+		var status = taskInterface.Progress.CreateStatus(0, 2);
+		
 		if (!File.Exists(tml_assembly_path))
 		{
 			taskInterface.ShowDialogWithOkFallback("tML exe not found", $"\"{tml_assembly_path}\" does not exist.", SetupMessageBoxButtons.Ok, SetupMessageBoxIcon.Error);
-			TaskInterface.UpdateStatus("Cancelled");
+			status.AddMessage("Canceled");
 			return;
 		}
 		
@@ -33,16 +35,21 @@ public sealed class HookGenTask(ITaskInterface taskInterface) : SetupOperation(t
 			File.Delete(outputPath);
 		}
 		
-		TaskInterface.UpdateStatus("Hooking: tModLoader.dll -> TerrariaHooks.dll");
-		
-		if (!HookGen(taskInterface, tml_assembly_path, outputPath))
+		status.AddMessage("Hooking: tModLoader.dll -> TerrariaHooks.dll");
 		{
-			TaskInterface.UpdateStatus("Cancelled");
-			return;
+			if (!HookGen(taskInterface, tml_assembly_path, outputPath))
+			{
+				status.AddMessage("Cancelled");
+				return;
+			}
+			
+			status.Current++;
 		}
 		
 		File.Delete(Path.ChangeExtension(outputPath, "pdb"));
 		taskInterface.ShowDialogWithOkFallback("Success", "Make sure you diff tModLoader after this", SetupMessageBoxButtons.Ok, SetupMessageBoxIcon.Information);
+		status.Current++;
+		status.AddMessage("Successfully generated TerrariaHooks.dll");
 	}
 	
 	public static bool HookGen(ITaskInterface taskInterface, string inputPath, string outputPath)

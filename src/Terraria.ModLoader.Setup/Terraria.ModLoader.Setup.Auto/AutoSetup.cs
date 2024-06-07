@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -15,21 +14,13 @@ internal sealed class AutoSetup : ITaskInterface
 	
 	public CancellationToken CancellationToken => cancelSource.Token;
 	
-	public int MaxProgress { get; set; } = 1;
+	public IProgressManager Progress { get; } = new ProgressManager();
 	
-	public int Progress
-	{
-		set => Console.WriteLine($"Value: {(float)value / MaxProgress}.");
-	}
+	public ISettingsManager Settings { get; } = new SettingsManager();
 	
 	public object InvokeOnMainThread(Delegate action)
 	{
 		return action.DynamicInvoke();
-	}
-	
-	public void UpdateStatus(string status)
-	{
-		Console.WriteLine(status);
 	}
 	
 	public void DoAuto()
@@ -97,34 +88,8 @@ internal sealed class AutoSetup : ITaskInterface
 		}
 		catch (Exception e)
 		{
-			UpdateStatus(e.Message);
+			Console.WriteLine(e.Message);
 			Environment.Exit(1);
 		}
 	}
-	
-#region Settings
-	private readonly Dictionary<string, object> knownSettings = new();
-	private string? settingsPath;
-	
-	public T GetSettings<T>()
-	{
-		return (T)knownSettings[typeof(T).FullName!];
-	}
-	
-	public void SetSettings<T>(T settings)
-	{
-		knownSettings[typeof(T).FullName!] = settings!;
-	}
-	
-	public void LoadSettings(string path)
-	{
-		settingsPath = path;
-		Settings.LoadSettings(path, knownSettings);
-	}
-	
-	public void SaveSettings()
-	{
-		Settings.SaveSettings(settingsPath!, knownSettings);
-	}
-#endregion
 }

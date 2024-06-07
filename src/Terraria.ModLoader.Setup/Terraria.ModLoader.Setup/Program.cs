@@ -47,7 +47,7 @@ internal static class Program
 			}
 			
 			CommonSetup.TmlDeveloperSteamDirectory = Path.GetDirectoryName(dialog.FileName)!;
-			CommonSetup.TaskInterface.SaveSettings();
+			CommonSetup.TaskInterface.Settings.Save();
 			
 			CommonSetup.UpdateTargetsFiles();
 			return;

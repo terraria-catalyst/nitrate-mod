@@ -70,7 +70,7 @@ public partial class MainForm : Form
 		};
 #endregion
 		
-		SetPatchMode(taskInterface.GetSettings<PatchSettings>().PatchMode);
+		SetPatchMode(taskInterface.Settings.Get<PatchSettings>().PatchMode);
 		
 		Closing += (_, args) =>
 		{
@@ -123,6 +123,7 @@ public partial class MainForm : Form
 	private void RunTask(SetupOperation task)
 	{
 		CancelSource = new CancellationTokenSource();
+		taskInterface.Progress.ClearProgress();
 		foreach (var b in taskButtons.Keys)
 		{
 			b.Enabled = false;
@@ -227,8 +228,8 @@ public partial class MainForm : Form
 		exactToolStripMenuItem.Checked = mode == 0;
 		offsetToolStripMenuItem.Checked = mode == 1;
 		fuzzyToolStripMenuItem.Checked = mode == 2;
-		taskInterface.GetSettings<PatchSettings>().PatchMode = mode;
-		taskInterface.SaveSettings();
+		taskInterface.Settings.Get<PatchSettings>().PatchMode = mode;
+		taskInterface.Settings.Save();
 	}
 	
 	private void exactToolStripMenuItem_Click(object sender, EventArgs e)

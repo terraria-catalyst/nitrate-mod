@@ -87,11 +87,20 @@ public abstract class RoslynTask(ITaskInterface taskInterface) : SetupOperation(
 			return MSBuildWorkspace.Create();
 		}
 		
-		TaskInterface.UpdateStatus("Finding MSBuild");
-		var vsInst = MSBuildLocator.QueryVisualStudioInstances().OrderByDescending(inst => inst.Version).First();
-		MSBuildLocator.RegisterInstance(vsInst);
-		TaskInterface.UpdateStatus($"Found MSBuild {vsInst.Version} at {vsInst.MSBuildPath}");
-		msBuildFound = true;
+		var status = taskInterface.Progress.CreateStatus(0, 1);
+		
+		VisualStudioInstance? vsInst;
+		status.AddMessage("Finding MSBuild");
+		{
+			vsInst = MSBuildLocator.QueryVisualStudioInstances().OrderByDescending(inst => inst.Version).First();
+			MSBuildLocator.RegisterInstance(vsInst);
+			status.Current++;
+		}
+		
+		status.AddMessage($"Found MSBuild {vsInst.Version} at {vsInst.MSBuildPath}");
+		{
+			msBuildFound = true;
+		}
 		
 		return MSBuildWorkspace.Create();
 	}

@@ -23,21 +23,19 @@ public abstract class SetupOperation(ITaskInterface taskInterface)
 		public WorkItem(string status, Action action) : this(status, _ => action()) { }
 	}
 	
-	protected void ExecuteParallel(List<WorkItem> items, bool resetProgress = true, int maxDegree = 0)
+	protected void ExecuteParallel(List<WorkItem> items, int maxDegree = 0)
 	{
 		try
 		{
-			if (resetProgress)
-			{
-				TaskInterface.MaxProgress = items.Count;
-				Progress = 0;
-			}
+			var progStatus = TaskInterface.Progress.CreateStatus(0, items.Count);
+			var statusMessageHandle = progStatus.AddMessage("");
+			Progress = 0;
 			
 			var working = new List<StrongBox<string>>();
 			
 			void updateStatus()
 			{
-				TaskInterface.UpdateStatus(string.Join("\r\n", working.Select(r => r.Value)));
+				progStatus.SetMessage(statusMessageHandle, string.Join("\r\n", working.Select(r => r.Value)));
 			}
 			
 			Parallel.ForEach(
@@ -58,7 +56,7 @@ public abstract class SetupOperation(ITaskInterface taskInterface)
 					lock (working)
 					{
 						working.Remove(status);
-						TaskInterface.Progress = ++Progress;
+						progStatus.Current = ++Progress;
 						updateStatus();
 					}
 					
