@@ -32,9 +32,14 @@ internal sealed class MainSetup : IDialogTaskInterface, IPatchReviewerInterface
 				return;
 			}
 			
-			Form.ProgressBar.Maximum = Progress.AllProgress.Max;
-			Form.ProgressBar.Value = Progress.AllProgress.Current;
-			Form.LabelStatus.Text = string.Join('\n', Progress.PendingStatuses.SelectMany(x => x.Messages));
+			InvokeOnMainThread(
+				() =>
+				{
+					Form.ProgressBar.Maximum = Progress.AllProgress.Max;
+					Form.ProgressBar.Value = Progress.AllProgress.Current;
+					Form.LabelStatus.Text = string.Join('\n', Progress.PendingStatuses.SelectMany(x => x.Messages));
+				}
+			);
 		};
 	}
 	
