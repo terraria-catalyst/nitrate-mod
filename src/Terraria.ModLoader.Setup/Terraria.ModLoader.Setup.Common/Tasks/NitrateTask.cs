@@ -13,7 +13,7 @@ namespace Terraria.ModLoader.Setup.Common.Tasks;
 
 public sealed class NitrateTask : CompositeTask
 {
-	private sealed class OrganizeExistingPartialClassesTask(CommonContext ctx, string sourceDirectory, string targetDirectory) : SetupOperation(ctx)
+	private sealed class OrganizePartialClasses(CommonContext ctx, string sourceDirectory, string targetDirectory) : SetupOperation(ctx)
 	{
 		public override void Run()
 		{
@@ -86,7 +86,7 @@ public sealed class NitrateTask : CompositeTask
 		}
 	}
 	
-	private sealed class MakeEveryTypePartialTask(CommonContext ctx, string sourceDirectory, string targetDirectory) : SetupOperation(ctx)
+	private sealed class MakeTypesPartial(CommonContext ctx, string sourceDirectory, string targetDirectory) : SetupOperation(ctx)
 	{
 		private sealed class TypePartialRewriter : CSharpSyntaxRewriter
 		{
@@ -165,7 +165,7 @@ public sealed class NitrateTask : CompositeTask
 								File.SetAttributes(destination, FileAttributes.Normal);
 							}
 							
-							File.WriteAllText(destination, Partialize(File.ReadAllText(file), ctx.TaskInterface.CancellationToken));
+							File.WriteAllText(destination, Partialize(File.ReadAllText(file), Context.TaskInterface.CancellationToken));
 						}
 					)
 				);
@@ -191,7 +191,153 @@ public sealed class NitrateTask : CompositeTask
 		}
 	}
 	
-	private sealed class FormatWithDotnetFormatAndEditorConfigTask(CommonContext ctx, string sourceDirectory, string targetDirectory) : SetupOperation(ctx)
+	private sealed class TreeshakePreprocessors(CommonContext ctx, string sourceDirectory, string targetDirectory) : SetupOperation(ctx)
+	{
+		public override void Run()
+		{
+			var items = new List<WorkItem>();
+			
+			foreach (var (file, relPath) in EnumerateFiles(sourceDirectory))
+			{
+				var destination = Path.Combine(targetDirectory, relPath);
+				
+				if (!relPath.EndsWith(".cs"))
+				{
+					copy(file, relPath, destination);
+					continue;
+				}
+				
+				items.Add(
+					new WorkItem(
+						"Treeshaking preprocessors: " + relPath,
+						() =>
+						{
+							CreateParentDirectory(destination);
+							
+							if (File.Exists(destination))
+							{
+								File.SetAttributes(destination, FileAttributes.Normal);
+							}
+							
+							File.WriteAllText(destination, Treeshake(File.ReadAllText(file), Context.TaskInterface.CancellationToken));
+						}
+					)
+				);
+			}
+			
+			ExecuteParallel(items);
+			
+			return;
+			
+			void copy(string file, string relPath, string destination)
+			{
+				items.Add(new WorkItem("Copying: " + relPath, () => Copy(file, destination)));
+			}
+		}
+		
+		private static string Treeshake(string source, CancellationToken cancellationToken)
+		{
+			var tree = CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(preprocessorSymbols: ["FNA", "NETCORE",]), cancellationToken: cancellationToken);
+			var node = tree.GetRoot(cancellationToken);
+			
+			var directives = tree.getdi;
+			var conditionStack = new Stack<bool>();
+			conditionStack.Push(true);
+			
+			foreach (var directive in directives)
+			{
+				switch (directive.Kind())
+				{
+				case SyntaxKind.IfDirectiveTrivia:
+					var ifDirective = (IfDirectiveTriviaSyntax)directive;
+					var ifCondition = EvaluateCondition(ifDirective.Condition);
+					conditionStack.Push(ifCondition);
+					break;
+				
+				case SyntaxKind.ElifDirectiveTrivia:
+					var elifDirective = (ElifDirectiveTriviaSyntax)directive;
+					var elifCondition = EvaluateCondition(elifDirective.Condition);
+					var outerCondition = conditionStack.Peek();
+					conditionStack.Pop();
+					conditionStack.Push(outerCondition && !conditionStack.Contains(true) && elifCondition);
+					break;
+				
+				case SyntaxKind.ElseDirectiveTrivia:
+					conditionStack.Push(!conditionStack.Pop());
+					break;
+				
+				case SyntaxKind.EndIfDirectiveTrivia:
+					conditionStack.Pop();
+					break;
+				
+				default:
+					if (!conditionStack.Contains(true))
+					{
+						node = node.RemoveNode(directive, SyntaxRemoveOptions.KeepExteriorTrivia);
+					}
+					
+					break;
+				}
+			}
+			
+			return node.ToFullString();
+		}
+		
+		private static bool EvaluateCondition(ExpressionSyntax condition)
+		{
+			return EvaluateExpression(condition, new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "FNA", "NETCORE", });
+		}
+		
+		private static bool EvaluateExpression(ExpressionSyntax expression, HashSet<string> definedSymbols)
+		{
+			switch (expression.Kind())
+			{
+			case SyntaxKind.IdentifierName:
+				var identifier = (IdentifierNameSyntax)expression;
+				return definedSymbols.Contains(identifier.Identifier.ValueText);
+			
+			case SyntaxKind.LogicalAndExpression:
+				var andExpression = (BinaryExpressionSyntax)expression;
+				return EvaluateExpression(andExpression.Left, definedSymbols) && EvaluateExpression(andExpression.Right, definedSymbols);
+			
+			case SyntaxKind.LogicalOrExpression:
+				var orExpression = (BinaryExpressionSyntax)expression;
+				return EvaluateExpression(orExpression.Left, definedSymbols) || EvaluateExpression(orExpression.Right, definedSymbols);
+			
+			case SyntaxKind.EqualsExpression:
+			{
+				var equalsExpression = (BinaryExpressionSyntax)expression;
+				if (equalsExpression is not { Left: IdentifierNameSyntax left, Right: LiteralExpressionSyntax right, })
+				{
+					return false;
+				}
+				
+				var symbol = left.Identifier.Text;
+				var value = right.Token.ValueText;
+				return definedSymbols.Contains(symbol) && value.Equals("true", StringComparison.CurrentCultureIgnoreCase);
+				
+			}
+			
+			case SyntaxKind.NotEqualsExpression:
+			{
+				var notEqualsExpression = (BinaryExpressionSyntax)expression;
+				if (notEqualsExpression.Left is not IdentifierNameSyntax left || notEqualsExpression.Right is not LiteralExpressionSyntax right)
+				{
+					return false;
+				}
+				
+				var symbol = left.Identifier.Text;
+				var value = right.Token.ValueText;
+				return definedSymbols.Contains(symbol) && value.Equals("false", StringComparison.CurrentCultureIgnoreCase);
+			}
+			
+			default:
+				return false;
+			}
+		}
+	}
+	
+	private sealed class FormatWithEditorConfig(CommonContext ctx, string sourceDirectory, string targetDirectory) : SetupOperation(ctx)
 	{
 		public override void Run()
 		{
@@ -293,9 +439,10 @@ public sealed class NitrateTask : CompositeTask
 	public static SetupOperation[] GetOperations(CommonContext ctx, string baseDir, string patchedDir, string patchDir)
 	{
 		return [
-			new OrganizeExistingPartialClassesTask(ctx, baseDir, baseDir = patchedDir + nameof(OrganizeExistingPartialClassesTask)), 
-			new MakeEveryTypePartialTask(ctx, baseDir, baseDir = patchedDir + nameof(MakeEveryTypePartialTask)), 
-			new FormatWithDotnetFormatAndEditorConfigTask(ctx, baseDir, baseDir = patchedDir + nameof(FormatWithDotnetFormatAndEditorConfigTask)),
+			new OrganizePartialClasses(ctx, baseDir, baseDir = patchedDir + '_' + nameof(OrganizePartialClasses)),
+			new MakeTypesPartial(ctx, baseDir, baseDir = patchedDir + '_' + nameof(MakeTypesPartial)),
+			new TreeshakePreprocessors(ctx, baseDir, baseDir = patchedDir + '_' + nameof(TreeshakePreprocessors)),
+			new FormatWithEditorConfig(ctx, baseDir, baseDir = patchedDir + '_' + nameof(FormatWithEditorConfig)),
 			new PatchTask(ctx, baseDir, patchedDir, patchDir),
 		];
 	}
