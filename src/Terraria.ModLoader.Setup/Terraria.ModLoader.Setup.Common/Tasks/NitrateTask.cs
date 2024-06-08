@@ -240,27 +240,27 @@ public sealed class NitrateTask : CompositeTask
 			var processedLines = new List<string>();
 			
 			var include = true;
-			foreach (var l in lines) {
-				var line = l.Trim();
+			foreach (var line in lines) {
+				var trimmedLine = line.Trim();
 				
-				if (line.StartsWith("#if"))
+				if (trimmedLine.StartsWith("#if"))
 				{
-					var condition = line[3..].Trim();
+					var condition = trimmedLine[3..].Trim();
 					include = EvaluateCondition(condition, symbols);
 				}
-				else if (line.StartsWith("#elif"))
+				else if (trimmedLine.StartsWith("#elif"))
 				{
-					var condition = line[5..].Trim();
+					var condition = trimmedLine[5..].Trim();
 					if (!include)
 					{
 						include = EvaluateCondition(condition, symbols);
 					}
 				}
-				else if (line.StartsWith("#else"))
+				else if (trimmedLine.StartsWith("#else"))
 				{
 					include = !include;
 				}
-				else if (line.StartsWith("#endif"))
+				else if (trimmedLine.StartsWith("#endif"))
 				{
 					include = true;
 				}
