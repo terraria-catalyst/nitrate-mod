@@ -94,7 +94,7 @@ public sealed class NitrateTask : CompositeTask
 	
 	public static SetupOperation[] GetOperations(CommonContext ctx, string baseDir, string patchedDir, string patchDir)
 	{
-		return [new OrganizeExistingPartialClassesTask(ctx, update(ref baseDir, patchedDir + nameof(OrganizeExistingPartialClassesTask)), baseDir), new PatchTask(ctx, baseDir, patchedDir, patchDir),];
+		return [new OrganizeExistingPartialClassesTask(ctx, update(ref baseDir, patchedDir + nameof(OrganizeExistingPartialClassesTask)), baseDir), new MakeEveryTypePartialTask(ctx, update(ref baseDir, patchedDir + nameof(MakeEveryTypePartialTask)), baseDir), new FormatWithDotnetFormatAndEditorConfigTask(ctx, update(ref baseDir, patchedDir + nameof(FormatWithDotnetFormatAndEditorConfigTask)), baseDir), new PatchTask(ctx, baseDir, patchedDir, patchDir),];
 		
 		T update<T>(ref T value, T newValue)
 		{
