@@ -43,7 +43,7 @@ public sealed class PatchTask(ITaskInterface taskInterface, string baseDir, stri
 	
 	public override void Run()
 	{
-		CommonSetup.UpdateTargetsFiles(); //Update branch information
+		CommonSetup.UpdateTargetsFiles(taskInterface); //Update branch information
 		
 		mode = (Patcher.Mode) taskInterface.Settings.Get<PatchSettings>().PatchMode;
 		

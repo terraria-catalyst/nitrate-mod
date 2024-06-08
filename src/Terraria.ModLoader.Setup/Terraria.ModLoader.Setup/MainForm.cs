@@ -92,7 +92,7 @@ public partial class MainForm : Form
 	
 	private void menuItemTerraria_Click(object sender, EventArgs e)
 	{
-		CommonSetup.SelectAndSetTerrariaDirectoryDialog();
+		CommonSetup.SelectAndSetTerrariaDirectoryDialog(taskInterface);
 	}
 	
 	private void menuItemDecompileServer_Click(object sender, EventArgs e)
@@ -253,6 +253,6 @@ public partial class MainForm : Form
 	
 	private void menuItemTmlPath_Click(object sender, EventArgs e)
 	{
-		SelectTmlDirectoryDialog();
+		SelectTmlDirectoryDialog(taskInterface);
 	}
 }

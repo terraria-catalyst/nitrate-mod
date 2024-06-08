@@ -2,6 +2,9 @@
 
 namespace Terraria.ModLoader.Setup.Common;
 
+/// <summary>
+///		Handles saving and getting settings.
+/// </summary>
 public interface ISettingsManager
 {
 	/// <summary>

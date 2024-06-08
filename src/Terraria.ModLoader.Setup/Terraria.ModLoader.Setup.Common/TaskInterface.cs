@@ -3,6 +3,9 @@ using System.Threading;
 
 namespace Terraria.ModLoader.Setup.Common;
 
+/// <summary>
+///		The main interface object designed to handle task execution.
+/// </summary>
 public interface ITaskInterface
 {
 	/// <summary>

@@ -127,18 +127,18 @@ public sealed class DecompileTask : SetupOperation
 	
 	public override bool ConfigurationDialog()
 	{
-		if (File.Exists(CommonSetup.TerrariaPath) && File.Exists(CommonSetup.TerrariaServerPath))
+		if (File.Exists(CommonSetup.TerrariaPath[TaskInterface]) && File.Exists(CommonSetup.TerrariaServerPath[TaskInterface]))
 		{
 			return true;
 		}
 		
-		if (CommonSetup.IsAutomatic)
+		if (CommonSetup.IsAutomatic[TaskInterface])
 		{
 			Console.WriteLine($"Automatic setup critical failure, can't find both {CommonSetup.TerrariaPath} and {CommonSetup.TerrariaServerPath}");
 			Environment.Exit(1);
 		}
 		
-		return (bool) TaskInterface.InvokeOnMainThread(new Func<bool>(CommonSetup.SelectAndSetTerrariaDirectoryDialog));
+		return (bool) TaskInterface.InvokeOnMainThread(new Func<bool>(() => CommonSetup.SelectAndSetTerrariaDirectoryDialog(TaskInterface)));
 	}
 	
 	public override void Run()
@@ -155,8 +155,8 @@ public sealed class DecompileTask : SetupOperation
 			status.Current++;
 		}
 		
-		var clientModule = serverOnly ? null : ReadModule(CommonSetup.TerrariaPath, CLIENT_VERSION, status);
-		var serverModule = ReadModule(CommonSetup.TerrariaServerPath, SERVER_VERSION, status);
+		var clientModule = serverOnly ? null : ReadModule(CommonSetup.TerrariaPath[TaskInterface], CLIENT_VERSION, status);
+		var serverModule = ReadModule(CommonSetup.TerrariaServerPath[TaskInterface], SERVER_VERSION, status);
 		status.Current++;
 		var mainModule = serverOnly ? serverModule : clientModule;
 		if (mainModule is null)
@@ -192,7 +192,7 @@ public sealed class DecompileTask : SetupOperation
 		items.Add(WriteTerrariaProjectFile(mainModule, files, resources, decompiledLibraries));
 		items.Add(WriteCommonConfigurationFile());
 		
-		if (CommonSetup.IsAutomatic)
+		if (CommonSetup.IsAutomatic[TaskInterface])
 		{
 			ExecuteParallel(items, 1);
 		}

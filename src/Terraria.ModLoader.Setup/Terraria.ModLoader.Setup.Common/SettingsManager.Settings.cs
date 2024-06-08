@@ -19,6 +19,15 @@ public sealed class TerrariaPathSettings
 	public string TmlDeveloperSteamDirectory { get; set; } = string.Empty;
 }
 
+public sealed class RuntimeSettings
+{
+	public bool IsAutomatic { get; set; }
+	
+	public string? TerrariaSteamDirectory { get; set; }
+	
+	public string? TmlDeveloperSteamDirectory { get; set; }
+}
+
 public static class Settings
 {
 	public static void InitializeSettings(ITaskInterface taskInterface)
@@ -35,6 +44,7 @@ public static class Settings
 			);
 			
 			taskInterface.Settings.Set(new TerrariaPathSettings());
+			taskInterface.Settings.Set(new RuntimeSettings());
 		}
 		
 		// Load settings from file if it exists and save it and defaults.

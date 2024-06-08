@@ -10,17 +10,16 @@ internal static class Program
 	public static void Main(string[] args)
 	{
 		var setup = new AutoSetup();
-		CommonSetup.IsAutomatic = true;
-		CommonSetup.TaskInterface = setup;
 		Settings.InitializeSettings(setup);
+		CommonSetup.IsAutomatic[setup] = true;
 		CommonSetup.CreateSymlinks();
 		
-		CommonSetup.TerrariaSteamDirectory = Path.GetFullPath(args[0]);
-		CommonSetup.TmlDeveloperSteamDirectory = Path.GetFullPath("steam_build");
+		CommonSetup.TerrariaSteamDirectory[setup] = Path.GetFullPath(args[0]);
+		CommonSetup.TmlDeveloperSteamDirectory[setup] = Path.GetFullPath("steam_build");
 		
-		if (!Directory.Exists(CommonSetup.TmlDeveloperSteamDirectory))
+		if (!Directory.Exists(CommonSetup.TmlDeveloperSteamDirectory[setup]))
 		{
-			Directory.CreateDirectory(CommonSetup.TmlDeveloperSteamDirectory);
+			Directory.CreateDirectory(CommonSetup.TmlDeveloperSteamDirectory[setup]);
 		}
 		
 		Console.WriteLine("Automatic setup start");

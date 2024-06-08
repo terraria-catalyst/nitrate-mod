@@ -1,5 +1,7 @@
 namespace Terraria.ModLoader.Setup.Common;
 
+// TODO: Replace mirrored Windows API for more generalized API.
+
 public enum SetupDialogResult
 {
 	None = 0,
@@ -10,10 +12,6 @@ public enum SetupDialogResult
 	Ignore = 5,
 	Yes = 6,
 	No = 7,
-	
-	/* 8
-	 * 9 */
-	
 	TryAgain = 10,
 	Continue = 11,
 }
