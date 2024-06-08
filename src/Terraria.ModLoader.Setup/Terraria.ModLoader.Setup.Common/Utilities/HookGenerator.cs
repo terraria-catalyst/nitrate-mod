@@ -14,7 +14,17 @@ using MonoMod.Utils;
 
 namespace Terraria.ModLoader.Setup.Common.Utilities;
 
-public class HookGenerator
+/// <summary>
+///		Generates MonoMod IL and detour hook definitions for a given assembly.
+/// </summary>
+/// <remarks>
+///		Forked from:
+///		https://github.com/MonoMod/MonoMod/blob/reorganize/src/MonoMod.RuntimeDetour.HookGen/HookGenerator.cs
+///		<br />
+///		Copied and maintained separately since it's no longer officially
+///		maintained by the MonoMod developers.
+/// </remarks>
+public sealed class HookGenerator
 {
 	private static readonly Dictionary<Type, string> reflectionTypeNameMap = new()
 	{
@@ -34,6 +44,8 @@ public class HookGenerator
 		{ typeof(uint), "uint" },
 		{ typeof(ulong), "ulong" },
 		{ typeof(void), "void" },
+		
+		// TODO: add nint and nuint (IntPtr, UIntPtr); changes signatures
 	};
 	
 	private static readonly Dictionary<string, string> typeNameMap = new();
@@ -42,6 +54,7 @@ public class HookGenerator
 	{
 		foreach (var pair in reflectionTypeNameMap)
 		{
+			// Shouldn't generally be possible.
 			if (pair.Key.FullName is null)
 			{
 				throw new InvalidOperationException();
@@ -51,13 +64,17 @@ public class HookGenerator
 		}
 	}
 	
+	/// <summary>
+	///		The generated module to be output.
+	/// </summary>
 	public ModuleDefinition OutputModule { get; }
 	
 	private readonly MonoModder modder;
 	
-	private readonly string @namespace;
-	private readonly string namespaceIl;
-	private readonly bool hookOrig;
+	private readonly string onNamespace;
+	private readonly string ilNamespace;
+	
+	public bool HookOrig { get; set; }
 	
 	public bool HookPrivate { get; set; }
 	
@@ -99,19 +116,19 @@ public class HookGenerator
 		// OutputModule.AssemblyReferences.AddRange(modder.Module.AssemblyReferences);
 		// modder.DependencyMap[OutputModule] = new List<ModuleDefinition>(modder.DependencyMap[modder.Module]);
 		
-		@namespace = Environment.GetEnvironmentVariable("MONOMOD_HOOKGEN_NAMESPACE");
-		if (string.IsNullOrEmpty(@namespace))
+		onNamespace = Environment.GetEnvironmentVariable("MONOMOD_HOOKGEN_NAMESPACE") ?? "";
+		if (string.IsNullOrEmpty(onNamespace))
 		{
-			@namespace = "On";
+			onNamespace = "On";
 		}
 		
-		namespaceIl = Environment.GetEnvironmentVariable("MONOMOD_HOOKGEN_NAMESPACE_IL");
-		if (string.IsNullOrEmpty(namespaceIl))
+		ilNamespace = Environment.GetEnvironmentVariable("MONOMOD_HOOKGEN_NAMESPACE_IL") ?? "";
+		if (string.IsNullOrEmpty(ilNamespace))
 		{
-			namespaceIl = "IL";
+			ilNamespace = "IL";
 		}
 		
-		hookOrig = Environment.GetEnvironmentVariable("MONOMOD_HOOKGEN_ORIG") == "1";
+		HookOrig = Environment.GetEnvironmentVariable("MONOMOD_HOOKGEN_ORIG") == "1";
 		HookPrivate = Environment.GetEnvironmentVariable("MONOMOD_HOOKGEN_PRIVATE") == "1";
 		
 		modder.MapDependency(modder.Module, "MonoMod.RuntimeDetour");
@@ -158,26 +175,11 @@ public class HookGenerator
 		unmodifyMethod = OutputModule.ImportReference(hookEndpointManagerType.FindMethod("Unmodify"));
 	}
 	
-	public void Generate()
-	{
-		foreach (var type in modder.Module.Types)
-		{
-			GenerateFor(type, out var hookType, out var hookIlType);
-			if (hookType == null || hookIlType == null || hookType.IsNested)
-			{
-				continue;
-			}
-			
-			OutputModule.Types.Add(hookType);
-			OutputModule.Types.Add(hookIlType);
-		}
-	}
-	
-	public void GenerateFor(TypeDefinition type, out TypeDefinition hookType, out TypeDefinition hookIlType)
+	public void GenerateFor(TypeDefinition type, out TypeDefinition? hookType, out TypeDefinition? hookIlType)
 	{
 		hookType = hookIlType = null;
 		
-		if (type.HasGenericParameters || type.IsRuntimeSpecialName || type.Name.StartsWith("<", StringComparison.Ordinal))
+		if (type.HasGenericParameters || type.IsRuntimeSpecialName || type.Name.StartsWith('<'))
 		{
 			return;
 		}
@@ -190,14 +192,14 @@ public class HookGenerator
 		modder.LogVerbose($"[HookGen] Generating for type {type.FullName}");
 		
 		hookType = new TypeDefinition(
-			type.IsNested ? null : (@namespace + (string.IsNullOrEmpty(type.Namespace) ? "" : ("." + type.Namespace))),
+			type.IsNested ? null : (onNamespace + (string.IsNullOrEmpty(type.Namespace) ? "" : ("." + type.Namespace))),
 			type.Name,
 			(type.IsNested ? TypeAttributes.NestedPublic : TypeAttributes.Public) | TypeAttributes.Abstract | TypeAttributes.Sealed | TypeAttributes.Class,
 			OutputModule.TypeSystem.Object
 		);
 		
 		hookIlType = new TypeDefinition(
-			type.IsNested ? null : (namespaceIl + (string.IsNullOrEmpty(type.Namespace) ? "" : ("." + type.Namespace))),
+			type.IsNested ? null : (ilNamespace + (string.IsNullOrEmpty(type.Namespace) ? "" : ("." + type.Namespace))),
 			type.Name,
 			(type.IsNested ? TypeAttributes.NestedPublic : TypeAttributes.Public) | TypeAttributes.Abstract | TypeAttributes.Sealed | TypeAttributes.Class,
 			OutputModule.TypeSystem.Object
@@ -231,12 +233,12 @@ public class HookGenerator
 	
 	public bool GenerateFor(TypeDefinition hookType, TypeDefinition hookIlType, MethodDefinition method)
 	{
-		if (method.HasGenericParameters || method.IsAbstract || (method.IsSpecialName && !method.IsConstructor))
+		if (method.HasGenericParameters || method.IsAbstract || method is { IsSpecialName: true, IsConstructor: false, })
 		{
 			return false;
 		}
 		
-		if (!hookOrig && method.Name.StartsWith("orig_", StringComparison.Ordinal))
+		if (!HookOrig && method.Name.StartsWith("orig_", StringComparison.Ordinal))
 		{
 			return false;
 		}
@@ -249,7 +251,7 @@ public class HookGenerator
 		var name = GetFriendlyName(method);
 		var suffix = method.Parameters.Count != 0;
 		
-		List<MethodDefinition> overloads = null;
+		var overloads = new List<MethodDefinition>();
 		if (suffix)
 		{
 			overloads = method.DeclaringType.Methods.Where(other => !other.HasGenericParameters && GetFriendlyName(other) == name && other != method).ToList();
@@ -301,7 +303,7 @@ public class HookGenerator
 			name = nameTmp;
 		}
 		
-		// TODO: Fix possible conflict when other members with the same names exist.
+		// TODO: Fix possible conflict when members with the same names exist.
 		
 		var delOrig = GenerateDelegateFor(method);
 		delOrig.Name = "orig_" + name;
@@ -310,9 +312,9 @@ public class HookGenerator
 		
 		var delHook = GenerateDelegateFor(method);
 		delHook.Name = "hook_" + name;
-		var delHookInvoke = delHook.FindMethod("Invoke");
+		var delHookInvoke = delHook.FindMethod("Invoke")!;
 		delHookInvoke.Parameters.Insert(0, new ParameterDefinition("orig", ParameterAttributes.None, delOrig));
-		var delHookBeginInvoke = delHook.FindMethod("BeginInvoke");
+		var delHookBeginInvoke = delHook.FindMethod("BeginInvoke")!;
 		delHookBeginInvoke.Parameters.Insert(0, new ParameterDefinition("orig", ParameterAttributes.None, delOrig));
 		delHook.CustomAttributes.Add(GenerateEditorBrowsable(EditorBrowsableState.Never));
 		hookType.NestedTypes.Add(delHook);
@@ -536,7 +538,7 @@ public class HookGenerator
 		return name;
 	}
 	
-	private string GetFriendlyName(TypeReference type, bool full)
+	private static string GetFriendlyName(TypeReference type, bool full)
 	{
 		if (type is TypeSpecification)
 		{
@@ -573,12 +575,12 @@ public class HookGenerator
 		}
 	}
 	
-	private static bool IsPublic(TypeDefinition typeDef)
+	private static bool IsPublic(TypeDefinition? typeDef)
 	{
 		return typeDef != null && (typeDef.IsNestedPublic || typeDef.IsPublic) && !typeDef.IsNotPublic;
 	}
 	
-	private bool HasPublicArgs(GenericInstanceType typeGen)
+	private static bool HasPublicArgs(GenericInstanceType typeGen)
 	{
 		foreach (var arg in typeGen.GenericArguments)
 		{
@@ -607,7 +609,7 @@ public class HookGenerator
 		// Check if the declaring type is accessible.
 		// If not, use its base type instead.
 		// Note: This will break down with type specifications!
-		var type = typeRef?.SafeResolve();
+		var type = typeRef.SafeResolve();
 		goto Try;
 		
 	Retry:
@@ -639,7 +641,7 @@ public class HookGenerator
 			if (type.IsEnum)
 			{
 				// ... try the enum's underlying type.
-				typeRef = type.FindField("value__").FieldType;
+				typeRef = type.FindField("value__")!.FieldType;
 				break;
 			}
 			

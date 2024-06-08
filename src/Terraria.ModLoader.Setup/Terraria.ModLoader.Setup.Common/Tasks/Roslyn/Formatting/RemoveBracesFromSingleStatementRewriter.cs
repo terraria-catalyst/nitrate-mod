@@ -95,7 +95,7 @@ internal sealed class RemoveBracesFromSingleStatementRewriter : CSharpSyntaxRewr
 		{
 			IfStatementSyntax elseif => elseClause.WithStatement(RemoveClauseBraces(elseif)),
 			BlockSyntax elseBlock => elseClause.WithStatement(RemoveBraces(elseBlock)).WithElseKeyword(EnsureEndsLine(elseClause.ElseKeyword)),
-			_ => elseClause
+			_ => elseClause,
 		};
 		
 		node = node.WithElse(elseClause);
