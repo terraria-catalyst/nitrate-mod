@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Terraria.ModLoader.Setup.Common.Tasks;
 
-public abstract class SetupOperation(ITaskInterface taskInterface)
+public abstract class SetupOperation(CommonContext ctx)
 {
 	protected delegate void UpdateStatus(string status);
 	
@@ -27,7 +27,7 @@ public abstract class SetupOperation(ITaskInterface taskInterface)
 	{
 		try
 		{
-			var progStatus = TaskInterface.Progress.CreateStatus(0, items.Count);
+			var progStatus = Context.Progress.CreateStatus(0, items.Count);
 			var statusMessageHandle = progStatus.AddMessage("");
 			Progress = 0;
 			
@@ -43,7 +43,7 @@ public abstract class SetupOperation(ITaskInterface taskInterface)
 				new ParallelOptions { MaxDegreeOfParallelism = maxDegree > 0 ? maxDegree : Environment.ProcessorCount, },
 				item =>
 				{
-					TaskInterface.CancellationToken.ThrowIfCancellationRequested();
+					Context.TaskInterface.CancellationToken.ThrowIfCancellationRequested();
 					var status = new StrongBox<string>(item.Status);
 					lock (working)
 					{
@@ -196,7 +196,7 @@ public abstract class SetupOperation(ITaskInterface taskInterface)
 		return true;
 	}
 	
-	protected ITaskInterface TaskInterface { get; } = taskInterface;
+	protected CommonContext Context { get; } = ctx;
 	
 	protected int Progress { get; set; }
 	

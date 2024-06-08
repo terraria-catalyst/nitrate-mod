@@ -6,7 +6,7 @@ using DiffPatch;
 
 namespace Terraria.ModLoader.Setup.Common.Tasks;
 
-public sealed class DiffTask(ITaskInterface taskInterface, string baseDir, string srcDir, string patchDir) : SetupOperation(taskInterface)
+public sealed class DiffTask(CommonContext ctx, string baseDir, string srcDir, string patchDir) : SetupOperation(ctx)
 {
 	private static readonly string[] extensions = [ ".cs", ".csproj", ".ico", ".resx", ".png", "App.config", ".json", ".targets", ".txt", ".bat", ".sh", ];
 	
@@ -19,7 +19,7 @@ public sealed class DiffTask(ITaskInterface taskInterface, string baseDir, strin
 	
 	public override void Run()
 	{
-		var status = taskInterface.Progress.CreateStatus(0, 2);
+		var status = Context.Progress.CreateStatus(0, 2);
 		var items = new List<WorkItem>();
 		
 		foreach (var (file, relPath) in PatchTask.EnumerateSrcFiles(srcDir))

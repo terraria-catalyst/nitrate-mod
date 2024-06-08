@@ -9,21 +9,24 @@ internal static class Program
 {
 	public static void Main(string[] args)
 	{
-		var setup = new AutoSetup();
-		Settings.InitializeSettings(setup);
-		CommonSetup.IsAutomatic[setup] = true;
+		var ctx = new CommonContext(new AutoSetup())
+		{
+			IsAutomatic = true,
+		};
+		
+		Settings.InitializeSettings(ctx.TaskInterface);
 		CommonSetup.CreateSymlinks();
 		
-		CommonSetup.TerrariaSteamDirectory[setup] = Path.GetFullPath(args[0]);
-		CommonSetup.TmlDeveloperSteamDirectory[setup] = Path.GetFullPath("steam_build");
+		ctx.TerrariaSteamDirectory = Path.GetFullPath(args[0]);
+		ctx.TmlDeveloperSteamDirectory = Path.GetFullPath("steam_build");
 		
-		if (!Directory.Exists(CommonSetup.TmlDeveloperSteamDirectory[setup]))
+		if (!Directory.Exists(ctx.TmlDeveloperSteamDirectory))
 		{
-			Directory.CreateDirectory(CommonSetup.TmlDeveloperSteamDirectory[setup]);
+			Directory.CreateDirectory(ctx.TmlDeveloperSteamDirectory);
 		}
 		
 		Console.WriteLine("Automatic setup start");
-		setup.DoAuto();
+		AutoSetup.DoAuto(ctx);
 		Console.WriteLine("Automatic setup finished");
 	}
 }

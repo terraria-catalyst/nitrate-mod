@@ -2,7 +2,7 @@ using System.Linq;
 
 namespace Terraria.ModLoader.Setup.Common.Tasks;
 
-public abstract class CompositeTask(ITaskInterface taskInterface, params SetupOperation[] tasks) : SetupOperation(taskInterface)
+public abstract class CompositeTask(CommonContext ctx, params SetupOperation[] tasks) : SetupOperation(ctx)
 {
 	private SetupOperation? failed;
 	

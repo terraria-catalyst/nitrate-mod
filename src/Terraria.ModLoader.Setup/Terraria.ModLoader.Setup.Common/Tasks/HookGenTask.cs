@@ -9,7 +9,7 @@ using HookGenerator = Terraria.ModLoader.Setup.Common.Utilities.HookGenerator;
 
 namespace Terraria.ModLoader.Setup.Common.Tasks;
 
-public sealed class HookGenTask(ITaskInterface taskInterface) : SetupOperation(taskInterface)
+public sealed class HookGenTask(CommonContext ctx) : SetupOperation(ctx)
 {
 	private const string dotnet_sdk_version = "8.0.1";
 	private const string dotnet_target_version = "net8.0";
@@ -20,11 +20,11 @@ public sealed class HookGenTask(ITaskInterface taskInterface) : SetupOperation(t
 	
 	public override void Run()
 	{
-		var status = taskInterface.Progress.CreateStatus(0, 2);
+		var status = Context.Progress.CreateStatus(0, 2);
 		
 		if (!File.Exists(tml_assembly_path))
 		{
-			taskInterface.ShowDialogWithOkFallback("tML exe not found", $"\"{tml_assembly_path}\" does not exist.", SetupMessageBoxButtons.Ok, SetupMessageBoxIcon.Error);
+			Context.TaskInterface.ShowDialogWithOkFallback("tML exe not found", $"\"{tml_assembly_path}\" does not exist.", SetupMessageBoxButtons.Ok, SetupMessageBoxIcon.Error);
 			status.AddMessage("Canceled");
 			return;
 		}
@@ -37,7 +37,7 @@ public sealed class HookGenTask(ITaskInterface taskInterface) : SetupOperation(t
 		
 		status.AddMessage("Hooking: tModLoader.dll -> TerrariaHooks.dll");
 		{
-			if (!HookGen(taskInterface, tml_assembly_path, outputPath))
+			if (!HookGen(Context, tml_assembly_path, outputPath))
 			{
 				status.AddMessage("Cancelled");
 				return;
@@ -47,12 +47,12 @@ public sealed class HookGenTask(ITaskInterface taskInterface) : SetupOperation(t
 		}
 		
 		File.Delete(Path.ChangeExtension(outputPath, "pdb"));
-		taskInterface.ShowDialogWithOkFallback("Success", "Make sure you diff tModLoader after this", SetupMessageBoxButtons.Ok, SetupMessageBoxIcon.Information);
+		Context.TaskInterface.ShowDialogWithOkFallback("Success", "Make sure you diff tModLoader after this", SetupMessageBoxButtons.Ok, SetupMessageBoxIcon.Information);
 		status.Current++;
 		status.AddMessage("Successfully generated TerrariaHooks.dll");
 	}
 	
-	public static bool HookGen(ITaskInterface taskInterface, string inputPath, string outputPath)
+	public static bool HookGen(CommonContext ctx, string inputPath, string outputPath)
 	{
 		var dotnetReferencesDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + installed_net_refs;
 		
@@ -60,7 +60,7 @@ public sealed class HookGenTask(ITaskInterface taskInterface) : SetupOperation(t
 		if (!Directory.Exists(dotnetReferencesDirectory) || Directory.GetFiles(dotnetReferencesDirectory, "*.dll").Length == 0)
 		{
 			// Replace with exceptions if this is ever called in CLI.
-			taskInterface.ShowDialogWithOkFallback(
+			ctx.TaskInterface.ShowDialogWithOkFallback(
 				$".NET SDK {dotnet_sdk_version} not found",
 				$"""Unable to find reference libraries for .NET SDK '{dotnet_sdk_version}' - "{dotnetReferencesDirectory}" does not exist.""",
 				SetupMessageBoxButtons.Ok,

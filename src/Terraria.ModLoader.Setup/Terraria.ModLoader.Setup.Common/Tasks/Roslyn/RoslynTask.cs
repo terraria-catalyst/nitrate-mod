@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis.MSBuild;
 
 namespace Terraria.ModLoader.Setup.Common.Tasks.Roslyn;
 
-public abstract class RoslynTask(ITaskInterface taskInterface) : SetupOperation(taskInterface)
+public abstract class RoslynTask(CommonContext ctx) : SetupOperation(ctx)
 {
 	private string projectPath;
 	
@@ -19,7 +19,7 @@ public abstract class RoslynTask(ITaskInterface taskInterface) : SetupOperation(
 	
 	public override bool ConfigurationDialog()
 	{
-		return (bool)TaskInterface.InvokeOnMainThread(
+		return (bool)Context.TaskInterface.InvokeOnMainThread(
 			new Func<bool>(
 				() =>
 				{
@@ -31,7 +31,7 @@ public abstract class RoslynTask(ITaskInterface taskInterface) : SetupOperation(
 						Title = "Select C# Project",
 					};
 					
-					var result = taskInterface.ShowDialogWithOkFallback(ref dialog);
+					var result = Context.TaskInterface.ShowDialogWithOkFallback(ref dialog);
 					projectPath = dialog.FileName;
 					return result == SetupDialogResult.Ok && File.Exists(projectPath);
 				}
@@ -87,7 +87,7 @@ public abstract class RoslynTask(ITaskInterface taskInterface) : SetupOperation(
 			return MSBuildWorkspace.Create();
 		}
 		
-		var status = taskInterface.Progress.CreateStatus(0, 1);
+		var status = Context.Progress.CreateStatus(0, 1);
 		
 		VisualStudioInstance? vsInst;
 		status.AddMessage("Finding MSBuild");

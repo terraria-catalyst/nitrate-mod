@@ -42,13 +42,13 @@ public sealed class FormatTask : SetupOperation
 		workspace.TryApplyChanges(workspace.CurrentSolution.WithOptions(optionSet));
 	}
 	
-	public FormatTask(ITaskInterface taskInterface) : base(taskInterface) { }
+	public FormatTask(CommonContext ctx) : base(ctx) { }
 	
 	private static string projectPath; //persist across executions
 	
 	public override bool ConfigurationDialog()
 	{
-		return (bool)TaskInterface.InvokeOnMainThread(
+		return (bool)Context.TaskInterface.InvokeOnMainThread(
 			new Func<bool>(
 				() =>
 				{
@@ -60,7 +60,7 @@ public sealed class FormatTask : SetupOperation
 						Title = "Select C# Project",
 					};
 					
-					var result = TaskInterface.ShowDialogWithOkFallback(ref dialog);
+					var result = Context.TaskInterface.ShowDialogWithOkFallback(ref dialog);
 					projectPath = dialog.FileName;
 					return result == SetupDialogResult.Ok && File.Exists(projectPath);
 				}
@@ -79,7 +79,7 @@ public sealed class FormatTask : SetupOperation
 		var workItems = Directory.EnumerateFiles(dir, "*.cs", SearchOption.AllDirectories)
 			.Select(path => new FileInfo(path))
 			.OrderByDescending(f => f.Length)
-			.Select(f => new WorkItem("Formatting: " + f.Name, () => FormatFile(f.FullName, false, TaskInterface.CancellationToken)));
+			.Select(f => new WorkItem("Formatting: " + f.Name, () => FormatFile(f.FullName, false, Context.TaskInterface.CancellationToken)));
 		
 		ExecuteParallel(workItems.ToList());
 	}

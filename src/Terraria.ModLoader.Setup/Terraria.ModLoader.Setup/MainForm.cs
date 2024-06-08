@@ -22,12 +22,12 @@ public partial class MainForm : Form
 	public ProgressBar ProgressBar => progressBar;
 	
 	private readonly IDictionary<Button, Func<SetupOperation>> taskButtons = new Dictionary<Button, Func<SetupOperation>>();
-	private readonly ITaskInterface taskInterface;
+	private readonly CommonContext ctx;
 	private bool closeOnCancel;
 	
-	public MainForm(ITaskInterface taskInterface)
+	public MainForm(CommonContext ctx)
 	{
-		this.taskInterface = taskInterface;
+		this.ctx = ctx;
 		
 		FormBorderStyle = FormBorderStyle.FixedSingle;
 		MaximizeBox = false;
@@ -37,24 +37,24 @@ public partial class MainForm : Form
 		labelWorkingDirectoryDisplay.Text = Directory.GetCurrentDirectory();
 		
 #region Task button initialization
-		taskButtons[buttonDecompile] = () => new DecompileTask(taskInterface, "src/staging/decompiled");
+		taskButtons[buttonDecompile] = () => new DecompileTask(ctx, "src/staging/decompiled");
 		// Terraria
-		taskButtons[buttonDiffTerraria] = () => new DiffTask(taskInterface, "src/staging/decompiled", "src/staging/Terraria", "patches/Terraria");
-		taskButtons[buttonPatchTerraria] = () => new PatchTask(taskInterface, "src/staging/decompiled", "src/staging/Terraria", "patches/Terraria");
+		taskButtons[buttonDiffTerraria] = () => new DiffTask(ctx, "src/staging/decompiled", "src/staging/Terraria", "patches/Terraria");
+		taskButtons[buttonPatchTerraria] = () => new PatchTask(ctx, "src/staging/decompiled", "src/staging/Terraria", "patches/Terraria");
 		// Terraria .NET Core
-		taskButtons[buttonDiffTerrariaNetCore] = () => new DiffTask(taskInterface, "src/staging/Terraria", "src/staging/TerrariaNetCore", "patches/TerrariaNetCore");
-		taskButtons[buttonPatchTerrariaNetCore] = () => new PatchTask(taskInterface, "src/staging/Terraria", "src/staging/TerrariaNetCore", "patches/TerrariaNetCore");
+		taskButtons[buttonDiffTerrariaNetCore] = () => new DiffTask(ctx, "src/staging/Terraria", "src/staging/TerrariaNetCore", "patches/TerrariaNetCore");
+		taskButtons[buttonPatchTerrariaNetCore] = () => new PatchTask(ctx, "src/staging/Terraria", "src/staging/TerrariaNetCore", "patches/TerrariaNetCore");
 		// tModLoader
-		taskButtons[buttonDiffModLoader] = () => new DiffTask(taskInterface, "src/staging/TerrariaNetCore", "src/staging/tModLoader", "patches/tModLoader");
-		taskButtons[buttonPatchModLoader] = () => new PatchTask(taskInterface, "src/staging/TerrariaNetCore", "src/staging/tModLoader", "patches/tModLoader");
+		taskButtons[buttonDiffModLoader] = () => new DiffTask(ctx, "src/staging/TerrariaNetCore", "src/staging/tModLoader", "patches/tModLoader");
+		taskButtons[buttonPatchModLoader] = () => new PatchTask(ctx, "src/staging/TerrariaNetCore", "src/staging/tModLoader", "patches/tModLoader");
 		// Nitrate
-		taskButtons[buttonDiffNitrate] = () => new DiffTask(taskInterface, "src/staging/tModLoader", "src/staging/Nitrate", "patches/Nitrate");
-		taskButtons[buttonPatchNitrate] = () => new PatchTask(taskInterface, "src/staging/tModLoader", "src/staging/Nitrate", "patches/Nitrate");
+		taskButtons[buttonDiffNitrate] = () => new DiffTask(ctx, "src/staging/tModLoader", "src/staging/Nitrate", "patches/Nitrate");
+		taskButtons[buttonPatchNitrate] = () => new PatchTask(ctx, "src/staging/tModLoader", "src/staging/Nitrate", "patches/Nitrate");
 		
 		taskButtons[buttonRegenerateSource] = () =>
 		{
 			return new RegenSourceTask(
-				taskInterface,
+				ctx,
 				new[] { buttonPatchTerraria, buttonPatchTerrariaNetCore, buttonPatchModLoader, buttonPatchNitrate, }
 					.Select(b => taskButtons[b]()).ToArray()
 			);
@@ -63,14 +63,14 @@ public partial class MainForm : Form
 		taskButtons[buttonSetup] = () =>
 		{
 			return new SetupTask(
-				taskInterface,
+				ctx,
 				new[] { buttonDecompile, buttonRegenerateSource, }
 					.Select(b => taskButtons[b]()).ToArray()
 			);
 		};
 #endregion
 		
-		SetPatchMode(taskInterface.Settings.Get<PatchSettings>().PatchMode);
+		SetPatchMode(ctx.Settings.Get<PatchSettings>().PatchMode);
 		
 		Closing += (_, args) =>
 		{
@@ -92,27 +92,27 @@ public partial class MainForm : Form
 	
 	private void menuItemTerraria_Click(object sender, EventArgs e)
 	{
-		CommonSetup.SelectAndSetTerrariaDirectoryDialog(taskInterface);
+		CommonSetup.SelectAndSetTerrariaDirectoryDialog(ctx);
 	}
 	
 	private void menuItemDecompileServer_Click(object sender, EventArgs e)
 	{
-		RunTask(new DecompileTask(taskInterface, "src/staging/decompiled_server", true));
+		RunTask(new DecompileTask(ctx, "src/staging/decompiled_server", true));
 	}
 	
 	private void menuItemFormatCode_Click(object sender, EventArgs e)
 	{
-		RunTask(new FormatTask(taskInterface));
+		RunTask(new FormatTask(ctx));
 	}
 	
 	private void menuItemHookGen_Click(object sender, EventArgs e)
 	{
-		RunTask(new HookGenTask(taskInterface));
+		RunTask(new HookGenTask(ctx));
 	}
 	
 	private void simplifierToolStripMenuItem_Click(object sender, EventArgs e)
 	{
-		RunTask(new SimplifierTask(taskInterface));
+		RunTask(new SimplifierTask(ctx));
 	}
 	
 	private void buttonTask_Click(object sender, EventArgs e)
@@ -123,7 +123,7 @@ public partial class MainForm : Form
 	private void RunTask(SetupOperation task)
 	{
 		CancelSource = new CancellationTokenSource();
-		taskInterface.Progress.ClearProgress();
+		ctx.Progress.ClearProgress();
 		foreach (var b in taskButtons.Keys)
 		{
 			b.Enabled = false;
@@ -228,8 +228,8 @@ public partial class MainForm : Form
 		exactToolStripMenuItem.Checked = mode == 0;
 		offsetToolStripMenuItem.Checked = mode == 1;
 		fuzzyToolStripMenuItem.Checked = mode == 2;
-		taskInterface.Settings.Get<PatchSettings>().PatchMode = mode;
-		taskInterface.Settings.Save();
+		ctx.Settings.Get<PatchSettings>().PatchMode = mode;
+		ctx.Settings.Save();
 	}
 	
 	private void exactToolStripMenuItem_Click(object sender, EventArgs e)
@@ -253,6 +253,6 @@ public partial class MainForm : Form
 	
 	private void menuItemTmlPath_Click(object sender, EventArgs e)
 	{
-		SelectTmlDirectoryDialog(taskInterface);
+		SelectTmlDirectoryDialog(ctx);
 	}
 }

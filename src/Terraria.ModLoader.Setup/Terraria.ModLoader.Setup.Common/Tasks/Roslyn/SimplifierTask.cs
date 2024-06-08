@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.Simplification;
 
 namespace Terraria.ModLoader.Setup.Common.Tasks.Roslyn;
 
-public sealed class SimplifierTask(ITaskInterface taskInterface) : RoslynTask(taskInterface)
+public sealed class SimplifierTask(CommonContext ctx) : RoslynTask(ctx)
 {
 	protected override string Status => "Simplifying";
 	
@@ -19,6 +19,6 @@ public sealed class SimplifierTask(ITaskInterface taskInterface) : RoslynTask(ta
 		}
 		
 		root = root.WithAdditionalAnnotations(Simplifier.Annotation);
-		return await Simplifier.ReduceAsync(doc.WithSyntaxRoot(root), cancellationToken: TaskInterface.CancellationToken);
+		return await Simplifier.ReduceAsync(doc.WithSyntaxRoot(root), cancellationToken: Context.TaskInterface.CancellationToken);
 	}
 }

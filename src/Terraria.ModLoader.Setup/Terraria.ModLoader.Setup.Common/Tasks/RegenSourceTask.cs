@@ -1,13 +1,13 @@
 namespace Terraria.ModLoader.Setup.Common.Tasks;
 
-public sealed class RegenSourceTask(ITaskInterface taskInterface, params SetupOperation[] tasks) : CompositeTask(taskInterface, tasks)
+public sealed class RegenSourceTask(CommonContext ctx, params SetupOperation[] tasks) : CompositeTask(ctx, tasks)
 {
 	public override bool StartupWarning()
 	{
 		SetupDialogResult res;
-		if (taskInterface.Settings.Get<PatchSettings>().PatchMode != 2)
+		if (Context.Settings.Get<PatchSettings>().PatchMode != 2)
 		{
-			res = taskInterface.ShowDialogWithOkFallback(
+			res = Context.TaskInterface.ShowDialogWithOkFallback(
 				"Ready for Setup",
 				"Any changes in src/staging/ will be lost.\r\n",
 				SetupMessageBoxButtons.OkCancel,
@@ -17,7 +17,7 @@ public sealed class RegenSourceTask(ITaskInterface taskInterface, params SetupOp
 			return res == SetupDialogResult.Ok;
 		}
 		
-		res = taskInterface.ShowDialogWithOkFallback(
+		res = Context.TaskInterface.ShowDialogWithOkFallback(
 			"Strict Patch Mode",
 			"Patch mode will be reset from fuzzy to offset.\r\n",
 			SetupMessageBoxButtons.OkCancel,
@@ -29,7 +29,7 @@ public sealed class RegenSourceTask(ITaskInterface taskInterface, params SetupOp
 			return false;
 		}
 		
-		res = taskInterface.ShowDialogWithOkFallback(
+		res = Context.TaskInterface.ShowDialogWithOkFallback(
 			"Ready for Setup",
 			"Any changes in src/staging/ will be lost.\r\n",
 			SetupMessageBoxButtons.OkCancel,
@@ -41,10 +41,10 @@ public sealed class RegenSourceTask(ITaskInterface taskInterface, params SetupOp
 	
 	public override void Run()
 	{
-		if (taskInterface.Settings.Get<PatchSettings>().PatchMode == 2)
+		if (Context.Settings.Get<PatchSettings>().PatchMode == 2)
 		{
-			taskInterface.Settings.Get<PatchSettings>().PatchMode = 1;
-			taskInterface.Settings.Save();
+			Context.Settings.Get<PatchSettings>().PatchMode = 1;
+			Context.Settings.Save();
 		}
 		
 		base.Run();

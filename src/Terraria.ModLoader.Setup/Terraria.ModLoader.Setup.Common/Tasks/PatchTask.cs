@@ -9,7 +9,7 @@ using DiffPatch;
 
 namespace Terraria.ModLoader.Setup.Common.Tasks;
 
-public sealed class PatchTask(ITaskInterface taskInterface, string baseDir, string patchedDir, string patchDir) : SetupOperation(taskInterface)
+public sealed class PatchTask(CommonContext ctx, string baseDir, string patchedDir, string patchDir) : SetupOperation(ctx)
 {
 	private static readonly string[] nonSourceDirs = [ "bin", "obj", ".vs", ];
 	
@@ -31,7 +31,7 @@ public sealed class PatchTask(ITaskInterface taskInterface, string baseDir, stri
 	
 	public override bool StartupWarning()
 	{
-		var res = taskInterface.ShowDialogWithOkFallback(
+		var res = Context.TaskInterface.ShowDialogWithOkFallback(
 			"Possible loss of data",
 			"Any changes in /" + patchedDir + " that have not been converted to patches will be lost.",
 			SetupMessageBoxButtons.OkCancel,
@@ -43,9 +43,9 @@ public sealed class PatchTask(ITaskInterface taskInterface, string baseDir, stri
 	
 	public override void Run()
 	{
-		CommonSetup.UpdateTargetsFiles(taskInterface); //Update branch information
+		CommonSetup.UpdateTargetsFiles(Context); //Update branch information
 		
-		mode = (Patcher.Mode) taskInterface.Settings.Get<PatchSettings>().PatchMode;
+		mode = (Patcher.Mode) Context.Settings.Get<PatchSettings>().PatchMode;
 		
 		var removedFileList = Path.Combine(patchDir, DiffTask.REMOVED_FILE_LIST);
 		var noCopy = File.Exists(removedFileList) ? [..File.ReadAllLines(removedFileList),] : new HashSet<string>();
@@ -97,7 +97,7 @@ public sealed class PatchTask(ITaskInterface taskInterface, string baseDir, stri
 		
 		//Remove files and directories that weren't in patches and original src.
 		
-		var srcFileDeletionStatus = TaskInterface.Progress.CreateStatus(0, 2);
+		var srcFileDeletionStatus = Context.Progress.CreateStatus(0, 2);
 		srcFileDeletionStatus.AddMessage("Deleting Old Src Files");
 		{
 			foreach (var (file, _) in EnumerateSrcFiles(patchedDir))
@@ -123,13 +123,13 @@ public sealed class PatchTask(ITaskInterface taskInterface, string baseDir, stri
 		
 		if (fuzzy > 0 || mode == Patcher.Mode.FUZZY && failures > 0)
 		{
-			TaskInterface.InvokeOnMainThread(new Action(() => ShowReviewWindow(results)));
+			Context.TaskInterface.InvokeOnMainThread(new Action(() => ShowReviewWindow(results)));
 		}
 	}
 	
 	private void ShowReviewWindow(IEnumerable<FilePatcher> reviewResults)
 	{
-		taskInterface.ShowReviewWindow(reviewResults, baseDir);
+		Context.TaskInterface.ShowReviewWindow(reviewResults, baseDir);
 	}
 	
 	public override bool Failed()
@@ -149,7 +149,7 @@ public sealed class PatchTask(ITaskInterface taskInterface, string baseDir, stri
 			return;
 		}
 		
-		taskInterface.ShowDialogWithOkFallback(
+		Context.TaskInterface.ShowDialogWithOkFallback(
 			"Patch Results",
 			$"Patches applied with {failures} failures and {warnings} warnings.\nSee /logs/patch.log for details",
 			SetupMessageBoxButtons.Ok,

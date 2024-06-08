@@ -10,7 +10,7 @@ namespace Terraria.ModLoader.Setup.Auto;
 
 internal sealed class AutoSetup : ITaskInterface
 {
-	private CancellationTokenSource cancelSource;
+	private CancellationTokenSource cancelSource = new();
 	
 	public CancellationToken CancellationToken => cancelSource.Token;
 	
@@ -23,24 +23,24 @@ internal sealed class AutoSetup : ITaskInterface
 		return action.DynamicInvoke();
 	}
 	
-	public void DoAuto()
+	public static void DoAuto(CommonContext ctx)
 	{
-		Func<SetupOperation> buttonDecompile = () => new DecompileTask(this, "src/staging/decompiled");
-		Func<SetupOperation> buttonPatchTerraria = () => new PatchTask(this, "src/staging/decompiled", "src/staging/Terraria", "patches/Terraria");
-		Func<SetupOperation> buttonPatchTerrariaNetCore = () => new PatchTask(this, "src/staging/Terraria", "src/staging/TerrariaNetCore", "patches/TerrariaNetCore");
-		Func<SetupOperation> buttonPatchModLoader = () => new PatchTask(this, "src/staging/TerrariaNetCore", "src/staging/tModLoader", "patches/tModLoader");
-		Func<SetupOperation> buttonPatchNitrate = () => new PatchTask(this, "src/staging/tModLoader", "src/staging/Nitrate", "patches/Nitrate");
+		Func<SetupOperation> buttonDecompile = () => new DecompileTask(ctx, "src/staging/decompiled");
+		Func<SetupOperation> buttonPatchTerraria = () => new PatchTask(ctx, "src/staging/decompiled", "src/staging/Terraria", "patches/Terraria");
+		Func<SetupOperation> buttonPatchTerrariaNetCore = () => new PatchTask(ctx, "src/staging/Terraria", "src/staging/TerrariaNetCore", "patches/TerrariaNetCore");
+		Func<SetupOperation> buttonPatchModLoader = () => new PatchTask(ctx, "src/staging/TerrariaNetCore", "src/staging/tModLoader", "patches/tModLoader");
+		Func<SetupOperation> buttonPatchNitrate = () => new PatchTask(ctx, "src/staging/tModLoader", "src/staging/Nitrate", "patches/Nitrate");
 		
 		Func<SetupOperation> buttonRegenSource = () =>
 			new RegenSourceTask(
-				this,
+				ctx,
 				new[] { buttonPatchTerraria, buttonPatchTerrariaNetCore, buttonPatchModLoader, buttonPatchNitrate, }
 					.Select(b => b()).ToArray()
 			);
 		
 		Func<SetupOperation> task = () =>
 			new SetupTask(
-				this,
+				ctx,
 				new[] { buttonDecompile, buttonRegenSource, }
 					.Select(b => b()).ToArray()
 			);
@@ -48,14 +48,14 @@ internal sealed class AutoSetup : ITaskInterface
 		if (Directory.Exists("src/staging/decompiled"))
 		{
 			Console.WriteLine("decompiled folder found, skipping decompile step");
-			task = () => new SetupTask(this, buttonRegenSource());
+			task = () => new SetupTask(ctx, buttonRegenSource());
 		}
 		
-		cancelSource = new CancellationTokenSource();
-		DoAuto2(task());
+		((AutoSetup)ctx.TaskInterface).cancelSource = new CancellationTokenSource();
+		DoAuto2(ctx, task());
 	}
 	
-	public void DoAuto2(SetupOperation task)
+	public static void DoAuto2(CommonContext ctx, SetupOperation task)
 	{
 		var errorLogFile = Path.Combine(CommonSetup.LOGS_DIR, "error.log");
 		try
@@ -71,7 +71,7 @@ internal sealed class AutoSetup : ITaskInterface
 			{
 				task.Run();
 				
-				if (cancelSource.IsCancellationRequested)
+				if (((AutoSetup)ctx.TaskInterface).cancelSource.IsCancellationRequested)
 				{
 					throw new OperationCanceledException();
 				}

@@ -15,26 +15,25 @@ internal static class Program
 		Application.EnableVisualStyles();
 		Application.SetCompatibleTextRenderingDefault(false);
 		
-		var setup = new MainSetup();
+		var ctx = new CommonContext(new MainSetup());
 		{
-			Settings.InitializeSettings(setup);
-			CommonSetup.IsAutomatic[setup] = false;
+			Settings.InitializeSettings(ctx.TaskInterface);
 			CommonSetup.CreateSymlinks();
-			FindTerrariaDirectoryIfNecessary(setup);
-			CommonSetup.CreateTmlSteamDirIfNecessary(setup);
-			CommonSetup.UpdateTargetsFiles(setup);
+			FindTerrariaDirectoryIfNecessary(ctx);
+			CommonSetup.CreateTmlSteamDirIfNecessary(ctx);
+			CommonSetup.UpdateTargetsFiles(ctx);
 		}
 		
-		Application.Run(setup.Form = new MainForm(setup));
+		Application.Run(((MainSetup)ctx.TaskInterface).Form = new MainForm(ctx));
 	}
 	
-	public static void SelectTmlDirectoryDialog(ITaskInterface taskInterface)
+	public static void SelectTmlDirectoryDialog(CommonContext ctx)
 	{
 		while (true)
 		{
 			var dialog = new OpenFileDialog
 			{
-				InitialDirectory = Path.GetFullPath(Directory.Exists(CommonSetup.TerrariaSteamDirectory[taskInterface]) ? CommonSetup.TerrariaSteamDirectory[taskInterface] : "."),
+				InitialDirectory = Path.GetFullPath(Directory.Exists(ctx.TerrariaSteamDirectory) ? ctx.TerrariaSteamDirectory : "."),
 				ValidateNames = false,
 				CheckFileExists = false,
 				CheckPathExists = true,
@@ -46,23 +45,23 @@ internal static class Program
 				return;
 			}
 			
-			CommonSetup.TmlDeveloperSteamDirectory[taskInterface] = Path.GetDirectoryName(dialog.FileName)!;
-			taskInterface.Settings.Save();
+			ctx.TmlDeveloperSteamDirectory = Path.GetDirectoryName(dialog.FileName)!;
+			ctx.Settings.Save();
 			
-			CommonSetup.UpdateTargetsFiles(taskInterface);
+			CommonSetup.UpdateTargetsFiles(ctx);
 			return;
 		}
 	}
 	
-	private static void FindTerrariaDirectoryIfNecessary(ITaskInterface taskInterface)
+	private static void FindTerrariaDirectoryIfNecessary(CommonContext ctx)
 	{
-		if (!Directory.Exists(CommonSetup.TerrariaSteamDirectory[taskInterface]))
+		if (!Directory.Exists(ctx.TerrariaSteamDirectory))
 		{
-			FindTerrariaDirectory(taskInterface);
+			FindTerrariaDirectory(ctx);
 		}
 	}
 	
-	private static void FindTerrariaDirectory(ITaskInterface taskInterface)
+	private static void FindTerrariaDirectory(CommonContext ctx)
 	{
 		if (!SteamUtils.TryFindTerrariaDirectory(out var terrariaFolderPath))
 		{
@@ -72,13 +71,13 @@ internal static class Program
 			
 			var messageResult = MessageBox.Show(message_text, "Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
 			
-			if (messageResult != DialogResult.OK || !CommonSetup.TrySelectTerrariaDirectoryDialog(taskInterface, out terrariaFolderPath))
+			if (messageResult != DialogResult.OK || !CommonSetup.TrySelectTerrariaDirectoryDialog(ctx, out terrariaFolderPath))
 			{
 				Console.WriteLine("User chose to not retry. Exiting.");
 				Environment.Exit(-1);
 			}
 		}
 		
-		CommonSetup.SetTerrariaDirectory(taskInterface, terrariaFolderPath);
+		CommonSetup.SetTerrariaDirectory(ctx, terrariaFolderPath);
 	}
 }

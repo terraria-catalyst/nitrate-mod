@@ -14,20 +14,6 @@ namespace Terraria.ModLoader.Setup.Common;
 /// </summary>
 public static class CommonSetup
 {
-	public sealed class GetSetFunctionalIndexerProvider<TParameter, TValue>(Func<TParameter, TValue> getter, Action<TParameter, TValue> setter)
-	{
-		public TValue this[TParameter p0]
-		{
-			get => getter(p0);
-			set => setter(p0, value);
-		}
-	}
-	
-	public sealed class GetFunctionalIndexerProvider<TParameter, TValue>(Func<TParameter, TValue> getter)
-	{
-		public TValue this[TParameter p0] => getter(p0);
-	}
-	
 	/// <summary>
 	///		The setup directory name.
 	/// </summary>
@@ -47,69 +33,6 @@ public static class CommonSetup
 	///		The setup settings file path.
 	/// </summary>
 	public static readonly string SETTINGS_PATH = Path.Combine(SETTINGS_DIR, "settings.json");
-	
-	// ReSharper disable once InconsistentNaming
-	public static readonly GetSetFunctionalIndexerProvider<ITaskInterface, bool> IsAutomatic = new(
-		getter: taskInterface => taskInterface.Settings.Get<RuntimeSettings>().IsAutomatic,
-		setter: (taskInterface, value) =>
-		{
-			taskInterface.Settings.Get<RuntimeSettings>().IsAutomatic = value;
-		}
-	);
-	
-	// ReSharper disable once InconsistentNaming
-	public static readonly GetSetFunctionalIndexerProvider<ITaskInterface, string> TerrariaSteamDirectory = new(
-		getter: taskInterface =>
-		{
-			if (IsAutomatic[taskInterface])
-			{
-				return taskInterface.Settings.Get<RuntimeSettings>().TerrariaSteamDirectory ??= taskInterface.Settings.Get<TerrariaPathSettings>().TerrariaSteamDirectory;
-			}
-			
-			return taskInterface.Settings.Get<TerrariaPathSettings>().TerrariaSteamDirectory;
-		},
-		setter: (taskInterface, value) =>
-		{
-			if (IsAutomatic[taskInterface])
-			{
-				taskInterface.Settings.Get<RuntimeSettings>().TerrariaSteamDirectory = value;
-			}
-			else
-			{
-				taskInterface.Settings.Get<TerrariaPathSettings>().TerrariaSteamDirectory = value;
-			}
-		}
-	);
-	
-	// ReSharper disable once InconsistentNaming
-	public static readonly GetSetFunctionalIndexerProvider<ITaskInterface, string> TmlDeveloperSteamDirectory = new(
-		getter: taskInterface =>
-		{
-			if (IsAutomatic[taskInterface])
-			{
-				return taskInterface.Settings.Get<RuntimeSettings>().TmlDeveloperSteamDirectory ??= taskInterface.Settings.Get<TerrariaPathSettings>().TmlDeveloperSteamDirectory;
-			}
-			
-			return taskInterface.Settings.Get<TerrariaPathSettings>().TmlDeveloperSteamDirectory;
-		},
-		setter: (taskInterface, value) =>
-		{
-			if (IsAutomatic[taskInterface])
-			{
-				taskInterface.Settings.Get<RuntimeSettings>().TmlDeveloperSteamDirectory = value;
-			}
-			else
-			{
-				taskInterface.Settings.Get<TerrariaPathSettings>().TmlDeveloperSteamDirectory = value;
-			}
-		}
-	);
-	
-	// ReSharper disable once InconsistentNaming
-	public static readonly GetFunctionalIndexerProvider<ITaskInterface, string> TerrariaPath = new(taskInterface => Path.Combine(TerrariaSteamDirectory[taskInterface], "Terraria.exe"));
-	
-	// ReSharper disable once InconsistentNaming
-	public static readonly GetFunctionalIndexerProvider<ITaskInterface, string> TerrariaServerPath = new(taskInterface => Path.Combine(TerrariaSteamDirectory[taskInterface], "TerrariaServer.exe"));
 	
 #region Create Symlinks
 	public static void CreateSymlinks()
@@ -179,9 +102,9 @@ public static class CommonSetup
 #region Update Targets Files
 	private static string branch = "";
 	
-	public static void UpdateTargetsFiles(ITaskInterface taskInterface)
+	public static void UpdateTargetsFiles(CommonContext ctx)
 	{
-		UpdateFileText("src/staging/WorkspaceInfo.targets", GetWorkspaceInfoTargetsText());
+		UpdateFileText("src/staging/WorkspaceInfo.targets", GetWorkspaceInfoTargetsText(ctx));
 		var tmlModTargetsContents = File.ReadAllText("patches/tModLoader/Terraria/release_extras/tMLMod.targets");
 		
 		var tmlVersion = Environment.GetEnvironmentVariable("TMLVERSION");
@@ -195,7 +118,7 @@ public static class CommonSetup
 			UpdateFileText("patches/tModLoader/Terraria/release_extras/tMLMod.targets", tmlModTargetsContents); // The patch file needs to be updated as well since it will be copied to src and the post-build will copy it to the steam folder as well.
 		}
 		
-		UpdateFileText(Path.Combine(TmlDeveloperSteamDirectory[taskInterface], "tMLMod.targets"), tmlModTargetsContents);
+		UpdateFileText(Path.Combine(ctx.TmlDeveloperSteamDirectory, "tMLMod.targets"), tmlModTargetsContents);
 	}
 	
 	private static void UpdateFileText(string path, string text)
@@ -208,7 +131,7 @@ public static class CommonSetup
 		}
 	}
 	
-	private static string GetWorkspaceInfoTargetsText()
+	private static string GetWorkspaceInfoTargetsText(CommonContext ctx)
 	{
 		var gitSha = "";
 		RunCmd("", "git", "rev-parse HEAD", s => gitSha = s.Trim());
@@ -238,8 +161,8 @@ public static class CommonSetup
 			  <PropertyGroup>
 				<BranchName>{branch}</BranchName>
 				<CommitSHA>{gitSha}</CommitSHA>
-				<TerrariaSteamPath>{TerrariaSteamDirectory}</TerrariaSteamPath>
-			    <tModLoaderSteamPath>{TmlDeveloperSteamDirectory}</tModLoaderSteamPath>
+				<TerrariaSteamPath>{ctx.TerrariaSteamDirectory}</TerrariaSteamPath>
+			    <tModLoaderSteamPath>{ctx.TmlDeveloperSteamDirectory}</tModLoaderSteamPath>
 			  </PropertyGroup>
 			</Project>
 			""";
@@ -247,18 +170,18 @@ public static class CommonSetup
 #endregion
 	
 #region Select and Set Terraria Directory Dialog
-	public static bool SelectAndSetTerrariaDirectoryDialog(ITaskInterface taskInterface)
+	public static bool SelectAndSetTerrariaDirectoryDialog(CommonContext ctx)
 	{
-		if (!TrySelectTerrariaDirectoryDialog(taskInterface, out var path))
+		if (!TrySelectTerrariaDirectoryDialog(ctx, out var path))
 		{
 			return false;
 		}
 		
-		SetTerrariaDirectory(taskInterface, path);
+		SetTerrariaDirectory(ctx, path);
 		return true;
 	}
 	
-	public static bool TrySelectTerrariaDirectoryDialog(ITaskInterface taskInterface, out string? result)
+	public static bool TrySelectTerrariaDirectoryDialog(CommonContext ctx, out string? result)
 	{
 		result = null;
 		
@@ -266,12 +189,12 @@ public static class CommonSetup
 		{
 			var dialog = new OpenFileDialogParameters
 			{
-				InitialDirectory = Path.GetFullPath(Directory.Exists(TerrariaSteamDirectory[taskInterface]) ? TerrariaSteamDirectory[taskInterface] : "."),
+				InitialDirectory = Path.GetFullPath(Directory.Exists(ctx.TerrariaSteamDirectory) ? ctx.TerrariaSteamDirectory : "."),
 				Filter = "Terraria|Terraria.exe",
 				Title = "Select Terraria.exe",
 			};
 			
-			if (taskInterface.ShowDialogWithOkFallback(ref dialog) != SetupDialogResult.Ok)
+			if (ctx.TaskInterface.ShowDialogWithOkFallback(ref dialog) != SetupDialogResult.Ok)
 			{
 				return false;
 			}
@@ -289,7 +212,7 @@ public static class CommonSetup
 			
 			if (err != null)
 			{
-				if (taskInterface.ShowDialogWithOkFallback("Invalid Selection", err, SetupMessageBoxButtons.RetryCancel, SetupMessageBoxIcon.Error) == SetupDialogResult.Cancel)
+				if (ctx.TaskInterface.ShowDialogWithOkFallback("Invalid Selection", err, SetupMessageBoxButtons.RetryCancel, SetupMessageBoxIcon.Error) == SetupDialogResult.Cancel)
 				{
 					return false;
 				}
@@ -303,29 +226,29 @@ public static class CommonSetup
 		}
 	}
 	
-	public static void SetTerrariaDirectory(ITaskInterface taskInterface, string path)
+	public static void SetTerrariaDirectory(CommonContext ctx, string path)
 	{
-		TerrariaSteamDirectory[taskInterface] = path;
-		TmlDeveloperSteamDirectory[taskInterface] = string.Empty;
-		taskInterface.Settings.Save();
+		ctx.TerrariaSteamDirectory = path;
+		ctx.TmlDeveloperSteamDirectory = string.Empty;
+		ctx.Settings.Save();
 		
-		CreateTmlSteamDirIfNecessary(taskInterface);
-		UpdateTargetsFiles(taskInterface);
+		CreateTmlSteamDirIfNecessary(ctx);
+		UpdateTargetsFiles(ctx);
 	}
 	
-	public static void CreateTmlSteamDirIfNecessary(ITaskInterface taskInterface)
+	public static void CreateTmlSteamDirIfNecessary(CommonContext ctx)
 	{
-		if (Directory.Exists(TmlDeveloperSteamDirectory[taskInterface]))
+		if (Directory.Exists(ctx.TmlDeveloperSteamDirectory))
 		{
 			return;
 		}
 		
-		TmlDeveloperSteamDirectory[taskInterface] = Path.GetFullPath(Path.Combine(TerrariaSteamDirectory[taskInterface], "..", "tModLoaderDev"));
-		taskInterface.Settings.Save();
+		ctx.TmlDeveloperSteamDirectory = Path.GetFullPath(Path.Combine(ctx.TerrariaSteamDirectory, "..", "tModLoaderDev"));
+		ctx.Settings.Save();
 		
 		try
 		{
-			Directory.CreateDirectory(TmlDeveloperSteamDirectory[taskInterface]);
+			Directory.CreateDirectory(ctx.TmlDeveloperSteamDirectory);
 		}
 		catch (Exception e)
 		{

@@ -98,7 +98,7 @@ public sealed class DecompileTask : SetupOperation
 	
 	private readonly DecompilerSettings decompilerSettings;
 	
-	public DecompileTask(ITaskInterface taskInterface, string srcDir, bool serverOnly = false) : base(taskInterface)
+	public DecompileTask(CommonContext ctx, string srcDir, bool serverOnly = false) : base(ctx)
 	{
 		this.srcDir = srcDir;
 		this.serverOnly = serverOnly;
@@ -127,23 +127,23 @@ public sealed class DecompileTask : SetupOperation
 	
 	public override bool ConfigurationDialog()
 	{
-		if (File.Exists(CommonSetup.TerrariaPath[TaskInterface]) && File.Exists(CommonSetup.TerrariaServerPath[TaskInterface]))
+		if (File.Exists(Context.TerrariaPath) && File.Exists(Context.TerrariaServerPath))
 		{
 			return true;
 		}
 		
-		if (CommonSetup.IsAutomatic[TaskInterface])
+		if (Context.IsAutomatic)
 		{
-			Console.WriteLine($"Automatic setup critical failure, can't find both {CommonSetup.TerrariaPath} and {CommonSetup.TerrariaServerPath}");
+			Console.WriteLine($"Automatic setup critical failure, can't find both {Context.TerrariaPath} and {Context.TerrariaServerPath}");
 			Environment.Exit(1);
 		}
 		
-		return (bool) TaskInterface.InvokeOnMainThread(new Func<bool>(() => CommonSetup.SelectAndSetTerrariaDirectoryDialog(TaskInterface)));
+		return (bool) Context.TaskInterface.InvokeOnMainThread(new Func<bool>(() => CommonSetup.SelectAndSetTerrariaDirectoryDialog(Context)));
 	}
 	
 	public override void Run()
 	{
-		var status = TaskInterface.Progress.CreateStatus(0, 2);
+		var status = Context.Progress.CreateStatus(0, 2);
 		
 		status.AddMessage("Deleting Old Src");
 		{
@@ -155,8 +155,8 @@ public sealed class DecompileTask : SetupOperation
 			status.Current++;
 		}
 		
-		var clientModule = serverOnly ? null : ReadModule(CommonSetup.TerrariaPath[TaskInterface], CLIENT_VERSION, status);
-		var serverModule = ReadModule(CommonSetup.TerrariaServerPath[TaskInterface], SERVER_VERSION, status);
+		var clientModule = serverOnly ? null : ReadModule(Context.TerrariaPath, CLIENT_VERSION, status);
+		var serverModule = ReadModule(Context.TerrariaServerPath, SERVER_VERSION, status);
 		status.Current++;
 		var mainModule = serverOnly ? serverModule : clientModule;
 		if (mainModule is null)
@@ -192,7 +192,7 @@ public sealed class DecompileTask : SetupOperation
 		items.Add(WriteTerrariaProjectFile(mainModule, files, resources, decompiledLibraries));
 		items.Add(WriteCommonConfigurationFile());
 		
-		if (CommonSetup.IsAutomatic[TaskInterface])
+		if (Context.IsAutomatic)
 		{
 			ExecuteParallel(items, 1);
 		}
@@ -425,7 +425,7 @@ public sealed class DecompileTask : SetupOperation
 	{
 		var decompiler = new CSharpDecompiler(ts, projectDecompiler.Settings)
 		{
-			CancellationToken = TaskInterface.CancellationToken,
+			CancellationToken = Context.TaskInterface.CancellationToken,
 		};
 		
 		decompiler.AstTransforms.Add(new EscapeInvalidIdentifiers());
@@ -461,7 +461,7 @@ public sealed class DecompileTask : SetupOperation
 				if (format_output)
 				{
 					updateStatus("Formatting: " + src.Key);
-					source = FormatTask.Format(source, TaskInterface.CancellationToken, true);
+					source = FormatTask.Format(source, Context.TaskInterface.CancellationToken, true);
 				}
 				
 				File.WriteAllText(path, source);
