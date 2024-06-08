@@ -248,14 +248,14 @@ public sealed class NitrateTask : CompositeTask
 						{
 							var analyzers = new ProcessStartInfo("dotnet.exe")
 							{
-								Arguments = "format analyzers -v diag",
+								Arguments = "format analyzers -v diag --binarylog analyzers.binlog",
 								UseShellExecute = true,
 								WorkingDirectory = Path.GetDirectoryName(file)!,
 							};
 							
 							var style = new ProcessStartInfo("dotnet.exe")
 							{
-								Arguments = "format style -v diag",
+								Arguments = "format style -v diag --binarylog style.binlog",
 								UseShellExecute = true,
 								WorkingDirectory = Path.GetDirectoryName(file)!,
 							};
@@ -292,13 +292,11 @@ public sealed class NitrateTask : CompositeTask
 	
 	public static SetupOperation[] GetOperations(CommonContext ctx, string baseDir, string patchedDir, string patchDir)
 	{
-		return [new OrganizeExistingPartialClassesTask(ctx, update(ref baseDir, patchedDir + nameof(OrganizeExistingPartialClassesTask)), baseDir), new MakeEveryTypePartialTask(ctx, update(ref baseDir, patchedDir + nameof(MakeEveryTypePartialTask)), baseDir), new FormatWithDotnetFormatAndEditorConfigTask(ctx, update(ref baseDir, patchedDir + nameof(FormatWithDotnetFormatAndEditorConfigTask)), baseDir), new PatchTask(ctx, baseDir, patchedDir, patchDir),];
-		
-		T update<T>(ref T value, T newValue)
-		{
-			var old = value;
-			value = newValue;
-			return old;
-		}
+		return [
+			new OrganizeExistingPartialClassesTask(ctx, baseDir, baseDir = patchedDir + nameof(OrganizeExistingPartialClassesTask)), 
+			new MakeEveryTypePartialTask(ctx, baseDir, baseDir = patchedDir + nameof(MakeEveryTypePartialTask)), 
+			new FormatWithDotnetFormatAndEditorConfigTask(ctx, baseDir, baseDir = patchedDir + nameof(FormatWithDotnetFormatAndEditorConfigTask)),
+			new PatchTask(ctx, baseDir, patchedDir, patchDir),
+		];
 	}
 }
