@@ -12,6 +12,8 @@ public sealed class CommonContext(ITaskInterface taskInterface)
 	
 	public bool IsAutomatic { get; init; }
 	
+	public string Branch { get; set; } = "";
+	
 	private string? terrariaSteamDirectory;
 	
 	public string TerrariaSteamDirectory

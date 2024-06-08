@@ -37,7 +37,7 @@ public static class CommonSetup
 #region Create Symlinks
 	public static void CreateSymlinks()
 	{
-		string[] candidates = ["GoG", "Terraria", "TerrariaNetCore", "tModLoader",];
+		var candidates = new[] { "GoG", "Terraria", "TerrariaNetCore", "tModLoader", };
 		var sourceDirectory = Path.Combine("src", "Terraria.ModLoader", "patches");
 		var targetDirectory = Path.Combine("patches");
 		
@@ -100,15 +100,13 @@ public static class CommonSetup
 #endregion
 	
 #region Update Targets Files
-	private static string branch = "";
-	
 	public static void UpdateTargetsFiles(CommonContext ctx)
 	{
 		UpdateFileText("src/staging/WorkspaceInfo.targets", GetWorkspaceInfoTargetsText(ctx));
 		var tmlModTargetsContents = File.ReadAllText("patches/tModLoader/Terraria/release_extras/tMLMod.targets");
 		
 		var tmlVersion = Environment.GetEnvironmentVariable("TMLVERSION");
-		if (!string.IsNullOrWhiteSpace(tmlVersion) && branch == "stable")
+		if (!string.IsNullOrWhiteSpace(tmlVersion) && ctx.Branch == "stable")
 		{
 			// Convert 2012.4.x to 2012_4
 			Console.WriteLine($"TMLVERSION found: {tmlVersion}");
@@ -136,14 +134,14 @@ public static class CommonSetup
 		var gitSha = "";
 		RunCmd("", "git", "rev-parse HEAD", s => gitSha = s.Trim());
 		
-		branch = "";
-		RunCmd("", "git", "rev-parse --abbrev-ref HEAD", s => branch = s.Trim());
+		ctx.Branch = "";
+		RunCmd("", "git", "rev-parse --abbrev-ref HEAD", s => ctx.Branch = s.Trim());
 		
 		var githubHeadRef = Environment.GetEnvironmentVariable("GITHUB_HEAD_REF");
 		if (!string.IsNullOrWhiteSpace(githubHeadRef))
 		{
 			Console.WriteLine($"GITHUB_HEAD_REF found: {githubHeadRef}");
-			branch = githubHeadRef;
+			ctx.Branch = githubHeadRef;
 		}
 		
 		var headSha = Environment.GetEnvironmentVariable("HEAD_SHA");
@@ -159,7 +157,7 @@ public static class CommonSetup
 			<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 			  <!-- This file will always be overwritten, do not edit it manually. -->
 			  <PropertyGroup>
-				<BranchName>{branch}</BranchName>
+				<BranchName>{ctx.Branch}</BranchName>
 				<CommitSHA>{gitSha}</CommitSHA>
 				<TerrariaSteamPath>{ctx.TerrariaSteamDirectory}</TerrariaSteamPath>
 			    <tModLoaderSteamPath>{ctx.TmlDeveloperSteamDirectory}</tModLoaderSteamPath>
