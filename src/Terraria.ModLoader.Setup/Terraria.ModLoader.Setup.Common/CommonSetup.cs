@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,7 @@ namespace Terraria.ModLoader.Setup.Common;
 /// </summary>
 public static class CommonSetup
 {
+#region Constants
 	/// <summary>
 	///		The setup directory name.
 	/// </summary>
@@ -33,8 +35,14 @@ public static class CommonSetup
 	///		The setup settings file path.
 	/// </summary>
 	public static readonly string SETTINGS_PATH = Path.Combine(SETTINGS_DIR, "settings.json");
+#endregion
 	
 #region Create Symlinks
+	/// <summary>
+	///		Initializes symlinks for compatibility between the source
+	///		Terraria.ModLoader (tModLoader) submodule patches and our
+	///		(Nitrate's) modified setup tool.
+	/// </summary>
 	public static void CreateSymlinks()
 	{
 		var candidates = new[] { "GoG", "Terraria", "TerrariaNetCore", "tModLoader", };
@@ -100,55 +108,82 @@ public static class CommonSetup
 #endregion
 	
 #region Update Targets Files
+	/// <summary>
+	///		Updates the <c>WorkspaceInfo.targets</c> amd <c>tMLMod.targets</c>
+	///		files with current environment information.
+	/// </summary>
 	public static void UpdateTargetsFiles(CommonContext ctx)
 	{
-		UpdateFileText("src/staging/WorkspaceInfo.targets", GetWorkspaceInfoTargetsText(ctx));
-		var tmlModTargetsContents = File.ReadAllText("patches/tModLoader/Terraria/release_extras/tMLMod.targets");
-		
-		var tmlVersion = Environment.GetEnvironmentVariable("TMLVERSION");
-		if (!string.IsNullOrWhiteSpace(tmlVersion) && ctx.Branch == "stable")
+		// WorkspaceInfo.targets
 		{
-			// Convert 2012.4.x to 2012_4
-			Console.WriteLine($"TMLVERSION found: {tmlVersion}");
-			var tmlVersionDefine = $"TML_{string.Join("_", tmlVersion.Split('.').Take(2))}";
-			Console.WriteLine($"TMLVERSIONDefine: {tmlVersionDefine}");
-			tmlModTargetsContents = tmlModTargetsContents.Replace("<!-- TML stable version define placeholder -->", $"<DefineConstants>$(DefineConstants);{tmlVersionDefine}</DefineConstants>");
-			UpdateFileText("patches/tModLoader/Terraria/release_extras/tMLMod.targets", tmlModTargetsContents); // The patch file needs to be updated as well since it will be copied to src and the post-build will copy it to the steam folder as well.
+			updateTextFile("src/staging/WorkspaceInfo.targets", GetWorkspaceInfoTargetsText(ctx));
 		}
 		
-		UpdateFileText(Path.Combine(ctx.TmlDeveloperSteamDirectory, "tMLMod.targets"), tmlModTargetsContents);
-	}
-	
-	private static void UpdateFileText(string path, string text)
-	{
-		SetupOperation.CreateParentDirectory(path);
-		
-		if ((!File.Exists(path) || text != File.ReadAllText(path)) && path is not null)
+		// tMLMod.targets
 		{
-			File.WriteAllText(path, text);
+			var targetsContents = File.ReadAllText("patches/tModLoader/Terraria/release_extras/tMLMod.targets");
+			var tmlVersion = Environment.GetEnvironmentVariable("TMLVERSION");
+			
+			if (!string.IsNullOrWhiteSpace(tmlVersion) && ctx.Branch == "stable")
+			{
+				// Convert 2012.4.x to 2012_4
+				var tmlVersionDefine = $"TML_{string.Join("_", tmlVersion.Split('.').Take(2))}";
+				
+				Console.WriteLine($"TMLVERSION found: {tmlVersion}");
+				Console.WriteLine($"Defining TMLVERSION constant as: {tmlVersionDefine}");
+				
+				targetsContents = targetsContents.Replace("<!-- TML stable version define placeholder -->", $"<DefineConstants>$(DefineConstants);{tmlVersionDefine}</DefineConstants>");
+				
+				// The patch file needs to be updated as well since it gets
+				// copied to src and the post-build task will copy it to the
+				// Steam folder as well.
+				updateTextFile("patches/tModLoader/Terraria/release_extras/tMLMod.targets", targetsContents);
+			}
+			
+			updateTextFile(Path.Combine(ctx.TmlDeveloperSteamDirectory, "tMLMod.targets"), targetsContents);
+		}
+		
+		return;
+		
+		static void updateTextFile(string path, string text)
+		{
+			SetupOperation.CreateParentDirectory(path);
+			
+			if (!File.Exists(path) || text != File.ReadAllText(path))
+			{
+				File.WriteAllText(path, text);
+			}
 		}
 	}
 	
 	private static string GetWorkspaceInfoTargetsText(CommonContext ctx)
 	{
 		var gitSha = "";
-		RunCmd("", "git", "rev-parse HEAD", s => gitSha = s.Trim());
+		{
+			RunCommand("", "git", "rev-parse HEAD", s => gitSha = s.Trim());
+		}
 		
 		ctx.Branch = "";
-		RunCmd("", "git", "rev-parse --abbrev-ref HEAD", s => ctx.Branch = s.Trim());
+		{
+			RunCommand("", "git", "rev-parse --abbrev-ref HEAD", s => ctx.Branch = s.Trim());
+		}
 		
 		var githubHeadRef = Environment.GetEnvironmentVariable("GITHUB_HEAD_REF");
-		if (!string.IsNullOrWhiteSpace(githubHeadRef))
 		{
-			Console.WriteLine($"GITHUB_HEAD_REF found: {githubHeadRef}");
-			ctx.Branch = githubHeadRef;
+			if (!string.IsNullOrWhiteSpace(githubHeadRef))
+			{
+				Console.WriteLine($"GITHUB_HEAD_REF found: {githubHeadRef}");
+				ctx.Branch = githubHeadRef;
+			}
 		}
 		
 		var headSha = Environment.GetEnvironmentVariable("HEAD_SHA");
-		if (!string.IsNullOrWhiteSpace(headSha))
 		{
-			Console.WriteLine($"HEAD_SHA found: {headSha}");
-			gitSha = headSha;
+			if (!string.IsNullOrWhiteSpace(headSha))
+			{
+				Console.WriteLine($"HEAD_SHA found: {headSha}");
+				gitSha = headSha;
+			}
 		}
 		
 		return
@@ -168,6 +203,9 @@ public static class CommonSetup
 #endregion
 	
 #region Select and Set Terraria Directory Dialog
+	/// <summary>
+	///		Prompts the user to select the Terraria directory and sets it.
+	/// </summary>
 	public static bool SelectAndSetTerrariaDirectoryDialog(CommonContext ctx)
 	{
 		if (!TrySelectTerrariaDirectoryDialog(ctx, out var path))
@@ -179,7 +217,10 @@ public static class CommonSetup
 		return true;
 	}
 	
-	public static bool TrySelectTerrariaDirectoryDialog(CommonContext ctx, out string? result)
+	/// <summary>
+	///		Prompts the user to select the Terraria directory.
+	/// </summary>
+	public static bool TrySelectTerrariaDirectoryDialog(CommonContext ctx, [NotNullWhen(returnValue: true)] out string? result)
 	{
 		result = null;
 		
@@ -198,32 +239,37 @@ public static class CommonSetup
 			}
 			
 			string? err = null;
-			
-			if (Path.GetFileName(dialog.FileName) != "Terraria.exe")
 			{
-				err = "File must be named Terraria.exe";
-			}
-			else if (!File.Exists(Path.Combine(Path.GetDirectoryName(dialog.FileName)!, "TerrariaServer.exe")))
-			{
-				err = "TerrariaServer.exe does not exist in the same directory";
+				// TODO: Are these restrictions really necessary?
+				if (Path.GetFileName(dialog.FileName) != "Terraria.exe")
+				{
+					err = "File must be named Terraria.exe";
+				}
+				else if (!File.Exists(Path.Combine(Path.GetDirectoryName(dialog.FileName)!, "TerrariaServer.exe")))
+				{
+					err = "TerrariaServer.exe does not exist in the same directory";
+				}
 			}
 			
 			if (err != null)
 			{
-				if (ctx.TaskInterface.ShowDialogWithOkFallback("Invalid Selection", err, SetupMessageBoxButtons.RetryCancel, SetupMessageBoxIcon.Error) == SetupDialogResult.Cancel)
+				var retryPrompt = ctx.TaskInterface.ShowDialogWithOkFallback("Invalid Selection", err, SetupMessageBoxButtons.RetryCancel, SetupMessageBoxIcon.Error);
+				if (retryPrompt == SetupDialogResult.Cancel)
 				{
 					return false;
 				}
 			}
 			else
 			{
-				result = Path.GetDirectoryName(dialog.FileName);
-				
+				result = Path.GetDirectoryName(dialog.FileName)!;
 				return true;
 			}
 		}
 	}
 	
+	/// <summary>
+	///		Sets the Terraria directory.
+	/// </summary>
 	public static void SetTerrariaDirectory(CommonContext ctx, string path)
 	{
 		ctx.TerrariaSteamDirectory = path;
@@ -234,6 +280,10 @@ public static class CommonSetup
 		UpdateTargetsFiles(ctx);
 	}
 	
+	/// <summary>
+	///		Creates the Terraria.ModLoader (tModLoader) Steam developer
+	///		directory if necessary.
+	/// </summary>
 	public static void CreateTmlSteamDirIfNecessary(CommonContext ctx)
 	{
 		if (Directory.Exists(ctx.TmlDeveloperSteamDirectory))
@@ -255,19 +305,28 @@ public static class CommonSetup
 	}
 #endregion
 	
-#region Utilities
-	public static void RunCmd(
+#region Miscellaneous Utilities
+	/// <summary>
+	///		Executes the given command.
+	/// </summary>
+	/// <param name="dir">The working directory.</param>
+	/// <param name="cmd">The command (executable) name.</param>
+	/// <param name="args">The arguments.</param>
+	/// <param name="output">Invoked when an output is received.</param>
+	/// <param name="error">Invoked when an error is received.</param>
+	/// <param name="input">Input to pass to the process.</param>
+	/// <param name="cancel">The cancellation token.</param>
+	public static void RunCommand(
 		string dir,
 		string cmd,
 		string args,
-		Action<string> output = null,
-		Action<string> error = null,
-		string input = null,
+		Action<string>? output = null,
+		Action<string>? error = null,
+		string? input = null,
 		CancellationToken cancel = default
 	)
 	{
-		using var process = new Process();
-		process.StartInfo = new ProcessStartInfo
+		var startInfo = new ProcessStartInfo
 		{
 			FileName = cmd,
 			Arguments = args,
@@ -276,6 +335,9 @@ public static class CommonSetup
 			RedirectStandardInput = input != null,
 			CreateNoWindow = true,
 		};
+		
+		using var process = new Process();
+		process.StartInfo = startInfo;
 		
 		if (output != null)
 		{
