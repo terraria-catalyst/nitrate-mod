@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -191,7 +193,98 @@ public sealed class NitrateTask : CompositeTask
 	
 	private sealed class FormatWithDotnetFormatAndEditorConfigTask(CommonContext ctx, string sourceDirectory, string targetDirectory) : SetupOperation(ctx)
 	{
-		public override void Run() { }
+		public override void Run()
+		{
+			var items = new List<WorkItem>();
+			
+			foreach (var (file, relPath) in EnumerateFiles(sourceDirectory))
+			{
+				var destination = Path.Combine(targetDirectory, relPath);
+				
+				if (!relPath.EndsWith(".csproj"))
+				{
+					copy(file, relPath, destination);
+					continue;
+				}
+				
+				items.Add(
+					new WorkItem(
+						"Making restorable: " + relPath,
+						() =>
+						{
+							CreateParentDirectory(destination);
+							
+							if (File.Exists(destination))
+							{
+								File.SetAttributes(destination, FileAttributes.Normal);
+							}
+							
+							File.WriteAllText(destination, MakeRestorable(File.ReadAllText(file)));
+						}
+					)
+				);
+			}
+			
+			ExecuteParallel(items);
+			
+			items.Clear();
+			
+			var editorconfigPath = Path.Combine(Directory.GetCurrentDirectory(), "src", ".editorconfig");
+			foreach (var (file, relPath) in EnumerateFiles(targetDirectory))
+			{
+				if (!relPath.EndsWith(".csproj"))
+				{
+					continue;
+				}
+				
+				// Copy .editorconfig over to the target directory.
+				File.Copy(editorconfigPath, Path.Combine(Path.GetDirectoryName(file)!, ".editorconfig"), true);
+				
+				// Run dotnet format in directory.
+				items.Add(
+					new WorkItem(
+						"Formatting: " + relPath + " (with dotnet format)",
+						() =>
+						{
+							var analyzers = new ProcessStartInfo("dotnet.exe")
+							{
+								Arguments = "format analyzers -v diag",
+								UseShellExecute = true,
+								WorkingDirectory = Path.GetDirectoryName(file)!,
+							};
+							
+							var style = new ProcessStartInfo("dotnet.exe")
+							{
+								Arguments = "format style -v diag",
+								UseShellExecute = true,
+								WorkingDirectory = Path.GetDirectoryName(file)!,
+							};
+							
+							var analyzersProcess = Process.Start(analyzers);
+							analyzersProcess?.WaitForExit();
+							var styleProcess = Process.Start(style);
+							styleProcess?.WaitForExit();
+						}
+					)
+				);
+			}
+			
+			ExecuteParallel(items);
+			
+			return;
+			
+			void copy(string file, string relPath, string destination)
+			{
+				items.Add(new WorkItem("Copying: " + relPath, () => Copy(file, destination)));
+			}
+		}
+		
+		private static string MakeRestorable(string source)
+		{
+			source = source.Replace("<ProjectReference Include=\"../../../FNA/FNA.Core.csproj\" />", "<ProjectReference Include=\"../../../Terraria.ModLoader/FNA/FNA.Core.csproj\" />");
+			source = source.Replace("<Import Project=\"../../../tModBuildTasks/BuildTasks.targets\" />", "<Import Project=\"../../../Terraria.ModLoader/tModBuildTasks/BuildTasks.targets\" />");
+			return source.Replace("<ProjectReference Include=\"../../../tModPorter/tModPorter/tModPorter.csproj\" />", "<ProjectReference Include=\"../../../Terraria.ModLoader/tModPorter/tModPorter/tModPorter.csproj\" />");
+		}
 	}
 	
 	// "src/staging/tModLoader", "src/staging/Nitrate", "patches/Nitrate"
