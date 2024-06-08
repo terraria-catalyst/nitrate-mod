@@ -10,8 +10,41 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Terraria.ModLoader.Setup.Common.Tasks;
 
-public sealed class NitrateTask : CompositeTask
+/// <summary>
+///		Composite task which applies automated intermediary Nitrate patches
+///		before then applying explicitly-defined user patches.
+/// </summary>
+/// <seealso cref="OrganizePartialClasses"/>
+/// <seealso cref="MakeTypesPartial"/>
+/// <seealso cref="TreeshakePreprocessors"/>
+/// <seealso cref="FormatWithEditorConfig"/>
+public sealed class NitrateTask(CommonContext ctx, string baseDir, string patchedDir, string patchDir)
+	: CompositeTask(ctx, GetOperations(ctx, baseDir, patchedDir, patchDir))
 {
+	/// <summary>
+	///		Organizes existing partial class files to be within subdirectories.
+	/// </summary>
+	/// <remarks>
+	///		Matches cases like:
+	///		<ul>
+	///			<li>Main.TML.cs</li>
+	///			<li>TileData.Default.cs</li>
+	///			<li>WorldFileData.tML.cs (note casing)</li>
+	///		</ul>
+	///		Ignores cases like:
+	///		<ul>
+	///			<li>Logging.ExceptionHandling.cs (in ModLoader directory)</li>
+	///		</ul>
+	///		Notable exceptions (also gets ignored):
+	///		<ul>
+	///			<li>TileData.Default.cs - TileData new to TML.</li>
+	///			<li>Recipe.Extensions.cs - Recipe rewritten by TML.</li>
+	///		</ul>
+	///		Collected files are moved to a subdirectory within the same
+	///		directory, e.g.
+	///		<c>Main.TML.Something.cs -> _TML/Main.Something.cs</c> and
+	///		<c>Main.TML.cs -> _TML/Main.cs</c>.
+	/// </remarks>
 	private sealed class OrganizePartialClasses(CommonContext ctx, string sourceDirectory, string targetDirectory) : SetupOperation(ctx)
 	{
 		public override void Run()
@@ -85,6 +118,12 @@ public sealed class NitrateTask : CompositeTask
 		}
 	}
 	
+	/// <summary>
+	///		Rewrites all type definitions in C# source files to be partial.
+	/// </summary>
+	/// <remarks>
+	///		Convenient for development and reduces patches.
+	/// </remarks>
 	private sealed class MakeTypesPartial(CommonContext ctx, string sourceDirectory, string targetDirectory) : SetupOperation(ctx)
 	{
 		private sealed class TypePartialRewriter : CSharpSyntaxRewriter
@@ -190,6 +229,20 @@ public sealed class NitrateTask : CompositeTask
 		}
 	}
 	
+	/// <summary>
+	///		Naively evaluates preprocessor directives using known symbols to cut
+	///		down on unnecessary code from older Terraria.ModLoader projects.
+	/// </summary>
+	/// <remarks>
+	///		Defined symbols:
+	///		<ul>
+	///			<li>FNA</li>
+	///			<li>NETCORE</li>
+	///		</ul>
+	///		Files are interpreted line-by-line to process preprocessor
+	///		directives; complex expressions involving parentheses and logical
+	///		operators are handled.
+	/// </remarks>
 	private sealed class TreeshakePreprocessors(CommonContext ctx, string sourceDirectory, string targetDirectory) : SetupOperation(ctx)
 	{
 		public override void Run()
@@ -240,7 +293,8 @@ public sealed class NitrateTask : CompositeTask
 			var processedLines = new List<string>();
 			
 			var include = true;
-			foreach (var line in lines) {
+			foreach (var line in lines)
+			{
 				var trimmedLine = line.Trim();
 				
 				if (trimmedLine.StartsWith("#if"))
@@ -342,6 +396,18 @@ public sealed class NitrateTask : CompositeTask
 		}
 	}
 	
+	/// <summary>
+	///		Runs <c>dotnet format analyzers</c> and <c>dotnet format style</c>
+	///		on all resolved <c>.csproj</c> files using the <c>.editorconfig</c>
+	///		file resolved at <c>&lt;cwd&gt;/src/.editorconfig</c>.
+	/// </summary>
+	/// <remarks>
+	///		Additionally, copies the <c>.editorconfig</c> file to the directory of each
+	///		<c>.csproj</c> file.
+	///		<br />
+	///		Also patches existing <c>.csproj</c> files to be restorable (fixes
+	///		incorrect paths).
+	/// </remarks>
 	private sealed class FormatWithEditorConfig(CommonContext ctx, string sourceDirectory, string targetDirectory) : SetupOperation(ctx)
 	{
 		public override void Run()
@@ -438,17 +504,8 @@ public sealed class NitrateTask : CompositeTask
 		}
 	}
 	
-	// "src/staging/tModLoader", "src/staging/Nitrate", "patches/Nitrate"
-	public NitrateTask(CommonContext ctx, string baseDir, string patchedDir, string patchDir) : base(ctx, GetOperations(ctx, baseDir, patchedDir, patchDir)) { }
-	
 	public static SetupOperation[] GetOperations(CommonContext ctx, string baseDir, string patchedDir, string patchDir)
 	{
-		return [
-			new OrganizePartialClasses(ctx, baseDir, baseDir = patchedDir + '_' + nameof(OrganizePartialClasses)),
-			new MakeTypesPartial(ctx, baseDir, baseDir = patchedDir + '_' + nameof(MakeTypesPartial)),
-			new TreeshakePreprocessors(ctx, baseDir, baseDir = patchedDir + '_' + nameof(TreeshakePreprocessors)),
-			new FormatWithEditorConfig(ctx, baseDir, baseDir = patchedDir + '_' + nameof(FormatWithEditorConfig)),
-			new PatchTask(ctx, baseDir, patchedDir, patchDir),
-		];
+		return [new OrganizePartialClasses(ctx, baseDir, baseDir = patchedDir + '_' + nameof(OrganizePartialClasses)), new MakeTypesPartial(ctx, baseDir, baseDir = patchedDir + '_' + nameof(MakeTypesPartial)), new TreeshakePreprocessors(ctx, baseDir, baseDir = patchedDir + '_' + nameof(TreeshakePreprocessors)), new FormatWithEditorConfig(ctx, baseDir, baseDir = patchedDir + '_' + nameof(FormatWithEditorConfig)), new PatchTask(ctx, baseDir, patchedDir, patchDir),];
 	}
 }
