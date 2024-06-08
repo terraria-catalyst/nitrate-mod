@@ -179,7 +179,7 @@ public sealed class NitrateTask : CompositeTask
 			}
 		}
 		
-		public static string Partialize(string source, CancellationToken cancellationToken)
+		private static string Partialize(string source, CancellationToken cancellationToken)
 		{
 			var tree = CSharpSyntaxTree.ParseText(source, cancellationToken: cancellationToken);
 			var node = tree.GetRoot(cancellationToken);
