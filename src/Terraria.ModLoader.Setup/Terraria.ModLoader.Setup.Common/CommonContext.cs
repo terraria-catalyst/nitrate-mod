@@ -10,7 +10,7 @@ public sealed class CommonContext(ITaskInterface taskInterface)
 	
 	public ISettingsManager Settings => TaskInterface.Settings;
 	
-	public bool IsAutomatic { get; set; }
+	public bool IsAutomatic { get; init; }
 	
 	private string? terrariaSteamDirectory;
 	
