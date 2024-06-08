@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -219,7 +218,7 @@ public sealed class NitrateTask : CompositeTask
 								File.SetAttributes(destination, FileAttributes.Normal);
 							}
 							
-							File.WriteAllText(destination, Treeshake(File.ReadAllText(file), Context.TaskInterface.CancellationToken));
+							File.WriteAllLines(destination, Treeshake(File.ReadAllLines(file)));
 						}
 					)
 				);
@@ -235,105 +234,111 @@ public sealed class NitrateTask : CompositeTask
 			}
 		}
 		
-		private static string Treeshake(string source, CancellationToken cancellationToken)
+		private static string[] Treeshake(string[] lines)
 		{
-			var tree = CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(preprocessorSymbols: ["FNA", "NETCORE",]), cancellationToken: cancellationToken);
-			var node = tree.GetRoot(cancellationToken);
+			var symbols = new HashSet<string> { "FNA", "NETCORE", };
+			var processedLines = new List<string>();
 			
-			var directives = tree.getdi;
-			var conditionStack = new Stack<bool>();
-			conditionStack.Push(true);
-			
-			foreach (var directive in directives)
-			{
-				switch (directive.Kind())
+			var include = true;
+			foreach (var l in lines) {
+				var line = l.Trim();
+				
+				if (line.StartsWith("#if"))
 				{
-				case SyntaxKind.IfDirectiveTrivia:
-					var ifDirective = (IfDirectiveTriviaSyntax)directive;
-					var ifCondition = EvaluateCondition(ifDirective.Condition);
-					conditionStack.Push(ifCondition);
+					var condition = line[3..].Trim();
+					include = EvaluateCondition(condition, symbols);
+				}
+				else if (line.StartsWith("#elif"))
+				{
+					var condition = line[5..].Trim();
+					if (!include)
+					{
+						include = EvaluateCondition(condition, symbols);
+					}
+				}
+				else if (line.StartsWith("#else"))
+				{
+					include = !include;
+				}
+				else if (line.StartsWith("#endif"))
+				{
+					include = true;
+				}
+				else if (include)
+				{
+					processedLines.Add(line);
+				}
+			}
+			
+			return processedLines.ToArray();
+		}
+		
+		private static bool EvaluateCondition(string condition, HashSet<string> symbols)
+		{
+			condition = condition.Replace(" ", "");
+			return EvaluateExpression(condition, symbols);
+		}
+		
+		private static bool EvaluateExpression(string expression, HashSet<string> symbols)
+		{
+			if (expression.Length == 1)
+			{
+				return symbols.Contains(expression);
+			}
+			
+			if (expression[0] == '(' && expression[^1] == ')')
+			{
+				return EvaluateExpression(expression.Substring(1, expression.Length - 2), symbols);
+			}
+			
+			var andIndex = FindLogicalOperatorIndex(expression, "&&");
+			if (andIndex != -1)
+			{
+				var leftExpression = expression[..andIndex];
+				var rightExpression = expression[(andIndex + 2)..];
+				return EvaluateExpression(leftExpression, symbols) && EvaluateExpression(rightExpression, symbols);
+			}
+			
+			var orIndex = FindLogicalOperatorIndex(expression, "||");
+			if (orIndex != -1)
+			{
+				var leftExpression = expression[..orIndex];
+				var rightExpression = expression[(orIndex + 2)..];
+				return EvaluateExpression(leftExpression, symbols) || EvaluateExpression(rightExpression, symbols);
+			}
+			
+			return symbols.Contains(expression);
+		}
+		
+		private static int FindLogicalOperatorIndex(string expression, string logicalOperator)
+		{
+			var parenthesesDepth = 0;
+			
+			for (var i = 0; i < expression.Length - logicalOperator.Length + 1; i++)
+			{
+				var curr = expression[i];
+				
+				switch (curr)
+				{
+				case '(':
+					parenthesesDepth++;
 					break;
 				
-				case SyntaxKind.ElifDirectiveTrivia:
-					var elifDirective = (ElifDirectiveTriviaSyntax)directive;
-					var elifCondition = EvaluateCondition(elifDirective.Condition);
-					var outerCondition = conditionStack.Peek();
-					conditionStack.Pop();
-					conditionStack.Push(outerCondition && !conditionStack.Contains(true) && elifCondition);
-					break;
-				
-				case SyntaxKind.ElseDirectiveTrivia:
-					conditionStack.Push(!conditionStack.Pop());
-					break;
-				
-				case SyntaxKind.EndIfDirectiveTrivia:
-					conditionStack.Pop();
+				case ')':
+					parenthesesDepth--;
 					break;
 				
 				default:
-					if (!conditionStack.Contains(true))
+					if (parenthesesDepth == 0 && expression.Substring(i, logicalOperator.Length) == logicalOperator)
 					{
-						node = node.RemoveNode(directive, SyntaxRemoveOptions.KeepExteriorTrivia);
+						return i;
 					}
 					
 					break;
 				}
 			}
 			
-			return node.ToFullString();
-		}
-		
-		private static bool EvaluateCondition(ExpressionSyntax condition)
-		{
-			return EvaluateExpression(condition, new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "FNA", "NETCORE", });
-		}
-		
-		private static bool EvaluateExpression(ExpressionSyntax expression, HashSet<string> definedSymbols)
-		{
-			switch (expression.Kind())
-			{
-			case SyntaxKind.IdentifierName:
-				var identifier = (IdentifierNameSyntax)expression;
-				return definedSymbols.Contains(identifier.Identifier.ValueText);
-			
-			case SyntaxKind.LogicalAndExpression:
-				var andExpression = (BinaryExpressionSyntax)expression;
-				return EvaluateExpression(andExpression.Left, definedSymbols) && EvaluateExpression(andExpression.Right, definedSymbols);
-			
-			case SyntaxKind.LogicalOrExpression:
-				var orExpression = (BinaryExpressionSyntax)expression;
-				return EvaluateExpression(orExpression.Left, definedSymbols) || EvaluateExpression(orExpression.Right, definedSymbols);
-			
-			case SyntaxKind.EqualsExpression:
-			{
-				var equalsExpression = (BinaryExpressionSyntax)expression;
-				if (equalsExpression is not { Left: IdentifierNameSyntax left, Right: LiteralExpressionSyntax right, })
-				{
-					return false;
-				}
-				
-				var symbol = left.Identifier.Text;
-				var value = right.Token.ValueText;
-				return definedSymbols.Contains(symbol) && value.Equals("true", StringComparison.CurrentCultureIgnoreCase);
-				
-			}
-			
-			case SyntaxKind.NotEqualsExpression:
-			{
-				var notEqualsExpression = (BinaryExpressionSyntax)expression;
-				if (notEqualsExpression.Left is not IdentifierNameSyntax left || notEqualsExpression.Right is not LiteralExpressionSyntax right)
-				{
-					return false;
-				}
-				
-				var symbol = left.Identifier.Text;
-				var value = right.Token.ValueText;
-				return definedSymbols.Contains(symbol) && value.Equals("false", StringComparison.CurrentCultureIgnoreCase);
-			}
-			
-			default:
-				return false;
-			}
+			return -1;
 		}
 	}
 	
