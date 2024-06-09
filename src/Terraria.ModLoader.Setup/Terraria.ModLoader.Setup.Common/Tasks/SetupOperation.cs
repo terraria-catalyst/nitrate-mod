@@ -184,7 +184,7 @@ public abstract class SetupOperation(CommonContext ctx)
 	
 	private static bool DeleteEmptyDirsRecursion(string dir, bool includingSelf)
 	{
-		var allEmpty = Directory.EnumerateDirectories(dir).Aggregate(true, (current, subDir) => current & DeleteEmptyDirsRecursion(subDir, false));
+		var allEmpty = Directory.EnumerateDirectories(dir).Aggregate(true, (current, subDir) => current & DeleteEmptyDirsRecursion(subDir, true));
 		
 		if (!allEmpty || Directory.EnumerateFiles(dir).Any())
 		{
