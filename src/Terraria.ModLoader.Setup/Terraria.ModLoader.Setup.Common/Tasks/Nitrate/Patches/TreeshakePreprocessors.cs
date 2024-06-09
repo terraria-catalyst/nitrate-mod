@@ -68,6 +68,9 @@ internal sealed class TreeshakePreprocessors(CommonContext ctx, string sourceDir
 		var processedLines = new List<string>();
 		
 		var include = true;
+		var inBlock = false;
+		var blockIncluded = false;
+		
 		foreach (var line in lines)
 		{
 			var trimmedLine = line.Trim();
@@ -76,22 +79,39 @@ internal sealed class TreeshakePreprocessors(CommonContext ctx, string sourceDir
 			{
 				var condition = trimmedLine[3..].Trim();
 				include = EvaluateCondition(condition, symbols);
+				inBlock = true;
+				blockIncluded = include;
 			}
 			else if (trimmedLine.StartsWith("#elif"))
 			{
 				var condition = trimmedLine[5..].Trim();
-				if (!include)
+				if (inBlock && !blockIncluded)
 				{
 					include = EvaluateCondition(condition, symbols);
+					blockIncluded = include;
+				}
+				else
+				{
+					include = false;
 				}
 			}
 			else if (trimmedLine.StartsWith("#else"))
 			{
-				include = !include;
+				if (inBlock && !blockIncluded)
+				{
+					include = true;
+					blockIncluded = true;
+				}
+				else
+				{
+					include = false;
+				}
 			}
 			else if (trimmedLine.StartsWith("#endif"))
 			{
 				include = true;
+				inBlock = false;
+				blockIncluded = false;
 			}
 			else if (include)
 			{
