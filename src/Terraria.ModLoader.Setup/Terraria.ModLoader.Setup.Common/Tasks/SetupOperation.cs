@@ -177,14 +177,14 @@ public abstract class SetupOperation(CommonContext ctx)
 		}
 	}
 	
-	protected static bool DeleteEmptyDirs(string dir)
+	protected static bool DeleteEmptyDirs(string dir, bool includingSelf = true)
 	{
-		return !Directory.Exists(dir) || DeleteEmptyDirsRecursion(dir);
+		return !Directory.Exists(dir) || DeleteEmptyDirsRecursion(dir, includingSelf);
 	}
 	
-	private static bool DeleteEmptyDirsRecursion(string dir)
+	private static bool DeleteEmptyDirsRecursion(string dir, bool includingSelf)
 	{
-		var allEmpty = Directory.EnumerateDirectories(dir).Aggregate(true, (current, subDir) => current & DeleteEmptyDirsRecursion(subDir));
+		var allEmpty = Directory.EnumerateDirectories(dir).Aggregate(true, (current, subDir) => current & DeleteEmptyDirsRecursion(subDir, false));
 		
 		if (!allEmpty || Directory.EnumerateFiles(dir).Any())
 		{
@@ -192,6 +192,13 @@ public abstract class SetupOperation(CommonContext ctx)
 		}
 		
 		Directory.Delete(dir);
+		
+		// Quick and dirty patch: just create the directory again if it's
+		// expected to still be there.
+		if (!includingSelf)
+		{
+			Directory.CreateDirectory(dir);
+		}
 		
 		return true;
 	}

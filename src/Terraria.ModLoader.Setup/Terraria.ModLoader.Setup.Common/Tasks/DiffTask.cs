@@ -38,6 +38,10 @@ public sealed class DiffTask(CommonContext ctx, string baseDir, string srcDir, s
 		
 		status.AddMessage("Deleting Unnecessary Patches");
 		{
+			// Create patch directory if it doesn't currently exist (no
+			// patches).
+			Directory.CreateDirectory(patchDir);
+			
 			foreach (var (file, relPath) in EnumerateFiles(patchDir))
 			{
 				var targetPath = relPath.EndsWith(".patch") ? relPath[..^6] : relPath;
@@ -47,7 +51,9 @@ public sealed class DiffTask(CommonContext ctx, string baseDir, string srcDir, s
 				}
 			}
 			
-			DeleteEmptyDirs(patchDir);
+			// Even if there are no patches, keep the actual directory since we
+			// write files to it later.
+			DeleteEmptyDirs(patchDir, includingSelf: false);
 			status.Current++;
 		}
 		

@@ -9,8 +9,8 @@ namespace Terraria.ModLoader.Setup.Common.Tasks.Nitrate;
 ///		Composite task which applies automated intermediary Nitrate patches
 ///		before then applying explicitly-defined user patches.
 /// </summary>
-public sealed class NitrateTask(CommonContext ctx, string baseDir, string patchedDir, string patchDir)
-	: CompositeTask(ctx, GetOperations(ctx, baseDir, patchedDir, patchDir))
+public sealed class NitrateTask(CommonContext ctx, string baseDir, string patchedDir, string patchDir, out string pathToUseForDiffing)
+	: CompositeTask(ctx, GetOperations(ctx, baseDir, patchedDir, patchDir, out pathToUseForDiffing))
 {
 	public override bool ConfigurationDialog()
 	{
@@ -25,17 +25,19 @@ public sealed class NitrateTask(CommonContext ctx, string baseDir, string patche
 		
 		Tasks = res switch
 		{
-			SetupDialogResult.Yes => GetOperations(Context, baseDir, patchedDir, patchDir),
-			SetupDialogResult.No => [GetOperations(Context, baseDir, patchedDir, patchDir).Last(),],
+			SetupDialogResult.Yes => GetOperations(Context, baseDir, patchedDir, patchDir, out _),
+			SetupDialogResult.No => [GetOperations(Context, baseDir, patchedDir, patchDir, out _).Last(),],
 			_ => Tasks,
 		};
 		
 		return base.ConfigurationDialog();
 	}
 	
-	public static SetupOperation[] GetOperations(CommonContext ctx, string baseDir, string patchedDir, string patchDir)
+	public static SetupOperation[] GetOperations(CommonContext ctx, string baseDir, string patchedDir, string patchDir, out string pathToUseForDiffing)
 	{
-		return [patch<OrganizePartialClasses>(), patch<MakeTypesPartial>(), patch<TreeshakePreprocessors>(), patch<FormatWithEditorConfig>(), new PatchTask(ctx, baseDir, patchedDir, patchDir),];
+		var operations = new SetupOperation[] { patch<OrganizePartialClasses>(), patch<MakeTypesPartial>(), patch<TreeshakePreprocessors>(), patch<FormatWithEditorConfig>(), new PatchTask(ctx, baseDir, patchedDir, patchDir), };
+		pathToUseForDiffing = baseDir;
+		return operations;
 		
 		T patch<T>() where T : SetupOperation
 		{

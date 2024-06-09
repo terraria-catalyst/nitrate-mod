@@ -30,7 +30,7 @@ internal sealed class AutoSetup : ITaskInterface
 		Func<SetupOperation> buttonPatchTerraria = () => new PatchTask(ctx, "src/staging/decompiled", "src/staging/Terraria", "patches/Terraria");
 		Func<SetupOperation> buttonPatchTerrariaNetCore = () => new PatchTask(ctx, "src/staging/Terraria", "src/staging/TerrariaNetCore", "patches/TerrariaNetCore");
 		Func<SetupOperation> buttonPatchModLoader = () => new PatchTask(ctx, "src/staging/TerrariaNetCore", "src/staging/tModLoader", "patches/tModLoader");
-		Func<SetupOperation> buttonPatchNitrate = () => new NitrateTask(ctx, "src/staging/tModLoader", "src/staging/Nitrate", "patches/Nitrate");
+		Func<SetupOperation> buttonPatchNitrate = () => new NitrateTask(ctx, "src/staging/tModLoader", "src/staging/Nitrate", "patches/Nitrate", out _);
 		
 		Func<SetupOperation> buttonRegenSource = () =>
 			new RegenSourceTask(
