@@ -1,9 +1,0 @@
---- src/tModLoader/Terraria/Tile.cs
-+++ src/Nitrate/Terraria/Tile.cs
-@@ -1,6 +_,3 @@
--#if MONO
--using System.Runtime.InteropServices;
--#endif
- using Microsoft.Xna.Framework;
- using Terraria.DataStructures;
- 
