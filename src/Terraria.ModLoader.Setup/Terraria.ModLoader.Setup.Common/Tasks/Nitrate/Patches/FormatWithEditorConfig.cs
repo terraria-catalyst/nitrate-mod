@@ -27,7 +27,7 @@ internal sealed class FormatWithEditorConfig(CommonContext ctx, string sourceDir
 			var destination = Path.Combine(targetDirectory, relPath);
 			
 			// Exclude non-csproj files and templates.
-			if (!relPath.EndsWith(".csproj") || Path.GetFileName(relPath) == "{{ModName}}.csproj")
+			if (!relPath.EndsWith(".csproj") || relPath.EndsWith("{{ModName}}.csproj"))
 			{
 				copy(file, relPath, destination);
 				continue;
@@ -58,7 +58,7 @@ internal sealed class FormatWithEditorConfig(CommonContext ctx, string sourceDir
 		var editorconfigPath = Path.Combine(Directory.GetCurrentDirectory(), "src", ".editorconfig");
 		foreach (var (file, relPath) in EnumerateFiles(targetDirectory))
 		{
-			if (!relPath.EndsWith(".csproj"))
+			if (!relPath.EndsWith(".csproj") || relPath.EndsWith("{{ModName}}.csproj"))
 			{
 				continue;
 			}
