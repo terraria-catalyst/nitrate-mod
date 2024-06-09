@@ -504,6 +504,27 @@ public sealed class NitrateTask(CommonContext ctx, string baseDir, string patche
 		}
 	}
 	
+	public override bool ConfigurationDialog()
+	{
+		var res = Context.IsAutomatic
+			? SetupDialogResult.Yes
+			: Context.TaskInterface.ShowDialogWithOkFallback(
+				"Additional Nitrate Setup",
+				"Run additional Nitrate patch steps (initializes untracked intermediary projects)? This includes formatting and other automated processes that would produce large patches otherwise.",
+				SetupMessageBoxButtons.YesNo,
+				SetupMessageBoxIcon.Question
+			);
+		
+		Tasks = res switch
+		{
+			SetupDialogResult.Yes => GetOperations(Context, baseDir, patchedDir, patchDir),
+			SetupDialogResult.No => [GetOperations(Context, baseDir, patchedDir, patchDir).Last(),],
+			_ => Tasks,
+		};
+		
+		return base.ConfigurationDialog();
+	}
+	
 	public static SetupOperation[] GetOperations(CommonContext ctx, string baseDir, string patchedDir, string patchDir)
 	{
 		return [new OrganizePartialClasses(ctx, baseDir, baseDir = patchedDir + '_' + nameof(OrganizePartialClasses)), new MakeTypesPartial(ctx, baseDir, baseDir = patchedDir + '_' + nameof(MakeTypesPartial)), new TreeshakePreprocessors(ctx, baseDir, baseDir = patchedDir + '_' + nameof(TreeshakePreprocessors)), new FormatWithEditorConfig(ctx, baseDir, baseDir = patchedDir + '_' + nameof(FormatWithEditorConfig)), new PatchTask(ctx, baseDir, patchedDir, patchDir),];

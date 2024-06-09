@@ -4,11 +4,13 @@ namespace Terraria.ModLoader.Setup.Common.Tasks;
 
 public abstract class CompositeTask(CommonContext ctx, params SetupOperation[] tasks) : SetupOperation(ctx)
 {
+	public SetupOperation[] Tasks { get; set; } = tasks;
+	
 	private SetupOperation? failed;
 	
 	public override bool ConfigurationDialog()
 	{
-		return tasks.All(task => task.ConfigurationDialog());
+		return Tasks.All(task => task.ConfigurationDialog());
 	}
 	
 	public override bool Failed()
@@ -24,7 +26,7 @@ public abstract class CompositeTask(CommonContext ctx, params SetupOperation[] t
 		}
 		else
 		{
-			foreach (var task in tasks)
+			foreach (var task in Tasks)
 			{
 				task.FinishedDialog();
 			}
@@ -33,7 +35,7 @@ public abstract class CompositeTask(CommonContext ctx, params SetupOperation[] t
 	
 	public override void Run()
 	{
-		foreach (var task in tasks)
+		foreach (var task in Tasks)
 		{
 			task.Run();
 			if (!task.Failed())
