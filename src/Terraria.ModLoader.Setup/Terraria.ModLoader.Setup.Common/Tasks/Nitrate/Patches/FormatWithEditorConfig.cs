@@ -69,12 +69,13 @@ internal sealed class FormatWithEditorConfig(CommonContext ctx, string sourceDir
 			// Run dotnet format in directory.
 			items.Add(
 				new WorkItem(
-					"Formatting: " + relPath + " (with dotnet format)",
+					"Formatting: " + relPath + " (with dotnet format and cleanupcode.exe)",
 					() =>
 					{
 						var cwd = Path.GetDirectoryName(file)!;
-						CommonSetup.RunCommand(cwd, "dotnet", "format analyzers -v diag --binarylog analyzers.binlog", cancel: Context.TaskInterface.CancellationToken);
-						CommonSetup.RunCommand(cwd, "dotnet", "format style -v diag --binarylog analyzers.binlog", cancel: Context.TaskInterface.CancellationToken);
+						CommonSetup.RunCommand(cwd, "dotnet", "format analyzers", cancel: Context.TaskInterface.CancellationToken);
+						CommonSetup.RunCommand(cwd, "dotnet", "format style", cancel: Context.TaskInterface.CancellationToken);
+						// CommonSetup.RunCommand(cwd, "dotnet", "cleanupcode", cancel: Context.TaskInterface.CancellationToken);
 					}
 				)
 			);
