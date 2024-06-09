@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Terraria", "staging\Nitrate_FormatWithEditorConfig\Terraria\Terraria.csproj", "{FCA5A001-E557-4BE0-9227-8659B95D20C3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReLogic", "staging\Nitrate_FormatWithEditorConfig\ReLogic\ReLogic.csproj", "{D07E0F50-4A75-4D67-B723-0B81CD647F34}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FCA5A001-E557-4BE0-9227-8659B95D20C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FCA5A001-E557-4BE0-9227-8659B95D20C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FCA5A001-E557-4BE0-9227-8659B95D20C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FCA5A001-E557-4BE0-9227-8659B95D20C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D07E0F50-4A75-4D67-B723-0B81CD647F34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D07E0F50-4A75-4D67-B723-0B81CD647F34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D07E0F50-4A75-4D67-B723-0B81CD647F34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D07E0F50-4A75-4D67-B723-0B81CD647F34}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
