@@ -7,6 +7,7 @@ using System.Windows.Forms;
 
 using Terraria.ModLoader.Setup.Common;
 using Terraria.ModLoader.Setup.Common.Tasks;
+using Terraria.ModLoader.Setup.Common.Tasks.Nitrate;
 using Terraria.ModLoader.Setup.Common.Tasks.Roslyn;
 
 using static Terraria.ModLoader.Setup.Program;

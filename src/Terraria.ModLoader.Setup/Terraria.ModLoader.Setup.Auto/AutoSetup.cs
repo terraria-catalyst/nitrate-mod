@@ -5,6 +5,7 @@ using System.Threading;
 
 using Terraria.ModLoader.Setup.Common;
 using Terraria.ModLoader.Setup.Common.Tasks;
+using Terraria.ModLoader.Setup.Common.Tasks.Nitrate;
 
 namespace Terraria.ModLoader.Setup.Auto;
 
