@@ -67,9 +67,10 @@ internal sealed class TreeshakePreprocessors(CommonContext ctx, string sourceDir
 		var symbols = new HashSet<string> { "FNA", "NETCORE", };
 		var processedLines = new List<string>();
 		
-		var include = true;
-		var inBlock = false;
-		var blockIncluded = false;
+		var includeStack = new Stack<bool>();
+		var blockIncludedStack = new Stack<bool>();
+		includeStack.Push(true);
+		blockIncludedStack.Push(false);
 		
 		foreach (var line in lines)
 		{
@@ -78,42 +79,51 @@ internal sealed class TreeshakePreprocessors(CommonContext ctx, string sourceDir
 			if (trimmedLine.StartsWith("#if"))
 			{
 				var condition = trimmedLine[3..].Trim();
-				include = EvaluateCondition(condition, symbols);
-				inBlock = true;
-				blockIncluded = include;
+				var include = EvaluateCondition(condition, symbols);
+				includeStack.Push(include && !blockIncludedStack.Peek());
+				blockIncludedStack.Push(includeStack.Peek());
 			}
 			else if (trimmedLine.StartsWith("#elif"))
 			{
 				var condition = trimmedLine[5..].Trim();
-				if (inBlock && !blockIncluded)
+				if (includeStack.Count <= 1)
 				{
-					include = EvaluateCondition(condition, symbols);
-					blockIncluded = include;
+					continue;
 				}
-				else
+				
+				includeStack.Pop();
+				var include = EvaluateCondition(condition, symbols);
+				includeStack.Push(include && !blockIncludedStack.Peek());
+				
+				if (includeStack.Peek())
 				{
-					include = false;
+					blockIncludedStack.Pop();
 				}
+				
+				blockIncludedStack.Push(includeStack.Peek());
 			}
 			else if (trimmedLine.StartsWith("#else"))
 			{
-				if (inBlock && !blockIncluded)
+				if (includeStack.Count <= 1)
 				{
-					include = true;
-					blockIncluded = true;
+					continue;
 				}
-				else
-				{
-					include = false;
-				}
+				
+				includeStack.Pop();
+				includeStack.Push(!blockIncludedStack.Pop());
+				blockIncludedStack.Push(includeStack.Peek());
 			}
 			else if (trimmedLine.StartsWith("#endif"))
 			{
-				include = true;
-				inBlock = false;
-				blockIncluded = false;
+				if (includeStack.Count <= 1)
+				{
+					continue;
+				}
+				
+				includeStack.Pop();
+				blockIncludedStack.Pop();
 			}
-			else if (include)
+			else if (includeStack.Peek())
 			{
 				processedLines.Add(line);
 			}
