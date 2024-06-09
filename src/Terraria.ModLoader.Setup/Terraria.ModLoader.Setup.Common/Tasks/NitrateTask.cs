@@ -417,8 +417,9 @@ public sealed class NitrateTask(CommonContext ctx, string baseDir, string patche
 			foreach (var (file, relPath) in EnumerateFiles(sourceDirectory))
 			{
 				var destination = Path.Combine(targetDirectory, relPath);
-				
-				if (!relPath.EndsWith(".csproj"))
+
+				// Exclude non-csproj files and templates.
+				if (!relPath.EndsWith(".csproj") || Path.GetFileName(relPath) == "{{ModName}}")
 				{
 					copy(file, relPath, destination);
 					continue;
@@ -463,24 +464,9 @@ public sealed class NitrateTask(CommonContext ctx, string baseDir, string patche
 						"Formatting: " + relPath + " (with dotnet format)",
 						() =>
 						{
-							var analyzers = new ProcessStartInfo("dotnet.exe")
-							{
-								Arguments = "format analyzers -v diag --binarylog analyzers.binlog",
-								UseShellExecute = true,
-								WorkingDirectory = Path.GetDirectoryName(file)!,
-							};
-							
-							var style = new ProcessStartInfo("dotnet.exe")
-							{
-								Arguments = "format style -v diag --binarylog style.binlog",
-								UseShellExecute = true,
-								WorkingDirectory = Path.GetDirectoryName(file)!,
-							};
-							
-							var analyzersProcess = Process.Start(analyzers);
-							analyzersProcess?.WaitForExit();
-							var styleProcess = Process.Start(style);
-							styleProcess?.WaitForExit();
+							var cwd = Path.GetDirectoryName(file)!;
+							CommonSetup.RunCommand(cwd, "dotnet", "format analyzers -v diag --binarylog analyzers.binlog", cancel: Context.TaskInterface.CancellationToken);
+							CommonSetup.RunCommand(cwd, "dotnet", "format style -v diag --binarylog analyzers.binlog", cancel: Context.TaskInterface.CancellationToken);
 						}
 					)
 				);
