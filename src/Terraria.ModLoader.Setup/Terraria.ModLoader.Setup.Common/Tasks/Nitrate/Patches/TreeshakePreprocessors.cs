@@ -110,6 +110,12 @@ internal sealed class TreeshakePreprocessors(CommonContext ctx, string sourceDir
 	
 	private static bool EvaluateExpression(string expression, HashSet<string> symbols)
 	{
+		if (expression.StartsWith('!'))
+		{
+			var subExpression = expression[1..];
+			return !EvaluateExpression(subExpression, symbols);
+		}
+		
 		if (expression.Length == 1)
 		{
 			return symbols.Contains(expression);
