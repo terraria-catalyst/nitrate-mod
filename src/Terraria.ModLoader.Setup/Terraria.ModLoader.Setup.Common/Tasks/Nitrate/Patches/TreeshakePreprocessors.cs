@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Terraria.ModLoader.Setup.Common.Tasks.Nitrate.Patches;
 
@@ -85,22 +86,26 @@ internal sealed class TreeshakePreprocessors(CommonContext ctx, string sourceDir
 			}
 			else if (trimmedLine.StartsWith("#elif"))
 			{
-				var condition = trimmedLine[5..].Trim();
 				if (includeStack.Count <= 1)
 				{
 					continue;
 				}
 				
+				var condition = trimmedLine[5..].Trim();
+				var parentInclude = includeStack.Skip(1).First();
 				includeStack.Pop();
-				var include = EvaluateCondition(condition, symbols);
-				includeStack.Push(include && !blockIncludedStack.Peek());
-				
-				if (includeStack.Peek())
+				var blockIncluded = blockIncludedStack.Pop();
+				if (blockIncluded)
 				{
-					blockIncludedStack.Pop();
+					includeStack.Push(false);
+					blockIncludedStack.Push(true);
 				}
-				
-				blockIncludedStack.Push(includeStack.Peek());
+				else
+				{
+					var include = EvaluateCondition(condition, symbols);
+					includeStack.Push(parentInclude && include);
+					blockIncludedStack.Push(parentInclude && include);
+				}
 			}
 			else if (trimmedLine.StartsWith("#else"))
 			{
@@ -109,9 +114,19 @@ internal sealed class TreeshakePreprocessors(CommonContext ctx, string sourceDir
 					continue;
 				}
 				
+				var parentInclude = includeStack.Skip(1).First();
+				var blockIncluded = blockIncludedStack.Pop();
 				includeStack.Pop();
-				includeStack.Push(!blockIncludedStack.Pop());
-				blockIncludedStack.Push(includeStack.Peek());
+				if (blockIncluded)
+				{
+					includeStack.Push(false);
+					blockIncludedStack.Push(true);
+				}
+				else
+				{
+					includeStack.Push(parentInclude);
+					blockIncludedStack.Push(parentInclude);
+				}
 			}
 			else if (trimmedLine.StartsWith("#endif"))
 			{
