@@ -81,8 +81,9 @@ internal sealed class TreeshakePreprocessors(CommonContext ctx, string sourceDir
 			{
 				var condition = trimmedLine[3..].Trim();
 				var include = EvaluateCondition(condition, symbols);
-				includeStack.Push(include && !blockIncludedStack.Peek());
-				blockIncludedStack.Push(includeStack.Peek());
+				var parentInclude = includeStack.Peek();
+				includeStack.Push(parentInclude && include);
+				blockIncludedStack.Push(parentInclude && include);
 			}
 			else if (trimmedLine.StartsWith("#elif"))
 			{
