@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
@@ -8,8 +9,14 @@ using Microsoft.Win32;
 
 namespace Terraria.ModLoader.Setup.Common.Utilities;
 
+/// <summary>
+///		Utilities for interfacing with Steam files.
+/// </summary>
 public static partial class SteamUtils
 {
+	/// <summary>
+	///		The vanilla Terraria Steam app ID.
+	/// </summary>
 	public const int TERRARIA_APP_ID = 105600;
 	
 	public static readonly string TERRARIA_MANIFEST_FILE = $"appmanifest_{TERRARIA_APP_ID}.acf";
@@ -17,7 +24,10 @@ public static partial class SteamUtils
 	private static readonly Regex steamLibraryFoldersRegex = SteamLibraryFoldersRegex();
 	private static readonly Regex steamManifestInstallDirRegex = SteamManifestInstallDirRegex();
 	
-	public static bool TryFindTerrariaDirectory(out string path)
+	/// <summary>
+	///		Attempts to resolve the Terraria Steam directory.
+	/// </summary>
+	public static bool TryFindTerrariaDirectory([NotNullWhen(returnValue: true)] out string? path)
 	{
 		if (TryGetSteamDirectory(out var steamDirectory) && TryGetTerrariaDirectoryFromSteam(steamDirectory, out path))
 		{
@@ -28,7 +38,7 @@ public static partial class SteamUtils
 		return false;
 	}
 	
-	public static bool TryGetTerrariaDirectoryFromSteam(string steamDirectory, out string path)
+	private static bool TryGetTerrariaDirectoryFromSteam(string steamDirectory, [NotNullWhen(returnValue: true)] out string? path)
 	{
 		var steamApps = Path.Combine(steamDirectory, "steamapps");
 		var libraries = new List<string>
@@ -41,7 +51,6 @@ public static partial class SteamUtils
 		if (File.Exists(libraryFoldersFile))
 		{
 			var contents = File.ReadAllText(libraryFoldersFile);
-			
 			var matches = steamLibraryFoldersRegex.Matches(contents);
 			
 			foreach (Match match in matches)
@@ -81,11 +90,10 @@ public static partial class SteamUtils
 		}
 		
 		path = null;
-		
 		return false;
 	}
 	
-	public static bool TryGetSteamDirectory(out string path)
+	private static bool TryGetSteamDirectory(out string path)
 	{
 		if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 		{
