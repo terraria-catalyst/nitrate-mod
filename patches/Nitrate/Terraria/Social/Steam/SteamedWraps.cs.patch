@@ -1,0 +1,22 @@
+--- src/Nitrate_FormatWithEditorConfig/Terraria/Social/Steam/SteamedWraps.cs
++++ src/Nitrate/Terraria/Social/Steam/SteamedWraps.cs
+@@ -31,7 +_,10 @@
+ 	// Used to get the right token for fetching/setting localized descriptions from/to Steam Workshop
+ 	internal static string GetCurrentSteamLangKey()
+ 	{
+-		//TODO: Unhardcode this whenever the language roster is unhardcoded for modding.
++		// NITRATE: Define Workshop language key in the GameCulture instance.
++		return LanguageManager.Instance.ActiveCulture.WorkshopName ?? "english";
++		
++		/*
+ 		return (GameCulture.CultureName)LanguageManager.Instance.ActiveCulture.LegacyId switch {
+ 			GameCulture.CultureName.German => "german",
+ 			GameCulture.CultureName.Italian => "italian",
+@@ -43,6 +_,7 @@
+ 			GameCulture.CultureName.Polish => "polish",
+ 			_ => "english",
+ 		};
++		*/
+ 	}
+ 
+ 	internal static void ReportCheckSteamLogs()

@@ -1,0 +1,11 @@
+--- src/Nitrate_FormatWithEditorConfig/Terraria/GameContent/UI/Elements/UIWorkshopPublishWorldListItem.cs
++++ src/Nitrate/Terraria/GameContent/UI/Elements/UIWorkshopPublishWorldListItem.cs
+@@ -123,7 +_,7 @@
+ 		Utils.DrawBorderString(spriteBatch, expertText, vector + new Vector2(x2, num4 + 3f), gameModeColor);
+ 		vector.X += num3 + 5f;
+ 		float num5 = num2;
+-		if (!GameCulture.FromCultureName(GameCulture.CultureName.English).IsActive)
++		if (!EN_US.IsActive)
+ 			num5 += 40f;
+ 
+ 		DrawPanel(spriteBatch, vector, num5, height);
