@@ -24,101 +24,83 @@
  	public enum CultureName
  	{
  		English = 1,
-@@ -21,41 +_,66 @@
- 		Polish = 9,
+@@ -22,29 +_,45 @@
  		Unknown = 9999
  	}
--
+ 
 -	private static Dictionary<CultureName, GameCulture> _NamedCultures;
 -	private static Dictionary<int, GameCulture> _legacyCultures;
-+	
  	public readonly CultureInfo CultureInfo;
-+	
++
 +	[Obsolete("Avoid hard-coded vanilla language IDs, preder string IDs")]
  	public readonly int LegacyId;
--
+ 
 -	public static IEnumerable<GameCulture> KnownCultures => _legacyCultures.Values;
--
--	public static GameCulture DefaultCulture { get; set; }
--
-+	
 +	public static IEnumerable<GameCulture> KnownCultures => Languages.GetCultures();
-+	
+ 
+-	public static GameCulture DefaultCulture { get; set; }
 +	public static GameCulture DefaultCulture
 +	{
 +		get => Languages.Default;
-+		
++
 +		[Obsolete("Default culture cannot be changed")]
 +		set
 +		{
 +			// no-op
 +		}
 +	}
-+	
+ 
  	public bool IsActive => Language.ActiveCulture == this;
--
-+	
+ 
  	public string Name => CultureInfo.Name;
--
-+	
+ 
 +	[Obsolete("Avoid hard-coded vanilla CultureName, prefer string IDs")]
  	public static GameCulture FromCultureName(CultureName name)
  	{
 +		/*
  		if (!_NamedCultures.ContainsKey(name))
  			return DefaultCulture;
--
-+		
+ 
  		return _NamedCultures[name];
 +		*/
-+		
++
 +		return Languages.NAMED_CULTURES.TryGetValue(name, out var culture) ? culture : DefaultCulture;
  	}
--
-+	
+ 
 +	[Obsolete("Avoid hard-coded vanilla language IDs, prefer string IDs")]
  	public static GameCulture FromLegacyId(int id)
  	{
 +		/*
  		if (id < 1)
  			id = 1;
--
-+		
- 		if (!_legacyCultures.ContainsKey(id))
+ 
+@@ -52,10 +_,19 @@
  			return DefaultCulture;
--
-+		
+ 
  		return _legacyCultures[id];
 +		*/
-+		
++
 +		if (id < 1)
 +		{
 +			id = 1;
 +		}
-+		
++
 +		return FromCultureName((CultureName)id);
  	}
--
+ 
 -	public static GameCulture FromName(string name) => _legacyCultures.Values.SingleOrDefault((GameCulture culture) => culture.Name == name) ?? DefaultCulture;
--
-+	
 +	// public static GameCulture FromName(string name) => _legacyCultures.Values.SingleOrDefault((GameCulture culture) => culture.Name == name) ?? DefaultCulture;
-+	
+ 
 +	/*
  	static GameCulture()
  	{
  		_NamedCultures = new Dictionary<CultureName, GameCulture> {
-@@ -69,22 +_,30 @@
- 			{ CultureName.Portuguese, new GameCulture("pt-BR", 8) },
- 			{ CultureName.Polish, new GameCulture("pl-PL", 9) }
- 		};
--
-+	
+@@ -72,14 +_,21 @@
+ 
  		DefaultCulture = _NamedCultures[CultureName.English];
  	}
--
 +	*/
-+	
+ 
 +	[Obsolete("GameCulture has been reworked to define behavior, use other overload")]
  	public GameCulture(string name, int legacyId)
  	{
@@ -126,20 +108,18 @@
  		LegacyId = legacyId;
 -		RegisterLegacyCulture(this, legacyId);
 +		// RegisterLegacyCulture(this, legacyId);
-+		
++
 +		// Nitrate: Stub these values to ensure no nulls at runtime. Not great.
 +		LanguageName = EnglishName = name;
 +		WorkshopName = null;
  	}
--
-+	
+ 
 +	/*
  	private static void RegisterLegacyCulture(GameCulture culture, int legacyId)
  	{
  		if (_legacyCultures == null)
- 			_legacyCultures = new Dictionary<int, GameCulture>();
--
-+	
+@@ -87,4 +_,5 @@
+ 
  		_legacyCultures.Add(legacyId, culture);
  	}
 +	*/
