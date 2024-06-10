@@ -1,0 +1,11 @@
+--- src/Nitrate_FormatWithEditorConfig/Terraria/Player.cs
++++ src/Nitrate/Terraria/Player.cs
+@@ -31981,7 +_,7 @@
+ 			int num5 = ((!Main.getGoodWorld) ? Projectile.NewProjectile(projectileSource_Misc, position.X + (float)(width / 2), position.Y + (float)(height / 2), (float)Main.rand.Next(10, 30) * 0.1f * (float)hitDirection + num, (float)Main.rand.Next(-40, -20) * 0.1f, num2, damage, num3, Main.myPlayer, num4) : Projectile.NewProjectile(projectileSource_Misc, position.X + (float)(width / 2), position.Y + (float)(height / 2), ((float)Main.rand.Next(10, 30) * 0.1f * (float)hitDirection + num) * 1.5f, (float)Main.rand.Next(-40, -20) * 0.1f * 1.5f, num2, damage, num3, Main.myPlayer, num4));
+ 			DateTime now = DateTime.Now;
+ 			string text = now.ToString("D");
+-			if (GameCulture.FromCultureName(GameCulture.CultureName.English).IsActive)
++			if (EN_US.IsActive)
+ 				text = now.ToString("MMMM d, yyy");
+ 
+ 			string miscText = deathText.ToString() + "\n" + text;

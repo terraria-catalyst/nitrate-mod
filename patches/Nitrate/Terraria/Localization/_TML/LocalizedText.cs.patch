@@ -1,0 +1,67 @@
+--- src/Nitrate_FormatWithEditorConfig/Terraria/Localization/_TML/LocalizedText.cs
++++ src/Nitrate/Terraria/Localization/_TML/LocalizedText.cs
+@@ -25,22 +_,26 @@
+ 	//   other
+ 	public static int CardinalPluralRule(GameCulture culture, int count)
+ 	{
++		// NITRATE: Define plural rules in the GameCulture instance.
++		return culture.CardinalPluralRule(count);
++		
++		/*
+ 		int mod_i10 = count % 10;
+ 		int mod_i100 = count % 100;
+ 		static bool contains(int i, int a, int b) => i >= a && i <= b;
+-
++		
+ 		switch (culture.LegacyId) {
+ 			case (int)GameCulture.CultureName.Russian:
+ 				// one, few, many
+ 				// _C_RULE_13
+ 				if (mod_i10 == 1 && mod_i100 != 11)
+ 					return 0;
+-
++		
+ 				if (contains(mod_i10, 2, 4) && !contains(mod_i100, 12, 14))
+ 					return 1;
+-
++		
+ 				return 2;
+-
++		
+ 			case (int)GameCulture.CultureName.English:
+ 			case (int)GameCulture.CultureName.German:
+ 			case (int)GameCulture.CultureName.Italian:
+@@ -48,27 +_,28 @@
+ 			case (int)GameCulture.CultureName.Portuguese:
+ 				// one, many
+ 				return count == 1 ? 0 : 1;
+-
++		
+ 			case (int)GameCulture.CultureName.French:
+ 				// one, many
+ 				return count == 0 || count == 1 ? 0 : 1;
+-
++		
+ 			case (int)GameCulture.CultureName.Polish:
+ 				// one, few, many
+ 				if (count == 1)
+ 					return 0;
+-				
++		
+ 				if (contains(mod_i10, 2, 4) && !contains(mod_i100, 12, 14))
+ 					return 1;
+-				
++		
+ 				return 2;
+-
++		
+ 			case (int)GameCulture.CultureName.Chinese:
+ 			default:
+ 				// Chinese
+ 				// other
+ 				return 0;
+ 		}
++		*/
+ 	}
+ 
+ 	public static readonly Regex PluralizationPatternRegex = new Regex(@"{\^(\d+):([^\r\n]+?)}", RegexOptions.Compiled); // "{0} {^0:item;items}"

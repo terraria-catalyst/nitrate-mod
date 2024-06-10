@@ -1,0 +1,11 @@
+--- src/Nitrate_FormatWithEditorConfig/Terraria/GameContent/UI/Elements/UICharacterListItem.cs
++++ src/Nitrate/Terraria/GameContent/UI/Elements/UICharacterListItem.cs
+@@ -333,7 +_,7 @@
+ 		vector.X += num2 + 5f;
+ 		Vector2 vector3 = vector;
+ 		float num3 = 140f;
+-		if (GameCulture.FromCultureName(GameCulture.CultureName.Russian).IsActive)
++		if (RU_RU.IsActive)
+ 			num3 = 180f;
+ 
+ 		DrawPanel(spriteBatch, vector3, num3);

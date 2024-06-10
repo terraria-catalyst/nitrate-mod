@@ -9,3 +9,21 @@
  			/*
  			base.Content.RootDirectory = "Content";
  			*/
+@@ -39741,7 +_,7 @@
+ 		string text = "";
+ 		float num4 = 215f;
+ 		int startX = 0;
+-		if (GameCulture.FromCultureName(GameCulture.CultureName.Russian).IsActive) {
++		if (RU_RU.IsActive) {
+ 			startX = -50;
+ 			num4 += 50f;
+ 		}
+@@ -44536,7 +_,7 @@
+ 
+ 	private void OnSubmitServerPassword()
+ 	{
+-		string text = "-autoshutdown -password \"" + ConvertToSafeArgument(Netplay.ServerPassword) + "\" -lang " + Language.ActiveCulture.LegacyId;
++		string text = "-autoshutdown -password \"" + ConvertToSafeArgument(Netplay.ServerPassword) + "\" -language " + Language.ActiveCulture.LanguageName;
+ 		if (Platform.IsLinux)
+ 			text = ((IntPtr.Size != 8) ? (text + " -x86") : (text + " -x64"));
+ 
