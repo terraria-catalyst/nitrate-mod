@@ -7,7 +7,7 @@
 -		//TODO: Unhardcode this whenever the language roster is unhardcoded for modding.
 +		// NITRATE: Define Workshop language key in the GameCulture instance.
 +		return LanguageManager.Instance.ActiveCulture.WorkshopName ?? "english";
-+		
++
 +		/*
  		return (GameCulture.CultureName)LanguageManager.Instance.ActiveCulture.LegacyId switch
  		{
