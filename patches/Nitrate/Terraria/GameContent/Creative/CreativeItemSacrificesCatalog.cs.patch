@@ -11,7 +11,7 @@
  			{
  				var value = 0;
  				var flag = false;
-+				
++
 +				// NITRATE(#42): Use InvariantCulture for ToLower to avoid
 +				// issues when using languages not supported by vanilla
 +				// Terraria.
@@ -19,8 +19,8 @@
 +				// in the TSV file) to some character other than 'i' (how it
 +				// appears in the switch case).
 -				var text2 = array2[1].ToLower();
-+				string text2 = array2[1].ToLower(CultureInfo.InvariantCulture);
-+				
++				var text2 = array2[1].ToLower(CultureInfo.InvariantCulture);
++
  				switch (text2)
  				{
  				case "":
