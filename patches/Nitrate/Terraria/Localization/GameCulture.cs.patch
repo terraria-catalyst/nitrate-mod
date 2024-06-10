@@ -74,7 +74,7 @@
  		if (id < 1)
  			id = 1;
  
-@@ -52,10 +_,19 @@
+@@ -52,10 +_,21 @@
  			return DefaultCulture;
  
  		return _legacyCultures[id];
@@ -88,8 +88,9 @@
 +		return FromCultureName((CultureName)id);
  	}
  
--	public static GameCulture FromName(string name) => _legacyCultures.Values.SingleOrDefault((GameCulture culture) => culture.Name == name) ?? DefaultCulture;
-+	// public static GameCulture FromName(string name) => _legacyCultures.Values.SingleOrDefault((GameCulture culture) => culture.Name == name) ?? DefaultCulture;
++	/*
+ 	public static GameCulture FromName(string name) => _legacyCultures.Values.SingleOrDefault((GameCulture culture) => culture.Name == name) ?? DefaultCulture;
++	*/
  
 +	/*
  	static GameCulture()
