@@ -1,0 +1,26 @@
+--- src/Nitrate_FormatWithEditorConfig/Terraria/GameContent/Creative/CreativeItemSacrificesCatalog.cs
++++ src/Nitrate/Terraria/GameContent/Creative/CreativeItemSacrificesCatalog.cs
+@@ -1,5 +_,6 @@
+ using System;
+ using System.Collections.Generic;
++using System.Globalization;
+ using System.Text.RegularExpressions;
+ 
+ using Terraria.ID;
+@@ -25,7 +_,15 @@
+ 			if (array2.Length >= 3 && ItemID.Search.TryGetId(array2[0], out var id)) {
+ 				int value = 0;
+ 				bool flag = false;
++				
++				// NITRATE(#42): Use InvariantCulture for ToLower to avoid
++				// issues when using languages not supported by vanilla
++				// Terraria.
++				// Some languages, for example, may lowercase 'I' (as it appears
++				// in the TSV file) to some character other than 'i' (how it
++				// appears in the switch case).
+-				string text2 = array2[1].ToLower();
++				string text2 = array2[1].ToLower(CultureInfo.InvariantCulture);
++				
+ 				switch (text2) {
+ 					case "":
+ 					case "a":
