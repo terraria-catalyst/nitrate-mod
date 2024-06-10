@@ -24,11 +24,11 @@
  	public enum CultureName
  	{
  		English = 1,
-@@ -22,29 +_,45 @@
+@@ -22,31 +_,47 @@
  		Unknown = 9999
  	}
  
--	private static Dictionary<CultureName, GameCulture> _NamedCultures;
+-	private static readonly Dictionary<CultureName, GameCulture> _NamedCultures;
 -	private static Dictionary<int, GameCulture> _legacyCultures;
  	public readonly CultureInfo CultureInfo;
 +
@@ -58,10 +58,12 @@
  	public static GameCulture FromCultureName(CultureName name)
  	{
 +		/*
- 		if (!_NamedCultures.ContainsKey(name))
+ 		if (!_NamedCultures.TryGetValue(name, out var value))
+ 		{
  			return DefaultCulture;
+ 		}
  
- 		return _NamedCultures[name];
+ 		return value;
 +		*/
 +
 +		return Languages.NAMED_CULTURES.TryGetValue(name, out var culture) ? culture : DefaultCulture;
@@ -72,12 +74,12 @@
  	{
 +		/*
  		if (id < 1)
+ 		{
  			id = 1;
+@@ -58,10 +_,21 @@
+ 		}
  
-@@ -52,10 +_,21 @@
- 			return DefaultCulture;
- 
- 		return _legacyCultures[id];
+ 		return value;
 +		*/
 +
 +		if (id < 1)
@@ -96,7 +98,7 @@
  	static GameCulture()
  	{
  		_NamedCultures = new Dictionary<CultureName, GameCulture> {
-@@ -72,14 +_,21 @@
+@@ -78,18 +_,26 @@
  
  		DefaultCulture = _NamedCultures[CultureName.English];
  	}
@@ -118,8 +120,7 @@
 +	/*
  	private static void RegisterLegacyCulture(GameCulture culture, int legacyId)
  	{
- 		if (_legacyCultures == null)
-@@ -87,4 +_,5 @@
+ 		_legacyCultures ??= [];
  
  		_legacyCultures.Add(legacyId, culture);
  	}

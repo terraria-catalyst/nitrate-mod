@@ -17,26 +17,26 @@ namespace Terraria.ModLoader.Setup;
 public partial class MainForm : Form
 {
 	public CancellationTokenSource CancelSource { get; private set; }
-	
+
 	public Label LabelStatus => labelStatus;
-	
+
 	public ProgressBar ProgressBar => progressBar;
-	
+
 	private readonly IDictionary<Button, Func<SetupOperation>> taskButtons = new Dictionary<Button, Func<SetupOperation>>();
 	private readonly CommonContext ctx;
 	private bool closeOnCancel;
-	
+
 	public MainForm(CommonContext ctx)
 	{
 		this.ctx = ctx;
-		
+
 		FormBorderStyle = FormBorderStyle.FixedSingle;
 		MaximizeBox = false;
-		
+
 		InitializeComponent();
-		
+
 		labelWorkingDirectoryDisplay.Text = Directory.GetCurrentDirectory();
-		
+
 #region Task button initialization
 		taskButtons[buttonDecompile] = () => new DecompileTask(ctx, "src/staging/decompiled");
 		// Terraria
@@ -61,7 +61,7 @@ public partial class MainForm : Form
 					.Select(b => taskButtons[b]()).ToArray()
 			);
 		};
-		
+
 		taskButtons[buttonSetup] = () =>
 		{
 			return new SetupTask(
@@ -71,57 +71,57 @@ public partial class MainForm : Form
 			);
 		};
 #endregion
-		
+
 		SetPatchMode(ctx.Settings.Get<PatchSettings>().PatchMode);
-		
+
 		Closing += (_, args) =>
 		{
 			if (!buttonCancel.Enabled)
 			{
 				return;
 			}
-			
+
 			CancelSource.Cancel();
 			args.Cancel = true;
 			closeOnCancel = true;
 		};
 	}
-	
+
 	private void buttonCancel_Click(object sender, EventArgs e)
 	{
 		CancelSource.Cancel();
 	}
-	
+
 	private void menuItemTerraria_Click(object sender, EventArgs e)
 	{
 		CommonSetup.SelectAndSetTerrariaDirectoryDialog(ctx);
 	}
-	
+
 	private void menuItemDecompileServer_Click(object sender, EventArgs e)
 	{
 		RunTask(new DecompileTask(ctx, "src/staging/decompiled_server", true));
 	}
-	
+
 	private void menuItemFormatCode_Click(object sender, EventArgs e)
 	{
 		RunTask(new FormatTask(ctx));
 	}
-	
+
 	private void menuItemHookGen_Click(object sender, EventArgs e)
 	{
 		RunTask(new HookGenTask(ctx));
 	}
-	
+
 	private void simplifierToolStripMenuItem_Click(object sender, EventArgs e)
 	{
 		RunTask(new SimplifierTask(ctx));
 	}
-	
+
 	private void buttonTask_Click(object sender, EventArgs e)
 	{
 		RunTask(taskButtons[(Button)sender]());
 	}
-	
+
 	private void RunTask(SetupOperation task)
 	{
 		CancelSource = new CancellationTokenSource();
@@ -130,33 +130,33 @@ public partial class MainForm : Form
 		{
 			b.Enabled = false;
 		}
-		
+
 		buttonCancel.Enabled = true;
-		
+
 		new Thread(() => RunTaskThread(task)).Start();
 	}
-	
+
 	private void RunTaskThread(SetupOperation task)
 	{
 		var errorLogFile = Path.Combine(CommonSetup.LOGS_DIR, "error.log");
 		try
 		{
 			SetupOperation.DeleteFile(errorLogFile);
-			
+
 			if (!task.ConfigurationDialog())
 			{
 				return;
 			}
-			
+
 			if (!task.StartupWarning())
 			{
 				return;
 			}
-			
+
 			try
 			{
 				task.Run();
-				
+
 				if (CancelSource.IsCancellationRequested)
 				{
 					throw new OperationCanceledException();
@@ -174,15 +174,15 @@ public partial class MainForm : Form
 						}
 					}
 				);
-				
+
 				return;
 			}
-			
+
 			if (task.Failed() || task.Warnings())
 			{
 				task.FinishedDialog();
 			}
-			
+
 			Invoke(
 				() =>
 				{
@@ -200,7 +200,7 @@ public partial class MainForm : Form
 					labelStatus.Text = "Error: " + e.Message.Trim();
 				}
 			);
-			
+
 			SetupOperation.CreateDirectory(CommonSetup.LOGS_DIR);
 			File.WriteAllText(errorLogFile, status + "\r\n" + e);
 		}
@@ -213,7 +213,7 @@ public partial class MainForm : Form
 					{
 						b.Enabled = true;
 					}
-					
+
 					buttonCancel.Enabled = false;
 					progressBar.Value = 0;
 					if (closeOnCancel)
@@ -224,7 +224,7 @@ public partial class MainForm : Form
 			);
 		}
 	}
-	
+
 	private void SetPatchMode(int mode)
 	{
 		exactToolStripMenuItem.Checked = mode == 0;
@@ -233,26 +233,26 @@ public partial class MainForm : Form
 		ctx.Settings.Get<PatchSettings>().PatchMode = mode;
 		ctx.Settings.Save();
 	}
-	
+
 	private void exactToolStripMenuItem_Click(object sender, EventArgs e)
 	{
 		SetPatchMode(0);
 	}
-	
+
 	private void offsetToolStripMenuItem_Click(object sender, EventArgs e)
 	{
 		SetPatchMode(1);
 	}
-	
+
 	private void fuzzyToolStripMenuItem_Click(object sender, EventArgs e)
 	{
 		SetPatchMode(2);
 	}
-	
+
 	private void mainMenuStrip_ItemClicked(object sender, ToolStripItemClickedEventArgs e) { }
-	
+
 	private void toolTipButtons_Popup(object sender, PopupEventArgs e) { }
-	
+
 	private void menuItemTmlPath_Click(object sender, EventArgs e)
 	{
 		SelectTmlDirectoryDialog(ctx);

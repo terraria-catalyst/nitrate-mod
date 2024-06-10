@@ -14,7 +14,7 @@ internal static class Program
 	{
 		Application.EnableVisualStyles();
 		Application.SetCompatibleTextRenderingDefault(false);
-		
+
 		var ctx = new CommonContext(new MainSetup());
 		{
 			Settings.InitializeSettings(ctx.TaskInterface);
@@ -23,10 +23,10 @@ internal static class Program
 			CommonSetup.CreateTmlSteamDirIfNecessary(ctx);
 			CommonSetup.UpdateTargetsFiles(ctx);
 		}
-		
+
 		Application.Run(((MainSetup)ctx.TaskInterface).Form = new MainForm(ctx));
 	}
-	
+
 	public static void SelectTmlDirectoryDialog(CommonContext ctx)
 	{
 		while (true)
@@ -39,20 +39,20 @@ internal static class Program
 				CheckPathExists = true,
 				FileName = "Folder Selection.",
 			};
-			
+
 			if (dialog.ShowDialog() != DialogResult.OK)
 			{
 				return;
 			}
-			
+
 			ctx.TmlDeveloperSteamDirectory = Path.GetDirectoryName(dialog.FileName)!;
 			ctx.Settings.Save();
-			
+
 			CommonSetup.UpdateTargetsFiles(ctx);
 			return;
 		}
 	}
-	
+
 	private static void FindTerrariaDirectoryIfNecessary(CommonContext ctx)
 	{
 		if (!Directory.Exists(ctx.TerrariaSteamDirectory))
@@ -60,24 +60,24 @@ internal static class Program
 			FindTerrariaDirectory(ctx);
 		}
 	}
-	
+
 	private static void FindTerrariaDirectory(CommonContext ctx)
 	{
 		if (!SteamUtils.TryFindTerrariaDirectory(out var terrariaFolderPath))
 		{
 			const string message_text = "Unable to automatically find Terraria's installation path. Please select it manually.";
-			
+
 			Console.WriteLine(message_text);
-			
+
 			var messageResult = MessageBox.Show(message_text, "Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
-			
+
 			if (messageResult != DialogResult.OK || !CommonSetup.TrySelectTerrariaDirectoryDialog(ctx, out terrariaFolderPath))
 			{
 				Console.WriteLine("User chose to not retry. Exiting.");
 				Environment.Exit(-1);
 			}
 		}
-		
+
 		CommonSetup.SetTerrariaDirectory(ctx, terrariaFolderPath);
 	}
 }

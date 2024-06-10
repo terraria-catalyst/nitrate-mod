@@ -20,23 +20,23 @@ public static class CommonSetup
 	///		The setup directory name.
 	/// </summary>
 	public const string SETUP_DIR = ".setup";
-	
+
 	/// <summary>
 	///		The setup logs directory.
 	/// </summary>
 	public static readonly string LOGS_DIR = Path.Combine(SETUP_DIR, "logs");
-	
+
 	/// <summary>
 	///		The setup settings directory.
 	/// </summary>
 	public static readonly string SETTINGS_DIR = Path.Combine(SETUP_DIR, "settings");
-	
+
 	/// <summary>
 	///		The setup settings file path.
 	/// </summary>
 	public static readonly string SETTINGS_PATH = Path.Combine(SETTINGS_DIR, "settings.json");
 #endregion
-	
+
 #region Create Symlinks
 	/// <summary>
 	///		Initializes symlinks for compatibility between the source
@@ -48,31 +48,31 @@ public static class CommonSetup
 		var candidates = new[] { "GoG", "Terraria", "TerrariaNetCore", "tModLoader", };
 		var sourceDirectory = Path.Combine("src", "Terraria.ModLoader", "patches");
 		var targetDirectory = Path.Combine("patches");
-		
+
 		foreach (var candidate in candidates)
 		{
 			var source = Path.Combine(sourceDirectory, candidate);
 			var target = Path.Combine(targetDirectory, candidate);
-			
+
 			if (!File.Exists(target) && !Directory.Exists(target))
 			{
 				CreateSymlink(source, target);
 			}
 		}
 	}
-	
+
 	private static void CreateSymlink(string directoryToSymlink, string newPath)
 	{
 		if (!Directory.Exists(directoryToSymlink))
 		{
 			throw new DirectoryNotFoundException("Could not find directory to symlink to: " + directoryToSymlink);
 		}
-		
+
 		if (Directory.Exists(newPath) || File.Exists(newPath))
 		{
 			throw new IOException("Attempted to create symlink at existing file/directory location: " + newPath);
 		}
-		
+
 		ProcessStartInfo procInfo;
 		if (OperatingSystem.IsWindows())
 		{
@@ -92,13 +92,13 @@ public static class CommonSetup
 				UseShellExecute = true,
 			};
 		}
-		
+
 		var proc = Process.Start(procInfo);
 		if (proc is null)
 		{
 			throw new IOException($"Failed to run command: {procInfo.FileName + " " + string.Join(' ', procInfo.Arguments)}");
 		}
-		
+
 		proc.WaitForExit();
 		if (proc.ExitCode != 0)
 		{
@@ -106,7 +106,7 @@ public static class CommonSetup
 		}
 	}
 #endregion
-	
+
 #region Update Targets Files
 	/// <summary>
 	///		Updates the <c>WorkspaceInfo.targets</c> amd <c>tMLMod.targets</c>
@@ -118,56 +118,56 @@ public static class CommonSetup
 		{
 			updateTextFile("src/staging/WorkspaceInfo.targets", GetWorkspaceInfoTargetsText(ctx));
 		}
-		
+
 		// tMLMod.targets
 		{
 			var targetsContents = File.ReadAllText("patches/tModLoader/Terraria/release_extras/tMLMod.targets");
 			var tmlVersion = Environment.GetEnvironmentVariable("TMLVERSION");
-			
+
 			if (!string.IsNullOrWhiteSpace(tmlVersion) && ctx.Branch == "stable")
 			{
 				// Convert 2012.4.x to 2012_4
 				var tmlVersionDefine = $"TML_{string.Join("_", tmlVersion.Split('.').Take(2))}";
-				
+
 				Console.WriteLine($"TMLVERSION found: {tmlVersion}");
 				Console.WriteLine($"Defining TMLVERSION constant as: {tmlVersionDefine}");
-				
+
 				targetsContents = targetsContents.Replace("<!-- TML stable version define placeholder -->", $"<DefineConstants>$(DefineConstants);{tmlVersionDefine}</DefineConstants>");
-				
+
 				// The patch file needs to be updated as well since it gets
 				// copied to src and the post-build task will copy it to the
 				// Steam folder as well.
 				updateTextFile("patches/tModLoader/Terraria/release_extras/tMLMod.targets", targetsContents);
 			}
-			
+
 			updateTextFile(Path.Combine(ctx.TmlDeveloperSteamDirectory, "tMLMod.targets"), targetsContents);
 		}
-		
+
 		return;
-		
+
 		static void updateTextFile(string path, string text)
 		{
 			SetupOperation.CreateParentDirectory(path);
-			
+
 			if (!File.Exists(path) || text != File.ReadAllText(path))
 			{
 				File.WriteAllText(path, text);
 			}
 		}
 	}
-	
+
 	private static string GetWorkspaceInfoTargetsText(CommonContext ctx)
 	{
 		var gitSha = "";
 		{
 			RunCommand("", "git", "rev-parse HEAD", s => gitSha = s.Trim());
 		}
-		
+
 		ctx.Branch = "";
 		{
 			RunCommand("", "git", "rev-parse --abbrev-ref HEAD", s => ctx.Branch = s.Trim());
 		}
-		
+
 		var githubHeadRef = Environment.GetEnvironmentVariable("GITHUB_HEAD_REF");
 		{
 			if (!string.IsNullOrWhiteSpace(githubHeadRef))
@@ -176,7 +176,7 @@ public static class CommonSetup
 				ctx.Branch = githubHeadRef;
 			}
 		}
-		
+
 		var headSha = Environment.GetEnvironmentVariable("HEAD_SHA");
 		{
 			if (!string.IsNullOrWhiteSpace(headSha))
@@ -185,7 +185,7 @@ public static class CommonSetup
 				gitSha = headSha;
 			}
 		}
-		
+
 		return
 			$"""
 			<?xml version="1.0" encoding="utf-8"?>
@@ -201,7 +201,7 @@ public static class CommonSetup
 			""";
 	}
 #endregion
-	
+
 #region Select and Set Terraria Directory Dialog
 	/// <summary>
 	///		Prompts the user to select the Terraria directory and sets it.
@@ -212,18 +212,18 @@ public static class CommonSetup
 		{
 			return false;
 		}
-		
+
 		SetTerrariaDirectory(ctx, path);
 		return true;
 	}
-	
+
 	/// <summary>
 	///		Prompts the user to select the Terraria directory.
 	/// </summary>
 	public static bool TrySelectTerrariaDirectoryDialog(CommonContext ctx, [NotNullWhen(returnValue: true)] out string? result)
 	{
 		result = null;
-		
+
 		while (true)
 		{
 			var dialog = new OpenFileDialogParameters
@@ -232,12 +232,12 @@ public static class CommonSetup
 				Filter = "Terraria|Terraria.exe",
 				Title = "Select Terraria.exe",
 			};
-			
+
 			if (ctx.TaskInterface.ShowDialogWithOkFallback(ref dialog) != SetupDialogResult.Ok)
 			{
 				return false;
 			}
-			
+
 			string? err = null;
 			{
 				// TODO: Are these restrictions really necessary?
@@ -250,7 +250,7 @@ public static class CommonSetup
 					err = "TerrariaServer.exe does not exist in the same directory";
 				}
 			}
-			
+
 			if (err != null)
 			{
 				var retryPrompt = ctx.TaskInterface.ShowDialogWithOkFallback("Invalid Selection", err, SetupMessageBoxButtons.RetryCancel, SetupMessageBoxIcon.Error);
@@ -266,7 +266,7 @@ public static class CommonSetup
 			}
 		}
 	}
-	
+
 	/// <summary>
 	///		Sets the Terraria directory.
 	/// </summary>
@@ -275,11 +275,11 @@ public static class CommonSetup
 		ctx.TerrariaSteamDirectory = path;
 		ctx.TmlDeveloperSteamDirectory = string.Empty;
 		ctx.Settings.Save();
-		
+
 		CreateTmlSteamDirIfNecessary(ctx);
 		UpdateTargetsFiles(ctx);
 	}
-	
+
 	/// <summary>
 	///		Creates the Terraria.ModLoader (tModLoader) Steam developer
 	///		directory if necessary.
@@ -290,10 +290,10 @@ public static class CommonSetup
 		{
 			return;
 		}
-		
+
 		ctx.TmlDeveloperSteamDirectory = Path.GetFullPath(Path.Combine(ctx.TerrariaSteamDirectory, "..", "tModLoaderDev"));
 		ctx.Settings.Save();
-		
+
 		try
 		{
 			Directory.CreateDirectory(ctx.TmlDeveloperSteamDirectory);
@@ -304,7 +304,7 @@ public static class CommonSetup
 		}
 	}
 #endregion
-	
+
 #region Miscellaneous Utilities
 	/// <summary>
 	///		Executes the given command.
@@ -335,34 +335,34 @@ public static class CommonSetup
 			RedirectStandardInput = input != null,
 			CreateNoWindow = true,
 		};
-		
+
 		using var process = new Process();
 		process.StartInfo = startInfo;
-		
+
 		if (output != null)
 		{
 			process.StartInfo.RedirectStandardOutput = true;
 			process.StartInfo.StandardOutputEncoding = Encoding.UTF8;
 		}
-		
+
 		if (error != null)
 		{
 			process.StartInfo.RedirectStandardError = true;
 			process.StartInfo.StandardErrorEncoding = Encoding.UTF8;
 		}
-		
+
 		if (!process.Start())
 		{
 			throw new Exception($"Failed to start process: \"{cmd} {args}\"");
 		}
-		
+
 		if (input != null)
 		{
 			var w = new StreamWriter(process.StandardInput.BaseStream, new UTF8Encoding(false));
 			w.Write(input);
 			w.Close();
 		}
-		
+
 		while (!process.HasExited)
 		{
 			if (cancel.IsCancellationRequested)
@@ -370,9 +370,9 @@ public static class CommonSetup
 				process.Kill();
 				throw new OperationCanceledException(cancel);
 			}
-			
+
 			process.WaitForExit(100);
-			
+
 			output?.Invoke(process.StandardOutput.ReadToEnd());
 			error?.Invoke(process.StandardError.ReadToEnd());
 		}

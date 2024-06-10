@@ -1,31 +1,33 @@
 --- src/Nitrate_FormatWithEditorConfig/Terraria/Main.cs
 +++ src/Nitrate/Terraria/Main.cs
-@@ -5491,7 +_,7 @@
- 		if (!dedServ) {
+@@ -6141,7 +_,7 @@
+ 		{
  			Map = new WorldMap(maxTilesX, maxTilesY);
  			Configuration.Load();
--			graphics = new GraphicsDeviceManager(((object)this) as Game);
+-			graphics = new GraphicsDeviceManager((object)this as Game)
 +			graphics = new GraphicsDeviceManager(this);
- 			/*
- 			base.Content.RootDirectory = "Content";
- 			*/
-@@ -9542,8 +_,11 @@
+ 			{
+ 				/*
+ 	base.Content.RootDirectory = "Content";
+@@ -10287,10 +_,13 @@
  		base.GraphicsDevice.DeviceLost += GraphicsDeviceLost;
  		base.GraphicsDevice.DeviceReset += GraphicsDeviceLost;
  		base.GraphicsDevice.DeviceResetting += GraphicsDeviceLost;
-+		
++
 +		/*
  		if (_needsLanguageSelect)
+ 		{
  			menuMode = 1212;
+ 		}
 +		*/
  
  		_achievements = new AchievementManager();
  		_achievementAdvisor = new AchievementAdvisor();
-@@ -9721,6 +_,12 @@
+@@ -10486,6 +_,12 @@
  		CacheSupportedDisplaySizes();
  		ContentSamples.RebuildItemCreativeSortingIDsAfterRecipesAreSetUp();
  		ContentSamples.CommonlyUsedContentSamples.PrepareAfterEverythingElseLoaded();
-+		
++
 +		if (_needsLanguageSelect)
 +		{
 +			menuMode = 888;
@@ -33,19 +35,19 @@
 +		}
  	}
  
- 	private IEnumerator LoadMusic_InSteps()
-@@ -39741,7 +_,7 @@
- 		string text = "";
- 		float num4 = 215f;
- 		int startX = 0;
--		if (GameCulture.FromCultureName(GameCulture.CultureName.Russian).IsActive) {
-+		if (RU_RU.IsActive) {
+ 	private static IEnumerator LoadMusic_InSteps()
+@@ -48370,7 +_,7 @@
+ 		var text = "";
+ 		var num4 = 215f;
+ 		var startX = 0;
+-		if (GameCulture.FromCultureName(GameCulture.CultureName.Russian).IsActive)
++		if (RU_RU.IsActive)
+ 		{
  			startX = -50;
  			num4 += 50f;
- 		}
-@@ -42590,7 +_,8 @@
- 				array9[num20] = Lang.menu[103].Value;
- 				if (selectedMenu == num20) {
+@@ -51778,7 +_,8 @@
+ 				if (selectedMenu == num20)
+ 				{
  					SoundEngine.PlaySound(10);
 -					menuMode = 1213;
 +					menuMode = 888;
@@ -53,21 +55,21 @@
  				}
  
  				// TML settings
-@@ -43732,7 +_,7 @@
- 		SkipMenuEnumeration:
+@@ -53166,7 +_,7 @@
  
- 		if (menuMode == 888) {
+ 		if (menuMode == 888)
+ 		{
 -			if (!_blockFancyUIWhileLoading)
 +			if (!_blockFancyUIWhileLoading && Assets is not null)
+ 			{
  				MenuUI.Draw(spriteBatch, gameTime);
- 		}
- 		else {
-@@ -44536,7 +_,7 @@
+ 			}
+@@ -54212,7 +_,7 @@
  
  	private void OnSubmitServerPassword()
  	{
--		string text = "-autoshutdown -password \"" + ConvertToSafeArgument(Netplay.ServerPassword) + "\" -lang " + Language.ActiveCulture.LegacyId;
-+		string text = "-autoshutdown -password \"" + ConvertToSafeArgument(Netplay.ServerPassword) + "\" -language " + Language.ActiveCulture.CultureInfo.Name;
+-		var text = "-autoshutdown -password \"" + ConvertToSafeArgument(Netplay.ServerPassword) + "\" -lang " + Language.ActiveCulture.LegacyId;
++		var text = "-autoshutdown -password \"" + ConvertToSafeArgument(Netplay.ServerPassword) + "\" -language " + Language.ActiveCulture.CultureInfo.Name;
  		if (Platform.IsLinux)
+ 		{
  			text = ((IntPtr.Size != 8) ? (text + " -x86") : (text + " -x64"));
- 

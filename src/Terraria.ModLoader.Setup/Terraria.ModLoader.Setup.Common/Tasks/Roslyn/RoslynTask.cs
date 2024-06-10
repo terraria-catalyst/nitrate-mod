@@ -12,11 +12,11 @@ namespace Terraria.ModLoader.Setup.Common.Tasks.Roslyn;
 public abstract class RoslynTask(CommonContext ctx) : SetupOperation(ctx)
 {
 	private string projectPath;
-	
+
 	protected abstract string Status { get; }
-	
+
 	protected virtual int MaxDegreeOfParallelism => 0;
-	
+
 	public override bool ConfigurationDialog()
 	{
 		return (bool)Context.TaskInterface.InvokeOnMainThread(
@@ -30,7 +30,7 @@ public abstract class RoslynTask(CommonContext ctx) : SetupOperation(ctx)
 						Filter = "C# Project|*.csproj",
 						Title = "Select C# Project",
 					};
-					
+
 					var result = Context.TaskInterface.ShowDialogWithOkFallback(ref dialog);
 					projectPath = dialog.FileName;
 					return result == SetupDialogResult.Ok && File.Exists(projectPath);
@@ -38,20 +38,20 @@ public abstract class RoslynTask(CommonContext ctx) : SetupOperation(ctx)
 			)
 		);
 	}
-	
+
 	public override void Run()
 	{
 		RunAsync().GetAwaiter().GetResult();
 	}
-	
+
 	public async Task RunAsync()
 	{
 		using var workspace = CreateWorkspace();
 		// todo proper error log
 		workspace.WorkspaceFailed += (o, e) => Console.Error.WriteLine(e.Diagnostic.Message);
-		
+
 		Console.WriteLine($"Loading project '{projectPath}'");
-		
+
 		// Attach progress reporter, so we print projects as they are loaded.
 		var project = await workspace.OpenProjectAsync(projectPath);
 		var workItems = project.Documents.Select(
@@ -64,7 +64,7 @@ public abstract class RoslynTask(CommonContext ctx) : SetupOperation(ctx)
 					{
 						throw new InvalidOperationException("New document file path was null");
 					}
-					
+
 					var before = await doc.GetTextAsync();
 					var after = await newDoc.GetTextAsync();
 					if (before != after)
@@ -74,21 +74,21 @@ public abstract class RoslynTask(CommonContext ctx) : SetupOperation(ctx)
 				}
 			)
 		);
-		
+
 		ExecuteParallel(workItems.ToList(), maxDegree: MaxDegreeOfParallelism);
 	}
-	
+
 	private static bool msBuildFound;
-	
+
 	private MSBuildWorkspace CreateWorkspace()
 	{
 		if (msBuildFound)
 		{
 			return MSBuildWorkspace.Create();
 		}
-		
+
 		var status = Context.Progress.CreateStatus(0, 1);
-		
+
 		VisualStudioInstance? vsInst;
 		status.AddMessage("Finding MSBuild");
 		{
@@ -96,14 +96,14 @@ public abstract class RoslynTask(CommonContext ctx) : SetupOperation(ctx)
 			MSBuildLocator.RegisterInstance(vsInst);
 			status.Current++;
 		}
-		
+
 		status.AddMessage($"Found MSBuild {vsInst.Version} at {vsInst.MSBuildPath}");
 		{
 			msBuildFound = true;
 		}
-		
+
 		return MSBuildWorkspace.Create();
 	}
-	
+
 	protected abstract Task<Document> Process(Document doc);
 }

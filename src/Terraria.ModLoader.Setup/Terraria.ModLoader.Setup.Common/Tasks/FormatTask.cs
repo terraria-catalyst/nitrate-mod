@@ -15,15 +15,15 @@ namespace Terraria.ModLoader.Setup.Common.Tasks;
 public sealed class FormatTask : SetupOperation
 {
 	private static readonly AdhocWorkspace workspace = new();
-	
+
 	static FormatTask()
 	{
 		var optionSet = workspace.CurrentSolution.Options;
-		
+
 		// Essentials
 		optionSet = optionSet
 			.WithChangedOption(FormattingOptions.UseTabs, LanguageNames.CSharp, true);
-		
+
 		// K&R
 		optionSet = optionSet
 			.WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInProperties, false)
@@ -33,19 +33,19 @@ public sealed class FormatTask : SetupOperation
 			.WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInAnonymousTypes, false)
 			.WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInObjectCollectionArrayInitializers, false)
 			.WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInLambdaExpressionBody, false);
-		
+
 		// Fix switch indentation
 		optionSet = optionSet
 			.WithChangedOption(CSharpFormattingOptions.IndentSwitchCaseSection, true)
 			.WithChangedOption(CSharpFormattingOptions.IndentSwitchCaseSectionWhenBlock, false);
-		
+
 		workspace.TryApplyChanges(workspace.CurrentSolution.WithOptions(optionSet));
 	}
-	
+
 	public FormatTask(CommonContext ctx) : base(ctx) { }
-	
+
 	private static string projectPath; //persist across executions
-	
+
 	public override bool ConfigurationDialog()
 	{
 		return (bool)Context.TaskInterface.InvokeOnMainThread(
@@ -59,7 +59,7 @@ public sealed class FormatTask : SetupOperation
 						Filter = "C# Project|*.csproj",
 						Title = "Select C# Project",
 					};
-					
+
 					var result = Context.TaskInterface.ShowDialogWithOkFallback(ref dialog);
 					projectPath = dialog.FileName;
 					return result == SetupDialogResult.Ok && File.Exists(projectPath);
@@ -67,7 +67,7 @@ public sealed class FormatTask : SetupOperation
 			)
 		);
 	}
-	
+
 	public override void Run()
 	{
 		var dir = Path.GetDirectoryName(projectPath); //just format all files in the directory
@@ -75,15 +75,15 @@ public sealed class FormatTask : SetupOperation
 		{
 			throw new InvalidOperationException("No parent directory: " + projectPath);
 		}
-		
+
 		var workItems = Directory.EnumerateFiles(dir, "*.cs", SearchOption.AllDirectories)
 			.Select(path => new FileInfo(path))
 			.OrderByDescending(f => f.Length)
 			.Select(f => new WorkItem("Formatting: " + f.Name, () => FormatFile(f.FullName, false, Context.TaskInterface.CancellationToken)));
-		
+
 		ExecuteParallel(workItems.ToList());
 	}
-	
+
 	public static void FormatFile(string path, bool aggressive, CancellationToken cancellationToken)
 	{
 		var source = File.ReadAllText(path);
@@ -93,7 +93,7 @@ public sealed class FormatTask : SetupOperation
 			File.WriteAllText(path, formatted);
 		}
 	}
-	
+
 	public static SyntaxNode Format(SyntaxNode node, bool aggressive, CancellationToken cancellationToken)
 	{
 		if (aggressive)
@@ -101,14 +101,14 @@ public sealed class FormatTask : SetupOperation
 			node = new NoNewlineBetweenFieldsRewriter().Visit(node);
 			node = new RemoveBracesFromSingleStatementRewriter().Visit(node);
 		}
-		
+
 		node = new AddVisualNewlinesRewriter().Visit(node);
 		node = new FileScopedNamespaceRewriter().Visit(node);
 		node = Formatter.Format(node!, workspace, cancellationToken: cancellationToken);
 		node = new CollectionInitializerFormatter().Visit(node);
 		return node;
 	}
-	
+
 	public static string Format(string source, CancellationToken cancellationToken, bool aggressive)
 	{
 		var tree = CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(preprocessorSymbols: new[] { "SERVER", }));

@@ -11,29 +11,29 @@ internal static class SyntaxUtils
 	{
 		return !node.DescendantTrivia(node.Span).Any(t => t.IsKind(SyntaxKind.EndOfLineTrivia));
 	}
-	
+
 	public static bool IsWhitespace(this SyntaxTrivia trivia)
 	{
 		return trivia.IsKind(SyntaxKind.WhitespaceTrivia) || trivia.IsKind(SyntaxKind.EndOfLineTrivia);
 	}
-	
+
 	public static string GetIndentation(this SyntaxNode node)
 	{
 		return GetIndentation(node.SyntaxTree, node.SpanStart);
 	}
-	
+
 	public static string GetIndentation(SyntaxTree tree, int position)
 	{
 		var start = tree.GetText().Lines.GetLineFromPosition(position).Start;
 		var whitespace = tree.GetRoot().FindTrivia(start, true);
 		return whitespace.ToFullString();
 	}
-	
+
 	public static SyntaxToken WithLeadingWhitespace(this SyntaxToken node, string indent)
 	{
 		return WithLeadingWhitespace((SyntaxNodeOrToken)node, indent).AsToken();
 	}
-	
+
 	public static SyntaxNodeOrToken WithLeadingWhitespace(this SyntaxNodeOrToken node, string indent)
 	{
 		var t = node.GetLeadingTrivia();
@@ -50,7 +50,7 @@ internal static class SyntaxUtils
 		{
 			t = t.Replace(last, SyntaxFactory.Whitespace(indent));
 		}
-		
+
 		return node.WithLeadingTrivia(t);
 	}
 }

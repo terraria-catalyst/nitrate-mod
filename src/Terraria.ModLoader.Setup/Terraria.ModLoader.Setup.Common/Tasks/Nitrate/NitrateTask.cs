@@ -22,23 +22,23 @@ public sealed class NitrateTask(CommonContext ctx, string baseDir, string patche
 				SetupMessageBoxButtons.YesNo,
 				SetupMessageBoxIcon.Question
 			);
-		
+
 		Tasks = res switch
 		{
 			SetupDialogResult.Yes => GetOperations(Context, baseDir, patchedDir, patchDir, out _),
 			SetupDialogResult.No => [GetOperations(Context, baseDir, patchedDir, patchDir, out _).Last(),],
 			_ => Tasks,
 		};
-		
+
 		return base.ConfigurationDialog();
 	}
-	
+
 	public static SetupOperation[] GetOperations(CommonContext ctx, string baseDir, string patchedDir, string patchDir, out string pathToUseForDiffing)
 	{
 		var operations = new SetupOperation[] { patch<OrganizePartialClasses>(), patch<MakeTypesPartial>(), patch<TreeshakePreprocessors>(), patch<FormatWithEditorConfig>(), new PatchTask(ctx, baseDir, patchedDir, patchDir), };
 		pathToUseForDiffing = baseDir;
 		return operations;
-		
+
 		T patch<T>() where T : SetupOperation
 		{
 			return (T)Activator.CreateInstance(typeof(T), ctx, baseDir, baseDir = patchedDir + '_' + typeof(T).Name)!;

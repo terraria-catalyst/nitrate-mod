@@ -44,12 +44,12 @@ public sealed class HookGenerator
 		{ typeof(uint), "uint" },
 		{ typeof(ulong), "ulong" },
 		{ typeof(void), "void" },
-		
+
 		// TODO: add nint and nuint (IntPtr, UIntPtr); changes signatures
 	};
-	
+
 	private static readonly Dictionary<string, string> typeNameMap = new();
-	
+
 	static HookGenerator()
 	{
 		foreach (var pair in reflectionTypeNameMap)
@@ -59,44 +59,44 @@ public sealed class HookGenerator
 			{
 				throw new InvalidOperationException();
 			}
-			
+
 			typeNameMap[pair.Key.FullName] = pair.Value;
 		}
 	}
-	
+
 	/// <summary>
 	///		The generated module to be output.
 	/// </summary>
 	public ModuleDefinition OutputModule { get; }
-	
+
 	private readonly MonoModder modder;
-	
+
 	private readonly string onNamespace;
 	private readonly string ilNamespace;
-	
+
 	public bool HookOrig { get; set; }
-	
+
 	public bool HookPrivate { get; set; }
-	
+
 	private readonly TypeReference multicastDelegateType;
 	private readonly TypeReference asyncResultInterfaceType;
 	private readonly TypeReference asyncCallbackType;
 	private readonly TypeReference editorBrowsableStateType;
-	
+
 	private readonly MethodReference editorBrowsableAttributeCtor;
-	
+
 	private readonly MethodReference getMethodFromHandle;
 	private readonly MethodReference addMethod;
 	private readonly MethodReference removeMethod;
 	private readonly MethodReference modifyMethod;
 	private readonly MethodReference unmodifyMethod;
-	
+
 	private readonly TypeReference ilManipulatorType;
-	
+
 	public HookGenerator(MonoModder modder, string name)
 	{
 		this.modder = modder;
-		
+
 		OutputModule = ModuleDefinition.CreateModule(
 			name,
 			new ModuleParameters
@@ -107,58 +107,58 @@ public sealed class HookGenerator
 				Runtime = modder.Module.Runtime,
 			}
 		);
-		
+
 		// Copy all assembly references from the input module.
 		// Cecil + .NET Standard libraries + .NET 5.0 = weirdness.
 		modder.MapDependencies();
-		
+
 		// Removed for tML, better to only add dependencies as needed via the resolver
 		// OutputModule.AssemblyReferences.AddRange(modder.Module.AssemblyReferences);
 		// modder.DependencyMap[OutputModule] = new List<ModuleDefinition>(modder.DependencyMap[modder.Module]);
-		
+
 		onNamespace = Environment.GetEnvironmentVariable("MONOMOD_HOOKGEN_NAMESPACE") ?? "";
 		if (string.IsNullOrEmpty(onNamespace))
 		{
 			onNamespace = "On";
 		}
-		
+
 		ilNamespace = Environment.GetEnvironmentVariable("MONOMOD_HOOKGEN_NAMESPACE_IL") ?? "";
 		if (string.IsNullOrEmpty(ilNamespace))
 		{
 			ilNamespace = "IL";
 		}
-		
+
 		HookOrig = Environment.GetEnvironmentVariable("MONOMOD_HOOKGEN_ORIG") == "1";
 		HookPrivate = Environment.GetEnvironmentVariable("MONOMOD_HOOKGEN_PRIVATE") == "1";
-		
+
 		modder.MapDependency(modder.Module, "MonoMod.RuntimeDetour");
 		if (!modder.DependencyCache.TryGetValue("MonoMod.RuntimeDetour", out var moduleRuntimeDetour))
 		{
 			throw new FileNotFoundException("MonoMod.RuntimeDetour not found!");
 		}
-		
+
 		modder.MapDependency(modder.Module, "MonoMod.Utils");
 		if (!modder.DependencyCache.TryGetValue("MonoMod.Utils", out var moduleUtils))
 		{
 			throw new FileNotFoundException("MonoMod.Utils not found!");
 		}
-		
+
 		multicastDelegateType = OutputModule.ImportReference(modder.FindType("System.MulticastDelegate"));
 		asyncResultInterfaceType = OutputModule.ImportReference(modder.FindType("System.IAsyncResult"));
 		asyncCallbackType = OutputModule.ImportReference(modder.FindType("System.AsyncCallback"));
 		var methodBaseType = OutputModule.ImportReference(modder.FindType("System.Reflection.MethodBase"));
 		var runtimeMethodHandleType = OutputModule.ImportReference(modder.FindType("System.RuntimeMethodHandle"));
 		editorBrowsableStateType = OutputModule.ImportReference(modder.FindType("System.ComponentModel.EditorBrowsableState"));
-		
+
 		var hookEndpointManagerType = moduleRuntimeDetour.GetType("MonoMod.RuntimeDetour.HookGen.HookEndpointManager");
-		
+
 		ilManipulatorType = OutputModule.ImportReference(
 			moduleUtils.GetType("MonoMod.Cil.ILContext/Manipulator")
 		);
-		
+
 		OutputModule.ImportReference(modder.FindType("System.ObsoleteAttribute").Resolve().FindMethod("System.Void .ctor(System.String,System.Boolean)"));
 		editorBrowsableAttributeCtor = OutputModule.ImportReference(modder.FindType("System.ComponentModel.EditorBrowsableAttribute").Resolve().FindMethod("System.Void .ctor(System.ComponentModel.EditorBrowsableState)"));
-		
+
 		getMethodFromHandle = OutputModule.ImportReference(
 			new MethodReference("GetMethodFromHandle", methodBaseType, methodBaseType)
 			{
@@ -168,50 +168,50 @@ public sealed class HookGenerator
 				},
 			}
 		);
-		
+
 		addMethod = OutputModule.ImportReference(hookEndpointManagerType.FindMethod("Add"));
 		removeMethod = OutputModule.ImportReference(hookEndpointManagerType.FindMethod("Remove"));
 		modifyMethod = OutputModule.ImportReference(hookEndpointManagerType.FindMethod("Modify"));
 		unmodifyMethod = OutputModule.ImportReference(hookEndpointManagerType.FindMethod("Unmodify"));
 	}
-	
+
 	public void GenerateFor(TypeDefinition type, out TypeDefinition? hookType, out TypeDefinition? hookIlType)
 	{
 		hookType = hookIlType = null;
-		
+
 		if (type.HasGenericParameters || type.IsRuntimeSpecialName || type.Name.StartsWith('<'))
 		{
 			return;
 		}
-		
+
 		if (!HookPrivate && type.IsNotPublic)
 		{
 			return;
 		}
-		
+
 		modder.LogVerbose($"[HookGen] Generating for type {type.FullName}");
-		
+
 		hookType = new TypeDefinition(
 			type.IsNested ? null : (onNamespace + (string.IsNullOrEmpty(type.Namespace) ? "" : ("." + type.Namespace))),
 			type.Name,
 			(type.IsNested ? TypeAttributes.NestedPublic : TypeAttributes.Public) | TypeAttributes.Abstract | TypeAttributes.Sealed | TypeAttributes.Class,
 			OutputModule.TypeSystem.Object
 		);
-		
+
 		hookIlType = new TypeDefinition(
 			type.IsNested ? null : (ilNamespace + (string.IsNullOrEmpty(type.Namespace) ? "" : ("." + type.Namespace))),
 			type.Name,
 			(type.IsNested ? TypeAttributes.NestedPublic : TypeAttributes.Public) | TypeAttributes.Abstract | TypeAttributes.Sealed | TypeAttributes.Class,
 			OutputModule.TypeSystem.Object
 		);
-		
+
 		var add = false;
-		
+
 		foreach (var method in type.Methods)
 		{
 			add |= GenerateFor(hookType, hookIlType, method);
 		}
-		
+
 		foreach (var nested in type.NestedTypes)
 		{
 			GenerateFor(nested, out var hookNestedType, out var hookNestedIlType);
@@ -219,38 +219,38 @@ public sealed class HookGenerator
 			{
 				continue;
 			}
-			
+
 			add = true;
 			hookType.NestedTypes.Add(hookNestedType);
 			hookIlType.NestedTypes.Add(hookNestedIlType);
 		}
-		
+
 		if (!add)
 		{
 			hookType = hookIlType = null;
 		}
 	}
-	
+
 	public bool GenerateFor(TypeDefinition hookType, TypeDefinition hookIlType, MethodDefinition method)
 	{
 		if (method.HasGenericParameters || method.IsAbstract || method is { IsSpecialName: true, IsConstructor: false, })
 		{
 			return false;
 		}
-		
+
 		if (!HookOrig && method.Name.StartsWith("orig_", StringComparison.Ordinal))
 		{
 			return false;
 		}
-		
+
 		if (!HookPrivate && method.IsPrivate)
 		{
 			return false;
 		}
-		
+
 		var name = GetFriendlyName(method);
 		var suffix = method.Parameters.Count != 0;
-		
+
 		var overloads = new List<MethodDefinition>();
 		if (suffix)
 		{
@@ -260,7 +260,7 @@ public sealed class HookGenerator
 				suffix = false;
 			}
 		}
-		
+
 		if (suffix)
 		{
 			var builder = new StringBuilder();
@@ -271,7 +271,7 @@ public sealed class HookGenerator
 				{
 					typeName = GetFriendlyName(param.ParameterType, false);
 				}
-				
+
 				if (overloads.Any(
 						other =>
 						{
@@ -283,14 +283,14 @@ public sealed class HookGenerator
 				{
 					typeName = GetFriendlyName(param.ParameterType, true);
 				}
-				
+
 				builder.Append('_');
 				builder.Append(typeName.Replace(".", "", StringComparison.Ordinal).Replace("`", "", StringComparison.Ordinal));
 			}
-			
+
 			name += builder.ToString();
 		}
-		
+
 		if (hookType.FindEvent(name) != null)
 		{
 			string nameTmp;
@@ -299,17 +299,17 @@ public sealed class HookGenerator
 				hookType.FindEvent(nameTmp = name + "_" + i) != null;
 				i++
 			) { }
-			
+
 			name = nameTmp;
 		}
-		
+
 		// TODO: Fix possible conflict when members with the same names exist.
-		
+
 		var delOrig = GenerateDelegateFor(method);
 		delOrig.Name = "orig_" + name;
 		delOrig.CustomAttributes.Add(GenerateEditorBrowsable(EditorBrowsableState.Never));
 		hookType.NestedTypes.Add(delOrig);
-		
+
 		var delHook = GenerateDelegateFor(method);
 		delHook.Name = "hook_" + name;
 		var delHookInvoke = delHook.FindMethod("Invoke")!;
@@ -318,16 +318,16 @@ public sealed class HookGenerator
 		delHookBeginInvoke.Parameters.Insert(0, new ParameterDefinition("orig", ParameterAttributes.None, delOrig));
 		delHook.CustomAttributes.Add(GenerateEditorBrowsable(EditorBrowsableState.Never));
 		hookType.NestedTypes.Add(delHook);
-		
+
 		var methodRef = OutputModule.ImportReference(method);
-		
+
 #region Hook
 		var addHook = new MethodDefinition(
 			"add_" + name,
 			MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.Static,
 			OutputModule.TypeSystem.Void
 		);
-		
+
 		addHook.Parameters.Add(new ParameterDefinition(null, ParameterAttributes.None, delHook));
 		addHook.Body = new MethodBody(addHook);
 		var il = addHook.Body.GetILProcessor();
@@ -339,13 +339,13 @@ public sealed class HookGenerator
 		il.Emit(OpCodes.Call, endpointMethod);
 		il.Emit(OpCodes.Ret);
 		hookType.Methods.Add(addHook);
-		
+
 		var removeHook = new MethodDefinition(
 			"remove_" + name,
 			MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.Static,
 			OutputModule.TypeSystem.Void
 		);
-		
+
 		removeHook.Parameters.Add(new ParameterDefinition(null, ParameterAttributes.None, delHook));
 		removeHook.Body = new MethodBody(removeHook);
 		il = removeHook.Body.GetILProcessor();
@@ -357,23 +357,23 @@ public sealed class HookGenerator
 		il.Emit(OpCodes.Call, endpointMethod);
 		il.Emit(OpCodes.Ret);
 		hookType.Methods.Add(removeHook);
-		
+
 		var evHook = new EventDefinition(name, EventAttributes.None, delHook)
 		{
 			AddMethod = addHook,
 			RemoveMethod = removeHook,
 		};
-		
+
 		hookType.Events.Add(evHook);
 #endregion
-		
+
 #region Hook IL
 		var addIl = new MethodDefinition(
 			"add_" + name,
 			MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.Static,
 			OutputModule.TypeSystem.Void
 		);
-		
+
 		addIl.Parameters.Add(new ParameterDefinition(null, ParameterAttributes.None, ilManipulatorType));
 		addIl.Body = new MethodBody(addIl);
 		il = addIl.Body.GetILProcessor();
@@ -385,13 +385,13 @@ public sealed class HookGenerator
 		il.Emit(OpCodes.Call, endpointMethod);
 		il.Emit(OpCodes.Ret);
 		hookIlType.Methods.Add(addIl);
-		
+
 		var removeIl = new MethodDefinition(
 			"remove_" + name,
 			MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.Static,
 			OutputModule.TypeSystem.Void
 		);
-		
+
 		removeIl.Parameters.Add(new ParameterDefinition(null, ParameterAttributes.None, ilManipulatorType));
 		removeIl.Body = new MethodBody(removeIl);
 		il = removeIl.Body.GetILProcessor();
@@ -403,19 +403,19 @@ public sealed class HookGenerator
 		il.Emit(OpCodes.Call, endpointMethod);
 		il.Emit(OpCodes.Ret);
 		hookIlType.Methods.Add(removeIl);
-		
+
 		var evIl = new EventDefinition(name, EventAttributes.None, ilManipulatorType)
 		{
 			AddMethod = addIl,
 			RemoveMethod = removeIl,
 		};
-		
+
 		hookIlType.Events.Add(evIl);
 #endregion
-		
+
 		return true;
 	}
-	
+
 	public TypeDefinition GenerateDelegateFor(MethodDefinition method)
 	{
 		var name = GetFriendlyName(method);
@@ -429,16 +429,16 @@ public sealed class HookGenerator
 			}
 			while (method.DeclaringType.Methods.Any(other => !other.HasGenericParameters && GetFriendlyName(other) == (name + suffix)));
 		}
-		
+
 		name = "d_" + name;
-		
+
 		var del = new TypeDefinition(
 			null,
 			null,
 			TypeAttributes.NestedPublic | TypeAttributes.Sealed | TypeAttributes.Class,
 			multicastDelegateType
 		);
-		
+
 		var ctor = new MethodDefinition(
 			".ctor",
 			MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName | MethodAttributes.ReuseSlot,
@@ -448,12 +448,12 @@ public sealed class HookGenerator
 			ImplAttributes = MethodImplAttributes.Runtime | MethodImplAttributes.Managed,
 			HasThis = true,
 		};
-		
+
 		ctor.Parameters.Add(new ParameterDefinition(OutputModule.TypeSystem.Object));
 		ctor.Parameters.Add(new ParameterDefinition(OutputModule.TypeSystem.IntPtr));
 		ctor.Body = new MethodBody(ctor);
 		del.Methods.Add(ctor);
-		
+
 		var invoke = new MethodDefinition(
 			"Invoke",
 			MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig | MethodAttributes.NewSlot,
@@ -463,7 +463,7 @@ public sealed class HookGenerator
 			ImplAttributes = MethodImplAttributes.Runtime | MethodImplAttributes.Managed,
 			HasThis = true,
 		};
-		
+
 		if (!method.IsStatic)
 		{
 			var selfType = ImportVisible(method.DeclaringType);
@@ -471,10 +471,10 @@ public sealed class HookGenerator
 			{
 				selfType = new ByReferenceType(selfType);
 			}
-			
+
 			invoke.Parameters.Add(new ParameterDefinition("self", ParameterAttributes.None, selfType));
 		}
-		
+
 		foreach (var param in method.Parameters)
 		{
 			invoke.Parameters.Add(
@@ -485,10 +485,10 @@ public sealed class HookGenerator
 				)
 			);
 		}
-		
+
 		invoke.Body = new MethodBody(invoke);
 		del.Methods.Add(invoke);
-		
+
 		var invokeBegin = new MethodDefinition(
 			"BeginInvoke",
 			MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig | MethodAttributes.NewSlot,
@@ -498,17 +498,17 @@ public sealed class HookGenerator
 			ImplAttributes = MethodImplAttributes.Runtime | MethodImplAttributes.Managed,
 			HasThis = true,
 		};
-		
+
 		foreach (var param in invoke.Parameters)
 		{
 			invokeBegin.Parameters.Add(new ParameterDefinition(param.Name, param.Attributes, param.ParameterType));
 		}
-		
+
 		invokeBegin.Parameters.Add(new ParameterDefinition("callback", ParameterAttributes.None, asyncCallbackType));
 		invokeBegin.Parameters.Add(new ParameterDefinition(null, ParameterAttributes.None, OutputModule.TypeSystem.Object));
 		invokeBegin.Body = new MethodBody(invokeBegin);
 		del.Methods.Add(invokeBegin);
-		
+
 		var invokeEnd = new MethodDefinition(
 			"EndInvoke",
 			MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig | MethodAttributes.NewSlot,
@@ -518,14 +518,14 @@ public sealed class HookGenerator
 			ImplAttributes = MethodImplAttributes.Runtime | MethodImplAttributes.Managed,
 			HasThis = true,
 		};
-		
+
 		invokeEnd.Parameters.Add(new ParameterDefinition("result", ParameterAttributes.None, asyncResultInterfaceType));
 		invokeEnd.Body = new MethodBody(invokeEnd);
 		del.Methods.Add(invokeEnd);
-		
+
 		return del;
 	}
-	
+
 	private static string GetFriendlyName(MethodReference method)
 	{
 		var name = method.Name;
@@ -533,11 +533,11 @@ public sealed class HookGenerator
 		{
 			name = name[1..];
 		}
-		
+
 		name = name.Replace('.', '_');
 		return name;
 	}
-	
+
 	private static string GetFriendlyName(TypeReference type, bool full)
 	{
 		if (type is TypeSpecification)
@@ -546,10 +546,10 @@ public sealed class HookGenerator
 			BuildFriendlyName(builder, type, full);
 			return builder.ToString();
 		}
-		
+
 		return full ? type.FullName : type.Name;
 	}
-	
+
 	private static void BuildFriendlyName(StringBuilder builder, TypeReference type, bool full)
 	{
 		if (type is not TypeSpecification specification)
@@ -557,7 +557,7 @@ public sealed class HookGenerator
 			builder.Append((full ? type.FullName : type.Name).Replace("_", "", StringComparison.Ordinal));
 			return;
 		}
-		
+
 		if (specification.IsByReference)
 		{
 			builder.Append("ref");
@@ -566,20 +566,20 @@ public sealed class HookGenerator
 		{
 			builder.Append("ptr");
 		}
-		
+
 		BuildFriendlyName(builder, specification.ElementType, full);
-		
+
 		if (specification.IsArray)
 		{
 			builder.Append("Array");
 		}
 	}
-	
+
 	private static bool IsPublic(TypeDefinition? typeDef)
 	{
 		return typeDef != null && (typeDef.IsNestedPublic || typeDef.IsPublic) && !typeDef.IsNotPublic;
 	}
-	
+
 	private static bool HasPublicArgs(GenericInstanceType typeGen)
 	{
 		foreach (var arg in typeGen.GenericArguments)
@@ -589,21 +589,21 @@ public sealed class HookGenerator
 			{
 				return false;
 			}
-			
+
 			if (arg is GenericInstanceType argGen && !HasPublicArgs(argGen))
 			{
 				return false;
 			}
-			
+
 			if (!IsPublic(arg.SafeResolve()))
 			{
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	private TypeReference ImportVisible(TypeReference typeRef)
 	{
 		// Check if the declaring type is accessible.
@@ -611,23 +611,23 @@ public sealed class HookGenerator
 		// Note: This will break down with type specifications!
 		var type = typeRef.SafeResolve();
 		goto Try;
-		
+
 	Retry:
 		typeRef = type.BaseType;
 		type = typeRef?.SafeResolve();
-		
+
 	Try:
 		if (type == null) // Unresolvable - probably private anyway.
 		{
 			return OutputModule.TypeSystem.Object;
 		}
-		
+
 		// Generic instance types are special. Try to match them exactly or baseify them.
 		if (typeRef is GenericInstanceType typeGen && !HasPublicArgs(typeGen))
 		{
 			goto Retry;
 		}
-		
+
 		// Check if the type and all of its parents are public.
 		// Generic return / param types are too complicated at the moment and will be simplified.
 		for (var parent = type; parent != null; parent = parent.DeclaringType)
@@ -637,18 +637,18 @@ public sealed class HookGenerator
 				continue;
 			}
 			// If it isn't public, ...
-			
+
 			if (type.IsEnum)
 			{
 				// ... try the enum's underlying type.
 				typeRef = type.FindField("value__")!.FieldType;
 				break;
 			}
-			
+
 			// ... try the base type.
 			goto Retry;
 		}
-		
+
 		try
 		{
 			return OutputModule.ImportReference(typeRef);
@@ -659,7 +659,7 @@ public sealed class HookGenerator
 			return OutputModule.TypeSystem.Object;
 		}
 	}
-	
+
 	private CustomAttribute GenerateEditorBrowsable(EditorBrowsableState state)
 	{
 		var attrib = new CustomAttribute(editorBrowsableAttributeCtor);

@@ -1,12 +1,12 @@
 --- src/Nitrate_FormatWithEditorConfig/Terraria/Lang.cs
 +++ src/Nitrate/Terraria/Lang.cs
-@@ -1077,7 +_,8 @@
+@@ -1162,7 +_,8 @@
  	public static string LocalizedDuration(TimeSpan time, bool abbreviated, bool showAllAvailableUnits)
  	{
- 		string text = "";
+ 		var text = "";
 -		abbreviated |= !GameCulture.FromCultureName(GameCulture.CultureName.English).IsActive;
 +		// TODO(NITRATE): Attach this behavior to GameCulture.
 +		abbreviated |= !EN_US.IsActive;
- 		if (time.Days > 0) {
- 			int num = time.Days;
- 			if (!showAllAvailableUnits && time > TimeSpan.FromDays(1.0))
+ 		if (time.Days > 0)
+ 		{
+ 			var num = time.Days;

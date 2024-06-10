@@ -1,20 +1,20 @@
 --- src/Nitrate_FormatWithEditorConfig/Terraria/GameContent/UI/Elements/UIWorldListItem.cs
 +++ src/Nitrate/Terraria/GameContent/UI/Elements/UIWorldListItem.cs
-@@ -434,7 +_,7 @@
+@@ -510,7 +_,7 @@
  		Utils.DrawBorderString(spriteBatch, expertText, vector + new Vector2(x2, 3f), gameModeColor);
  		vector.X += num2 + 5f;
- 		float num3 = 150f;
+ 		var num3 = 150f;
 -		if (!GameCulture.FromCultureName(GameCulture.CultureName.English).IsActive)
 +		if (!EN_US.IsActive)
+ 		{
  			num3 += 40f;
- 
- 		DrawPanel(spriteBatch, vector, num3);
-@@ -445,7 +_,7 @@
+ 		}
+@@ -523,7 +_,7 @@
  		vector.X += num3 + 5f;
- 		float num4 = innerDimensions.X + innerDimensions.Width - vector.X;
+ 		var num4 = innerDimensions.X + innerDimensions.Width - vector.X;
  		DrawPanel(spriteBatch, vector, num4);
--		string arg = ((!GameCulture.FromCultureName(GameCulture.CultureName.English).IsActive) ? _data.CreationTime.ToShortDateString() : _data.CreationTime.ToString("d MMMM yyyy"));
+-		var arg = ((!GameCulture.FromCultureName(GameCulture.CultureName.English).IsActive) ? _data.CreationTime.ToShortDateString() : _data.CreationTime.ToString("d MMMM yyyy"));
 +		string arg = Language.ActiveCulture.FormatDateTime(_data.CreationTime);
- 		string textValue2 = Language.GetTextValue("UI.WorldCreatedFormat", arg);
- 		float x5 = FontAssets.MouseText.Value.MeasureString(textValue2).X;
- 		float x6 = num4 * 0.5f - x5 * 0.5f;
+ 		var textValue2 = Language.GetTextValue("UI.WorldCreatedFormat", arg);
+ 		var x5 = FontAssets.MouseText.Value.MeasureString(textValue2).X;
+ 		var x6 = num4 * 0.5f - x5 * 0.5f;

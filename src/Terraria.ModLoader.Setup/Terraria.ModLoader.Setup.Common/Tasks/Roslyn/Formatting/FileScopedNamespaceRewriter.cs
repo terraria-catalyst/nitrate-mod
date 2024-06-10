@@ -23,10 +23,10 @@ internal sealed class FileScopedNamespaceRewriter : CSharpSyntaxRewriter
 				Unindent(node.Members)
 			)
 			.WithTriviaFrom(node);
-		
+
 		return fs;
 	}
-	
+
 	private static SyntaxList<MemberDeclarationSyntax> Unindent(SyntaxList<MemberDeclarationSyntax> members)
 	{
 		return new UnindentRewriter().VisitList(members);

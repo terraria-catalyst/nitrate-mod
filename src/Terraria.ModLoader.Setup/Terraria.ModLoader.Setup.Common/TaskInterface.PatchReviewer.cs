@@ -33,7 +33,7 @@ partial class TaskInterfaceExtensions
 		{
 			return;
 		}
-		
+
 		patchReviewerInterface.ShowReviewWindow(reviewResults, baseDir);
 	}
 }

@@ -11,7 +11,7 @@ namespace Terraria.ModLoader.Setup.Common.Tasks.Roslyn.Formatting;
 internal sealed class AddVisualNewlinesRewriter : CSharpSyntaxRewriter
 {
 	private readonly HashSet<SyntaxNode?> modifyNodes = [];
-	
+
 	public override SyntaxNode? VisitBlock(BlockSyntax node)
 	{
 		var stmts = node.Statements;
@@ -24,17 +24,17 @@ internal sealed class AddVisualNewlinesRewriter : CSharpSyntaxRewriter
 				modifyNodes.Add(next);
 			}
 		}
-		
+
 		return base.VisitBlock(node);
 	}
-	
+
 	public override SyntaxNode? Visit(SyntaxNode? node)
 	{
 		if (modifyNodes.Remove(node))
 		{
 			node = node!.WithLeadingTrivia(node!.GetLeadingTrivia().Insert(0, SyntaxFactory.EndOfLine(Environment.NewLine)));
 		}
-		
+
 		return base.Visit(node);
 	}
 }

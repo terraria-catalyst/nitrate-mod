@@ -10,19 +10,19 @@ namespace Terraria.ModLoader.Setup.Common.Tasks.Roslyn.Formatting;
 internal sealed class NoNewlineBetweenFieldsRewriter : CSharpSyntaxRewriter
 {
 	private readonly HashSet<SyntaxToken> modifyTokens = [];
-	
+
 	public override SyntaxNode? VisitClassDeclaration(ClassDeclarationSyntax node)
 	{
 		TagFieldTokens(node.Members);
 		return base.VisitClassDeclaration(node);
 	}
-	
+
 	public override SyntaxNode? VisitStructDeclaration(StructDeclarationSyntax node)
 	{
 		TagFieldTokens(node.Members);
 		return base.VisitStructDeclaration(node);
 	}
-	
+
 	private void TagFieldTokens(SyntaxList<MemberDeclarationSyntax> members)
 	{
 		for (var i = 0; i < members.Count - 1; i++)
@@ -33,7 +33,7 @@ internal sealed class NoNewlineBetweenFieldsRewriter : CSharpSyntaxRewriter
 			}
 		}
 	}
-	
+
 	private void Tag(SyntaxToken token)
 	{
 		if (token.HasLeadingTrivia && token.LeadingTrivia[0].IsKind(SyntaxKind.EndOfLineTrivia) && token.LeadingTrivia.All(SyntaxUtils.IsWhitespace))
@@ -41,14 +41,14 @@ internal sealed class NoNewlineBetweenFieldsRewriter : CSharpSyntaxRewriter
 			modifyTokens.Add(token);
 		}
 	}
-	
+
 	public override SyntaxToken VisitToken(SyntaxToken token)
 	{
 		if (modifyTokens.Contains(token))
 		{
 			token = token.WithLeadingTrivia(token.LeadingTrivia.Skip(1));
 		}
-		
+
 		return base.VisitToken(token);
 	}
 }

@@ -30,16 +30,16 @@ public enum SetupMessageBoxButtons
 public enum SetupMessageBoxIcon
 {
 	None = 0,
-	
+
 	Error = 16,
 	Stop = Error,
 	Hand = Error,
-	
+
 	Question = 32,
-	
+
 	Exclamation = 48,
 	Warning = Exclamation,
-	
+
 	Asterisk = 64,
 	Information = Asterisk,
 }
@@ -49,7 +49,7 @@ public readonly record struct OpenFileDialogParameters(string FileName, string I
 public interface IDialogTaskInterface : ITaskInterface
 {
 	SetupDialogResult ShowDialog(string title, string message, SetupMessageBoxButtons buttons, SetupMessageBoxIcon icon);
-	
+
 	SetupDialogResult ShowDialog(ref OpenFileDialogParameters parameters);
 }
 
@@ -59,7 +59,7 @@ partial class TaskInterfaceExtensions
 	{
 		return taskInterface is not IDialogTaskInterface dialogTaskInterface ? SetupDialogResult.Ok : dialogTaskInterface.ShowDialog(title, message, buttons, icon);
 	}
-	
+
 	public static SetupDialogResult ShowDialogWithOkFallback(this ITaskInterface taskInterface, ref OpenFileDialogParameters parameters)
 	{
 		return taskInterface is not IDialogTaskInterface dialogTaskInterface ? SetupDialogResult.Ok : dialogTaskInterface.ShowDialog(ref parameters);

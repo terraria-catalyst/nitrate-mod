@@ -10,7 +10,7 @@ public sealed class SetupTask(CommonContext ctx, params SetupOperation[] tasks) 
 			SetupMessageBoxButtons.OkCancel,
 			SetupMessageBoxIcon.Information
 		);
-		
+
 		return res == SetupDialogResult.Ok;
 	}
 }

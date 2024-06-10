@@ -9,10 +9,10 @@
 +		return LanguageManager.Instance.ActiveCulture.WorkshopName ?? "english";
 +		
 +		/*
- 		return (GameCulture.CultureName)LanguageManager.Instance.ActiveCulture.LegacyId switch {
+ 		return (GameCulture.CultureName)LanguageManager.Instance.ActiveCulture.LegacyId switch
+ 		{
  			GameCulture.CultureName.German => "german",
- 			GameCulture.CultureName.Italian => "italian",
-@@ -43,6 +_,7 @@
+@@ -44,6 +_,7 @@
  			GameCulture.CultureName.Polish => "polish",
  			_ => "english",
  		};

@@ -15,7 +15,7 @@ public sealed class PatchSettings
 public sealed class TerrariaPathSettings
 {
 	public string TerrariaSteamDirectory { get; set; } = string.Empty;
-	
+
 	public string TmlDeveloperSteamDirectory { get; set; } = string.Empty;
 }
 
@@ -24,7 +24,7 @@ public static class Settings
 	public static void InitializeSettings(ITaskInterface taskInterface)
 	{
 		Directory.CreateDirectory(CommonSetup.SETTINGS_DIR);
-		
+
 		// Set initial setting values.
 		{
 			taskInterface.Settings.Set(
@@ -33,32 +33,32 @@ public static class Settings
 					PatchMode = 0,
 				}
 			);
-			
+
 			taskInterface.Settings.Set(new TerrariaPathSettings());
 		}
-		
+
 		// Load settings from file if it exists and save it and defaults.
 		{
 			taskInterface.Settings.Load(CommonSetup.SETTINGS_PATH);
 			taskInterface.Settings.Save();
 		}
 	}
-	
+
 	public static void LoadSettings(string path, Dictionary<string, object> settings)
 	{
 		if (!File.Exists(path))
 		{
 			return;
 		}
-		
+
 		var settingsJson = File.ReadAllText(path);
 		var settingsDict = JsonConvert.DeserializeObject<Dictionary<string, JObject>>(settingsJson);
-		
+
 		if (settingsDict is null)
 		{
 			return;
 		}
-		
+
 		foreach (var (settingTypeName, settingObject) in settingsDict)
 		{
 			var settingType = Type.GetType(settingTypeName);
@@ -66,17 +66,17 @@ public static class Settings
 			{
 				continue;
 			}
-			
+
 			var setting = settingObject.ToObject(settingType);
 			if (setting is null)
 			{
 				continue;
 			}
-			
+
 			settings[settingTypeName] = setting;
 		}
 	}
-	
+
 	public static void SaveSettings(string path, Dictionary<string, object> settings)
 	{
 		var settingsDict = new Dictionary<string, JObject>();
@@ -84,7 +84,7 @@ public static class Settings
 		{
 			settingsDict[settingTypeName] = JObject.FromObject(setting);
 		}
-		
+
 		var settingsJson = JsonConvert.SerializeObject(settingsDict, Formatting.Indented);
 		File.WriteAllText(path, settingsJson);
 	}

@@ -9,19 +9,19 @@ namespace Terraria.ModLoader.Setup.Common.Tasks;
 public sealed class DiffTask(CommonContext ctx, string baseDir, string srcDir, string patchDir) : SetupOperation(ctx)
 {
 	private static readonly string[] extensions = [ ".cs", ".csproj", ".ico", ".resx", ".png", "App.config", ".json", ".targets", ".txt", ".bat", ".sh", ];
-	
+
 	private static bool IsDiffable(string relPath)
 	{
 		return extensions.Any(relPath.EndsWith);
 	}
-	
+
 	public const string REMOVED_FILE_LIST = "removed_files.list";
-	
+
 	public override void Run()
 	{
 		var status = Context.Progress.CreateStatus(0, 2);
 		var items = new List<WorkItem>();
-		
+
 		foreach (var (file, relPath) in PatchTask.EnumerateSrcFiles(srcDir))
 		{
 			if (!File.Exists(Path.Combine(baseDir, relPath)))
@@ -33,15 +33,15 @@ public sealed class DiffTask(CommonContext ctx, string baseDir, string srcDir, s
 				items.Add(new WorkItem("Diffing: " + relPath, () => Diff(relPath)));
 			}
 		}
-		
+
 		ExecuteParallel(items);
-		
+
 		status.AddMessage("Deleting Unnecessary Patches");
 		{
 			// Create patch directory if it doesn't currently exist (no
 			// patches).
 			Directory.CreateDirectory(patchDir);
-			
+
 			foreach (var (file, relPath) in EnumerateFiles(patchDir))
 			{
 				var targetPath = relPath.EndsWith(".patch") ? relPath[..^6] : relPath;
@@ -50,20 +50,20 @@ public sealed class DiffTask(CommonContext ctx, string baseDir, string srcDir, s
 					DeleteFile(file);
 				}
 			}
-			
+
 			// Even if there are no patches, keep the actual directory since we
 			// write files to it later.
 			DeleteEmptyDirs(patchDir, includingSelf: false);
 			status.Current++;
 		}
-		
+
 		status.AddMessage("Noting Removed Files");
 		{
 			var removedFiles = PatchTask.EnumerateSrcFiles(baseDir)
 				.Where(f => !File.Exists(Path.Combine(srcDir, f.relPath)))
 				.Select(f => f.relPath)
 				.ToArray();
-			
+
 			var removedFileList = Path.Combine(patchDir, REMOVED_FILE_LIST);
 			if (removedFiles.Length > 0)
 			{
@@ -73,11 +73,11 @@ public sealed class DiffTask(CommonContext ctx, string baseDir, string srcDir, s
 			{
 				DeleteFile(removedFileList);
 			}
-			
+
 			status.Current++;
 		}
 	}
-	
+
 	private void Diff(string relPath)
 	{
 		var patchFile = Differ.DiffFiles(
@@ -85,12 +85,12 @@ public sealed class DiffTask(CommonContext ctx, string baseDir, string srcDir, s
 			Path.Combine(baseDir, relPath).Replace('\\', '/'),
 			Path.Combine(srcDir, relPath).Replace('\\', '/')
 		);
-		
+
 		var patchPath = Path.Combine(patchDir, relPath + ".patch");
 		if (!patchFile.IsEmpty)
 		{
 			CreateParentDirectory(patchPath);
-			
+
 			// NITRATE PATCH: Handle unique circumstances for our directories.
 			var fileText = patchFile.ToString(true);
 			var lineEnding = fileText.Contains("\r\n") ? "\r\n" : "\n";
@@ -101,7 +101,7 @@ public sealed class DiffTask(CommonContext ctx, string baseDir, string srcDir, s
 				textParts[1] = textParts[1].Replace("+++ src/staging/", "+++ src/");
 				fileText = string.Join(lineEnding, textParts);
 			}
-			
+
 			File.WriteAllText(patchPath, fileText);
 		}
 		else

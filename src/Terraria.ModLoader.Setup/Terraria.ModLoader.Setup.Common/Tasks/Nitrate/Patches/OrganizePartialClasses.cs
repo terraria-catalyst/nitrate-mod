@@ -43,37 +43,37 @@ internal sealed class OrganizePartialClasses(CommonContext ctx, string sourceDir
 		// Notable exceptions (also ignore):
 		// - TileData.Default.cs - TileData new to TML.
 		// - Recipe.Extensions.cs - Recipe rewritten by TML.
-		
+
 		var items = new List<WorkItem>();
-		
+
 		foreach (var (file, relPath) in EnumerateFiles(sourceDirectory))
 		{
 			var destination = Path.Combine(targetDirectory, relPath);
-			
+
 			if (relPath.Contains("ModLoader"))
 			{
 				copy(file, relPath, destination);
 				continue;
 			}
-			
+
 			var parts = relPath.Split('.');
 			if (parts.Length < 3)
 			{
 				copy(file, relPath, destination);
 				continue;
 			}
-			
+
 			var name = Path.GetFileName(parts[0]);
 			var type = parts[1];
 			var ext = parts[^1];
-			
+
 			// For now, let's only do this for C# source files.
 			if (ext != "cs")
 			{
 				copy(file, relPath, destination);
 				continue;
 			}
-			
+
 			// If the name is Name.Type.cs and Type isn't TML, we'll assume
 			// we should leave this be for now (part of exceptions list).
 			if (parts.Length == 3 && !type.Equals("tml", System.StringComparison.InvariantCultureIgnoreCase))
@@ -81,7 +81,7 @@ internal sealed class OrganizePartialClasses(CommonContext ctx, string sourceDir
 				copy(file, relPath, destination);
 				continue;
 			}
-			
+
 			// Now that we've determined this file is a C# source file and
 			// explicitly specifies it's a TML particle definition, we can
 			// move it to a _TML subdirectory.
@@ -90,11 +90,11 @@ internal sealed class OrganizePartialClasses(CommonContext ctx, string sourceDir
 			destination = Path.Combine(targetDirectory, Path.GetDirectoryName(relPath)!, "_" + type.ToUpperInvariant(), string.Join('.', new[] { name, }.Concat(parts.Where((_, i) => i > 1))));
 			copy(file, relPath, destination);
 		}
-		
+
 		ExecuteParallel(items);
-		
+
 		return;
-		
+
 		void copy(string file, string relPath, string destination)
 		{
 			items.Add(new WorkItem("Copying: " + relPath, () => Copy(file, destination)));

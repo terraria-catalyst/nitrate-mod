@@ -18,52 +18,52 @@ public sealed class ProgressStatus(int current, int max, IProgressManager manage
 	public int Current
 	{
 		get => current;
-		
+
 		set
 		{
 			current = value;
 			manager.NotifyProgressChanged();
 		}
 	}
-	
+
 	/// <summary>
 	///		The maximum progress for this status.
 	/// </summary>
 	public int Max
 	{
 		get => max;
-		
+
 		set
 		{
 			max = value;
 			manager.NotifyProgressChanged();
 		}
 	}
-	
+
 	private bool completed;
-	
+
 	/// <summary>
 	///		Whether this status is completed.
 	/// </summary>
 	public bool Completed
 	{
 		get => completed;
-		
+
 		set
 		{
 			completed = value;
 			manager.NotifyProgressChanged();
 		}
 	}
-	
+
 	/// <summary>
 	///		The status messages.
 	/// </summary>
 	public IEnumerable<string> Messages => messages.Values;
-	
+
 	private readonly Dictionary<ProgressStatusMessageHandle, string> messages = [];
 	private int nextMessageId;
-	
+
 	/// <summary>
 	///		Adds a tracked message to this status.
 	/// </summary>
@@ -76,7 +76,7 @@ public sealed class ProgressStatus(int current, int max, IProgressManager manage
 		manager.NotifyProgressChanged();
 		return handle;
 	}
-	
+
 	/// <summary>
 	///		Gets the message associated with the given handle.
 	/// </summary>
@@ -87,7 +87,7 @@ public sealed class ProgressStatus(int current, int max, IProgressManager manage
 		manager.NotifyProgressChanged();
 		return messages[handle];
 	}
-	
+
 	/// <summary>
 	///		Updates the message associated with the given handle.
 	/// </summary>
@@ -98,7 +98,7 @@ public sealed class ProgressStatus(int current, int max, IProgressManager manage
 		manager.NotifyProgressChanged();
 		messages[handle] = message;
 	}
-	
+
 	/// <summary>
 	///		Removes the message associated with the given handle.
 	/// </summary>
@@ -117,7 +117,7 @@ public sealed class ProgressStatus(int current, int max, IProgressManager manage
 public readonly record struct ProgressCounter(in IEnumerable<ProgressStatus> Progress)
 {
 	public int Current => Progress.Sum(status => status.Current);
-	
+
 	public int Max => Progress.Sum(status => status.Max);
 }
 
@@ -135,34 +135,34 @@ public interface IProgressManager
 	///		including those already completed.
 	/// </remarks>
 	IEnumerable<ProgressStatus> AllStatuses { get; }
-	
+
 	/// <summary>
 	///		A collection of completed progress statuses.
 	/// </summary>
 	IEnumerable<ProgressStatus> CompletedStatuses { get; }
-	
+
 	/// <summary>
 	///		A collection of pending progress statuses.
 	/// </summary>
 	IEnumerable<ProgressStatus> PendingStatuses { get; }
-	
+
 	ProgressCounter AllProgress { get; }
-	
+
 	ProgressCounter CompletedProgress { get; }
-	
+
 	ProgressCounter PendingProgress { get; }
-	
+
 	ProgressStatus CreateStatus(int current, int max);
-	
+
 	/// <summary>
 	///		Invoked whenever any progress status is created or updated.
 	/// </summary>
 	event Action OnProgressChanged;
-	
+
 	void Complete(ProgressStatus status);
-	
+
 	void NotifyProgressChanged();
-	
+
 	/// <summary>
 	///		Clears all saved progress.
 	/// </summary>
@@ -175,23 +175,23 @@ public interface IProgressManager
 public sealed class ProgressManager : IProgressManager
 {
 	IEnumerable<ProgressStatus> IProgressManager.AllStatuses => allStatuses;
-	
+
 	IEnumerable<ProgressStatus> IProgressManager.CompletedStatuses => completedStatuses;
-	
+
 	IEnumerable<ProgressStatus> IProgressManager.PendingStatuses => pendingStatuses;
-	
+
 	ProgressCounter IProgressManager.AllProgress => new(allStatuses);
-	
+
 	ProgressCounter IProgressManager.CompletedProgress => new(completedStatuses);
-	
+
 	ProgressCounter IProgressManager.PendingProgress => new(pendingStatuses);
-	
+
 	// Track individually instead of using LINQ on a single collection.
 	// This is to avoid the overhead of filtering the statuses every time.
 	private readonly List<ProgressStatus> allStatuses = [];
 	private readonly List<ProgressStatus> completedStatuses = [];
 	private readonly List<ProgressStatus> pendingStatuses = [];
-	
+
 	public ProgressStatus CreateStatus(int current, int max)
 	{
 		var status = new ProgressStatus(current, max, this);
@@ -200,28 +200,28 @@ public sealed class ProgressManager : IProgressManager
 		NotifyProgressChanged();
 		return status;
 	}
-	
+
 	public event Action? OnProgressChanged;
-	
+
 	public void Complete(ProgressStatus status)
 	{
 		if (status.Completed)
 		{
 			return;
 		}
-		
+
 		status.Completed = true;
 		pendingStatuses.Remove(status);
 		completedStatuses.Add(status);
-		
+
 		NotifyProgressChanged();
 	}
-	
+
 	public void NotifyProgressChanged()
 	{
 		OnProgressChanged?.Invoke();
 	}
-	
+
 	public void ClearProgress()
 	{
 		allStatuses.Clear();

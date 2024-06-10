@@ -21,40 +21,40 @@ internal sealed class FormatWithEditorConfig(CommonContext ctx, string sourceDir
 	public override void Run()
 	{
 		var items = new List<WorkItem>();
-		
+
 		foreach (var (file, relPath) in EnumerateFiles(sourceDirectory))
 		{
 			var destination = Path.Combine(targetDirectory, relPath);
-			
+
 			// Exclude non-csproj files and templates.
 			if (!relPath.EndsWith(".csproj") || relPath.EndsWith("{{ModName}}.csproj"))
 			{
 				copy(file, relPath, destination);
 				continue;
 			}
-			
+
 			items.Add(
 				new WorkItem(
 					"Making restorable: " + relPath,
 					() =>
 					{
 						CreateParentDirectory(destination);
-						
+
 						if (File.Exists(destination))
 						{
 							File.SetAttributes(destination, FileAttributes.Normal);
 						}
-						
+
 						File.WriteAllText(destination, MakeRestorable(File.ReadAllText(file)));
 					}
 				)
 			);
 		}
-		
+
 		ExecuteParallel(items);
-		
+
 		items.Clear();
-		
+
 		var editorconfigPath = Path.Combine(Directory.GetCurrentDirectory(), "src", ".editorconfig");
 		foreach (var (file, relPath) in EnumerateFiles(targetDirectory))
 		{
@@ -62,10 +62,10 @@ internal sealed class FormatWithEditorConfig(CommonContext ctx, string sourceDir
 			{
 				continue;
 			}
-			
+
 			// Copy .editorconfig over to the target directory.
 			File.Copy(editorconfigPath, Path.Combine(Path.GetDirectoryName(file)!, ".editorconfig"), true);
-			
+
 			// Run dotnet format in directory.
 			items.Add(
 				new WorkItem(
@@ -73,24 +73,25 @@ internal sealed class FormatWithEditorConfig(CommonContext ctx, string sourceDir
 					() =>
 					{
 						var cwd = Path.GetDirectoryName(file)!;
-						CommonSetup.RunCommand(cwd, "dotnet", "format analyzers", cancel: Context.TaskInterface.CancellationToken);
-						CommonSetup.RunCommand(cwd, "dotnet", "format style", cancel: Context.TaskInterface.CancellationToken);
+						CommonSetup.RunCommand(cwd, "dotnet", "format analyzers --severity info -v diag", cancel: Context.TaskInterface.CancellationToken);
+						CommonSetup.RunCommand(cwd, "dotnet", "format style --severity info -v diag", cancel: Context.TaskInterface.CancellationToken);
+						CommonSetup.RunCommand(cwd, "dotnet", "format whitespace -v diag", cancel: Context.TaskInterface.CancellationToken);
 						// CommonSetup.RunCommand(cwd, "dotnet", "cleanupcode", cancel: Context.TaskInterface.CancellationToken);
 					}
 				)
 			);
 		}
-		
+
 		ExecuteParallel(items);
-		
+
 		return;
-		
+
 		void copy(string file, string relPath, string destination)
 		{
 			items.Add(new WorkItem("Copying: " + relPath, () => Copy(file, destination)));
 		}
 	}
-	
+
 	private static string MakeRestorable(string source)
 	{
 		source = source.Replace("<ProjectReference Include=\"../../../FNA/FNA.Core.csproj\" />", "<ProjectReference Include=\"../../../Terraria.ModLoader/FNA/FNA.Core.csproj\" />");

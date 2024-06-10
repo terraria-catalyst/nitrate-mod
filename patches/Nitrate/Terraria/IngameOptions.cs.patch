@@ -1,17 +1,17 @@
 --- src/Nitrate_FormatWithEditorConfig/Terraria/IngameOptions.cs
 +++ src/Nitrate/Terraria/IngameOptions.cs
-@@ -120,10 +_,10 @@
+@@ -125,10 +_,10 @@
  			skipRightSlot[i] = false;
  		}
  
--		bool flag = GameCulture.FromCultureName(GameCulture.CultureName.Russian).IsActive || GameCulture.FromCultureName(GameCulture.CultureName.Portuguese).IsActive || GameCulture.FromCultureName(GameCulture.CultureName.Polish).IsActive || GameCulture.FromCultureName(GameCulture.CultureName.French).IsActive;
--		bool isActive = GameCulture.FromCultureName(GameCulture.CultureName.Polish).IsActive;
--		bool isActive2 = GameCulture.FromCultureName(GameCulture.CultureName.German).IsActive;
--		bool flag2 = GameCulture.FromCultureName(GameCulture.CultureName.Italian).IsActive || GameCulture.FromCultureName(GameCulture.CultureName.Spanish).IsActive;
+-		var flag = GameCulture.FromCultureName(GameCulture.CultureName.Russian).IsActive || GameCulture.FromCultureName(GameCulture.CultureName.Portuguese).IsActive || GameCulture.FromCultureName(GameCulture.CultureName.Polish).IsActive || GameCulture.FromCultureName(GameCulture.CultureName.French).IsActive;
+-		var isActive = GameCulture.FromCultureName(GameCulture.CultureName.Polish).IsActive;
+-		var isActive2 = GameCulture.FromCultureName(GameCulture.CultureName.German).IsActive;
+-		var flag2 = GameCulture.FromCultureName(GameCulture.CultureName.Italian).IsActive || GameCulture.FromCultureName(GameCulture.CultureName.Spanish).IsActive;
 +		bool flag = RU_RU.IsActive || PT_BR.IsActive || PL_PL.IsActive || FR_FR.IsActive;
 +		bool isActive = PL_PL.IsActive;
 +		bool isActive2 = DE_DE.IsActive;
 +		bool flag2 = IT_IT.IsActive || ES_ES.IsActive;
- 		bool flag3 = false;
- 		int num = 70;
- 		float scale = 0.75f;
+ 		var flag3 = false;
+ 		var num = 70;
+ 		var scale = 0.75f;

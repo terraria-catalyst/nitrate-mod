@@ -12,12 +12,12 @@ namespace Terraria.ModLoader.Setup.Common.Tasks;
 public sealed class PatchTask(CommonContext ctx, string baseDir, string patchedDir, string patchDir) : SetupOperation(ctx)
 {
 	private static readonly string[] nonSourceDirs = [ "bin", "obj", ".vs", ];
-	
+
 	public static IEnumerable<(string file, string relPath)> EnumerateSrcFiles(string dir)
 	{
 		return EnumerateFiles(dir).Where(f => !f.relPath.Split('/', '\\').Any(nonSourceDirs.Contains));
 	}
-	
+
 	private readonly string baseDir = PreparePath(baseDir);
 	private readonly string patchedDir = PreparePath(patchedDir);
 	private readonly string patchDir = PreparePath(patchDir);
@@ -26,9 +26,9 @@ public sealed class PatchTask(CommonContext ctx, string baseDir, string patchedD
 	private int failures;
 	private int fuzzy;
 	private StreamWriter logFile;
-	
+
 	private readonly ConcurrentBag<FilePatcher> results = [];
-	
+
 	public override bool StartupWarning()
 	{
 		var res = Context.TaskInterface.ShowDialogWithOkFallback(
@@ -37,22 +37,22 @@ public sealed class PatchTask(CommonContext ctx, string baseDir, string patchedD
 			SetupMessageBoxButtons.OkCancel,
 			SetupMessageBoxIcon.Warning
 		);
-		
+
 		return res == SetupDialogResult.Ok;
 	}
-	
+
 	public override void Run()
 	{
 		CommonSetup.UpdateTargetsFiles(Context); //Update branch information
-		
+
 		mode = (Patcher.Mode) Context.Settings.Get<PatchSettings>().PatchMode;
-		
+
 		var removedFileList = Path.Combine(patchDir, DiffTask.REMOVED_FILE_LIST);
 		var noCopy = File.Exists(removedFileList) ? [..File.ReadAllLines(removedFileList),] : new HashSet<string>();
-		
+
 		var items = new List<WorkItem>();
 		var newFiles = new HashSet<string>();
-		
+
 		foreach (var (file, relPath) in EnumerateFiles(patchDir))
 		{
 			if (relPath.EndsWith(".patch"))
@@ -63,29 +63,29 @@ public sealed class PatchTask(CommonContext ctx, string baseDir, string patchedD
 			else if (relPath != DiffTask.REMOVED_FILE_LIST)
 			{
 				var destination = Path.Combine(patchedDir, relPath);
-				
+
 				items.Add(new WorkItem("Copying: " + relPath, () => Copy(file, destination)));
 				newFiles.Add(destination);
 			}
 		}
-		
+
 		foreach (var (file, relPath) in EnumerateSrcFiles(baseDir))
 		{
 			if (!noCopy.Contains(relPath))
 			{
 				var destination = Path.Combine(patchedDir, relPath);
-				
+
 				items.Add(new WorkItem("Copying: " + relPath, () => Copy(file, destination)));
 				newFiles.Add(destination);
 			}
 		}
-		
+
 		try
 		{
 			CreateDirectory(CommonSetup.LOGS_DIR);
 			// ReSharper disable once InconsistentlySynchronizedField
 			logFile = new StreamWriter(Path.Combine(CommonSetup.LOGS_DIR, "patch.log"));
-			
+
 			// TaskInterface.MaxProgress = items.Count;
 			ExecuteParallel(items);
 		}
@@ -94,9 +94,9 @@ public sealed class PatchTask(CommonContext ctx, string baseDir, string patchedD
 			// ReSharper disable once InconsistentlySynchronizedField
 			logFile?.Close();
 		}
-		
+
 		//Remove files and directories that weren't in patches and original src.
-		
+
 		var srcFileDeletionStatus = Context.Progress.CreateStatus(0, 2);
 		srcFileDeletionStatus.AddMessage("Deleting Old Src Files");
 		{
@@ -107,48 +107,47 @@ public sealed class PatchTask(CommonContext ctx, string baseDir, string patchedD
 					File.Delete(file);
 				}
 			}
-			
+
 			srcFileDeletionStatus.Current++;
 		}
-		
+
 		srcFileDeletionStatus.AddMessage("Deleting Old Src's Empty Directories");
 		{
 			DeleteEmptyDirs(patchedDir);
 			srcFileDeletionStatus.Current++;
 			srcFileDeletionStatus.AddMessage("Old Src Removed");
 		}
-		
-		
+
 		//Show patch reviewer if there were any fuzzy patches.
-		
+
 		if (fuzzy > 0 || mode == Patcher.Mode.FUZZY && failures > 0)
 		{
 			Context.TaskInterface.InvokeOnMainThread(new Action(() => ShowReviewWindow(results)));
 		}
 	}
-	
+
 	private void ShowReviewWindow(IEnumerable<FilePatcher> reviewResults)
 	{
 		Context.TaskInterface.ShowReviewWindow(reviewResults, baseDir);
 	}
-	
+
 	public override bool Failed()
 	{
 		return failures > 0;
 	}
-	
+
 	public override bool Warnings()
 	{
 		return warnings > 0;
 	}
-	
+
 	public override void FinishedDialog()
 	{
 		if (fuzzy > 0)
 		{
 			return;
 		}
-		
+
 		Context.TaskInterface.ShowDialogWithOkFallback(
 			"Patch Results",
 			$"Patches applied with {failures} failures and {warnings} warnings.\nSee /logs/patch.log for details",
@@ -156,28 +155,28 @@ public sealed class PatchTask(CommonContext ctx, string baseDir, string patchedD
 			Failed() ? SetupMessageBoxIcon.Error : SetupMessageBoxIcon.Warning
 		);
 	}
-	
+
 	private FilePatcher Patch(string patchPath)
 	{
 		var patcher = FilePatcher.FromPatchFile(patchPath);
-		
+
 		// WEIRD NITRATE PATCH: Forcefully redirect paths for actually reading
 		// the patches since we do weird submodule stuff.
 		if (!patcher.patchFile.basePath.Contains("src/staging/"))
 		{
 			patcher.patchFile.basePath = patcher.patchFile.basePath.Replace("src/", "src/staging/");
 		}
-		
+
 		if (!patcher.patchFile.patchedPath.Contains("src/staging/"))
 		{
 			patcher.patchFile.patchedPath = patcher.patchFile.patchedPath.Replace("src/", "src/staging/");
 		}
-		
+
 		patcher.Patch(mode);
 		results.Add(patcher);
 		CreateParentDirectory(patcher.PatchedPath);
 		patcher.Save();
-		
+
 		int exact = 0, offset = 0;
 		foreach (var result in patcher.results)
 		{
@@ -186,12 +185,12 @@ public sealed class PatchTask(CommonContext ctx, string baseDir, string patchedD
 				failures++;
 				continue;
 			}
-			
+
 			if (result.mode == Patcher.Mode.FUZZY || result.offsetWarning)
 			{
 				warnings++;
 			}
-			
+
 			if (result.mode == Patcher.Mode.EXACT)
 			{
 				exact++;
@@ -205,20 +204,20 @@ public sealed class PatchTask(CommonContext ctx, string baseDir, string patchedD
 				fuzzy++;
 			}
 		}
-		
+
 		var log = new StringBuilder();
 		log.AppendLine($"{patcher.patchFile.basePath},\texact: {exact},\toffset: {offset},\tfuzzy: {fuzzy},\tfailed: {failures}");
-		
+
 		foreach (var res in patcher.results)
 		{
 			log.AppendLine(res.Summary());
 		}
-		
+
 		Log(log.ToString());
-		
+
 		return patcher;
 	}
-	
+
 	private void Log(string text)
 	{
 		lock (logFile)
