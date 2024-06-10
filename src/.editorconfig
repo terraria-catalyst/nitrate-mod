@@ -179,6 +179,7 @@ resharper_csharp_insert_final_newline = true
 resharper_csharp_keep_blank_lines_in_code = 1
 resharper_csharp_keep_blank_lines_in_declarations = 1
 resharper_csharp_max_enum_members_on_line = 1
+resharper_csharp_remove_spaces_on_blank_lines = true
 resharper_csharp_stick_comment = false
 resharper_csharp_wrap_after_declaration_lpar = true
 resharper_csharp_wrap_after_invocation_lpar = true
