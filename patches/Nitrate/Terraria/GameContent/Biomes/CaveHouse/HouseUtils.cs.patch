@@ -1,0 +1,14 @@
+--- src/Nitrate_FormatWithEditorConfig/Terraria/GameContent/Biomes/CaveHouse/HouseUtils.cs
++++ src/Nitrate/Terraria/GameContent/Biomes/CaveHouse/HouseUtils.cs
+@@ -58,9 +_,9 @@
+ 		rectangle2.Y += 3;
+ 		List<Rectangle> list =
+ 		[
+-			.. WorldGen.genRand.NextDouble() > roomSolidPrecentage + 0.2 ? [rectangle] : [],
++			.. WorldGen.genRand.NextDouble() > roomSolidPrecentage + 0.2 ? new[] { rectangle, } : [],
+ 			item,
+-			.. WorldGen.genRand.NextDouble() > roomSolidPrecentage2 + 0.2 ? [rectangle2] : [],
++			.. WorldGen.genRand.NextDouble() > roomSolidPrecentage2 + 0.2 ? new[] { rectangle2, } : [],
+ 		];
+ 
+ 		return list;

@@ -1,0 +1,18 @@
+--- src/Nitrate_FormatWithEditorConfig/Terraria/Localization/LocalizedText.cs
++++ src/Nitrate/Terraria/Localization/LocalizedText.cs
+@@ -8,7 +_,7 @@
+ public partial class LocalizedText
+ {
+ 	public static readonly LocalizedText Empty = new("", "");
+-	private static readonly Regex _substitutionRegex = MyRegex();
++	private static readonly Regex _substitutionRegex = Substitution();
+ 	public readonly string Key;
+ 
+ 	/*
+@@ -120,5 +_,5 @@
+ 
+ 	public override string ToString() => Value;
+ 	[GeneratedRegex("{(\\?(?:!)?)?([a-zA-Z][\\w\\.]*)}", RegexOptions.Compiled)]
+-	private static partial Regex MyRegex();
++	private static partial Regex Substitution();
+ }

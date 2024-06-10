@@ -1,0 +1,11 @@
+--- src/Nitrate_FormatWithEditorConfig/Terraria/ModLoader/IO/MapIO.cs
++++ src/Nitrate/Terraria/ModLoader/IO/MapIO.cs
+@@ -82,7 +_,7 @@
+ 				writer.Write(tile.Name);
+ 				writer.Write((ushort)(type - MapHelper.tileLookup[tile.Type]));
+ 			}
+-			else if (MapLoader.entryToWall.TryGetValue(type, out var value))
++			else if (MapLoader.entryToWall.TryGetValue(type, out value))
+ 			{
+ 				var wall = WallLoader.GetWall(value);
+ 				writer.Write(false);

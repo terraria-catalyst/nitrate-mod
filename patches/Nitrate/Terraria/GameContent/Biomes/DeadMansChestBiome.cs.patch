@@ -1,0 +1,11 @@
+--- src/Nitrate_FormatWithEditorConfig/Terraria/GameContent/Biomes/DeadMansChestBiome.cs
++++ src/Nitrate/Terraria/GameContent/Biomes/DeadMansChestBiome.cs
+@@ -311,7 +_,7 @@
+ 	{
+ 		var x = position.X;
+ 		var y = position.Y + 3;
+-		List<int> list = [.. IsGoodSpotsForExplosive(x, y) ? [x] : []];
++		List<int> list = [.. IsGoodSpotsForExplosive(x, y) ? new[] { x, } : [],];
+ 
+ 		x++;
+ 		if (IsGoodSpotsForExplosive(x, y))

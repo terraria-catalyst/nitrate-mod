@@ -1,0 +1,28 @@
+--- src/Nitrate_FormatWithEditorConfig/Terraria/Utils.cs
++++ src/Nitrate/Terraria/Utils.cs
+@@ -1690,10 +_,12 @@
+ 
+ 	public static Vector2 DrawBorderString(SpriteBatch sb, string text, Vector2 pos, Color color, float scale = 1f, float anchorx = 0f, float anchory = 0f, int maxCharactersDisplayed = -1)
+ 	{
++		/*
+ 		if (maxCharactersDisplayed != -1 && text.Length > maxCharactersDisplayed)
+ 		{
+ 			text[..maxCharactersDisplayed];
+ 		}
++		*/
+ 
+ 		var value = FontAssets.MouseText.Value;
+ 		var vector = value.MeasureString(text);
+@@ -1703,10 +_,12 @@
+ 
+ 	public static Vector2 DrawBorderStringBig(SpriteBatch spriteBatch, string text, Vector2 pos, Color color, float scale = 1f, float anchorx = 0f, float anchory = 0f, int maxCharactersDisplayed = -1)
+ 	{
++		/*
+ 		if (maxCharactersDisplayed != -1 && text.Length > maxCharactersDisplayed)
+ 		{
+ 			text[..maxCharactersDisplayed];
+ 		}
++		*/
+ 
+ 		var value = FontAssets.DeathText.Value;
+ 

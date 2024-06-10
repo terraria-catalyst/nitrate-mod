@@ -1,0 +1,25 @@
+--- src/Nitrate_FormatWithEditorConfig/Terraria/GameInput/PlayerInputProfile.cs
++++ src/Nitrate/Terraria/GameInput/PlayerInputProfile.cs
+@@ -220,18 +_,18 @@
+ 			foreach (var item in value.InputModes[nm].WritePreferences())
+ 			{
+ 				var flag = true;
+-				if (dict.TryGetValue(item.Key, out var value))
++				if (dict.TryGetValue(item.Key, out var value2))
+ 				{
+-					if (value.Count != item.Value.Count)
++					if (value2.Count != item.Value.Count)
+ 					{
+ 						flag = false;
+ 					}
+ 
+ 					if (!flag)
+ 					{
+-						for (var i = 0; i < value.Count; i++)
++						for (var i = 0; i < value2.Count; i++)
+ 						{
+-							if (value[i] != item.Value[i])
++							if (value2[i] != item.Value[i])
+ 							{
+ 								flag = false;
+ 								break;

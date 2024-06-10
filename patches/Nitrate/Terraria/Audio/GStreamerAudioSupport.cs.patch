@@ -1,0 +1,20 @@
+--- src/Nitrate_FormatWithEditorConfig/Terraria/Audio/GStreamerAudioSupport.cs
++++ src/Nitrate/Terraria/Audio/GStreamerAudioSupport.cs
+@@ -46,14 +_,14 @@
+ {
+ 	[LibraryImport("kernel32.dll", SetLastError = true)]
+ 	[return: MarshalAs(UnmanagedType.Bool)]
+-	static partial bool SetDefaultDllDirectories(int directoryFlags);
++	private static partial bool SetDefaultDllDirectories(int directoryFlags);
+ 
+ 	[LibraryImport("kernel32.dll", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+-	static partial void AddDllDirectory(string lpPathName);
++	private static partial void AddDllDirectory(string lpPathName);
+ 
+ 	[LibraryImport("kernel32.dll", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+ 	[return: MarshalAs(UnmanagedType.Bool)]
+-	static partial bool SetDllDirectory(string lpPathName);
++	private static partial bool SetDllDirectory(string lpPathName);
+ 
+ 	/// <summary>
+ 	/// Call this before loading the FAudio dll

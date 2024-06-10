@@ -1,0 +1,11 @@
+--- src/Nitrate_FormatWithEditorConfig/Terraria/WorldBuilding/Passes.cs
++++ src/Nitrate/Terraria/WorldBuilding/Passes.cs
+@@ -27,7 +_,7 @@
+ 		}
+ 	}
+ 
+-	public partial class ScatterCustom(string name, double loadWeight, int count, CustomPerUnitAction perUnit = null) : GenPass(name, loadWeight)
++	public partial class ScatterCustom(string name, double loadWeight, int count, GenBase.CustomPerUnitAction perUnit = null) : GenPass(name, loadWeight)
+ 	{
+ 		private CustomPerUnitAction _perUnit = perUnit;
+ 		private readonly int _count = count;

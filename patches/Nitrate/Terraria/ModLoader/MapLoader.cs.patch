@@ -1,0 +1,11 @@
+--- src/Nitrate_FormatWithEditorConfig/Terraria/ModLoader/MapLoader.cs
++++ src/Nitrate/Terraria/ModLoader/MapLoader.cs
+@@ -124,7 +_,7 @@
+ 			}
+ 			mapType += option;
+ 		}
+-		else if (entryToWall.TryGetValue(mapType, out var value))
++		else if (entryToWall.TryGetValue(mapType, out value))
+ 		{
+ 			var wall = WallLoader.GetWall(value);
+ 			var option = wall.GetMapOption(i, j);

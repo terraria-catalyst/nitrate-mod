@@ -1,0 +1,11 @@
+--- src/Nitrate_FormatWithEditorConfig/Terraria/DataStructures/VanillaPlayerDrawLayer.cs
++++ src/Nitrate/Terraria/DataStructures/VanillaPlayerDrawLayer.cs
+@@ -4,7 +_,7 @@
+ 
+ /// <summary> Creates a LegacyPlayerLayer with the given mod name, identifier name, and drawing action. </summary>
+ [Autoload(false)]
+-internal sealed partial class VanillaPlayerDrawLayer(string name, VanillaPlayerDrawLayer.DrawFunc drawFunc, Transformation transform = null, bool isHeadLayer = false, VanillaPlayerDrawLayer.Condition condition = null, Position position = null) : PlayerDrawLayer
++internal sealed partial class VanillaPlayerDrawLayer(string name, VanillaPlayerDrawLayer.DrawFunc drawFunc, PlayerDrawLayer.Transformation transform = null, bool isHeadLayer = false, VanillaPlayerDrawLayer.Condition condition = null, PlayerDrawLayer.Position position = null) : PlayerDrawLayer
+ {
+ 	/// <summary> The delegate of this method, which can either do the actual drawing or add draw data, depending on what kind of layer this is. </summary>
+ 	public delegate void DrawFunc(ref PlayerDrawSet info);

@@ -1,0 +1,11 @@
+--- src/Nitrate_FormatWithEditorConfig/Terraria/Social/Steam/SteamP2PWriter.cs
++++ src/Nitrate/Terraria/Social/Steam/SteamP2PWriter.cs
+@@ -74,7 +_,7 @@
+ 				}
+ 			}
+ 
+-			if (_pendingSendDataSwap.TryGetValue(user, out var value))
++			if (_pendingSendDataSwap.TryGetValue(user, out value))
+ 			{
+ 				var queue2 = value;
+ 				while (queue2.Count > 0)

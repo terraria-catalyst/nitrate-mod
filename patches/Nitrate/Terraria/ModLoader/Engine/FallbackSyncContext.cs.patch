@@ -1,0 +1,10 @@
+--- src/Nitrate_FormatWithEditorConfig/Terraria/ModLoader/Engine/FallbackSyncContext.cs
++++ src/Nitrate/Terraria/ModLoader/Engine/FallbackSyncContext.cs
+@@ -78,6 +_,6 @@
+ 			Logging.tML.Debug("Fallback synchronization context assigned");
+ 		}
+ 
+-		ctx?.Update();
++		SyncContext.Update();
+ 	}
+ }

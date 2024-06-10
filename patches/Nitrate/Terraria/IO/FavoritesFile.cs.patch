@@ -1,0 +1,14 @@
+--- src/Nitrate_FormatWithEditorConfig/Terraria/IO/FavoritesFile.cs
++++ src/Nitrate/Terraria/IO/FavoritesFile.cs
+@@ -44,9 +_,9 @@
+ 		}
+ 
+ 		var fileName = fileData.GetFileName();
+-		if (value.TryGetValue(fileName, out var value))
++		if (value.TryGetValue(fileName, out var value2))
+ 		{
+-			return value;
++			return value2;
+ 		}
+ 
+ 		return false;

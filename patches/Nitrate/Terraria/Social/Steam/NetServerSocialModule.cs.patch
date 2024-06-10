@@ -1,0 +1,11 @@
+--- src/Nitrate_FormatWithEditorConfig/Terraria/Social/Steam/NetServerSocialModule.cs
++++ src/Nitrate/Terraria/Social/Steam/NetServerSocialModule.cs
+@@ -149,7 +_,7 @@
+ 			var result = default(P2PSessionRequest_t);
+ 			result.m_steamIDRemote = userId;
+ 			OnP2PSessionRequest(result);
+-			if (!_connectionStateMap.TryGetValue(userId, out var value) || value == ConnectionState.Inactive)
++			if (!_connectionStateMap.TryGetValue(userId, out value) || value == ConnectionState.Inactive)
+ 			{
+ 				return false;
+ 			}

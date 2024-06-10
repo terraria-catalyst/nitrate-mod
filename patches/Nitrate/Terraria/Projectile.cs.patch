@@ -1,0 +1,11 @@
+--- src/Nitrate_FormatWithEditorConfig/Terraria/Projectile.cs
++++ src/Nitrate/Terraria/Projectile.cs
+@@ -43682,7 +_,7 @@
+ 			list.Remove(nPC3);
+ 		}
+ 
+-		List<Vector2> list2 = [.. nPC3 != null ? [nPC3.Center] : []];
++		List<Vector2> list2 = [.. nPC3 != null ? new[] { nPC3.Center, } : []];
+ 
+ 		var num2 = 0;
+ 		while (list.Count > 0 && list2.Count < num - 1)

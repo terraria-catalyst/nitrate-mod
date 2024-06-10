@@ -1,0 +1,11 @@
+--- src/Nitrate_FormatWithEditorConfig/Terraria/UI/UIElement.cs
++++ src/Nitrate/Terraria/UI/UIElement.cs
+@@ -236,7 +_,7 @@
+ 
+ 	public virtual List<SnapPoint> GetSnapPoints()
+ 	{
+-		List<SnapPoint> list = [.. GetSnapPoint(out var point) ? [point] : []];
++		List<SnapPoint> list = [.. GetSnapPoint(out var point) ? new[] { point, } : [],];
+ 
+ 		foreach (var element in Elements)
+ 		{

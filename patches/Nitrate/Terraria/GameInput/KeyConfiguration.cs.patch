@@ -1,0 +1,11 @@
+--- src/Nitrate_FormatWithEditorConfig/Terraria/GameInput/KeyConfiguration.cs
++++ src/Nitrate/Terraria/GameInput/KeyConfiguration.cs
+@@ -137,7 +_,7 @@
+ 			dictionary["MouseLeft"] = value;
+ 		}
+ 
+-		if (!dictionary.TryGetValue("Inventory", out var value) || value.Count == 0)
++		if (!dictionary.TryGetValue("Inventory", out value) || value.Count == 0)
+ 		{
+ 			value = [
+ 				"Escape"

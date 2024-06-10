@@ -11,11 +11,22 @@
  		var mod_i10 = count % 10;
  		var mod_i100 = count % 100;
  		static bool contains(int i, int a, int b) => i >= a && i <= b;
-@@ -78,6 +_,7 @@
+@@ -78,9 +_,10 @@
  			// other
  			return 0;
  		}
 +		*/
  	}
  
- 	public static readonly Regex PluralizationPatternRegex = MyRegex(); // "{0} {^0:item;items}"
+-	public static readonly Regex PluralizationPatternRegex = MyRegex(); // "{0} {^0:item;items}"
++	public static readonly Regex PluralizationPatternRegex = PluralizationPattern(); // "{0} {^0:item;items}"
+ 
+ 	public static string ApplyPluralization(string value, params object[] args)
+ 	{
+@@ -139,5 +_,5 @@
+ 	}
+ 
+ 	[GeneratedRegex(@"{\^(\d+):([^\r\n]+?)}", RegexOptions.Compiled)]
+-	private static partial Regex MyRegex();
++	private static partial Regex PluralizationPattern();
+ }

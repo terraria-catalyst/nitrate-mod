@@ -1,0 +1,14 @@
+--- src/Nitrate_FormatWithEditorConfig/Terraria/Localization/LanguageManager.cs
++++ src/Nitrate/Terraria/Localization/LanguageManager.cs
+@@ -324,9 +_,9 @@
+ 			{
+ 				var text2 = currentRecord[num];
+ 				var value = currentRecord[num2];
+-				if (!string.IsNullOrWhiteSpace(text2) && !string.IsNullOrWhiteSpace(value) && _localizedTexts.TryGetValue(text2, out var value))
++				if (!string.IsNullOrWhiteSpace(text2) && !string.IsNullOrWhiteSpace(value) && _localizedTexts.TryGetValue(text2, out var value2))
+ 				{
+-					value.SetValue(value);
++					value2.SetValue(value);
+ 				}
+ 			}
+ 		}

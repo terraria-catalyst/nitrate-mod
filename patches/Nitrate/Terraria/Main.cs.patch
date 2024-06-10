@@ -5,7 +5,7 @@
  			Map = new WorldMap(maxTilesX, maxTilesY);
  			Configuration.Load();
 -			graphics = new GraphicsDeviceManager((object)this as Game)
-+			graphics = new GraphicsDeviceManager(this);
++			graphics = new GraphicsDeviceManager(this)
  			{
  				/*
  	base.Content.RootDirectory = "Content";
@@ -36,6 +36,87 @@
  	}
  
  	private static IEnumerator LoadMusic_InSteps()
+@@ -11566,7 +_,7 @@
+ 				}
+ 			}
+ 
+-			LoaderManager.Get<SceneEffectLoader>().UpdateMusic(ref modMusic, ref modPriority);
++			SceneEffectLoader.UpdateMusic(ref modMusic, ref modPriority);
+ 		}
+ 
+ 		_ = (screenPosition.X + (float)(screenWidth / 2)) / 16f;
+@@ -12220,7 +_,7 @@
+ 				}
+ 			}
+ 
+-			LoaderManager.Get<SceneEffectLoader>().UpdateMusic(ref modMusic, ref modPriority);
++			SceneEffectLoader.UpdateMusic(ref modMusic, ref modPriority);
+ 		}
+ 
+ 		_ = (screenPosition.X + (float)(screenWidth / 2)) / 16f;
+@@ -21770,7 +_,7 @@
+ 			var num6 = 0;
+ 			for (var i = 0; i < NPCLoader.NPCCount; i++)
+ 			{
+-				if (Item.BannerToNPC(i) != 0 && player[myPlayer].HasNPCBannerBuff(i))
++				if (Item.BannerToNPC(i) != 0 && Player.HasNPCBannerBuff(i))
+ 				{
+ 					num6++;
+ 					var nPCNameValue = Lang.GetNPCNameValue(Item.BannerToNPC(i));
+@@ -21862,7 +_,7 @@
+ 		var num13 = 0;
+ 		for (var l = 0; l < NPCLoader.NPCCount; l++)
+ 		{
+-			if (Item.BannerToNPC(l) == 0 || !player[myPlayer].HasNPCBannerBuff(l))
++			if (Item.BannerToNPC(l) == 0 || !Player.HasNPCBannerBuff(l))
+ 			{
+ 				continue;
+ 			}
+@@ -23090,7 +_,7 @@
+ 				var color = Lighting.GetColor((int)vector.X / 16, (int)(vector.Y / 16f));
+ 				if (rCurrentNPC.IsABestiaryIconDummy)
+ 				{
+-					color = rCurrentNPC.GetBestiaryEntryColor();
++					color = NPC.GetBestiaryEntryColor();
+ 				}
+ 
+ 				if (!flag3)
+@@ -23139,7 +_,7 @@
+ 				var color2 = Lighting.GetColor((int)vector2.X / 16, (int)(vector2.Y / 16f));
+ 				if (rCurrentNPC.IsABestiaryIconDummy)
+ 				{
+-					color2 = rCurrentNPC.GetBestiaryEntryColor();
++					color2 = NPC.GetBestiaryEntryColor();
+ 				}
+ 
+ 				if (type == 259 || type == 260)
+@@ -23392,7 +_,7 @@
+ 		var npcColor = Lighting.GetColor((int)((double)rCurrentNPC.position.X + (double)rCurrentNPC.width * 0.5) / 16, (int)(((double)rCurrentNPC.position.Y + (double)rCurrentNPC.height * 0.5) / 16.0));
+ 		if (rCurrentNPC.IsABestiaryIconDummy)
+ 		{
+-			npcColor = rCurrentNPC.GetBestiaryEntryColor();
++			npcColor = NPC.GetBestiaryEntryColor();
+ 		}
+ 
+ 		if (type >= 277 && type <= 280)
+@@ -28855,7 +_,7 @@
+ 
+ 		if (proj.type == 933)
+ 		{
+-			default(FinalFractalHelper).Draw(proj);
++			FinalFractalHelper.Draw(proj);
+ 		}
+ 
+ 		if (proj.type == 79)
+@@ -43933,7 +_,7 @@
+ 
+ 				if (mouseLeft && mouseLeftRelease && player[myPlayer].team != i && teamCooldown == 0)
+ 				{
+-					if (!player[myPlayer].TeamChangeAllowed())
++					if (!Player.TeamChangeAllowed())
+ 					{
+ 						NewText(Lang.misc[84].Value, byte.MaxValue, 240, 20);
+ 					}
 @@ -48370,7 +_,7 @@
  		var text = "";
  		var num4 = 215f;
@@ -73,3 +154,21 @@
  		if (Platform.IsLinux)
  		{
  			text = ((IntPtr.Size != 8) ? (text + " -x86") : (text + " -x64"));
+@@ -54642,7 +_,7 @@
+ 
+ 	public static void OpenReportsMenu()
+ 	{
+-		List<IProvideReports> list = [IssueReporter, .. SocialAPI.Workshop != null ? [SocialAPI.Workshop.IssueReporter] : []];
++		List<IProvideReports> list = [IssueReporter, .. SocialAPI.Workshop != null ? new[] { SocialAPI.Workshop.IssueReporter, } : []];
+ 
+ 		var state = new UIReportsPage(MenuUI.CurrentState, menuMode, list);
+ 		menuMode = 888;
+@@ -61119,7 +_,7 @@
+ 				var flag5 = false;
+ 				var num11 = 0f;
+ 				var tile = Main.tile[j, i];
+-				if (flag && player[myPlayer].CanDoWireStuffHere(j, i))
++				if (flag && Player.CanDoWireStuffHere(j, i))
+ 				{
+ 					var num12 = 0;
+ 					if (tile.active())

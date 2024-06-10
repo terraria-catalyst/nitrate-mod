@@ -1,0 +1,49 @@
+--- src/Nitrate_FormatWithEditorConfig/ReLogic/Peripherals/RGB/Razer/NativeMethods.cs
++++ src/Nitrate/ReLogic/Peripherals/RGB/Razer/NativeMethods.cs
+@@ -181,29 +_,23 @@
+ 	[UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+ 	public static partial RzResult UnInit();
+ 
+-	[LibraryImport(DLL_NAME)]
+-	[UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+-	public static partial RzResult CreateKeyboardEffect(KeyboardEffectType effect, ref CustomKeyboardEffect effectData, ref Guid effectId);
+-
+-	[LibraryImport(DLL_NAME)]
+-	[UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+-	public static partial RzResult CreateMouseEffect(MouseEffectType effect, ref CustomMouseEffect effectData, ref Guid effectId);
+-
+-	[LibraryImport(DLL_NAME)]
+-	[UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+-	public static partial RzResult CreateHeadsetEffect(HeadsetEffectType effect, ref CustomHeadsetEffect effectData, ref Guid effectId);
+-
+-	[LibraryImport(DLL_NAME)]
+-	[UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+-	public static partial RzResult CreateMousepadEffect(MousepadEffectType effect, ref CustomMousepadEffect effectData, ref Guid effectId);
+-
+-	[LibraryImport(DLL_NAME)]
+-	[UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+-	public static partial RzResult CreateKeypadEffect(KeypadEffectType effect, ref CustomKeypadEffect effectData, ref Guid effectId);
+-
+-	[LibraryImport(DLL_NAME)]
+-	[UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+-	public static partial RzResult CreateChromaLinkEffect(ChromaLinkEffectType effect, ref CustomChromaLinkEffect effectData, ref Guid effectId);
++	[DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
++	public static extern RzResult CreateKeyboardEffect(KeyboardEffectType effect, ref CustomKeyboardEffect effectData, ref Guid effectId);
++
++	[DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
++	public static extern RzResult CreateMouseEffect(MouseEffectType effect, ref CustomMouseEffect effectData, ref Guid effectId);
++
++	[DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
++	public static extern RzResult CreateHeadsetEffect(HeadsetEffectType effect, ref CustomHeadsetEffect effectData, ref Guid effectId);
++
++	[DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
++	public static extern RzResult CreateMousepadEffect(MousepadEffectType effect, ref CustomMousepadEffect effectData, ref Guid effectId);
++
++	[DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
++	public static extern RzResult CreateKeypadEffect(KeypadEffectType effect, ref CustomKeypadEffect effectData, ref Guid effectId);
++
++	[DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
++	public static extern RzResult CreateChromaLinkEffect(ChromaLinkEffectType effect, ref CustomChromaLinkEffect effectData, ref Guid effectId);
+ 
+ 	[LibraryImport(DLL_NAME)]
+ 	[UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
