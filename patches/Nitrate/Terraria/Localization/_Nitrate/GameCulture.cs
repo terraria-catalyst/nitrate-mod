@@ -10,7 +10,7 @@ namespace Terraria.Localization;
 partial class GameCulture
 {
 	/// <summary>
-	///		The internal string ID of this language.
+	///		The actual name of the language in itself.
 	/// </summary>
 	public string LanguageName { get; }
 	

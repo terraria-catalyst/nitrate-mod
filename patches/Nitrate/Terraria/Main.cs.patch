@@ -9,6 +9,31 @@
  			/*
  			base.Content.RootDirectory = "Content";
  			*/
+@@ -9542,8 +_,11 @@
+ 		base.GraphicsDevice.DeviceLost += GraphicsDeviceLost;
+ 		base.GraphicsDevice.DeviceReset += GraphicsDeviceLost;
+ 		base.GraphicsDevice.DeviceResetting += GraphicsDeviceLost;
++		
++		/*
+ 		if (_needsLanguageSelect)
+ 			menuMode = 1212;
++		*/
+ 
+ 		_achievements = new AchievementManager();
+ 		_achievementAdvisor = new AchievementAdvisor();
+@@ -9721,6 +_,12 @@
+ 		CacheSupportedDisplaySizes();
+ 		ContentSamples.RebuildItemCreativeSortingIDsAfterRecipesAreSetUp();
+ 		ContentSamples.CommonlyUsedContentSamples.PrepareAfterEverythingElseLoaded();
++		
++		if (_needsLanguageSelect)
++		{
++			menuMode = 888;
++			MenuUI.SetState(languageSelectMenu_InitialLanguageSelect);
++		}
+ 	}
+ 
+ 	private IEnumerator LoadMusic_InSteps()
 @@ -39741,7 +_,7 @@
  		string text = "";
  		float num4 = 215f;
@@ -18,12 +43,31 @@
  			startX = -50;
  			num4 += 50f;
  		}
+@@ -42590,7 +_,8 @@
+ 				array9[num20] = Lang.menu[103].Value;
+ 				if (selectedMenu == num20) {
+ 					SoundEngine.PlaySound(10);
+-					menuMode = 1213;
++					menuMode = 888;
++					MenuUI.SetState(languageSelectMenu);
+ 				}
+ 
+ 				// TML settings
+@@ -43732,7 +_,7 @@
+ 		SkipMenuEnumeration:
+ 
+ 		if (menuMode == 888) {
+-			if (!_blockFancyUIWhileLoading)
++			if (!_blockFancyUIWhileLoading && Assets is not null)
+ 				MenuUI.Draw(spriteBatch, gameTime);
+ 		}
+ 		else {
 @@ -44536,7 +_,7 @@
  
  	private void OnSubmitServerPassword()
  	{
 -		string text = "-autoshutdown -password \"" + ConvertToSafeArgument(Netplay.ServerPassword) + "\" -lang " + Language.ActiveCulture.LegacyId;
-+		string text = "-autoshutdown -password \"" + ConvertToSafeArgument(Netplay.ServerPassword) + "\" -language " + Language.ActiveCulture.LanguageName;
++		string text = "-autoshutdown -password \"" + ConvertToSafeArgument(Netplay.ServerPassword) + "\" -language " + Language.ActiveCulture.CultureInfo.Name;
  		if (Platform.IsLinux)
  			text = ((IntPtr.Size != 8) ? (text + " -x86") : (text + " -x64"));
  

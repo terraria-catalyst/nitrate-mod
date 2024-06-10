@@ -49,7 +49,7 @@ public static class WellKnownLanguages
 		}
 	}
 	
-	private sealed class DeDeCulture() : LegacyCulture("en-US", "Deutsch", "German", "german", 2)
+	private sealed class DeDeCulture() : LegacyCulture("de-DE", "Deutsch", "German", "german", 2)
 	{
 		protected override int CardinalPluralRule(int count, int mod10, int mod100)
 		{
@@ -57,7 +57,7 @@ public static class WellKnownLanguages
 		}
 	}
 	
-	private sealed class ItItCulture() : LegacyCulture("en-US", "Italiano", "Italian", "italian", 3)
+	private sealed class ItItCulture() : LegacyCulture("it-IT", "Italiano", "Italian", "italian", 3)
 	{
 		protected override int CardinalPluralRule(int count, int mod10, int mod100)
 		{
@@ -65,7 +65,7 @@ public static class WellKnownLanguages
 		}
 	}
 	
-	private sealed class FrFrCulture() : LegacyCulture("en-US", "Français", "French", "french", 4)
+	private sealed class FrFrCulture() : LegacyCulture("fr-FR", "Français", "French", "french", 4)
 	{
 		protected override int CardinalPluralRule(int count, int mod10, int mod100)
 		{
@@ -73,7 +73,7 @@ public static class WellKnownLanguages
 		}
 	}
 	
-	private sealed class EsEsCulture() : LegacyCulture("en-US", "Español", "Spanish", "spanish", 5)
+	private sealed class EsEsCulture() : LegacyCulture("es-ES", "Español", "Spanish", "spanish", 5)
 	{
 		protected override int CardinalPluralRule(int count, int mod10, int mod100)
 		{
@@ -81,7 +81,7 @@ public static class WellKnownLanguages
 		}
 	}
 	
-	private sealed class RuRuCulture() : LegacyCulture("en-US", "Русский", "Russian", "russian", 6)
+	private sealed class RuRuCulture() : LegacyCulture("ru-RU", "Русский", "Russian", "russian", 6)
 	{
 		protected override int CardinalPluralRule(int count, int mod10, int mod100)
 		{
@@ -99,7 +99,7 @@ public static class WellKnownLanguages
 		}
 	}
 	
-	private sealed class ZhHansCulture() : LegacyCulture("en-US", "简体中文", "Chinese (Simplified)", "schinese", 7)
+	private sealed class ZhHansCulture() : LegacyCulture("zh-Hans", "简体中文", "Chinese (Simplified)", "schinese", 7)
 	{
 		protected override int CardinalPluralRule(int count, int mod10, int mod100)
 		{
@@ -107,7 +107,7 @@ public static class WellKnownLanguages
 		}
 	}
 	
-	private sealed class PtBrCulture() : LegacyCulture("en-US", "Português (Brasil)", "Portuguese (Brazil)", "portuguese", 8)
+	private sealed class PtBrCulture() : LegacyCulture("pt-BR", "Português (Brasil)", "Portuguese (Brazil)", "portuguese", 8)
 	{
 		protected override int CardinalPluralRule(int count, int mod10, int mod100)
 		{
@@ -115,7 +115,7 @@ public static class WellKnownLanguages
 		}
 	}
 	
-	private sealed class PlPlCulture() : LegacyCulture("en-US", "Polski", "Polish", "polish", 9)
+	private sealed class PlPlCulture() : LegacyCulture("pl-PL", "Polski", "Polish", "polish", 9)
 	{
 		protected override int CardinalPluralRule(int count, int mod10, int mod100)
 		{
@@ -178,4 +178,28 @@ public static class WellKnownLanguages
 	///		Polish (Poland)
 	/// </summary>
 	public static readonly GameCulture PL_PL = new PlPlCulture();
+	
+	static WellKnownLanguages()
+	{
+		Languages.CULTURES[EN_US.CultureInfo.Name] = EN_US;
+		Languages.CULTURES[DE_DE.CultureInfo.Name] = DE_DE;
+		Languages.CULTURES[IT_IT.CultureInfo.Name] = IT_IT;
+		Languages.CULTURES[FR_FR.CultureInfo.Name] = FR_FR;
+		Languages.CULTURES[ES_ES.CultureInfo.Name] = ES_ES;
+		Languages.CULTURES[RU_RU.CultureInfo.Name] = RU_RU;
+		Languages.CULTURES[ZH_HANS.CultureInfo.Name] = ZH_HANS;
+		Languages.CULTURES[PT_BR.CultureInfo.Name] = PT_BR;
+		Languages.CULTURES[PL_PL.CultureInfo.Name] = PL_PL;
+		
+#pragma warning disable CS0618 // Type or member is obsolete
+		Languages.NAMED_CULTURES[GameCulture.CultureName.English] = EN_US;
+		Languages.NAMED_CULTURES[GameCulture.CultureName.German] = DE_DE;
+		Languages.NAMED_CULTURES[GameCulture.CultureName.Italian] = FR_FR;
+		Languages.NAMED_CULTURES[GameCulture.CultureName.French] = ES_ES;
+		Languages.NAMED_CULTURES[GameCulture.CultureName.Spanish] = RU_RU;
+		Languages.NAMED_CULTURES[GameCulture.CultureName.Russian] = ZH_HANS;
+		Languages.NAMED_CULTURES[GameCulture.CultureName.Chinese] = PT_BR;
+		Languages.NAMED_CULTURES[GameCulture.CultureName.Polish] = PL_PL;
+#pragma warning restore CS0618 // Type or member is obsolete
+	}
 }
