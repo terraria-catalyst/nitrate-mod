@@ -49,9 +49,9 @@ public partial class MainForm : Form
 		taskButtons[buttonDiffModLoader] = () => new DiffTask(ctx, "src/staging/TerrariaNetCore", "src/staging/tModLoader", "patches/tModLoader");
 		taskButtons[buttonPatchModLoader] = () => new PatchTask(ctx, "src/staging/TerrariaNetCore", "src/staging/tModLoader", "patches/tModLoader");
 		// Nitrate
-		var nitrateTask = new NitrateTask(ctx, "src/staging/tModLoader", "src/staging/Nitrate", "patches/Nitrate", out var nitrateDiffPath);
-		taskButtons[buttonDiffNitrate] = () => new DiffTask(ctx, nitrateDiffPath, "src/staging/Nitrate", "patches/Nitrate");
-		taskButtons[buttonPatchNitrate] = () => nitrateTask;
+		var nitratePatchContext = ctx.CreateNitratePatchContext("src/staging/tModLoader", "src/staging/Nitrate", "patches/Nitrate");
+		taskButtons[buttonDiffNitrate] = () => new DiffTask(ctx, nitratePatchContext.NitrateDiffingPath, "src/staging/Nitrate", "patches/Nitrate");
+		taskButtons[buttonPatchNitrate] = () => new NitrateTask(ctx, nitratePatchContext);
 
 		taskButtons[buttonRegenerateSource] = () =>
 		{

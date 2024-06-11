@@ -4,7 +4,7 @@ namespace Terraria.ModLoader.Setup.Common.Tasks;
 
 public abstract class CompositeTask(CommonContext ctx, params SetupOperation[] tasks) : SetupOperation(ctx)
 {
-	public SetupOperation[] Tasks { get; set; } = tasks;
+	protected SetupOperation[] Tasks { get; set; } = tasks;
 
 	private SetupOperation? failed;
 
