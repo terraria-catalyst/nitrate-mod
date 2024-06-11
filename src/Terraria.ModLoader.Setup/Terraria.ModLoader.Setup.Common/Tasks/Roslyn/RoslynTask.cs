@@ -46,7 +46,7 @@ public abstract class RoslynTask(CommonContext ctx) : SetupOperation(ctx)
 
 	public async Task RunAsync()
 	{
-		using var workspace = CreateWorkspace();
+		using var workspace = Context.CreateWorkspace();
 		// todo proper error log
 		workspace.WorkspaceFailed += (o, e) => Console.Error.WriteLine(e.Diagnostic.Message);
 
@@ -76,33 +76,6 @@ public abstract class RoslynTask(CommonContext ctx) : SetupOperation(ctx)
 		);
 
 		ExecuteParallel(workItems.ToList(), maxDegree: MaxDegreeOfParallelism);
-	}
-
-	private static bool msBuildFound;
-
-	private MSBuildWorkspace CreateWorkspace()
-	{
-		if (msBuildFound)
-		{
-			return MSBuildWorkspace.Create();
-		}
-
-		var status = Context.Progress.CreateStatus(0, 1);
-
-		VisualStudioInstance? vsInst;
-		status.AddMessage("Finding MSBuild");
-		{
-			vsInst = MSBuildLocator.QueryVisualStudioInstances().OrderByDescending(inst => inst.Version).First();
-			MSBuildLocator.RegisterInstance(vsInst);
-			status.Current++;
-		}
-
-		status.AddMessage($"Found MSBuild {vsInst.Version} at {vsInst.MSBuildPath}");
-		{
-			msBuildFound = true;
-		}
-
-		return MSBuildWorkspace.Create();
 	}
 
 	protected abstract Task<Document> Process(Document doc);

@@ -2,6 +2,9 @@
 using System.IO;
 using System.Linq;
 
+using Microsoft.Build.Locator;
+using Microsoft.CodeAnalysis.MSBuild;
+
 using Terraria.ModLoader.Setup.Common.Tasks;
 using Terraria.ModLoader.Setup.Common.Tasks.Nitrate;
 using Terraria.ModLoader.Setup.Common.Tasks.Nitrate.Patches;
@@ -137,8 +140,35 @@ public sealed class CommonContext(ITaskInterface taskInterface)
 	/// </summary>
 	public string TerrariaServerPath => Path.Combine(TerrariaSteamDirectory, "TerrariaServer.exe");
 
+	public bool MsBuildFound { get; set; }
+
 	public NitratePatchContext CreateNitratePatchContext(string baseDir, string patchedDir, string patchDir)
 	{
 		return new NitratePatchContext(this, baseDir, patchedDir, patchDir);
+	}
+
+	public MSBuildWorkspace CreateWorkspace()
+	{
+		if (MsBuildFound)
+		{
+			return MSBuildWorkspace.Create();
+		}
+
+		var status = Progress.CreateStatus(0, 1);
+		VisualStudioInstance? vsInst;
+
+		status.AddMessage("Finding MSBuild...");
+		{
+			vsInst = MSBuildLocator.QueryVisualStudioInstances().OrderByDescending(x => x.Version).First();
+			MSBuildLocator.RegisterInstance(vsInst);
+			status.Current++;
+		}
+
+		status.AddMessage($"Found MSBuild {vsInst.Version} at {vsInst.MSBuildPath}!");
+		{
+			MsBuildFound = true;
+		}
+
+		return MSBuildWorkspace.Create();
 	}
 }
