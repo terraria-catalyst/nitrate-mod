@@ -1,5 +1,5 @@
---- src/staging/Nitrate_FormatWithEditorConfig/Terraria/Social/Steam/NetServerSocialModule.cs
-+++ src/staging/Nitrate/Terraria/Social/Steam/NetServerSocialModule.cs
+--- src/Nitrate_FormatWithEditorConfig/Terraria/Social/Steam/NetServerSocialModule.cs
++++ src/Nitrate/Terraria/Social/Steam/NetServerSocialModule.cs
 @@ -149,7 +_,7 @@
  			P2PSessionRequest_t result = default;
  			result.m_steamIDRemote = userId;

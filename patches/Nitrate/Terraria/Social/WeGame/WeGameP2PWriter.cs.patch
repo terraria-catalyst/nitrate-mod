@@ -1,6 +1,6 @@
 --- src/Nitrate_FormatWithEditorConfig/Terraria/Social/WeGame/WeGameP2PWriter.cs
 +++ src/Nitrate/Terraria/Social/WeGame/WeGameP2PWriter.cs
-@@ -74,7 +_,7 @@
+@@ -73,7 +_,7 @@
  				}
  			}
  

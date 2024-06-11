@@ -1,5 +1,5 @@
---- src/staging/Nitrate_FormatWithEditorConfig/Terraria/Main.cs
-+++ src/staging/Nitrate/Terraria/Main.cs
+--- src/Nitrate_FormatWithEditorConfig/Terraria/Main.cs
++++ src/Nitrate/Terraria/Main.cs
 @@ -6132,7 +_,7 @@
  		{
  			Map = new WorldMap(maxTilesX, maxTilesY);
