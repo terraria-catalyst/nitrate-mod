@@ -52,8 +52,8 @@ public sealed class CommonContext(ITaskInterface taskInterface)
 		public NitratePatchContext(CommonContext ctx, string baseDir, string patchedDir, string patchDir)
 		{
 			PreAnalysisOperations = [ patch<OrganizePartialClasses>(), patch<MakeTypesPartial>(), patch<TreeshakePreprocessors>(), patch<FormatWithEditorConfig>(), ];
-			PostAnalysisOperations = [];
-			PatchOperation = new PatchTask(ctx, baseDir, patchedDir, patchDir);
+			PostAnalysisOperations = [ patch<ApplyTerrariaAnalyzers>(), ];
+			PatchOperation = new PatchTask(ctx, baseDir, patchedDir, patchDir, this);
 
 			NitrateDiffingPath = baseDir;
 

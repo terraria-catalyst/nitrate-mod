@@ -1,4 +1,6 @@
-﻿namespace Terraria.ModLoader.Setup.Common.Tasks.Nitrate;
+﻿using System.Linq;
+
+namespace Terraria.ModLoader.Setup.Common.Tasks.Nitrate;
 
 /// <summary>
 ///		Composite task which applies automated intermediary Nitrate patches
@@ -29,7 +31,7 @@ public sealed class NitrateTask(CommonContext ctx, CommonContext.NitratePatchCon
 				SetupMessageBoxIcon.Question
 			);
 
-			runExtraAnalysisSteps = res == SetupDialogResult.Ok;
+			runExtraAnalysisSteps = res == SetupDialogResult.Yes;
 		}
 
 		if (runAllSteps)
@@ -38,7 +40,7 @@ public sealed class NitrateTask(CommonContext ctx, CommonContext.NitratePatchCon
 		}
 		else if (runExtraAnalysisSteps)
 		{
-			Tasks = nitratePatchContext.PostAnalysisOperations;
+			Tasks = nitratePatchContext.PostAnalysisOperations.Concat([nitratePatchContext.PatchOperation,]).ToArray();
 		}
 		else
 		{
