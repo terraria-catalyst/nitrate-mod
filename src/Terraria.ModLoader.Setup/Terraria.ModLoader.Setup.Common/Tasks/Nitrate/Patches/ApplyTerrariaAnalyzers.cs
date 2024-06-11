@@ -40,33 +40,13 @@ internal sealed class ApplyTerrariaAnalyzers(CommonContext ctx, string sourceDir
 					identifier
 				);
 
-				if (node.HasLeadingTrivia)
-				{
-					expression = expression.WithLeadingTrivia(node.GetLeadingTrivia());
-				}
-
-				if (node.HasTrailingTrivia)
-				{
-					expression = expression.WithTrailingTrivia(node.GetTrailingTrivia());
-				}
-
-				return expression;
+				return ApplyTrivia(expression, node);
 			}
 
 			// player[myPlayer] -> LocalPlayer
 			if (MatchPlayerMyPlayer(node))
 			{
-				if (node.HasLeadingTrivia)
-				{
-					identifier = identifier.WithLeadingTrivia(node.GetLeadingTrivia());
-				}
-
-				if (node.HasTrailingTrivia)
-				{
-					identifier = identifier.WithTrailingTrivia(node.GetTrailingTrivia());
-				}
-
-				return identifier;
+				return ApplyTrivia(identifier, node);
 			}
 
 			return base.VisitElementAccessExpression(node);
@@ -135,14 +115,14 @@ internal sealed class ApplyTerrariaAnalyzers(CommonContext ctx, string sourceDir
 			if (IsRandNextInvocation(left))
 			{
 				var newInvocation = TransformRandNextInvocation((InvocationExpressionSyntax)left, right, IsZeroLiteral(right));
-				return node.IsKind(SyntaxKind.EqualsExpression) ? newInvocation : NegateExpression(newInvocation);
+				return ApplyTrivia(node.IsKind(SyntaxKind.EqualsExpression) ? newInvocation : NegateExpression(newInvocation), node);
 			}
 
 			// Match pattern: expr2 == rand.Next(expr1)
 			if (IsRandNextInvocation(right))
 			{
 				var newInvocation = TransformRandNextInvocation((InvocationExpressionSyntax)right, left, IsZeroLiteral(left));
-				return node.IsKind(SyntaxKind.EqualsExpression) ? newInvocation : NegateExpression(newInvocation);
+				return ApplyTrivia(node.IsKind(SyntaxKind.EqualsExpression) ? newInvocation : NegateExpression(newInvocation), node);
 			}
 
 			// Impossible condition?
@@ -253,5 +233,20 @@ internal sealed class ApplyTerrariaAnalyzers(CommonContext ctx, string sourceDir
 		node = new SimplifyUnifiedRandom().Visit(node);
 
 		return node.ToFullString();
+	}
+
+	private static SyntaxNode ApplyTrivia(SyntaxNode node, SyntaxNode original)
+	{
+		if (original.HasLeadingTrivia)
+		{
+			node = node.WithLeadingTrivia(original.GetLeadingTrivia());
+		}
+
+		if (original.HasTrailingTrivia)
+		{
+			node = node.WithTrailingTrivia(original.GetTrailingTrivia());
+		}
+
+		return node;
 	}
 }
