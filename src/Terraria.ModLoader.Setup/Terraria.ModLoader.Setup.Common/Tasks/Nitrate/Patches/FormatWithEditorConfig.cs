@@ -73,8 +73,8 @@ internal sealed class FormatWithEditorConfig(CommonContext ctx, string sourceDir
 					() =>
 					{
 						var cwd = Path.GetDirectoryName(file)!;
-						CommonSetup.RunCommand(cwd, "dotnet", "format analyzers --severity info -v diag", cancel: Context.TaskInterface.CancellationToken);
-						CommonSetup.RunCommand(cwd, "dotnet", "format style --severity info -v diag", cancel: Context.TaskInterface.CancellationToken);
+						CommonSetup.RunCommand(cwd, "dotnet", "format analyzers --severity info -v diag --exclude-diagnostics SYSLIB1054 CA1822", cancel: Context.TaskInterface.CancellationToken);
+						CommonSetup.RunCommand(cwd, "dotnet", "format style --severity info -v diag --exclude-diagnostics SYSLIB1054 CA1822", cancel: Context.TaskInterface.CancellationToken);
 						CommonSetup.RunCommand(cwd, "dotnet", "format whitespace -v diag", cancel: Context.TaskInterface.CancellationToken);
 						// CommonSetup.RunCommand(cwd, "dotnet", "cleanupcode", cancel: Context.TaskInterface.CancellationToken);
 					}

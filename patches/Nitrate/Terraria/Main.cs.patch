@@ -1,6 +1,6 @@
---- src/Nitrate_FormatWithEditorConfig/Terraria/Main.cs
-+++ src/Nitrate/Terraria/Main.cs
-@@ -6141,7 +_,7 @@
+--- src/staging/Nitrate_FormatWithEditorConfig/Terraria/Main.cs
++++ src/staging/Nitrate/Terraria/Main.cs
+@@ -6132,7 +_,7 @@
  		{
  			Map = new WorldMap(maxTilesX, maxTilesY);
  			Configuration.Load();
@@ -9,7 +9,7 @@
  			{
  				/*
  	base.Content.RootDirectory = "Content";
-@@ -10287,10 +_,13 @@
+@@ -10278,10 +_,13 @@
  		base.GraphicsDevice.DeviceLost += GraphicsDeviceLost;
  		base.GraphicsDevice.DeviceReset += GraphicsDeviceLost;
  		base.GraphicsDevice.DeviceResetting += GraphicsDeviceLost;
@@ -23,7 +23,7 @@
  
  		_achievements = new AchievementManager();
  		_achievementAdvisor = new AchievementAdvisor();
-@@ -10486,6 +_,12 @@
+@@ -10477,6 +_,12 @@
  		CacheSupportedDisplaySizes();
  		ContentSamples.RebuildItemCreativeSortingIDsAfterRecipesAreSetUp();
  		ContentSamples.CommonlyUsedContentSamples.PrepareAfterEverythingElseLoaded();
@@ -35,8 +35,8 @@
 +		}
  	}
  
- 	private static IEnumerator LoadMusic_InSteps()
-@@ -11566,7 +_,7 @@
+ 	private IEnumerator LoadMusic_InSteps()
+@@ -11557,7 +_,7 @@
  				}
  			}
  
@@ -45,7 +45,7 @@
  		}
  
  		_ = (screenPosition.X + (float)(screenWidth / 2)) / 16f;
-@@ -12220,7 +_,7 @@
+@@ -12211,7 +_,7 @@
  				}
  			}
  
@@ -54,7 +54,7 @@
  		}
  
  		_ = (screenPosition.X + (float)(screenWidth / 2)) / 16f;
-@@ -21770,7 +_,7 @@
+@@ -21757,7 +_,7 @@
  			var num6 = 0;
  			for (var i = 0; i < NPCLoader.NPCCount; i++)
  			{
@@ -63,7 +63,7 @@
  				{
  					num6++;
  					var nPCNameValue = Lang.GetNPCNameValue(Item.BannerToNPC(i));
-@@ -21862,7 +_,7 @@
+@@ -21849,7 +_,7 @@
  		var num13 = 0;
  		for (var l = 0; l < NPCLoader.NPCCount; l++)
  		{
@@ -72,7 +72,7 @@
  			{
  				continue;
  			}
-@@ -23090,7 +_,7 @@
+@@ -23077,7 +_,7 @@
  				var color = Lighting.GetColor((int)vector.X / 16, (int)(vector.Y / 16f));
  				if (rCurrentNPC.IsABestiaryIconDummy)
  				{
@@ -81,7 +81,7 @@
  				}
  
  				if (!flag3)
-@@ -23139,7 +_,7 @@
+@@ -23126,7 +_,7 @@
  				var color2 = Lighting.GetColor((int)vector2.X / 16, (int)(vector2.Y / 16f));
  				if (rCurrentNPC.IsABestiaryIconDummy)
  				{
@@ -90,7 +90,7 @@
  				}
  
  				if (type == 259 || type == 260)
-@@ -23392,7 +_,7 @@
+@@ -23379,7 +_,7 @@
  		var npcColor = Lighting.GetColor((int)((double)rCurrentNPC.position.X + (double)rCurrentNPC.width * 0.5) / 16, (int)(((double)rCurrentNPC.position.Y + (double)rCurrentNPC.height * 0.5) / 16.0));
  		if (rCurrentNPC.IsABestiaryIconDummy)
  		{
@@ -99,7 +99,7 @@
  		}
  
  		if (type >= 277 && type <= 280)
-@@ -28855,7 +_,7 @@
+@@ -28834,7 +_,7 @@
  
  		if (proj.type == 933)
  		{
@@ -108,7 +108,7 @@
  		}
  
  		if (proj.type == 79)
-@@ -43933,7 +_,7 @@
+@@ -43690,7 +_,7 @@
  
  				if (mouseLeft && mouseLeftRelease && player[myPlayer].team != i && teamCooldown == 0)
  				{
@@ -117,7 +117,7 @@
  					{
  						NewText(Lang.misc[84].Value, byte.MaxValue, 240, 20);
  					}
-@@ -48370,7 +_,7 @@
+@@ -48029,7 +_,7 @@
  		var text = "";
  		var num4 = 215f;
  		var startX = 0;
@@ -126,7 +126,7 @@
  		{
  			startX = -50;
  			num4 += 50f;
-@@ -51778,7 +_,8 @@
+@@ -51430,7 +_,8 @@
  				if (selectedMenu == num20)
  				{
  					SoundEngine.PlaySound(10);
@@ -136,7 +136,7 @@
  				}
  
  				// TML settings
-@@ -53166,7 +_,7 @@
+@@ -52818,7 +_,7 @@
  
  		if (menuMode == 888)
  		{
@@ -145,7 +145,7 @@
  			{
  				MenuUI.Draw(spriteBatch, gameTime);
  			}
-@@ -54212,7 +_,7 @@
+@@ -53864,7 +_,7 @@
  
  	private void OnSubmitServerPassword()
  	{
@@ -154,16 +154,7 @@
  		if (Platform.IsLinux)
  		{
  			text = ((IntPtr.Size != 8) ? (text + " -x86") : (text + " -x64"));
-@@ -54642,7 +_,7 @@
- 
- 	public static void OpenReportsMenu()
- 	{
--		List<IProvideReports> list = [IssueReporter, .. SocialAPI.Workshop != null ? [SocialAPI.Workshop.IssueReporter] : []];
-+		List<IProvideReports> list = [IssueReporter, .. SocialAPI.Workshop != null ? new[] { SocialAPI.Workshop.IssueReporter, } : []];
- 
- 		var state = new UIReportsPage(MenuUI.CurrentState, menuMode, list);
- 		menuMode = 888;
-@@ -61119,7 +_,7 @@
+@@ -60709,7 +_,7 @@
  				var flag5 = false;
  				var num11 = 0f;
  				var tile = Main.tile[j, i];
