@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Threading;
 
@@ -102,6 +103,105 @@ internal sealed class ApplyTerrariaAnalyzers(CommonContext ctx, string sourceDir
 		}
 	}
 
+	/// <summary>
+	///		Simplifies unified random boolean expressions.
+	/// </summary>
+	/// <remarks>
+	///		<c>if (Main.rand.Next(5) == 0)</c> becomes <c>if (Main.rand.NextBool(5))</c>.
+	/// </remarks>
+	private sealed class SimplifyUnifiedRandom : CSharpSyntaxRewriter
+	{
+		// rand.Next(expr1) == 0 -> rand.NextBool(expr1)
+		// rand.Next(expr1) == expr2 -> rand.NextBool(expr1, expr2)
+		// rand.Next(expr1) != 0 -> !rand.NextBool(expr1)
+		// rand.Next(expr1) != expr2 -> !rand.NextBool(expr1, expr2)
+		// 0 == rand.Next(expr1) -> rand.NextBool(expr1)
+		// expr2 == rand.Next(expr1) -> rand.NextBool(expr1, expr2)
+		// 0 != rand.Next(expr1) -> !rand.NextBool(expr1)
+		// expr2 != rand.Next(expr1) -> !rand.NextBool(expr1, expr2)
+
+		public override SyntaxNode? VisitBinaryExpression(BinaryExpressionSyntax node)
+		{
+			// Skip over expressions other than == and !=.
+			if (!node.IsKind(SyntaxKind.EqualsExpression) && !node.IsKind(SyntaxKind.NotEqualsExpression))
+			{
+				return base.VisitBinaryExpression(node);
+			}
+
+			var left = node.Left;
+			var right = node.Right;
+
+			// Match pattern: rand.Next(expr1) == expr2
+			if (IsRandNextInvocation(left))
+			{
+				var newInvocation = TransformRandNextInvocation((InvocationExpressionSyntax)left, right, IsZeroLiteral(right));
+				return node.IsKind(SyntaxKind.EqualsExpression) ? newInvocation : NegateExpression(newInvocation);
+			}
+
+			// Match pattern: expr2 == rand.Next(expr1)
+			if (IsRandNextInvocation(right))
+			{
+				var newInvocation = TransformRandNextInvocation((InvocationExpressionSyntax)right, left, IsZeroLiteral(left));
+				return node.IsKind(SyntaxKind.EqualsExpression) ? newInvocation : NegateExpression(newInvocation);
+			}
+
+			// Impossible condition?
+			return base.VisitBinaryExpression(node);
+		}
+
+		private static bool IsRandNextInvocation(ExpressionSyntax expression)
+		{
+			if (expression is not InvocationExpressionSyntax invocation)
+			{
+				return false;
+			}
+
+			if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess)
+			{
+				return false;
+			}
+
+			return memberAccess.Name.Identifier.Text == "Next";
+		}
+
+		private static bool IsZeroLiteral(ExpressionSyntax expression)
+		{
+			return expression.IsKind(SyntaxKind.NumericLiteralExpression) && expression is LiteralExpressionSyntax { Token.ValueText: "0", } ;
+		}
+
+		private static InvocationExpressionSyntax TransformRandNextInvocation(InvocationExpressionSyntax invocation, ExpressionSyntax comparison, bool isZeroLiteralComparison)
+		{
+			if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess)
+			{
+				throw new SyntaxErrorException("Invalid invocation expression.");
+			}
+
+			var randExpression = memberAccess.Expression;
+			var argumentList = invocation.ArgumentList.Arguments;
+			var newArguments = isZeroLiteralComparison
+				// rand.Next(expr1) == 0 -> rand.NextBool(expr1)
+				? SyntaxFactory.SingletonSeparatedList(argumentList[0])
+				// rand.Next(expr1) == expr2 -> rand.NextBool(expr1, expr2)
+				: SyntaxFactory.SeparatedList(new[] { argumentList[0], SyntaxFactory.Argument(comparison), });
+
+			var newInvocation = SyntaxFactory.InvocationExpression(
+				SyntaxFactory.MemberAccessExpression(
+					SyntaxKind.SimpleMemberAccessExpression,
+					randExpression,
+					SyntaxFactory.IdentifierName("NextBool")
+				),
+				SyntaxFactory.ArgumentList(newArguments)
+			);
+
+			return newInvocation;
+		}
+
+		private static PrefixUnaryExpressionSyntax NegateExpression(ExpressionSyntax expression)
+		{
+			return SyntaxFactory.PrefixUnaryExpression(SyntaxKind.LogicalNotExpression, expression);
+		}
+	}
+
 	public override void Run()
 	{
 		var items = new List<WorkItem>();
@@ -150,6 +250,7 @@ internal sealed class ApplyTerrariaAnalyzers(CommonContext ctx, string sourceDir
 		var tree = CSharpSyntaxTree.ParseText(source, cancellationToken: cancellationToken);
 		var node = tree.GetRoot(cancellationToken);
 		node = new SimplifyLocalPlayerAccess().Visit(node);
+		node = new SimplifyUnifiedRandom().Visit(node);
 
 		return node.ToFullString();
 	}
