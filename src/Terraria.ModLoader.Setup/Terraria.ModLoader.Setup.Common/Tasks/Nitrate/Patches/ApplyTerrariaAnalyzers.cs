@@ -28,6 +28,7 @@ internal sealed class ApplyTerrariaAnalyzers(CommonContext ctx, string sourceDir
 	{
 		public override SyntaxNode? VisitElementAccessExpression(ElementAccessExpressionSyntax node)
 		{
+			// Main.player[Main.myPlayer] -> Main.LocalPlayer
 			if (MatchMainPlayerMainMyPlayer(node))
 			{
 				return SyntaxFactory.MemberAccessExpression(
@@ -37,6 +38,7 @@ internal sealed class ApplyTerrariaAnalyzers(CommonContext ctx, string sourceDir
 				);
 			}
 
+			// player[myPlayer] -> LocalPlayer
 			if (MatchPlayerMyPlayer(node))
 			{
 				return SyntaxFactory.IdentifierName("LocalPlayer");
