@@ -1,4 +1,4 @@
---- src/Nitrate_FormatWithEditorConfig/Terraria/Localization/GameCulture.cs
+--- src/Nitrate_Staging/Terraria/Localization/GameCulture.cs
 +++ src/Nitrate/Terraria/Localization/GameCulture.cs
 @@ -1,13 +_,22 @@
 +#nullable enable

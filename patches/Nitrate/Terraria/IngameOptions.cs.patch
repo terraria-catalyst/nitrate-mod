@@ -1,4 +1,4 @@
---- src/Nitrate_FormatWithEditorConfig/Terraria/IngameOptions.cs
+--- src/Nitrate_Staging/Terraria/IngameOptions.cs
 +++ src/Nitrate/Terraria/IngameOptions.cs
 @@ -125,10 +_,10 @@
  			skipRightSlot[i] = false;

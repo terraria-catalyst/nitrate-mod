@@ -1,4 +1,4 @@
---- src/Nitrate_FormatWithEditorConfig/Terraria/Social/Steam/SteamP2PWriter.cs
+--- src/Nitrate_Staging/Terraria/Social/Steam/SteamP2PWriter.cs
 +++ src/Nitrate/Terraria/Social/Steam/SteamP2PWriter.cs
 @@ -73,7 +_,7 @@
  				}

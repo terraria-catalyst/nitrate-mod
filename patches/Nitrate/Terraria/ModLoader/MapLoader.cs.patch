@@ -1,4 +1,4 @@
---- src/Nitrate_FormatWithEditorConfig/Terraria/ModLoader/MapLoader.cs
+--- src/Nitrate_Staging/Terraria/ModLoader/MapLoader.cs
 +++ src/Nitrate/Terraria/ModLoader/MapLoader.cs
 @@ -124,7 +_,7 @@
  			}

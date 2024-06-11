@@ -1,4 +1,4 @@
---- src/Nitrate_FormatWithEditorConfig/Terraria/GameInput/PlayerInputProfile.cs
+--- src/Nitrate_Staging/Terraria/GameInput/PlayerInputProfile.cs
 +++ src/Nitrate/Terraria/GameInput/PlayerInputProfile.cs
 @@ -220,18 +_,18 @@
  			foreach (var item in value.InputModes[nm].WritePreferences())

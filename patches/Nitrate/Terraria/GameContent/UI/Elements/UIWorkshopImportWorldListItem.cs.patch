@@ -1,4 +1,4 @@
---- src/Nitrate_FormatWithEditorConfig/Terraria/GameContent/UI/Elements/UIWorkshopImportWorldListItem.cs
+--- src/Nitrate_Staging/Terraria/GameContent/UI/Elements/UIWorkshopImportWorldListItem.cs
 +++ src/Nitrate/Terraria/GameContent/UI/Elements/UIWorkshopImportWorldListItem.cs
 @@ -173,7 +_,7 @@
  		if (_data._worldSizeName != null)

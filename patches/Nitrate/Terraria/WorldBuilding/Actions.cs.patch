@@ -1,4 +1,4 @@
---- src/Nitrate_FormatWithEditorConfig/Terraria/WorldBuilding/Actions.cs
+--- src/Nitrate_Staging/Terraria/WorldBuilding/Actions.cs
 +++ src/Nitrate/Terraria/WorldBuilding/Actions.cs
 @@ -102,7 +_,7 @@
  		public override bool Apply(Point origin, int x, int y, params object[] args) => UnitApply(origin, x, y, args);

@@ -1,4 +1,4 @@
---- src/Nitrate_FormatWithEditorConfig/Terraria/IO/FavoritesFile.cs
+--- src/Nitrate_Staging/Terraria/IO/FavoritesFile.cs
 +++ src/Nitrate/Terraria/IO/FavoritesFile.cs
 @@ -44,9 +_,9 @@
  		}

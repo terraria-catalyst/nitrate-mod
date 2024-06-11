@@ -1,4 +1,4 @@
---- src/Nitrate_FormatWithEditorConfig/Terraria/DataStructures/VanillaPlayerDrawLayer.cs
+--- src/Nitrate_Staging/Terraria/DataStructures/VanillaPlayerDrawLayer.cs
 +++ src/Nitrate/Terraria/DataStructures/VanillaPlayerDrawLayer.cs
 @@ -4,7 +_,7 @@
  

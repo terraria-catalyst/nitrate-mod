@@ -1,4 +1,4 @@
---- src/Nitrate_FormatWithEditorConfig/Terraria/GameContent/UI/Elements/UIWorldListItem.cs
+--- src/Nitrate_Staging/Terraria/GameContent/UI/Elements/UIWorldListItem.cs
 +++ src/Nitrate/Terraria/GameContent/UI/Elements/UIWorldListItem.cs
 @@ -510,7 +_,7 @@
  		Utils.DrawBorderString(spriteBatch, expertText, vector + new Vector2(x2, 3f), gameModeColor);

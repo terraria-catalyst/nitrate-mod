@@ -1,4 +1,4 @@
---- src/Nitrate_FormatWithEditorConfig/Terraria/GameContent/UI/Elements/UICharacterListItem.cs
+--- src/Nitrate_Staging/Terraria/GameContent/UI/Elements/UICharacterListItem.cs
 +++ src/Nitrate/Terraria/GameContent/UI/Elements/UICharacterListItem.cs
 @@ -390,7 +_,7 @@
  		vector.X += num2 + 5f;

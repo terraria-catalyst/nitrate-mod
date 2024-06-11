@@ -1,4 +1,4 @@
---- src/Nitrate_FormatWithEditorConfig/Terraria/Utils.cs
+--- src/Nitrate_Staging/Terraria/Utils.cs
 +++ src/Nitrate/Terraria/Utils.cs
 @@ -1683,10 +_,12 @@
  

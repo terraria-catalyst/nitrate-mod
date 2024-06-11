@@ -1,4 +1,4 @@
---- src/Nitrate_FormatWithEditorConfig/Terraria/Localization/LanguageManager.cs
+--- src/Nitrate_Staging/Terraria/Localization/LanguageManager.cs
 +++ src/Nitrate/Terraria/Localization/LanguageManager.cs
 @@ -324,9 +_,9 @@
  			{

@@ -1,4 +1,4 @@
---- src/Nitrate_FormatWithEditorConfig/Terraria/GameInput/KeyConfiguration.cs
+--- src/Nitrate_Staging/Terraria/GameInput/KeyConfiguration.cs
 +++ src/Nitrate/Terraria/GameInput/KeyConfiguration.cs
 @@ -137,7 +_,7 @@
  			dictionary["MouseLeft"] = value;

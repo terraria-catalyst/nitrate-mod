@@ -6,7 +6,7 @@ using DiffPatch;
 
 namespace Terraria.ModLoader.Setup.Common.Tasks;
 
-public sealed class DiffTask(CommonContext ctx, string baseDir, string srcDir, string patchDir) : SetupOperation(ctx)
+public sealed class DiffTask(CommonContext ctx, string baseDir, string srcDir, string patchDir, CommonContext.NitratePatchContext? nitratePatchContext = null) : SetupOperation(ctx)
 {
 	private static readonly string[] extensions = [ ".cs", ".csproj", ".ico", ".resx", ".png", "App.config", ".json", ".targets", ".txt", ".bat", ".sh", ];
 
@@ -97,8 +97,19 @@ public sealed class DiffTask(CommonContext ctx, string baseDir, string srcDir, s
 			var textParts = fileText.Split(lineEnding);
 			if (textParts.Length >= 2)
 			{
-				textParts[0] = textParts[0].Replace("--- src/staging/", "--- src/");
-				textParts[1] = textParts[1].Replace("+++ src/staging/", "+++ src/");
+				// Hide intermediate Nitrate patch directory since it varies.
+				if (nitratePatchContext is not null)
+				{
+					textParts[0] = textParts[0].Replace($"--- {nitratePatchContext.NitrateDiffingPath}", "--- src/Nitrate_Staging");
+					textParts[1] = textParts[1].Replace($"+++ {nitratePatchContext.NitrateDiffingPath}", "+++ src/Nitrate_Staging");
+				}
+
+				// Hide /staging/ directory.
+				{
+					textParts[0] = textParts[0].Replace("--- src/staging/", "--- src/");
+					textParts[1] = textParts[1].Replace("+++ src/staging/", "+++ src/");
+				}
+
 				fileText = string.Join(lineEnding, textParts);
 			}
 

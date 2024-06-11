@@ -1,4 +1,4 @@
---- src/Nitrate_FormatWithEditorConfig/Terraria/ModLoader/IO/MapIO.cs
+--- src/Nitrate_Staging/Terraria/ModLoader/IO/MapIO.cs
 +++ src/Nitrate/Terraria/ModLoader/IO/MapIO.cs
 @@ -82,7 +_,7 @@
  				writer.Write(tile.Name);

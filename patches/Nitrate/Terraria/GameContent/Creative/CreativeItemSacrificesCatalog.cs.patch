@@ -1,4 +1,4 @@
---- src/Nitrate_FormatWithEditorConfig/Terraria/GameContent/Creative/CreativeItemSacrificesCatalog.cs
+--- src/Nitrate_Staging/Terraria/GameContent/Creative/CreativeItemSacrificesCatalog.cs
 +++ src/Nitrate/Terraria/GameContent/Creative/CreativeItemSacrificesCatalog.cs
 @@ -1,5 +_,6 @@
  using System;

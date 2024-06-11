@@ -1,4 +1,4 @@
---- src/Nitrate_FormatWithEditorConfig/Terraria/WorldBuilding/Passes.cs
+--- src/Nitrate_Staging/Terraria/WorldBuilding/Passes.cs
 +++ src/Nitrate/Terraria/WorldBuilding/Passes.cs
 @@ -27,7 +_,7 @@
  		}

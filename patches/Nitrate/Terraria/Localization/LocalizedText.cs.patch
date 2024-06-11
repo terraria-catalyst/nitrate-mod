@@ -1,4 +1,4 @@
---- src/Nitrate_FormatWithEditorConfig/Terraria/Localization/LocalizedText.cs
+--- src/Nitrate_Staging/Terraria/Localization/LocalizedText.cs
 +++ src/Nitrate/Terraria/Localization/LocalizedText.cs
 @@ -8,7 +_,7 @@
  public partial class LocalizedText

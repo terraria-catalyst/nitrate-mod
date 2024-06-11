@@ -1,4 +1,4 @@
---- src/Nitrate_FormatWithEditorConfig/Terraria/Social/Steam/SteamedWraps.cs
+--- src/Nitrate_Staging/Terraria/Social/Steam/SteamedWraps.cs
 +++ src/Nitrate/Terraria/Social/Steam/SteamedWraps.cs
 @@ -31,7 +_,10 @@
  	// Used to get the right token for fetching/setting localized descriptions from/to Steam Workshop

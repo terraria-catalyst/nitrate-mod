@@ -1,4 +1,4 @@
---- src/Nitrate_FormatWithEditorConfig/Terraria/Lang.cs
+--- src/Nitrate_Staging/Terraria/Lang.cs
 +++ src/Nitrate/Terraria/Lang.cs
 @@ -1162,7 +_,8 @@
  	public static string LocalizedDuration(TimeSpan time, bool abbreviated, bool showAllAvailableUnits)
