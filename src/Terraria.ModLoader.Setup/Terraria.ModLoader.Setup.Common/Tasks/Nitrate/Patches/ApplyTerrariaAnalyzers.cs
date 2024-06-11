@@ -28,20 +28,44 @@ internal sealed class ApplyTerrariaAnalyzers(CommonContext ctx, string sourceDir
 	{
 		public override SyntaxNode? VisitElementAccessExpression(ElementAccessExpressionSyntax node)
 		{
+			var identifier = SyntaxFactory.IdentifierName("LocalPlayer");
+
 			// Main.player[Main.myPlayer] -> Main.LocalPlayer
 			if (MatchMainPlayerMainMyPlayer(node))
 			{
-				return SyntaxFactory.MemberAccessExpression(
+				var expression = SyntaxFactory.MemberAccessExpression(
 					SyntaxKind.SimpleMemberAccessExpression,
 					SyntaxFactory.IdentifierName("Main"),
-					SyntaxFactory.IdentifierName("LocalPlayer")
+					identifier
 				);
+
+				if (node.HasLeadingTrivia)
+				{
+					expression = expression.WithLeadingTrivia(node.GetLeadingTrivia());
+				}
+
+				if (node.HasTrailingTrivia)
+				{
+					expression = expression.WithTrailingTrivia(node.GetTrailingTrivia());
+				}
+
+				return expression;
 			}
 
 			// player[myPlayer] -> LocalPlayer
 			if (MatchPlayerMyPlayer(node))
 			{
-				return SyntaxFactory.IdentifierName("LocalPlayer");
+				if (node.HasLeadingTrivia)
+				{
+					identifier = identifier.WithLeadingTrivia(node.GetLeadingTrivia());
+				}
+
+				if (node.HasTrailingTrivia)
+				{
+					identifier = identifier.WithTrailingTrivia(node.GetTrailingTrivia());
+				}
+
+				return identifier;
 			}
 
 			return base.VisitElementAccessExpression(node);
