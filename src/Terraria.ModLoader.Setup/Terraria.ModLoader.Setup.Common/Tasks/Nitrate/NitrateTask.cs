@@ -13,7 +13,7 @@ public sealed class NitrateTask(CommonContext ctx, CommonContext.NitratePatchCon
 			? SetupDialogResult.Yes
 			: Context.TaskInterface.ShowDialogWithOkFallback(
 				"Additional Nitrate Setup",
-				"Run additional Nitrate patch steps (initializes untracked intermediary projects)? This includes formatting and other automated processes that would produce large patches otherwise.",
+				"Run ALL setup operations to prepare the Nitrate-specific development environment? This includes running various formatting steps on the vanilla/tModLoader source code, which takes a long time. These steps are reproduced client-side to avoid large patches.",
 				SetupMessageBoxButtons.YesNo,
 				SetupMessageBoxIcon.Question
 			);
@@ -24,7 +24,7 @@ public sealed class NitrateTask(CommonContext ctx, CommonContext.NitratePatchCon
 		{
 			res = Context.TaskInterface.ShowDialogWithOkFallback(
 				"Additional Nitrate Setup",
-				"Run and apply additional analyzers performed after code formatting? This is for development purposes.",
+				"Run only setup operations applied AFTER standard formatting applications? This includes advanced analyzers for intelligently formatting Terraria-specific code. This option exists mostly for development purposes when working on the setup tool. These steps are reproduced client-side to avoid large patches.",
 				SetupMessageBoxButtons.YesNo,
 				SetupMessageBoxIcon.Question
 			);
