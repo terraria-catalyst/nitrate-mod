@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -35,6 +36,8 @@ internal sealed class SimplifyRandomAnalyzer(string typeName) : AbstractAnalyzer
 
 		var generator = SyntaxGenerator.GetGenerator(document.Project);
 
+		var replacements = new Dictionary<SyntaxNode, SyntaxNode>();
+
 		for (var i = 0; i < binaryExpressions.Length; i++)
 		{
 			var expression = binaryExpressions[i];
@@ -67,9 +70,7 @@ internal sealed class SimplifyRandomAnalyzer(string typeName) : AbstractAnalyzer
 
 			var newMemberAccessExpression = oldMemberAccessExpression.WithName(SyntaxFactory.IdentifierName("NextBool"));
 
-			SyntaxNode newOperation;
-
-			newOperation = isZeroLiteralCheck
+			var newOperation = isZeroLiteralCheck
 				? generator.InvocationExpression(newMemberAccessExpression, oldInvocationExpression.ArgumentList.Arguments[0])
 				: generator.InvocationExpression(newMemberAccessExpression, oldInvocationExpression.ArgumentList.Arguments[0], otherExpression);
 
@@ -78,9 +79,10 @@ internal sealed class SimplifyRandomAnalyzer(string typeName) : AbstractAnalyzer
 				newOperation = generator.LogicalNotExpression(newOperation);
 			}
 
-			return document.WithSyntaxRoot(root.ReplaceNode(expression, newOperation));
+			replacements.Add(expression, newOperation);
 		}
 
-		return null;
+		root = root.ReplaceNodes(replacements.Keys, (x, _) => replacements[x]);
+		return replacements.Count != 0 ? document.WithSyntaxRoot(root) : null;
 	}
 }
