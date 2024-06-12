@@ -303,14 +303,26 @@ internal sealed class ApplyTerrariaAnalyzers(CommonContext ctx, string sourceDir
 					$"Processing document: {document.FilePath![Path.GetDirectoryName(project.FilePath!)!.Length..]}...",
 					() =>
 					{
-						Document? newDocument = null;
+						var newDocument = document;
 
 						foreach (var analyzer in analyzers)
 						{
-							newDocument = analyzer.ProcessDocument(compilation, document);
+							// Continuously apply analyzer until there is
+							// nothing less to operate on.
+							while (true)
+							{
+								var processedDocument = analyzer.ProcessDocument(compilation, newDocument);
+
+								if (processedDocument is null)
+								{
+									break;
+								}
+
+								newDocument = processedDocument;
+							}
 						}
 
-						if (newDocument is not null)
+						if (newDocument != document)
 						{
 							modifiedDocuments[document.FilePath!] = newDocument;
 						}

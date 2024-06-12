@@ -12,8 +12,6 @@ internal sealed class SimplifyRandomAnalyzer(string typeName) : AbstractAnalyzer
 {
 	protected override Document? ProcessDocumentWithContext(Compilation compilation, Document document, SyntaxTree syntaxTree, SyntaxNode root, SemanticModel semanticModel)
 	{
-		var modified = false;
-
 		var randomType = compilation.GetTypeByMetadataName(typeName);
 		var nextMethod = randomType?.GetMembers("Next").FirstOrDefault(
 			x =>
@@ -71,24 +69,18 @@ internal sealed class SimplifyRandomAnalyzer(string typeName) : AbstractAnalyzer
 
 			SyntaxNode newOperation;
 
-			if (isZeroLiteralCheck)
-			{
-				newOperation = generator.InvocationExpression(newMemberAccessExpression, oldInvocationExpression.ArgumentList.Arguments[0]);
-			}
-			else
-			{
-				newOperation = generator.InvocationExpression(newMemberAccessExpression, oldInvocationExpression.ArgumentList.Arguments[0], otherExpression);
-			}
+			newOperation = isZeroLiteralCheck
+				? generator.InvocationExpression(newMemberAccessExpression, oldInvocationExpression.ArgumentList.Arguments[0])
+				: generator.InvocationExpression(newMemberAccessExpression, oldInvocationExpression.ArgumentList.Arguments[0], otherExpression);
 
 			if (isNegated)
 			{
 				newOperation = generator.LogicalNotExpression(newOperation);
 			}
 
-			modified = true;
-			document = document.WithSyntaxRoot(root = root.ReplaceNode(expression, newOperation));
+			return document.WithSyntaxRoot(root.ReplaceNode(expression, newOperation));
 		}
 
-		return modified ? document : null;
+		return null;
 	}
 }
