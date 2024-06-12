@@ -208,18 +208,11 @@ internal sealed class ApplyTerrariaAnalyzers(CommonContext ctx, string sourceDir
 
 						foreach (var analyzer in analyzers)
 						{
-							// Continuously apply analyzer until there is
-							// nothing less to operate on.
-							while (true)
+							var modifiedDocument = analyzer.ProcessDocument(newDocument);
+
+							if (modifiedDocument is not null)
 							{
-								var processedDocument = analyzer.ProcessDocument(newDocument);
-
-								if (processedDocument is null)
-								{
-									break;
-								}
-
-								newDocument = processedDocument;
+								newDocument = modifiedDocument;
 							}
 						}
 
