@@ -32,9 +32,7 @@ internal sealed class SimplifyRandomAnalyzer(string typeName) : AbstractAnalyzer
 		}
 
 		var binaryExpressions = root.DescendantNodes().OfType<BinaryExpressionSyntax>().ToArray();
-
 		var generator = SyntaxGenerator.GetGenerator(document.Project);
-
 		var replacements = new Dictionary<SyntaxNode, SyntaxNode>();
 
 		foreach (var expression in binaryExpressions)

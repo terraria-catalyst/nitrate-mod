@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using Terraria.ModLoader.Setup.Common.Tasks.Nitrate.Patches.Analyzers;
 
@@ -24,72 +23,6 @@ namespace Terraria.ModLoader.Setup.Common.Tasks.Nitrate.Patches;
 // ReSharper disable once ClassNeverInstantiated.Global
 internal sealed class ApplyTerrariaAnalyzers(CommonContext ctx, string sourceDirectory, string targetDirectory) : SetupOperation(ctx)
 {
-#region Syntax rewriters
-	/// <summary>
-	///		Simplifies expressions that access the local client player instance.
-	/// </summary>
-	/// <remarks>
-	///		<c>Main::player[Main::myPlayer]</c> becomes <c>Main::LocalPlayer</c>.
-	/// </remarks>
-	private sealed class SimplifyLocalPlayerAccess : CSharpSyntaxRewriter
-	{
-		public override SyntaxNode? VisitElementAccessExpression(ElementAccessExpressionSyntax node)
-		{
-			var identifier = SyntaxFactory.IdentifierName("LocalPlayer");
-
-			// Main.player[Main.myPlayer] -> Main.LocalPlayer
-			if (MatchMainPlayerMainMyPlayer(node))
-			{
-				var expression = SyntaxFactory.MemberAccessExpression(
-					SyntaxKind.SimpleMemberAccessExpression,
-					SyntaxFactory.IdentifierName("Main"),
-					identifier
-				);
-
-				return ApplyTrivia(expression, node);
-			}
-
-			// player[myPlayer] -> LocalPlayer
-			if (MatchPlayerMyPlayer(node))
-			{
-				return ApplyTrivia(identifier, node);
-			}
-
-			return base.VisitElementAccessExpression(node);
-		}
-
-		private static bool MatchMainPlayerMainMyPlayer(ElementAccessExpressionSyntax node)
-		{
-			if (node is not { Expression: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.Text: "Main", }, Name.Identifier.Text: "player", }, ArgumentList.Arguments.Count: 1, })
-			{
-				return false;
-			}
-
-			if (node.ArgumentList.Arguments[0].Expression is not MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.Text: "Main", }, Name.Identifier.Text: "myPlayer", })
-			{
-				return false;
-			}
-
-			return true;
-		}
-
-		private static bool MatchPlayerMyPlayer(ElementAccessExpressionSyntax node)
-		{
-			if (node is not { Expression: IdentifierNameSyntax { Identifier.Text: "player", }, ArgumentList.Arguments.Count: 1, })
-			{
-				return false;
-			}
-
-			if (node.ArgumentList.Arguments[0].Expression is not IdentifierNameSyntax { Identifier.Text: "myPlayer", })
-			{
-				return false;
-			}
-
-			return true;
-		}
-	}
-#endregion
-
 	public override void Run()
 	{
 		var items = new List<WorkItem>();
@@ -163,7 +96,7 @@ internal sealed class ApplyTerrariaAnalyzers(CommonContext ctx, string sourceDir
 	{
 		var tree = CSharpSyntaxTree.ParseText(source, cancellationToken: cancellationToken);
 		var node = tree.GetRoot(cancellationToken);
-		node = new SimplifyLocalPlayerAccess().Visit(node);
+		// node = new SimplifyLocalPlayerAccess().Visit(node);
 		// node = new SimplifyUnifiedRandom().Visit(node);
 
 		return node.ToFullString();
