@@ -32,16 +32,21 @@ internal sealed class SimplifyRandomAnalyzer(string typeName) : AbstractAnalyzer
 		}
 
 		var binaryExpressions = root.DescendantNodes().OfType<BinaryExpressionSyntax>().ToArray();
-		var binaryOperations = binaryExpressions.Select(x => semanticModel.GetOperation(x)).ToArray();
 
 		var generator = SyntaxGenerator.GetGenerator(document.Project);
 
 		var replacements = new Dictionary<SyntaxNode, SyntaxNode>();
 
-		for (var i = 0; i < binaryExpressions.Length; i++)
+		foreach (var expression in binaryExpressions)
 		{
-			var expression = binaryExpressions[i];
-			var operation = binaryOperations[i];
+			// Avoid accidentally defining infinite recursion in implementation
+			// methods.
+			if (expression.Ancestors().OfType<MethodDeclarationSyntax>().Any(x => x.Identifier.Text == "NextBool"))
+			{
+				continue;
+			}
+
+			var operation = semanticModel.GetOperation(expression);
 
 			if (operation is not IBinaryOperation { OperatorKind: BinaryOperatorKind.Equals or BinaryOperatorKind.NotEquals, } binaryOperation)
 			{
