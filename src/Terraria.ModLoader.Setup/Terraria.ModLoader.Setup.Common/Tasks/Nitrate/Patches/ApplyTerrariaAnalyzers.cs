@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
@@ -255,7 +256,7 @@ internal sealed class ApplyTerrariaAnalyzers(CommonContext ctx, string sourceDir
 			new SimplifyRandomCodeFixProvider(),
 		};
 
-		AnalyzeAndFixProjectsAsync(analyzers, codeFixProviders, Context.TaskInterface.CancellationToken, relogicProject, terrariaProject).GetAwaiter().GetResult();
+		AnalyzeAndFixProjectsAsync(analyzers, codeFixProviders, relogicProject, terrariaProject).GetAwaiter().GetResult();
 
 		return;
 
@@ -275,46 +276,69 @@ internal sealed class ApplyTerrariaAnalyzers(CommonContext ctx, string sourceDir
 		return node.ToFullString();
 	}
 
-	private static async Task AnalyzeAndFixProjectsAsync(IEnumerable<DiagnosticAnalyzer> analyzers, IEnumerable<CodeFixProvider> codeFixProviders, CancellationToken cancellationToken, params Project[] projects)
+	private async Task AnalyzeAndFixProjectsAsync(IEnumerable<DiagnosticAnalyzer> analyzers, IEnumerable<CodeFixProvider> codeFixProviders, params Project[] projects)
 	{
 		analyzers = analyzers.ToArray();
 		codeFixProviders = codeFixProviders.ToArray();
 
 		foreach (var project in projects)
 		{
-			var modifiedDocuments = await AnalyzeAndFixProjectAsync(project, (DiagnosticAnalyzer[])analyzers, (CodeFixProvider[])codeFixProviders, cancellationToken);
+			var modifiedDocuments = await AnalyzeAndFixProjectAsync(project, (DiagnosticAnalyzer[])analyzers, (CodeFixProvider[])codeFixProviders, Context.TaskInterface.CancellationToken);
 			foreach (var document in modifiedDocuments)
 			{
-				await File.WriteAllTextAsync(document.FilePath!, (await document.GetTextAsync(cancellationToken)).ToString(), cancellationToken);
+				await File.WriteAllTextAsync(document.FilePath!, (await document.GetTextAsync(Context.TaskInterface.CancellationToken)).ToString(), Context.TaskInterface.CancellationToken);
 			}
 		}
 	}
 
-	private static async Task<List<Document>> AnalyzeAndFixProjectAsync(Project project, DiagnosticAnalyzer[] analyzers, CodeFixProvider[] codeFixProviders, CancellationToken cancellationToken)
+	private async Task<List<Document>> AnalyzeAndFixProjectAsync(Project project, DiagnosticAnalyzer[] analyzers, CodeFixProvider[] codeFixProviders, CancellationToken cancellationToken)
 	{
-		var modifiedDocuments = new Dictionary<string, Document>();
+		var modifiedDocuments = new ConcurrentDictionary<string, Document>();
 
+		var status = Context.Progress.CreateStatus(0, 2);
+		status.AddMessage($"Getting compilation for project \"{project.Name}\"...");
 		var compilation = await project.GetCompilationAsync(cancellationToken);
+		status.AddMessage("Got compilation!");
+		status.Current++;
 		if (compilation is null)
 		{
-			throw new DataException("Failed to compile project.");
+			throw new DataException("Failed to get compilation for project.");
 		}
 
 		var compilationWithAnalyzers = compilation.WithAnalyzers([..analyzers,], cancellationToken: cancellationToken);
-		var diagnostics = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync(cancellationToken);
 
-		// TODO: Optimize?
-		foreach (var diagnostic in diagnostics)
+		status.AddMessage($"Getting analyzer diagnostics for project \"{project.Name}\"...");
+		var analyzerDiagnostics = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync(cancellationToken);
+		status.AddMessage("Got analyzer diagnostics!");
+		status.Current++;
+
+		var diagnosticsPerFile = analyzerDiagnostics.GroupBy(d => d.Location.SourceTree!.FilePath).ToDictionary(g => g.Key, g => g.ToList());
+		var items = new List<WorkItem>();
+
+		foreach (var (fileName, diagnostics) in diagnosticsPerFile)
 		{
-			foreach (var codeFixProvider in codeFixProviders)
-			{
-				var document = project.GetDocument(diagnostic.Location.SourceTree)!;
-				var fixedDocument = await ApplyCodeFixAsync(document, diagnostic, codeFixProvider, cancellationToken);
+			items.Add(
+				new WorkItem(
+					$"Applying fixes to {fileName[Path.GetDirectoryName(project.FilePath!)!.Length..]}...",
+					() =>
+					{
+						foreach (var diagnostic in diagnostics)
+						{
+							foreach (var codeFixProvider in codeFixProviders)
+							{
+								var document = project.GetDocument(diagnostic.Location.SourceTree)!;
+								var fixedDocument = ApplyCodeFixAsync(document, diagnostic, codeFixProvider, cancellationToken).GetAwaiter().GetResult();
 
-				project = fixedDocument.Project;
-				modifiedDocuments[fixedDocument.FilePath!] = fixedDocument;
-			}
+								project = fixedDocument.Project;
+								modifiedDocuments[fixedDocument.FilePath!] = fixedDocument;
+							}
+						}
+					}
+				)
+			);
 		}
+
+		ExecuteParallel(items, 1);
 
 		/*
 		foreach (var documentId in project.DocumentIds)
