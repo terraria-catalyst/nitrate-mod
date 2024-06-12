@@ -66,6 +66,8 @@ internal sealed class MakeTypesPartial(CommonContext ctx, string sourceDirectory
 
 	public override void Run()
 	{
+		Directory.CreateDirectory(targetDirectory);
+
 		// For each given C# source file, we want to make every defined type
 		// partial (saves us patches later).
 

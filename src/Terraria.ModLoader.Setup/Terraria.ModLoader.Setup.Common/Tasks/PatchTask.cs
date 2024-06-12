@@ -9,7 +9,7 @@ using DiffPatch;
 
 namespace Terraria.ModLoader.Setup.Common.Tasks;
 
-public sealed class PatchTask(CommonContext ctx, string baseDir, string patchedDir, string patchDir) : SetupOperation(ctx)
+public sealed class PatchTask(CommonContext ctx, string baseDir, string patchedDir, string patchDir, CommonContext.NitratePatchContext? nitratePatchContext = null) : SetupOperation(ctx)
 {
 	private static readonly string[] nonSourceDirs = [ "bin", "obj", ".vs", ];
 
@@ -160,16 +160,31 @@ public sealed class PatchTask(CommonContext ctx, string baseDir, string patchedD
 	{
 		var patcher = FilePatcher.FromPatchFile(patchPath);
 
-		// WEIRD NITRATE PATCH: Forcefully redirect paths for actually reading
-		// the patches since we do weird submodule stuff.
-		if (!patcher.patchFile.basePath.Contains("src/staging/"))
+		// NITRATE: Redirect staging path references as well as Nitrate diff
+		// path references.
 		{
-			patcher.patchFile.basePath = patcher.patchFile.basePath.Replace("src/", "src/staging/");
-		}
+			if (nitratePatchContext is not null)
+			{
+				if (patcher.patchFile.basePath.Contains("src/Nitrate_Staging"))
+				{
+					patcher.patchFile.basePath = patcher.patchFile.basePath.Replace("src/Nitrate_Staging", nitratePatchContext.NitrateDiffingPath);
+				}
 
-		if (!patcher.patchFile.patchedPath.Contains("src/staging/"))
-		{
-			patcher.patchFile.patchedPath = patcher.patchFile.patchedPath.Replace("src/", "src/staging/");
+				if (patcher.patchFile.patchedPath.Contains("src/Nitrate_Staging"))
+				{
+					patcher.patchFile.patchedPath = patcher.patchFile.patchedPath.Replace("src/Nitrate_Staging", nitratePatchContext.NitrateDiffingPath);
+				}
+			}
+
+			if (!patcher.patchFile.basePath.Contains("src/staging/"))
+			{
+				patcher.patchFile.basePath = patcher.patchFile.basePath.Replace("src/", "src/staging/");
+			}
+
+			if (!patcher.patchFile.patchedPath.Contains("src/staging/"))
+			{
+				patcher.patchFile.patchedPath = patcher.patchFile.patchedPath.Replace("src/", "src/staging/");
+			}
 		}
 
 		patcher.Patch(mode);

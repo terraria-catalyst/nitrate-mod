@@ -1,5 +1,18 @@
---- src/Nitrate_Staging/Terraria/Main.cs
-+++ src/Nitrate/Terraria/Main.cs
+--- src/staging/Nitrate_ApplyTerrariaAnalyzers/Terraria/Main.cs
++++ src/staging/Nitrate/Terraria/Main.cs
+@@ -2643,7 +_,11 @@
+ 	/// Retrieves the <see cref="Player"/> object for the local user. Shorthand for <c><see cref="player"/>[<see cref="myPlayer"/>]</c>.<br/>
+ 	/// Many gameplay elements such as recipes, UI, TownNPC chat, and Biome logic are only executed locally, <see cref="LocalPlayer"/> is suitable for code relating to those situations. If the hook has a <see cref="Player"/> parameter, it is likely not suitable to use <see cref="LocalPlayer"/> in it.
+ 	/// </summary>
+-	public static Player LocalPlayer => player[myPlayer];
++	public static Player LocalPlayer
++	{
++		get => player[myPlayer];
++		internal set => player[myPlayer] = value;
++	}
+ 
+ 	public static CreativeUnlocksTracker LocalPlayerCreativeTracker => player[myPlayer].creativeTracker;
+ 
 @@ -6132,7 +_,7 @@
  		{
  			Map = new WorldMap(maxTilesX, maxTilesY);
