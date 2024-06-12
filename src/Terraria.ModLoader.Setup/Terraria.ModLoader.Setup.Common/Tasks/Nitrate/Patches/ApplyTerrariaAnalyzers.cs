@@ -328,7 +328,7 @@ internal sealed class ApplyTerrariaAnalyzers(CommonContext ctx, string sourceDir
 			var formattedDocument = await Formatter.FormatAsync(document);
 			project = formattedDocument.Project;
 		}
-		 */
+		*/
 
 		return modifiedDocuments.Values.ToList();
 	}
