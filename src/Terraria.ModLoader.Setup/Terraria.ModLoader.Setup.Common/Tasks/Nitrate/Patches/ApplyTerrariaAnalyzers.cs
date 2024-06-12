@@ -7,11 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CodeActions;
-using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Diagnostics;
 
 using Terraria.ModLoader.Setup.Common.Tasks.Nitrate.Patches.Analyzers;
 
@@ -246,17 +243,12 @@ internal sealed class ApplyTerrariaAnalyzers(CommonContext ctx, string sourceDir
 		status.AddMessage("Opened Terraria.csproj!");
 		status.Current++;
 
-		var analyzers = new List<DiagnosticAnalyzer>
+		var analyzers = new AbstractAnalyzer[]
 		{
 			new SimplifyRandomAnalyzer("Terraria.Utilities.UnifiedRandom"),
 		};
 
-		var codeFixProviders = new List<CodeFixProvider>
-		{
-			new SimplifyRandomCodeFixProvider(),
-		};
-
-		AnalyzeAndFixProjectsAsync(analyzers, codeFixProviders, relogicProject, terrariaProject).GetAwaiter().GetResult();
+		AnalyzeAndFixProjectsAsync(analyzers, relogicProject, terrariaProject).GetAwaiter().GetResult();
 
 		return;
 
@@ -276,14 +268,11 @@ internal sealed class ApplyTerrariaAnalyzers(CommonContext ctx, string sourceDir
 		return node.ToFullString();
 	}
 
-	private async Task AnalyzeAndFixProjectsAsync(IEnumerable<DiagnosticAnalyzer> analyzers, IEnumerable<CodeFixProvider> codeFixProviders, params Project[] projects)
+	private async Task AnalyzeAndFixProjectsAsync(AbstractAnalyzer[] analyzers, params Project[] projects)
 	{
-		analyzers = analyzers.ToArray();
-		codeFixProviders = codeFixProviders.ToArray();
-
 		foreach (var project in projects)
 		{
-			var modifiedDocuments = await AnalyzeAndFixProjectAsync(project, (DiagnosticAnalyzer[])analyzers, (CodeFixProvider[])codeFixProviders, Context.TaskInterface.CancellationToken);
+			var modifiedDocuments = await AnalyzeAndFixProjectAsync(project, analyzers, Context.TaskInterface.CancellationToken);
 			foreach (var document in modifiedDocuments)
 			{
 				await File.WriteAllTextAsync(document.FilePath!, (await document.GetTextAsync(Context.TaskInterface.CancellationToken)).ToString(), Context.TaskInterface.CancellationToken);
@@ -291,11 +280,11 @@ internal sealed class ApplyTerrariaAnalyzers(CommonContext ctx, string sourceDir
 		}
 	}
 
-	private async Task<List<Document>> AnalyzeAndFixProjectAsync(Project project, DiagnosticAnalyzer[] analyzers, CodeFixProvider[] codeFixProviders, CancellationToken cancellationToken)
+	private async Task<List<Document>> AnalyzeAndFixProjectAsync(Project project, AbstractAnalyzer[] analyzers, CancellationToken cancellationToken)
 	{
 		var modifiedDocuments = new ConcurrentDictionary<string, Document>();
 
-		var status = Context.Progress.CreateStatus(0, 2);
+		var status = Context.Progress.CreateStatus(0, 1);
 		status.AddMessage($"Getting compilation for project \"{project.Name}\"...");
 		var compilation = await project.GetCompilationAsync(cancellationToken);
 		status.AddMessage("Got compilation!");
@@ -305,33 +294,25 @@ internal sealed class ApplyTerrariaAnalyzers(CommonContext ctx, string sourceDir
 			throw new DataException("Failed to get compilation for project.");
 		}
 
-		var compilationWithAnalyzers = compilation.WithAnalyzers([..analyzers,], cancellationToken: cancellationToken);
-
-		status.AddMessage($"Getting analyzer diagnostics for project \"{project.Name}\"...");
-		var analyzerDiagnostics = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync(cancellationToken);
-		status.AddMessage("Got analyzer diagnostics!");
-		status.Current++;
-
-		var diagnosticsPerFile = analyzerDiagnostics.GroupBy(d => d.Location.SourceTree!.FilePath).ToDictionary(g => g.Key, g => g.ToList());
 		var items = new List<WorkItem>();
 
-		foreach (var (fileName, diagnostics) in diagnosticsPerFile)
+		foreach (var document in project.Documents)
 		{
 			items.Add(
 				new WorkItem(
-					$"Applying fixes to {fileName[Path.GetDirectoryName(project.FilePath!)!.Length..]}...",
+					$"Processing document: {document.FilePath![Path.GetDirectoryName(project.FilePath!)!.Length..]}...",
 					() =>
 					{
-						foreach (var diagnostic in diagnostics)
-						{
-							foreach (var codeFixProvider in codeFixProviders)
-							{
-								var document = project.GetDocument(diagnostic.Location.SourceTree)!;
-								var fixedDocument = ApplyCodeFixAsync(document, diagnostic, codeFixProvider, cancellationToken).GetAwaiter().GetResult();
+						var documentModified = false;
 
-								project = fixedDocument.Project;
-								modifiedDocuments[fixedDocument.FilePath!] = fixedDocument;
-							}
+						foreach (var analyzer in analyzers)
+						{
+							documentModified |= analyzer.ProcessDocument(compilation, document);
+						}
+
+						if (documentModified)
+						{
+							modifiedDocuments[document.FilePath!] = document;
 						}
 					}
 				)
@@ -350,27 +331,6 @@ internal sealed class ApplyTerrariaAnalyzers(CommonContext ctx, string sourceDir
 		 */
 
 		return modifiedDocuments.Values.ToList();
-	}
-
-	private static async Task<Document> ApplyCodeFixAsync(Document document, Diagnostic diagnostic, CodeFixProvider codeFixProvider, CancellationToken cancellationToken)
-	{
-		var actions = new List<CodeAction>();
-		var context = new CodeFixContext(document, diagnostic, (a, _) => actions.Add(a), cancellationToken);
-
-		await codeFixProvider.RegisterCodeFixesAsync(context);
-
-		if (actions.Count > 0)
-		{
-			var action = actions.First();
-			var operations = await action.GetOperationsAsync(cancellationToken);
-
-			foreach (var operation in operations)
-			{
-				operation.Apply(document.Project.Solution.Workspace, cancellationToken);
-			}
-		}
-
-		return document.Project.GetDocument(document.Id)!;
 	}
 
 	private static SyntaxNode ApplyTrivia(SyntaxNode node, SyntaxNode original)

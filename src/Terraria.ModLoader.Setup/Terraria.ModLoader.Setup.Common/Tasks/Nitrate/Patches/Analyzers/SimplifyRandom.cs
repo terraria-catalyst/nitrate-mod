@@ -1,61 +1,71 @@
-﻿using System.Collections.Generic;
-using System.Collections.Immutable;
+﻿using System;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CodeActions;
-using Microsoft.CodeAnalysis.CodeFixes;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.CodeAnalysis.Editing;
-using Microsoft.CodeAnalysis.Operations;
 
 namespace Terraria.ModLoader.Setup.Common.Tasks.Nitrate.Patches.Analyzers;
 
-[DiagnosticAnalyzer(LanguageNames.CSharp)]
-internal sealed class SimplifyRandomAnalyzer(string typeName) : AbstractDiagnosticAnalyzer(RULE)
+internal sealed class SimplifyRandomAnalyzer(string typeName) : AbstractAnalyzer
 {
-	public const string ID = "SimplifyRandom";
-
-	public static readonly DiagnosticDescriptor RULE = new(ID, "", "", "", DiagnosticSeverity.Warning, isEnabledByDefault: true, description: "");
-
-	protected override void InitializeWorker(AnalysisContext context)
+	public override bool ProcessDocument(Compilation compilation, Document document)
 	{
-		context.RegisterCompilationStartAction(
-			ctx =>
+		var modified = false;
+		var root = document.GetSyntaxRootAsync().Result;
+		if (root is null)
+		{
+			throw new Exception();
+		}
+
+		// get all binary expressions
+		var binaryExpressions = root.DescendantNodes().OfType<BinaryExpressionSyntax>();
+		foreach (var binaryExpression in binaryExpressions)
+		{
+			if (binaryExpression is not BinaryExpressionSyntax expression)
 			{
-				var randomTypeSymbol = ctx.Compilation.GetTypeByMetadataName(typeName);
-				var nextMethodSymbol = randomTypeSymbol?.GetMembers("Next").FirstOrDefault(
-					x =>
-					{
-						if (x is not IMethodSymbol methodSymbol)
-						{
-							return false;
-						}
+				continue;
+			}
 
-						return methodSymbol is { Parameters: [{ Type.SpecialType: SpecialType.System_Int32, },], };
-					}
-				);
-
-				if (nextMethodSymbol is null)
+			var randomTypeSymbol = compilation.GetTypeByMetadataName(typeName);
+			var nextMethodSymbol = randomTypeSymbol?.GetMembers("Next").FirstOrDefault(
+				x =>
 				{
-					return;
-				}
-
-				ctx.RegisterOperationAction(
-					opCtx =>
+					if (x is not IMethodSymbol methodSymbol)
 					{
-						if (opCtx.Operation is not IBinaryOperation { OperatorKind: BinaryOperatorKind.Equals or BinaryOperatorKind.NotEquals, } operation)
-						{
-							return;
-						}
+						return false;
+					}
 
-						var leftMethodSymbol = (operation.LeftOperand as IInvocationOperation)?.TargetMethod;
-						var rightMethodSymbol = (operation.RightOperand as IInvocationOperation)?.TargetMethod;
+					return methodSymbol is { Parameters: [{ Type.SpecialType: SpecialType.System_Int32, },], };
+				}
+			);
 
+			if (nextMethodSymbol is null)
+			{
+				continue;
+			}
+
+			// TODO: Is this really how I have to do it?
+			if (expression.OperatorToken.Text != "==" && expression.OperatorToken.Text != "!=")
+			{
+				continue;
+			}
+
+			var leftMethodSymbol = (expression.Left as InvocationExpressionSyntax)?.Expression as MemberAccessExpressionSyntax;
+			var rightMethodSymbol = (expression.Right as InvocationExpressionSyntax)?.Expression as MemberAccessExpressionSyntax;
+
+			if (leftMethodSymbol is null && rightMethodSymbol is null)
+			{
+				continue;
+			}
+
+			if ((leftMethodSymbol is null || leftMethodSymbol.Name.Identifier.Text != "Next") && (rightMethodSymbol is null || rightMethodSymbol.Name.Identifier.Text != "Next"))
+			{
+				continue;
+			}
+
+			var isNegated = expression.OperatorToken.Text == "!=";
+
+			/*
 						if (!SymbolEqualityComparer.Default.Equals(leftMethodSymbol, nextMethodSymbol) && !SymbolEqualityComparer.Default.Equals(rightMethodSymbol, nextMethodSymbol))
 						{
 							return;
@@ -87,15 +97,14 @@ internal sealed class SimplifyRandomAnalyzer(string typeName) : AbstractDiagnost
 								ImmutableDictionary.CreateRange(properties)
 							)
 						);
-					},
-					OperationKind.Binary
-				);
-			}
-		);
+			 */
+		}
+
+		return true;
 	}
 }
 
-internal sealed class SimplifyRandomCodeFixProvider() : AbstractCodeFixProvider(SimplifyRandomAnalyzer.ID)
+/*internal sealed class SimplifyRandomCodeFixProvider() : AbstractCodeFixProvider(SimplifyRandomAnalyzer.ID)
 {
 	protected override Task RegisterAsync(CodeFixContext context, Parameters parameters)
 	{
@@ -139,4 +148,4 @@ internal sealed class SimplifyRandomCodeFixProvider() : AbstractCodeFixProvider(
 		var newRoot = oldRoot!.ReplaceNode(operation, newOperation);
 		return document.WithSyntaxRoot(newRoot);
 	}
-}
+}*/
