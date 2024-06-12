@@ -303,23 +303,23 @@ internal sealed class ApplyTerrariaAnalyzers(CommonContext ctx, string sourceDir
 					$"Processing document: {document.FilePath![Path.GetDirectoryName(project.FilePath!)!.Length..]}...",
 					() =>
 					{
-						var documentModified = false;
+						Document? newDocument = null;
 
 						foreach (var analyzer in analyzers)
 						{
-							documentModified |= analyzer.ProcessDocument(compilation, document);
+							newDocument = analyzer.ProcessDocument(compilation, document);
 						}
 
-						if (documentModified)
+						if (newDocument is not null)
 						{
-							modifiedDocuments[document.FilePath!] = document;
+							modifiedDocuments[document.FilePath!] = newDocument;
 						}
 					}
 				)
 			);
 		}
 
-		ExecuteParallel(items, 1);
+		ExecuteParallel(items);
 
 		/*
 		foreach (var documentId in project.DocumentIds)
