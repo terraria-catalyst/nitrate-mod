@@ -64,9 +64,22 @@ internal sealed class SimplifyRandomAnalyzer(string typeName) : AbstractAnalyzer
 				continue;
 			}
 
+			var otherExpression = isLeft ? expression.Right : expression.Left;
+			var isZeroLiteralCheck = otherExpression is LiteralExpressionSyntax { Token.ValueText: "0", };
+
 			var newMemberAccessExpression = oldMemberAccessExpression.WithName(SyntaxFactory.IdentifierName("NextBool"));
 
-			var newOperation = generator.InvocationExpression(newMemberAccessExpression, oldInvocationExpression.ArgumentList.Arguments[0]);
+			SyntaxNode newOperation;
+
+			if (isZeroLiteralCheck)
+			{
+				newOperation = generator.InvocationExpression(newMemberAccessExpression, oldInvocationExpression.ArgumentList.Arguments[0]);
+			}
+			else
+			{
+				newOperation = generator.InvocationExpression(newMemberAccessExpression, oldInvocationExpression.ArgumentList.Arguments[0], otherExpression);
+			}
+
 			if (isNegated)
 			{
 				newOperation = generator.LogicalNotExpression(newOperation);
