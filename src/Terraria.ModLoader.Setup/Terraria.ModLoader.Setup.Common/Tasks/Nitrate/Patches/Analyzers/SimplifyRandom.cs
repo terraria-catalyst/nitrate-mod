@@ -10,9 +10,9 @@ namespace Terraria.ModLoader.Setup.Common.Tasks.Nitrate.Patches.Analyzers;
 
 internal sealed class SimplifyRandomAnalyzer(string typeName) : AbstractAnalyzer
 {
-	protected override Document? ProcessDocumentWithContext(Compilation compilation, Document document, SyntaxTree syntaxTree, SyntaxNode root, SemanticModel semanticModel)
+	protected override Document? ProcessDocumentWithContext(Document document, SyntaxTree syntaxTree, SyntaxNode root, SemanticModel semanticModel)
 	{
-		var randomType = compilation.GetTypeByMetadataName(typeName);
+		var randomType = semanticModel.Compilation.GetTypeByMetadataName(typeName);
 		var nextMethod = randomType?.GetMembers("Next").FirstOrDefault(
 			x =>
 			{

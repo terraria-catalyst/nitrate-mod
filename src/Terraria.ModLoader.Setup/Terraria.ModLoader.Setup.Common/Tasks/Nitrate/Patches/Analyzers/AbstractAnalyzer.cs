@@ -8,16 +8,16 @@ namespace Terraria.ModLoader.Setup.Common.Tasks.Nitrate.Patches.Analyzers;
 /// </summary>
 internal abstract class AbstractAnalyzer
 {
-	public virtual Document? ProcessDocument(Compilation compilation, Document document)
+	public virtual Document? ProcessDocument(Document document)
 	{
 		var syntaxTree = document.GetSyntaxTreeAsync().Result!;
 		var root = syntaxTree.GetRoot();
-		var semanticModel = compilation.GetSemanticModel(syntaxTree);
+		var semanticModel = document.GetSemanticModelAsync().Result!;
 
-		return ProcessDocumentWithContext(compilation, document, syntaxTree, root, semanticModel);
+		return ProcessDocumentWithContext(document, syntaxTree, root, semanticModel);
 	}
 
-	protected virtual Document? ProcessDocumentWithContext(Compilation compilation, Document document, SyntaxTree syntaxTree, SyntaxNode root, SemanticModel semanticModel)
+	protected virtual Document? ProcessDocumentWithContext(Document document, SyntaxTree syntaxTree, SyntaxNode root, SemanticModel semanticModel)
 	{
 		return null;
 	}

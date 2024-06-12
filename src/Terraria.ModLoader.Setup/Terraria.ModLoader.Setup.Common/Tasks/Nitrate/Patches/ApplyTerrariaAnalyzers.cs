@@ -311,7 +311,7 @@ internal sealed class ApplyTerrariaAnalyzers(CommonContext ctx, string sourceDir
 							// nothing less to operate on.
 							while (true)
 							{
-								var processedDocument = analyzer.ProcessDocument(compilation, newDocument);
+								var processedDocument = analyzer.ProcessDocument(newDocument);
 
 								if (processedDocument is null)
 								{
