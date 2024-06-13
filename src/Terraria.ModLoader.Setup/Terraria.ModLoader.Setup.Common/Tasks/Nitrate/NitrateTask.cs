@@ -20,7 +20,7 @@ public sealed class NitrateTask(CommonContext ctx, CommonContext.NitratePatchCon
 				SetupMessageBoxIcon.Question
 			);
 
-		var runAllSteps = res == SetupDialogResult.Ok;
+		var runAllSteps = res == SetupDialogResult.Yes;
 		var runExtraAnalysisSteps = false;
 		if (!runAllSteps)
 		{
