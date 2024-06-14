@@ -1,5 +1,13 @@
 --- src/Nitrate_Staging/Terraria/_TML/Main.cs
 +++ src/Nitrate/Terraria/_TML/Main.cs
+@@ -54,6 +_,7 @@
+ 	public static int worldEventUpdates;
+ 	private double _partialWorldEventUpdates = 0f;
+ 
++	[Obsolete("Public TitleLinkButton lists are obsolete, prefer Nitrate Version Branding API")]
+ 	public static List<TitleLinkButton> tModLoaderTitleLinks = [];
+ 
+ 	private static readonly HttpClient client = new();
 @@ -588,6 +_,7 @@
  
  	private static void DrawtModLoaderSocialMediaButtons(Microsoft.Xna.Framework.Color menuColor, float upBump)
