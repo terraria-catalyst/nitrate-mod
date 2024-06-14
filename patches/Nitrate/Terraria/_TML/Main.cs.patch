@@ -1,0 +1,18 @@
+--- src/Nitrate_Staging/Terraria/_TML/Main.cs
++++ src/Nitrate/Terraria/_TML/Main.cs
+@@ -588,6 +_,7 @@
+ 
+ 	private static void DrawtModLoaderSocialMediaButtons(Microsoft.Xna.Framework.Color menuColor, float upBump)
+ 	{
++		/*
+ 		var titleLinks = tModLoaderTitleLinks;
+ 		var anchorPosition = new Vector2(18f, (float)(screenHeight - 26 - 22) - upBump);
+ 		for (var i = 0; i < titleLinks.Count; i++)
+@@ -595,6 +_,7 @@
+ 			titleLinks[i].Draw(spriteBatch, anchorPosition);
+ 			anchorPosition.X += 30f;
+ 		}
++		*/
+ 	}
+ 
+ 	/// <summary>
