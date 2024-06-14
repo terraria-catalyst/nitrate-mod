@@ -1,6 +1,6 @@
---- src/staging/Nitrate_ApplyTerrariaAnalyzers/Terraria/Main.cs
-+++ src/staging/Nitrate/Terraria/Main.cs
-@@ -2643,7 +_,11 @@
+--- src/Nitrate_Staging/Terraria/Main.cs
++++ src/Nitrate/Terraria/Main.cs
+@@ -2652,7 +_,11 @@
  	/// Retrieves the <see cref="Player"/> object for the local user. Shorthand for <c><see cref="player"/>[<see cref="myPlayer"/>]</c>.<br/>
  	/// Many gameplay elements such as recipes, UI, TownNPC chat, and Biome logic are only executed locally, <see cref="LocalPlayer"/> is suitable for code relating to those situations. If the hook has a <see cref="Player"/> parameter, it is likely not suitable to use <see cref="LocalPlayer"/> in it.
  	/// </summary>
@@ -13,7 +13,7 @@
  
  	public static CreativeUnlocksTracker LocalPlayerCreativeTracker => player[myPlayer].creativeTracker;
  
-@@ -6132,7 +_,7 @@
+@@ -6139,7 +_,7 @@
  		{
  			Map = new WorldMap(maxTilesX, maxTilesY);
  			Configuration.Load();
@@ -22,7 +22,7 @@
  			{
  				/*
  	base.Content.RootDirectory = "Content";
-@@ -10278,10 +_,13 @@
+@@ -10285,10 +_,13 @@
  		base.GraphicsDevice.DeviceLost += GraphicsDeviceLost;
  		base.GraphicsDevice.DeviceReset += GraphicsDeviceLost;
  		base.GraphicsDevice.DeviceResetting += GraphicsDeviceLost;
@@ -36,7 +36,7 @@
  
  		_achievements = new AchievementManager();
  		_achievementAdvisor = new AchievementAdvisor();
-@@ -10477,6 +_,12 @@
+@@ -10484,6 +_,12 @@
  		CacheSupportedDisplaySizes();
  		ContentSamples.RebuildItemCreativeSortingIDsAfterRecipesAreSetUp();
  		ContentSamples.CommonlyUsedContentSamples.PrepareAfterEverythingElseLoaded();
@@ -49,7 +49,7 @@
  	}
  
  	private IEnumerator LoadMusic_InSteps()
-@@ -48029,7 +_,7 @@
+@@ -48371,7 +_,7 @@
  		var text = "";
  		var num4 = 215f;
  		var startX = 0;
@@ -58,7 +58,7 @@
  		{
  			startX = -50;
  			num4 += 50f;
-@@ -51430,7 +_,8 @@
+@@ -51779,7 +_,8 @@
  				if (selectedMenu == num20)
  				{
  					SoundEngine.PlaySound(10);
@@ -68,7 +68,7 @@
  				}
  
  				// TML settings
-@@ -52818,7 +_,7 @@
+@@ -53167,7 +_,7 @@
  
  		if (menuMode == 888)
  		{
@@ -77,7 +77,7 @@
  			{
  				MenuUI.Draw(spriteBatch, gameTime);
  			}
-@@ -53864,7 +_,7 @@
+@@ -54213,7 +_,7 @@
  
  	private void OnSubmitServerPassword()
  	{
