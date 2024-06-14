@@ -1,5 +1,13 @@
 --- src/Nitrate_Staging/Terraria/Main.cs
 +++ src/Nitrate/Terraria/Main.cs
+@@ -246,6 +_,7 @@
+ 	public static MapHeadRenderer MapPlayerRenderer = new();
+ 	public static NPCHeadRenderer TownNPCHeadRenderer = null;
+ 	public static NPCHeadRenderer BossNPCHeadRenderer = null;
++	[Obsolete("Public TitleLinkButton lists are obsolete, prefer Nitrate Version Branding API")]
+ 	public static List<TitleLinkButton> TitleLinks = [];
+ 	public static string versionNumber = "v1.4.4.9";
+ 	public static string versionNumber2 = "v1.4.4.9";
 @@ -2652,7 +_,11 @@
  	/// Retrieves the <see cref="Player"/> object for the local user. Shorthand for <c><see cref="player"/>[<see cref="myPlayer"/>]</c>.<br/>
  	/// Many gameplay elements such as recipes, UI, TownNPC chat, and Biome logic are only executed locally, <see cref="LocalPlayer"/> is suitable for code relating to those situations. If the hook has a <see cref="Player"/> parameter, it is likely not suitable to use <see cref="LocalPlayer"/> in it.
@@ -77,6 +85,21 @@
  			{
  				MenuUI.Draw(spriteBatch, gameTime);
  			}
+@@ -54086,10 +_,14 @@
+ 		var num110 = 0f;
+ 		if (!WorldGen.drunkWorldGen && menuMode == 0)
+ 		{
++			// Nitrate: Manual social media button drawing has been disabled.
++			// Now integrated into the Version Branding API.
++			/*
+ 			DrawSocialMediaButtons(color, num110);
+ 			num110 += 32f;
+ 
+ 			DrawtModLoaderSocialMediaButtons(color, num110);
++			*/
+ 		}
+ 
+ 		if (!WorldGen.drunkWorldGen)
 @@ -54213,7 +_,7 @@
  
  	private void OnSubmitServerPassword()
@@ -86,3 +109,62 @@
  		if (Platform.IsLinux)
  		{
  			text = ((IntPtr.Size != 8) ? (text + " -x86") : (text + " -x64"));
+@@ -54333,6 +_,7 @@
+ 
+ 	private static void DrawSocialMediaButtons(Microsoft.Xna.Framework.Color menuColor, float upBump)
+ 	{
++		/*
+ 		var titleLinks = TitleLinks;
+ 		var anchorPosition = new Vector2(18f, (float)(screenHeight - 26) - upBump);
+ 		for (var i = 0; i < titleLinks.Count; i++)
+@@ -54340,10 +_,16 @@
+ 			titleLinks[i].Draw(spriteBatch, anchorPosition);
+ 			anchorPosition.X += 30f;
+ 		}
++		*/
+ 	}
+ 
++// Nitrate: Method name is no longer accurate. Now also serves as an entry
++// for the version branding renderer.
+ 	private static void DrawVersionNumber(Microsoft.Xna.Framework.Color menuColor, float upBump)
+ 	{
++		version_branding_renderer.Draw(Main.spriteBatch, menuColor, upBump);
++		goto ThePartWeActuallyWantToStillHappen;
++		
+ 		var supportMessage = Language.GetTextValue("tModLoader.PatreonSupport");
+ 		var patreonShortURL = @"patreon.com/tModLoader";
+ 		var showPatreon = SocialAPI.Mode != SocialMode.Steam;
+@@ -54363,6 +_,8 @@
+ 		var origin = FontAssets.MouseText.Value.MeasureString(text);
+ 		origin.X *= 0.5f;
+ 		origin.Y *= 0.5f;
++		
++		ThePartWeActuallyWantToStillHappen:
+ 		for (var i = 0; i < 5; i++)
+ 		{
+ 			var color = Microsoft.Xna.Framework.Color.Black;
+@@ -54397,7 +_,7 @@
+ 				num2 = 2;
+ 			}
+ 
+-			spriteBatch.DrawString(FontAssets.MouseText.Value, text, new Vector2(origin.X + (float)num + 10f, (float)screenHeight - origin.Y + (float)num2 - 2f - upBump), color, 0f, origin, 1f, SpriteEffects.None, 0f);
++			// spriteBatch.DrawString(FontAssets.MouseText.Value, text, new Vector2(origin.X + (float)num + 10f, (float)screenHeight - origin.Y + (float)num2 - 2f - upBump), color, 0f, origin, 1f, SpriteEffects.None, 0f);
+ 
+ 			// Developer mode button.
+ 			if (menuMode == 0 /*&& !ModCompile.DeveloperMode*/)
+@@ -54429,6 +_,7 @@
+ 			}
+ 
+ 			// TML Patreon.
++			/*
+ 			if (showPatreon)
+ 			{
+ 				var font = FontAssets.MouseText.Value;
+@@ -54443,6 +_,7 @@
+ 					Utils.OpenToURL("https://www.patreon.com/tModLoader");
+ 				}
+ 			}
++			*/
+ 
+ 			// ModPack
+ 			if (ModOrganizer.ModPackActive != null)
