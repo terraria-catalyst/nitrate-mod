@@ -35,4 +35,9 @@ public interface IConfiguration {
     ///     If the async scene metrics feature should be enabled
     /// </summary>
     bool UsesAsyncSceneMetrics { get; set; }
+    
+    /// <summary>
+    ///     If the faster pylon system should be active
+    /// </summary>
+    bool UsesFasterPylonSystem { get; set; }
 }

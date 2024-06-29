@@ -31,6 +31,10 @@ internal sealed class ModConfigConfiguration : IConfiguration {
         [DefaultValue(true)]
         [UsedImplicitly(ImplicitUseKindFlags.Access | ImplicitUseKindFlags.Assign)]
         public bool UsesAsyncSceneMetrics { get; set; }
+        
+        [DefaultValue(true)]
+        [UsedImplicitly(ImplicitUseKindFlags.Access | ImplicitUseKindFlags.Assign)]
+        public bool UsesFasterPylonSystem { get; set; }
 
         /*[DefaultValue(true)]
         [UsedImplicitly(ImplicitUseKindFlags.Access | ImplicitUseKindFlags.Assign)]
@@ -57,5 +61,10 @@ internal sealed class ModConfigConfiguration : IConfiguration {
     bool IConfiguration.UsesAsyncSceneMetrics {
         get => Config.UsesAsyncSceneMetrics;
         set => Config.UsesAsyncSceneMetrics = value;
+    }
+
+    bool IConfiguration.UsesFasterPylonSystem {
+        get => Config.UsesFasterPylonSystem;
+        set => Config.UsesFasterPylonSystem = value;
     }
 }
