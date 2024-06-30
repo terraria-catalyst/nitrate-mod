@@ -26,6 +26,11 @@ Configs: {
 			Label: Uses Async Scene Metrics
 			Tooltip: ""
 		}
+
+		UsesFasterPylonSystem: {
+			Label: Uses Faster Pylon System
+			Tooltip: ""
+		}
 	}
 }
 
