@@ -22,4 +22,9 @@ internal sealed class NullConfiguration : IConfiguration {
         get => false;
         set { }
     }
+
+    bool IConfiguration.UsesFasterPylonSystem {
+        get => false;
+        set { }
+    }
 }
