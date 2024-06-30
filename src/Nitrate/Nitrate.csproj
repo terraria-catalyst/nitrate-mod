@@ -3,7 +3,6 @@
     <Import Project="../../catalyst/Mod.Build.targets"/>
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
         <LangVersion>latest</LangVersion>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <Nullable>enable</Nullable>
