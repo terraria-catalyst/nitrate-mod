@@ -28,8 +28,8 @@ Configs: {
 		}
 
 		UsesFasterPylonSystem: {
-			// Label: Uses Faster Pylon System
-			// Tooltip: ""
+			Label: 使用更快的晶塔系统
+			Tooltip: ""
 		}
 	}
 }
