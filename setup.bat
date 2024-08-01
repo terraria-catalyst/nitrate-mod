@@ -21,12 +21,5 @@ if NOT ["%errorlevel%"]==["0"] (
     exit /b %errorlevel%
 )
 
-where cleanupcode >NUL
-if NOT ["%errorlevel%"]==["0"] (
-	echo cleanupcode not found on PATH. Install ReSharper command line tools!
-    pause
-    exit /b %errorlevel%
-)
-
 echo running setup tool
 dotnet run --project src/Terraria.ModLoader.Setup/Terraria.ModLoader.Setup/Terraria.ModLoader.Setup.csproj -c "Release"
