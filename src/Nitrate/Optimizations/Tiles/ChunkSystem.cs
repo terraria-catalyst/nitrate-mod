@@ -270,6 +270,9 @@ internal sealed class ChunkSystem : ModSystem
         }
 
         Rectangle screenArea = new((int)Main.screenPosition.X, (int)Main.screenPosition.Y, Main.screenWidth, Main.screenHeight);
+        {
+            screenArea.Inflate(40, 40);
+        }
 
         // Chunk coordinates are incremented by 1 in each direction per chunk; 1 unit in chunk coordinates is equal to CHUNK_SIZE.
         // Chunk coordinates of the top-leftmost visible chunk.
@@ -512,7 +515,7 @@ internal sealed class ChunkSystem : ModSystem
                         return;
                     }
 
-                    walls.DoRenderWalls(Main.graphics.GraphicsDevice, screenSizeLightingBuffer, screenSizeOverrideBuffer, lightMapShader);
+                    walls.DoRenderWalls(Main.graphics.GraphicsDevice, lightingBuffer, overrideBuffer, lightMapShader);
                 }
             );
         }
@@ -534,7 +537,7 @@ internal sealed class ChunkSystem : ModSystem
                         return;
                     }
 
-                    non_solid_tiles.DoRenderTiles(Main.graphics.GraphicsDevice, screenSizeLightingBuffer, screenSizeOverrideBuffer, lightMapShader);
+                    non_solid_tiles.DoRenderTiles(Main.graphics.GraphicsDevice, lightingBuffer, overrideBuffer, lightMapShader);
                 }
             );
         }
@@ -556,7 +559,7 @@ internal sealed class ChunkSystem : ModSystem
                         return;
                     }
 
-                    solid_tiles.DoRenderTiles(Main.graphics.GraphicsDevice, screenSizeLightingBuffer, screenSizeOverrideBuffer, lightMapShader);
+                    solid_tiles.DoRenderTiles(Main.graphics.GraphicsDevice, lightingBuffer, overrideBuffer, lightMapShader);
                 }
             );
         }
