@@ -2,28 +2,34 @@
 
 namespace Nitrate.Config;
 
-internal sealed class NullConfiguration : IConfiguration {
-    bool IConfiguration.UsesExperimentalTileRenderer {
+internal sealed class NullConfiguration : IConfiguration
+{
+    bool IConfiguration.UsesExperimentalTileRenderer
+    {
         get => false;
         set { }
     }
 
-    bool IConfiguration.DisabledExperimentalTileRendererWarning {
+    bool IConfiguration.DisabledExperimentalTileRendererWarning
+    {
         get => false;
         set { }
     }
 
-    bool IConfiguration.UsesNewLaserRulerRendering {
+    bool IConfiguration.UsesNewLaserRulerRendering
+    {
         get => false;
         set { }
     }
 
-    bool IConfiguration.UsesAsyncSceneMetrics {
+    bool IConfiguration.UsesAsyncSceneMetrics
+    {
         get => false;
         set { }
     }
 
-    bool IConfiguration.UsesFasterPylonSystem {
+    bool IConfiguration.UsesFasterPylonSystem
+    {
         get => false;
         set { }
     }

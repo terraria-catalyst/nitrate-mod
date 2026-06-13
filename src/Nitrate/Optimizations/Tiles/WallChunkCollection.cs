@@ -7,10 +7,12 @@ using Terraria;
 
 namespace Nitrate.Optimizations.Tiles;
 
-internal sealed class WallChunkCollection : ChunkCollection {
+internal sealed class WallChunkCollection : ChunkCollection
+{
     public override bool ApplyOverride => false;
 
-    public override void PopulateChunk(Point key) {
+    public override void PopulateChunk(Point key)
+    {
         var chunk = Loaded[key];
         var target = chunk.RenderTarget;
 
@@ -37,21 +39,26 @@ internal sealed class WallChunkCollection : ChunkCollection {
             RasterizerState.CullNone
         );
 
-        for (var i = -1; i < size_tiles + 1; i++) {
-            for (var j = -1; j < size_tiles + 1; j++) {
+        for (var i = -1; i < size_tiles + 1; i++)
+        {
+            for (var j = -1; j < size_tiles + 1; j++)
+            {
                 var tileX = chunkPositionTile.X + i;
                 var tileY = chunkPositionTile.Y + j;
 
-                if (!WorldGen.InWorld(tileX, tileY)) {
+                if (!WorldGen.InWorld(tileX, tileY))
+                {
                     continue;
                 }
 
                 var tile = Framing.GetTileSafely(tileX, tileY);
 
-                if (AnimatedTileRegistry.IsWallPossiblyAnimated(tile.WallType)) {
+                if (AnimatedTileRegistry.IsWallPossiblyAnimated(tile.WallType))
+                {
                     chunk.AnimatedPoints.Add(new AnimatedPoint(tileX, tileY, AnimatedPointType.AnimatedTile));
                 }
-                else {
+                else
+                {
                     // Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(tileX * 16 - (int)chunkPositionWorld.X, tileY * 16 - (int)chunkPositionWorld.Y, 16, 16), Color.Yellow);
                     ModifiedTileDrawing.DrawSingleWall(false, tileX, tileY, chunkPositionWorld);
                 }
@@ -64,14 +71,17 @@ internal sealed class WallChunkCollection : ChunkCollection {
         device.SetRenderTargets(null);
     }
 
-    public override void DrawChunksToChunkTarget(GraphicsDevice device) {
-        if (ScreenTarget is null) {
+    public override void DrawChunksToChunkTarget(GraphicsDevice device)
+    {
+        if (ScreenTarget is null)
+        {
             return;
         }
 
         var bindings = device.GetRenderTargets();
 
-        foreach (var binding in bindings) {
+        foreach (var binding in bindings)
+        {
             ((RenderTarget2D)binding.RenderTarget).RenderTargetUsage = RenderTargetUsage.PreserveContents;
         }
 
@@ -92,20 +102,23 @@ internal sealed class WallChunkCollection : ChunkCollection {
 
         Rectangle screenArea = new((int)screenPosition.X, (int)screenPosition.Y, Main.screenWidth, Main.screenHeight);
 
-        foreach (var key in Loaded.Keys) {
+        foreach (var key in Loaded.Keys)
+        {
             var chunk = Loaded[key];
             var target = chunk.RenderTarget;
 
             Rectangle chunkArea = new(key.X * ChunkSystem.CHUNK_SIZE, key.Y * ChunkSystem.CHUNK_SIZE, target.Width, target.Height);
 
-            if (!chunkArea.Intersects(screenArea)) {
+            if (!chunkArea.Intersects(screenArea))
+            {
                 continue;
             }
 
             // This should never happen, something catastrophic happened if it did.
             // The check here is because rendering disposed targets generally has strange behaviour and doesn't always throw exceptions.
             // Therefore this check needs to be made as it's more robust.
-            if (target.IsDisposed) {
+            if (target.IsDisposed)
+            {
                 throw new Exception("Attempted to render a disposed chunk.");
             }
 
@@ -117,20 +130,25 @@ internal sealed class WallChunkCollection : ChunkCollection {
         device.SetRenderTargets(bindings);
     }
 
-    public void DoRenderWalls(GraphicsDevice graphicsDevice, RenderTarget2D? screenSizeLightingBuffer, RenderTarget2D? screenSizeOverrideBuffer, Lazy<Effect> lightMapRenderer, SpriteBatchUtil.SpriteBatchSnapshot? snapshot) {
+    public void DoRenderWalls(GraphicsDevice graphicsDevice, RenderTarget2D? screenSizeLightingBuffer, RenderTarget2D? screenSizeOverrideBuffer, Lazy<Effect> lightMapRenderer, SpriteBatchUtil.SpriteBatchSnapshot? snapshot)
+    {
         DrawChunksToChunkTarget(graphicsDevice);
         RenderChunksWithLighting(screenSizeLightingBuffer, screenSizeOverrideBuffer, lightMapRenderer);
 
-        if (snapshot.HasValue) {
+        if (snapshot.HasValue)
+        {
             Main.tileBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
             Main.spriteBatch.BeginWithSnapshot(snapshot.Value);
         }
 
-        foreach (var key in Loaded.Keys) {
+        foreach (var key in Loaded.Keys)
+        {
             var chunk = Loaded[key];
 
-            foreach (var wallPoint in chunk.AnimatedPoints) {
-                if (wallPoint.Type != AnimatedPointType.AnimatedTile) {
+            foreach (var wallPoint in chunk.AnimatedPoints)
+            {
+                if (wallPoint.Type != AnimatedPointType.AnimatedTile)
+                {
                     continue;
                 }
 
@@ -140,7 +158,8 @@ internal sealed class WallChunkCollection : ChunkCollection {
             }
         }
 
-        if (snapshot.HasValue) {
+        if (snapshot.HasValue)
+        {
             Main.tileBatch.End();
             Main.spriteBatch.End();
             Main.spriteBatch.BeginWithSnapshot(snapshot.Value);

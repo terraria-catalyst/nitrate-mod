@@ -18,17 +18,22 @@ using Terraria.ModLoader;
 namespace Nitrate.Optimizations.Tiles;
 
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
-internal sealed class ChunkSystem : ModSystem {
+internal sealed class ChunkSystem : ModSystem
+{
     [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
-    private sealed class WarningSystem : ModPlayer {
-        public override void OnEnterWorld() {
+    private sealed class WarningSystem : ModPlayer
+    {
+        public override void OnEnterWorld()
+        {
             base.OnEnterWorld();
 
-            if (Main.myPlayer != Player.whoAmI) {
+            if (Main.myPlayer != Player.whoAmI)
+            {
                 return;
             }
 
-            if (Configuration is { UsesExperimentalTileRenderer: true, DisabledExperimentalTileRendererWarning: false }) {
+            if (Configuration is { UsesExperimentalTileRenderer: true, DisabledExperimentalTileRendererWarning: false })
+            {
                 Main.NewText("StartupMessages.ExperimentalTileRendererWarning".LocalizeNitrate(), Color.PaleVioletRed);
             }
         }
@@ -59,12 +64,14 @@ internal sealed class ChunkSystem : ModSystem {
     private static bool debugChunkBorders;
     private static bool debugLightMap;
 
-    public override void OnModLoad() {
+    public override void OnModLoad()
+    {
         base.OnModLoad();
 
         enabled = Configuration.UsesExperimentalTileRenderer;
 
-        if (!enabled) {
+        if (!enabled)
+        {
             return;
         }
 
@@ -87,7 +94,8 @@ internal sealed class ChunkSystem : ModSystem {
         On_Main.DoDraw_WallsTilesNPCs += HookBeforeDrawingToPopulateLightingBufferAndHandleStuffThatShouldHappenWhenDrawingToScreen;
 
         Main.RunOnMainThread(
-            () => {
+            () =>
+            {
                 lightingBuffer = new RenderTarget2D(
                     Main.graphics.GraphicsDevice,
                     (int)Math.Ceiling(Main.screenWidth / 16f) + lighting_buffer_offscreen_range_tiles * 2,
@@ -103,7 +111,8 @@ internal sealed class ChunkSystem : ModSystem {
                 colorBuffer = new Color[lightingBuffer.Width * lightingBuffer.Height];
                 overrideColorBuffer = new Color[lightingBuffer.Width * lightingBuffer.Height];
 
-                foreach (var chunkCollection in chunk_collections) {
+                foreach (var chunkCollection in chunk_collections)
+                {
                     chunkCollection.ScreenTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
                 }
 
@@ -116,7 +125,8 @@ internal sealed class ChunkSystem : ModSystem {
             }
         );
 
-        Main.OnResolutionChanged += _ => {
+        Main.OnResolutionChanged += _ =>
+        {
             lightingBuffer?.Dispose();
 
             lightingBuffer = new RenderTarget2D(
@@ -133,7 +143,8 @@ internal sealed class ChunkSystem : ModSystem {
                 (int)Math.Ceiling(Main.screenHeight / 16f) + lighting_buffer_offscreen_range_tiles * 2
             );
 
-            foreach (var chunkCollection in chunk_collections) {
+            foreach (var chunkCollection in chunk_collections)
+            {
                 chunkCollection.ScreenTarget?.Dispose();
                 chunkCollection.ScreenTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
             }
@@ -149,10 +160,12 @@ internal sealed class ChunkSystem : ModSystem {
         };
     }
 
-    public override void OnWorldUnload() {
+    public override void OnWorldUnload()
+    {
         base.OnWorldUnload();
 
-        if (!enabled) {
+        if (!enabled)
+        {
             return;
         }
 
@@ -160,33 +173,40 @@ internal sealed class ChunkSystem : ModSystem {
         // an uncleared collection. This probably prevents a memory leak.
         List<Chunk> loadedChunksClone = new();
 
-        foreach (var chunkCollection in chunk_collections) {
+        foreach (var chunkCollection in chunk_collections)
+        {
             loadedChunksClone.AddRange(chunkCollection.Loaded.Values);
         }
 
         Main.RunOnMainThread(
-            () => {
-                foreach (var chunk in loadedChunksClone) {
+            () =>
+            {
+                foreach (var chunk in loadedChunksClone)
+                {
                     chunk.Dispose();
                 }
             }
         );
 
-        foreach (var chunkCollection in chunk_collections) {
+        foreach (var chunkCollection in chunk_collections)
+        {
             chunkCollection.Loaded.Clear();
             chunkCollection.NeedsPopulating.Clear();
         }
     }
 
-    public override void Unload() {
+    public override void Unload()
+    {
         base.Unload();
 
-        foreach (var chunkCollection in chunk_collections) {
+        foreach (var chunkCollection in chunk_collections)
+        {
             chunkCollection.DisposeAllChunks();
         }
 
         Main.RunOnMainThread(
-            () => {
+            () =>
+            {
                 lightingBuffer?.Dispose();
                 lightingBuffer = null;
 
@@ -202,29 +222,34 @@ internal sealed class ChunkSystem : ModSystem {
         );
     }
 
-    public override void PostUpdateInput() {
+    public override void PostUpdateInput()
+    {
         base.PostUpdateInput();
 
         const Keys chunk_border_key = Keys.F5;
         const Keys light_map_key = Keys.F6;
 
-        if (Main.keyState.IsKeyDown(chunk_border_key) && !Main.oldKeyState.IsKeyDown(chunk_border_key)) {
+        if (Main.keyState.IsKeyDown(chunk_border_key) && !Main.oldKeyState.IsKeyDown(chunk_border_key))
+        {
             debugChunkBorders = !debugChunkBorders;
 
             Main.NewText($"Chunk Borders ({chunk_border_key}): " + (debugChunkBorders ? "Shown" : "Hidden"), debugChunkBorders ? Color.Green : Color.Red);
         }
 
-        if (Main.keyState.IsKeyDown(light_map_key) && !Main.oldKeyState.IsKeyDown(light_map_key)) {
+        if (Main.keyState.IsKeyDown(light_map_key) && !Main.oldKeyState.IsKeyDown(light_map_key))
+        {
             debugLightMap = !debugLightMap;
 
             Main.NewText($"Light Map ({light_map_key}): " + (debugLightMap ? "Shown" : "Hidden"), debugLightMap ? Color.Green : Color.Red);
         }
     }
 
-    public override void PostUpdateEverything() {
+    public override void PostUpdateEverything()
+    {
         base.PostUpdateEverything();
 
-        if (!enabled) {
+        if (!enabled)
+        {
             return;
         }
 
@@ -240,25 +265,32 @@ internal sealed class ChunkSystem : ModSystem {
         var bottomY = (int)Math.Floor((double)(screenArea.Y + screenArea.Height) / CHUNK_SIZE) + chunk_offscreen_buffer;
 
         // Make sure all chunks onscreen as well as the buffer are loaded.
-        for (var x = topX; x <= bottomX; x++) {
-            for (var y = topY; y <= bottomY; y++) {
+        for (var x = topX; x <= bottomX; x++)
+        {
+            for (var y = topY; y <= bottomY; y++)
+            {
                 Point chunkKey = new(x, y);
 
-                foreach (var chunkCollection in chunk_collections) {
-                    if (!chunkCollection.Loaded.ContainsKey(chunkKey)) {
+                foreach (var chunkCollection in chunk_collections)
+                {
+                    if (!chunkCollection.Loaded.ContainsKey(chunkKey))
+                    {
                         chunkCollection.LoadChunk(chunkKey);
                     }
                 }
             }
         }
 
-        foreach (var chunkCollection in chunk_collections) {
+        foreach (var chunkCollection in chunk_collections)
+        {
             chunkCollection.RemoveOutOfBoundsAndPopulate(topX, bottomX, topY, bottomY);
         }
     }
 
-    private static void PopulateLightingBuffer() {
-        if (lightingBuffer is null || overrideBuffer is null) {
+    private static void PopulateLightingBuffer()
+    {
+        if (lightingBuffer is null || overrideBuffer is null)
+        {
             return;
         }
 
@@ -267,8 +299,10 @@ internal sealed class ChunkSystem : ModSystem {
         FasterParallel.For(
             0,
             colorBuffer.Length,
-            (inclusive, exclusive, _) => {
-                for (var i = inclusive; i < exclusive; i++) {
+            (inclusive, exclusive, _) =>
+            {
+                for (var i = inclusive; i < exclusive; i++)
+                {
                     var x = i % lightingBuffer.Width;
                     var y = i / lightingBuffer.Width;
 
@@ -279,7 +313,8 @@ internal sealed class ChunkSystem : ModSystem {
 
                     var overrideColor = Color.Transparent;
 
-                    if (checkDynamicLighting) {
+                    if (checkDynamicLighting)
+                    {
                         solid_tiles.TryGetDynamicLighting(tileX, tileY, colorBuffer[i], ref overrideColor);
                     }
 
@@ -289,30 +324,41 @@ internal sealed class ChunkSystem : ModSystem {
         );
 
         // SetDataPointerEXT skips some overhead.
-        unsafe {
+        unsafe
+        {
             fixed (Color* ptr = &colorBuffer[0])
-                lightingBuffer.SetDataPointerEXT(0, null, (IntPtr)ptr, colorBuffer.Length);
+            {
+                lightingBuffer.SetDataPointerEXT(0, null, (nint)ptr, colorBuffer.Length);
+            }
 
             if (!checkDynamicLighting)
+            {
                 return;
+            }
 
             fixed (Color* ptr = &overrideColorBuffer[0])
-                overrideBuffer.SetDataPointerEXT(0, null, (IntPtr)ptr, overrideColorBuffer.Length);
+            {
+                overrideBuffer.SetDataPointerEXT(0, null, (nint)ptr, overrideColorBuffer.Length);
+            }
         }
     }
 
-    private static void TransferTileSpaceBufferToScreenSpaceBuffer(GraphicsDevice device) {
-        if (screenSizeLightingBuffer is null || screenSizeOverrideBuffer is null) {
+    private static void TransferTileSpaceBufferToScreenSpaceBuffer(GraphicsDevice device)
+    {
+        if (screenSizeLightingBuffer is null || screenSizeOverrideBuffer is null)
+        {
             return;
         }
 
         var bindings = device.GetRenderTargets();
 
-        foreach (var binding in bindings) {
+        foreach (var binding in bindings)
+        {
             ((RenderTarget2D)binding.RenderTarget).RenderTargetUsage = RenderTargetUsage.PreserveContents;
         }
 
-        void transfer(RenderTarget2D? buffer, RenderTarget2D screenSize) {
+        void transfer(RenderTarget2D? buffer, RenderTarget2D screenSize)
+        {
             device.SetRenderTarget(screenSize);
             device.Clear(Color.Transparent);
 
@@ -336,7 +382,8 @@ internal sealed class ChunkSystem : ModSystem {
 
             device.SetRenderTargets(bindings);
 
-            if (ended) {
+            if (ended)
+            {
                 Main.spriteBatch.BeginWithSnapshot(snapshot);
             }
         }
@@ -344,98 +391,124 @@ internal sealed class ChunkSystem : ModSystem {
         transfer(lightingBuffer, screenSizeLightingBuffer);
 
         // Could probably abstract the conditions required to use color overrides.
-        if (Main.LocalPlayer.dangerSense || Main.LocalPlayer.findTreasure || Main.LocalPlayer.biomeSight) {
+        if (Main.LocalPlayer.dangerSense || Main.LocalPlayer.findTreasure || Main.LocalPlayer.biomeSight)
+        {
             transfer(overrideBuffer, screenSizeOverrideBuffer);
         }
     }
 
-    private static void TileStateChanged(int i, int j) {
+    private static void TileStateChanged(int i, int j)
+    {
         var chunkX = (int)Math.Floor(i / (CHUNK_SIZE / 16.0));
         var chunkY = (int)Math.Floor(j / (CHUNK_SIZE / 16.0));
 
-        List<Point> chunkKeys = new() {
+        List<Point> chunkKeys = new()
+        {
             new Point(chunkX, chunkY),
         };
 
-        if (i % CHUNK_SIZE < edge_threshold) {
+        if (i % CHUNK_SIZE < edge_threshold)
+        {
             chunkKeys.Add(new Point(chunkX - 1, chunkY));
         }
-        else if (i % CHUNK_SIZE > CHUNK_SIZE - edge_threshold) {
+        else if (i % CHUNK_SIZE > CHUNK_SIZE - edge_threshold)
+        {
             chunkKeys.Add(new Point(chunkX + 1, chunkY));
         }
 
-        if (j % CHUNK_SIZE < edge_threshold) {
+        if (j % CHUNK_SIZE < edge_threshold)
+        {
             chunkKeys.Add(new Point(chunkX, chunkY - 1));
         }
-        else if (j % CHUNK_SIZE > CHUNK_SIZE - edge_threshold) {
+        else if (j % CHUNK_SIZE > CHUNK_SIZE - edge_threshold)
+        {
             chunkKeys.Add(new Point(chunkX, chunkY + 1));
         }
 
-        foreach (var chunkCollection in new[] { non_solid_tiles, solid_tiles }) {
-            foreach (var chunkKey in chunkKeys) {
-                if (!chunkCollection.Loaded.ContainsKey(chunkKey)) {
+        foreach (var chunkCollection in new[] { non_solid_tiles, solid_tiles })
+        {
+            foreach (var chunkKey in chunkKeys)
+            {
+                if (!chunkCollection.Loaded.ContainsKey(chunkKey))
+                {
                     return;
                 }
 
-                if (!chunkCollection.NeedsPopulating.Contains(chunkKey)) {
+                if (!chunkCollection.NeedsPopulating.Contains(chunkKey))
+                {
                     chunkCollection.NeedsPopulating.Add(chunkKey);
                 }
             }
         }
     }
 
-    private static void WallStateChanged(int i, int j) {
+    private static void WallStateChanged(int i, int j)
+    {
         var chunkX = (int)Math.Floor(i / (CHUNK_SIZE / 16.0));
         var chunkY = (int)Math.Floor(j / (CHUNK_SIZE / 16.0));
 
-        List<Point> chunkKeys = new() {
+        List<Point> chunkKeys = new()
+        {
             new Point(chunkX, chunkY),
         };
 
-        if (i % CHUNK_SIZE < edge_threshold) {
+        if (i % CHUNK_SIZE < edge_threshold)
+        {
             chunkKeys.Add(new Point(chunkX - 1, chunkY));
         }
-        else if (i % CHUNK_SIZE > CHUNK_SIZE - edge_threshold) {
+        else if (i % CHUNK_SIZE > CHUNK_SIZE - edge_threshold)
+        {
             chunkKeys.Add(new Point(chunkX + 1, chunkY));
         }
 
-        if (j % CHUNK_SIZE < edge_threshold) {
+        if (j % CHUNK_SIZE < edge_threshold)
+        {
             chunkKeys.Add(new Point(chunkX, chunkY - 1));
         }
-        else if (j % CHUNK_SIZE > CHUNK_SIZE - edge_threshold) {
+        else if (j % CHUNK_SIZE > CHUNK_SIZE - edge_threshold)
+        {
             chunkKeys.Add(new Point(chunkX, chunkY + 1));
         }
 
-        foreach (var chunkKey in chunkKeys) {
-            if (!walls.Loaded.ContainsKey(chunkKey)) {
+        foreach (var chunkKey in chunkKeys)
+        {
+            if (!walls.Loaded.ContainsKey(chunkKey))
+            {
                 return;
             }
 
-            if (!walls.NeedsPopulating.Contains(chunkKey)) {
+            if (!walls.NeedsPopulating.Contains(chunkKey))
+            {
                 walls.NeedsPopulating.Add(chunkKey);
             }
         }
     }
 
-    private static void TileVisibilityChanged(DynamicTileVisibilityListener.VisibilityType types) {
-        foreach (var chunkCollection in chunk_collections) {
-            foreach (var chunkKey in chunkCollection.Loaded.Keys) {
+    private static void TileVisibilityChanged(DynamicTileVisibilityListener.VisibilityType types)
+    {
+        foreach (var chunkCollection in chunk_collections)
+        {
+            foreach (var chunkKey in chunkCollection.Loaded.Keys)
+            {
                 chunkCollection.NeedsPopulating.Add(chunkKey);
             }
         }
     }
 
-    private static void CancelVanillaRendering(ILContext il) {
+    private static void CancelVanillaRendering(ILContext il)
+    {
         ILCursor c = new(il);
 
         c.Emit(OpCodes.Ret);
     }
 
-    private static void NewDrawWalls(ILContext il) {
+    private static void NewDrawWalls(ILContext il)
+    {
         ILCursor c = new(il);
 
         c.EmitDelegate(
-            () => {
+            () =>
+            {
                 walls.DoRenderWalls(Main.graphics.GraphicsDevice, screenSizeLightingBuffer, screenSizeOverrideBuffer, light_map_renderer, Main.spriteBatch.TryEnd(out var s) ? s : null);
 
                 Main.instance.DrawTileCracks(2, Main.LocalPlayer.hitReplace);
@@ -448,11 +521,13 @@ internal sealed class ChunkSystem : ModSystem {
         c.Emit(OpCodes.Ret);
     }
 
-    private static void NewDrawNonSolidTiles(ILContext il) {
+    private static void NewDrawNonSolidTiles(ILContext il)
+    {
         ILCursor c = new(il);
 
         c.EmitDelegate(
-            () => {
+            () =>
+            {
                 // FIX: Last parameter (intoRenderTargets) is TRUE because it is
                 // required for special counts to actually clear.
                 Main.instance.TilesRenderer.PreDrawTiles(false, false, true);
@@ -468,11 +543,13 @@ internal sealed class ChunkSystem : ModSystem {
         c.Emit(OpCodes.Ret);
     }
 
-    private static void NewDrawSolidTiles(ILContext il) {
+    private static void NewDrawSolidTiles(ILContext il)
+    {
         ILCursor c = new(il);
 
         c.EmitDelegate(
-            () => {
+            () =>
+            {
                 Main.instance.TilesRenderer.PreDrawTiles(true, false, false);
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.Transform);
 
@@ -482,17 +559,20 @@ internal sealed class ChunkSystem : ModSystem {
 
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.Transform);
 
-                try {
+                try
+                {
                     Main.player[Main.myPlayer].hitReplace.DrawFreshAnimations(Main.spriteBatch);
                     Main.player[Main.myPlayer].hitTile.DrawFreshAnimations(Main.spriteBatch);
                 }
-                catch (Exception e2) {
+                catch (Exception e2)
+                {
                     TimeLogger.DrawException(e2);
                 }
 
                 Main.spriteBatch.End();
 
-                if (debugChunkBorders || debugLightMap) {
+                if (debugChunkBorders || debugLightMap)
+                {
                     Main.spriteBatch.Begin(
                         SpriteSortMode.Deferred,
                         BlendState.AlphaBlend,
@@ -501,11 +581,13 @@ internal sealed class ChunkSystem : ModSystem {
                         RasterizerState.CullNone
                     );
 
-                    if (debugChunkBorders) {
+                    if (debugChunkBorders)
+                    {
                         const int line_width = 2;
                         const int offset = line_width / 2;
 
-                        foreach (var chunkKey in solid_tiles.Loaded.Keys) {
+                        foreach (var chunkKey in solid_tiles.Loaded.Keys)
+                        {
                             var chunkX = chunkKey.X * CHUNK_SIZE - (int)Main.screenPosition.X;
                             var chunkY = chunkKey.Y * CHUNK_SIZE - (int)Main.screenPosition.Y;
 
@@ -516,7 +598,8 @@ internal sealed class ChunkSystem : ModSystem {
                         }
                     }
 
-                    if (debugLightMap) {
+                    if (debugLightMap)
+                    {
                         Main.spriteBatch.Draw(screenSizeLightingBuffer, Vector2.Zero, Color.White);
                     }
 
@@ -528,7 +611,8 @@ internal sealed class ChunkSystem : ModSystem {
         c.Emit(OpCodes.Ret);
     }
 
-    private static void HookBeforeDrawingToPopulateLightingBufferAndHandleStuffThatShouldHappenWhenDrawingToScreen(On_Main.orig_DoDraw_WallsTilesNPCs orig, Main self) {
+    private static void HookBeforeDrawingToPopulateLightingBufferAndHandleStuffThatShouldHappenWhenDrawingToScreen(On_Main.orig_DoDraw_WallsTilesNPCs orig, Main self)
+    {
         var old = Main.drawToScreen;
         Main.drawToScreen = true;
         Main.tileBatch.Begin();

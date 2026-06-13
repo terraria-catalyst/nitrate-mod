@@ -7,20 +7,25 @@ using Terraria;
 
 namespace Nitrate.Optimizations.Tiles;
 
-internal abstract class ChunkCollection {
-    public Dictionary<Point, Chunk> Loaded { get; } = new();
+internal abstract class ChunkCollection
+{
+    protected readonly Dictionary<Point, byte> FailedPopulations = new();
 
     public readonly List<Point> NeedsPopulating = new();
     protected readonly List<Point> NeedsRePopulating = new();
-    protected readonly Dictionary<Point, byte> FailedPopulations = new();
+    public Dictionary<Point, Chunk> Loaded { get; } = new();
 
     public RenderTarget2D? ScreenTarget { get; set; }
 
     public virtual bool ApplyOverride => Main.LocalPlayer.dangerSense || Main.LocalPlayer.findTreasure || Main.LocalPlayer.biomeSight;
 
-    public virtual void LoadChunk(Point key) {
-        if (NeedsPopulating.Contains(key)) return;
-        
+    public virtual void LoadChunk(Point key)
+    {
+        if (NeedsPopulating.Contains(key))
+        {
+            return;
+        }
+
         RenderTarget2D target = new(
             Main.graphics.GraphicsDevice,
             ChunkSystem.CHUNK_SIZE,
@@ -36,7 +41,8 @@ internal abstract class ChunkCollection {
         NeedsPopulating.Add(key);
     }
 
-    public virtual void UnloadChunk(Point key) {
+    public virtual void UnloadChunk(Point key)
+    {
         Loaded[key].Dispose();
         NeedsPopulating.Remove(key);
     }
@@ -45,8 +51,10 @@ internal abstract class ChunkCollection {
 
     public abstract void DrawChunksToChunkTarget(GraphicsDevice device);
 
-    public virtual void RenderChunksWithLighting(RenderTarget2D? screenSizeLightingBuffer, RenderTarget2D? screenSizeOverrideBuffer, Lazy<Effect> lightMapRenderer) {
-        if (ScreenTarget is null || screenSizeLightingBuffer is null) {
+    public virtual void RenderChunksWithLighting(RenderTarget2D? screenSizeLightingBuffer, RenderTarget2D? screenSizeOverrideBuffer, Lazy<Effect> lightMapRenderer)
+    {
+        if (ScreenTarget is null || screenSizeLightingBuffer is null)
+        {
             return;
         }
 
@@ -66,7 +74,8 @@ internal abstract class ChunkCollection {
         lightMapRenderer.Value.Parameters["gameViewMatrix"].SetValue(Main.GameViewMatrix.TransformationMatrix);
 
         // If not set it will default to being empty which will not apply any override colors.
-        if (screenSizeOverrideBuffer is not null) {
+        if (screenSizeOverrideBuffer is not null)
+        {
             lightMapRenderer.Value.Parameters["overrideMap"].SetValue(screenSizeOverrideBuffer);
         }
 
@@ -79,13 +88,16 @@ internal abstract class ChunkCollection {
         Main.spriteBatch.End();
     }
 
-    public virtual void DisposeAllChunks() {
+    public virtual void DisposeAllChunks()
+    {
         var loadedCopy = Loaded.Values;
 
         // Capture a copy that wasn't cleared to avoid memory leaks.
         Main.RunOnMainThread(
-            () => {
-                foreach (var chunk in loadedCopy) {
+            () =>
+            {
+                foreach (var chunk in loadedCopy)
+                {
                     chunk.Dispose();
                 }
 
@@ -98,10 +110,13 @@ internal abstract class ChunkCollection {
         NeedsPopulating.Clear();
     }
 
-    public virtual void RemoveOutOfBoundsAndPopulate(int topX, int bottomX, int topY, int bottomY) {
+    public virtual void RemoveOutOfBoundsAndPopulate(int topX, int bottomX, int topY, int bottomY)
+    {
         var copy = Loaded;
-        foreach (var key in copy.Keys) {
-            if ((key.X >= topX && key.X <= bottomX && key.Y >= topY && key.Y <= bottomY) || NeedsPopulating.Contains(key)) {
+        foreach (var key in copy.Keys)
+        {
+            if ((key.X >= topX && key.X <= bottomX && key.Y >= topY && key.Y <= bottomY) || NeedsPopulating.Contains(key))
+            {
                 continue;
             }
 
@@ -111,17 +126,21 @@ internal abstract class ChunkCollection {
         }
 
         // Only repopulate chunks once every 4 frames, like vanilla does with tiles.
-        if (Main.GameUpdateCount % 4 == 0) {
-            foreach (var key in NeedsPopulating) {
+        if (Main.GameUpdateCount % 4 == 0)
+        {
+            foreach (var key in NeedsPopulating)
+            {
                 PopulateChunk(key);
             }
-            
-            foreach (var key in NeedsPopulating.Except(NeedsRePopulating)) {
-                if (!FailedPopulations.TryAdd(key, 6)) {
+
+            foreach (var key in NeedsPopulating.Except(NeedsRePopulating))
+            {
+                if (!FailedPopulations.TryAdd(key, 6))
+                {
                     FailedPopulations[key] = 6;
                 }
             }
-            
+
             NeedsPopulating.Clear();
             NeedsPopulating.AddRange(NeedsRePopulating);
             NeedsRePopulating.Clear();

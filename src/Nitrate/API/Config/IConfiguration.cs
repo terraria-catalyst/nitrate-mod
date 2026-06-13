@@ -3,13 +3,14 @@
 namespace Nitrate.API.Config;
 
 /// <summary>
-///     <see cref="NitrateMod"/> configuration.
+///     <see cref="NitrateMod" /> configuration.
 /// </summary>
 /// <remarks>
 ///     In an effort to remain decoupled from tModLoader and its configuration
 ///     system, the configuration is defined as an interface.
 /// </remarks>
-public interface IConfiguration {
+public interface IConfiguration
+{
     /// <summary>
     ///     A no-op, &quot;null&quot; configuration.
     /// </summary>
@@ -30,12 +31,12 @@ public interface IConfiguration {
     ///     If the new laser ruler rendering system should be used over the vanilla one.
     /// </summary>
     bool UsesNewLaserRulerRendering { get; set; }
-    
+
     /// <summary>
     ///     If the async scene metrics feature should be enabled
     /// </summary>
     bool UsesAsyncSceneMetrics { get; set; }
-    
+
     /// <summary>
     ///     If the faster pylon system should be active
     /// </summary>

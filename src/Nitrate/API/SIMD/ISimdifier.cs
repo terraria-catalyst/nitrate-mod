@@ -5,7 +5,8 @@ namespace Nitrate.API.SIMD;
 /// <summary>
 ///     Simdifies a method body.
 /// </summary>
-public interface ISimdifier {
+public interface ISimdifier
+{
     /// <summary>
     ///     Simdifies the given method body.
     /// </summary>

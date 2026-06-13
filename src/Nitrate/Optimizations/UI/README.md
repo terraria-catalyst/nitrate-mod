@@ -20,9 +20,10 @@ The vanilla renderer of the laser ruler renders each grid cell individually, cau
 
 ### The Solution
 
-Instead of rendering each grid cell individually, render the grid as a sequence of overlapping shapes. 
+Instead of rendering each grid cell individually, render the grid as a sequence of overlapping shapes.
 
 The new system does so in the following order:
+
 1. Background (1 call)
 2. Grid lines (Up to ~240 calls, depends on screen size)
 3. Red mouse hover highlight (3 calls)

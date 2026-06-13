@@ -11,16 +11,19 @@ using Terraria.Graphics.Capture;
 
 namespace Nitrate.Optimizations.Tiles;
 
-internal sealed class TileChunkCollection : ChunkCollection {
-    public bool SolidLayer { get; init; }
-
+internal sealed class TileChunkCollection : ChunkCollection
+{
     private DynamicTileVisibilityListener.VisibilityType dynamicVisibilityTypes;
 
-    public TileChunkCollection() {
+    public TileChunkCollection()
+    {
         DynamicTileVisibilityListener.OnVisibilityChange += TrackTileVisibility;
     }
 
-    public override void PopulateChunk(Point key) {
+    public bool SolidLayer { get; init; }
+
+    public override void PopulateChunk(Point key)
+    {
         var chunk = Loaded[key];
         var target = chunk.RenderTarget;
 
@@ -47,64 +50,77 @@ internal sealed class TileChunkCollection : ChunkCollection {
             RasterizerState.CullNone
         );
 
-        for (var i = 0; i < size_tiles; i++) {
-            for (var j = 0; j < size_tiles; j++) {
+        for (var i = 0; i < size_tiles; i++)
+        {
+            for (var j = 0; j < size_tiles; j++)
+            {
                 var tileX = chunkPositionTile.X + i;
                 var tileY = chunkPositionTile.Y + j;
 
-                if (!WorldGen.InWorld(tileX, tileY)) {
+                if (!WorldGen.InWorld(tileX, tileY))
+                {
                     continue;
                 }
 
                 var tile = Framing.GetTileSafely(tileX, tileY);
-                
-                if (tile.frameX == -1) {
-                    if (!FailedPopulations.TryAdd(key, 0)) {
+
+                if (tile.frameX == -1)
+                {
+                    if (!FailedPopulations.TryAdd(key, 0))
+                    {
                         FailedPopulations[key]++;
                     }
                 }
 
-                if (FailedPopulations.TryGetValue(key, out byte value) && value < 6 && tile.frameX == -1) {
+                if (FailedPopulations.TryGetValue(key, out var value) && value < 6 && tile.frameX == -1)
+                {
                     StopRender(device);
                     NeedsRePopulating.Add(key);
                     return;
                 }
 
-                if (!tile.HasTile || Main.instance.TilesRenderer.IsTileDrawLayerSolid(tile.type) != SolidLayer) {
+                if (!tile.HasTile || Main.instance.TilesRenderer.IsTileDrawLayerSolid(tile.type) != SolidLayer)
+                {
                     continue;
                 }
 
-                if (AnimatedTileRegistry.IsTilePossiblyAnimated(tile.TileType)) {
+                if (AnimatedTileRegistry.IsTilePossiblyAnimated(tile.TileType))
+                {
                     chunk.AnimatedPoints.Add(new AnimatedPoint(tileX, tileY, AnimatedPointType.AnimatedTile));
                 }
                 /*else if (IsTileDynamic(tile, tileX, tileY))
                 {
                     chunk.AnimatedPoints.Add(new AnimatedPoint(tileX, tileY, AnimatedPointType.AnimatedTile));
                 }*/
-                else {
+                else
+                {
                     ModifiedTileDrawing.DrawSingleTile(false, SolidLayer, tileX, tileY, chunkPositionWorld);
                 }
             }
         }
-        
+
         StopRender(device);
     }
 
-    private void StopRender(GraphicsDevice device) {
+    private void StopRender(GraphicsDevice device)
+    {
         Main.tileBatch.End();
         Main.spriteBatch.End();
 
         device.SetRenderTargets(null);
     }
-    
-    public override void DrawChunksToChunkTarget(GraphicsDevice device) {
-        if (ScreenTarget is null) {
+
+    public override void DrawChunksToChunkTarget(GraphicsDevice device)
+    {
+        if (ScreenTarget is null)
+        {
             return;
         }
 
         var bindings = device.GetRenderTargets();
 
-        foreach (var binding in bindings) {
+        foreach (var binding in bindings)
+        {
             ((RenderTarget2D)binding.RenderTarget).RenderTargetUsage = RenderTargetUsage.PreserveContents;
         }
 
@@ -125,20 +141,23 @@ internal sealed class TileChunkCollection : ChunkCollection {
 
         Rectangle screenArea = new((int)screenPosition.X, (int)screenPosition.Y, Main.screenWidth, Main.screenHeight);
 
-        foreach (var key in Loaded.Keys) {
+        foreach (var key in Loaded.Keys)
+        {
             var chunk = Loaded[key];
             var target = chunk.RenderTarget;
 
             Rectangle chunkArea = new(key.X * ChunkSystem.CHUNK_SIZE, key.Y * ChunkSystem.CHUNK_SIZE, target.Width, target.Height);
 
-            if (!chunkArea.Intersects(screenArea)) {
+            if (!chunkArea.Intersects(screenArea))
+            {
                 continue;
             }
 
             // This should never happen, something catastrophic happened if it did.
             // The check here is because rendering disposed targets generally has strange behaviour and doesn't always throw exceptions.
             // Therefore this check needs to be made as it's more robust.
-            if (target.IsDisposed) {
+            if (target.IsDisposed)
+            {
                 throw new Exception("Attempted to render a disposed chunk.");
             }
 
@@ -150,11 +169,13 @@ internal sealed class TileChunkCollection : ChunkCollection {
         device.SetRenderTargets(bindings);
     }
 
-    public void DoRenderTiles(GraphicsDevice graphicsDevice, RenderTarget2D? screenSizeLightingBuffer, RenderTarget2D? screenSizeOverrideBuffer, Lazy<Effect> lightMapRenderer, SpriteBatchUtil.SpriteBatchSnapshot? snapshot) {
+    public void DoRenderTiles(GraphicsDevice graphicsDevice, RenderTarget2D? screenSizeLightingBuffer, RenderTarget2D? screenSizeOverrideBuffer, Lazy<Effect> lightMapRenderer, SpriteBatchUtil.SpriteBatchSnapshot? snapshot)
+    {
         var unscaledPosition = Main.Camera.UnscaledPosition;
         var offscreenRange = Vector2.Zero; /*new(Main.offScreenRange, Main.offScreenRange);*/
 
-        if (!SolidLayer) {
+        if (!SolidLayer)
+        {
             Main.critterCage = true;
         }
 
@@ -173,22 +194,28 @@ internal sealed class TileChunkCollection : ChunkCollection {
         DrawChunksToChunkTarget(graphicsDevice);
         RenderChunksWithLighting(screenSizeLightingBuffer, screenSizeOverrideBuffer, lightMapRenderer);
 
-        if (snapshot.HasValue) {
+        if (snapshot.HasValue)
+        {
             Main.spriteBatch.BeginWithSnapshot(snapshot.Value);
         }
 
-        foreach (var key in Loaded.Keys) {
+        foreach (var key in Loaded.Keys)
+        {
             var chunk = Loaded[key];
 
-            foreach (var tilePoint in chunk.AnimatedPoints) {
+            foreach (var tilePoint in chunk.AnimatedPoints)
+            {
                 var tile = Framing.GetTileSafely(tilePoint.X, tilePoint.Y);
 
-                if (tilePoint.Type == AnimatedPointType.AnimatedTile) {
-                    if (!tile.HasTile) {
+                if (tilePoint.Type == AnimatedPointType.AnimatedTile)
+                {
+                    if (!tile.HasTile)
+                    {
                         continue;
                     }
 
-                    if (!TextureAssets.Tile[tile.type].IsLoaded) {
+                    if (!TextureAssets.Tile[tile.type].IsLoaded)
+                    {
                         Main.instance.LoadTiles(tile.type);
                     }
 
@@ -197,7 +224,8 @@ internal sealed class TileChunkCollection : ChunkCollection {
             }
         }
 
-        if (SolidLayer) {
+        if (SolidLayer)
+        {
             var drawToScreen = Main.drawToScreen;
             Main.drawToScreen = true;
             Main.instance.DrawTileCracks(1, Main.LocalPlayer.hitReplace);
@@ -209,52 +237,64 @@ internal sealed class TileChunkCollection : ChunkCollection {
         Main.instance.TilesRenderer.DrawSpecialTilesLegacy(unscaledPosition, offscreenRange);
         Main.screenPosition -= new Vector2(Main.offScreenRange, Main.offScreenRange);
 
-        if (TileObject.objectPreview.Active && Main.LocalPlayer.cursorItemIconEnabled && Main.placementPreview && !CaptureManager.Instance.Active) {
+        if (TileObject.objectPreview.Active && Main.LocalPlayer.cursorItemIconEnabled && Main.placementPreview && !CaptureManager.Instance.Active)
+        {
             Main.instance.LoadTiles(TileObject.objectPreview.Type);
             TileObject.DrawPreview(Main.spriteBatch, TileObject.objectPreview, unscaledPosition - offscreenRange);
         }
 
-        if (snapshot.HasValue) {
+        if (snapshot.HasValue)
+        {
             Main.spriteBatch.TryEnd(out _);
         }
     }
 
-    private void TrackTileVisibility(DynamicTileVisibilityListener.VisibilityType types) {
+    private void TrackTileVisibility(DynamicTileVisibilityListener.VisibilityType types)
+    {
         dynamicVisibilityTypes = types;
     }
 
-    public bool TryGetDynamicLighting(int x, int y, Color lightColor, ref Color color) {
-        if (!WorldGen.InWorld(x, y)) {
+    public bool TryGetDynamicLighting(int x, int y, Color lightColor, ref Color color)
+    {
+        if (!WorldGen.InWorld(x, y))
+        {
             return false;
         }
 
         var tile = Main.tile[x, y];
 
-        if (dynamicVisibilityTypes == 0) {
+        if (dynamicVisibilityTypes == 0)
+        {
             return false;
         }
 
-        if (dynamicVisibilityTypes.HasFlag(DynamicTileVisibilityListener.VisibilityType.Dangersense)) {
-            if (Main.LocalPlayer.dangerSense && TileDrawing.IsTileDangerous(x, y, Main.LocalPlayer, tile, tile.TileType)) {
-                color = new(255, Math.Max(lightColor.G, (byte)50), Math.Max(lightColor.B, (byte)50));
+        if (dynamicVisibilityTypes.HasFlag(DynamicTileVisibilityListener.VisibilityType.Dangersense))
+        {
+            if (Main.LocalPlayer.dangerSense && TileDrawing.IsTileDangerous(x, y, Main.LocalPlayer, tile, tile.TileType))
+            {
+                color = new Color(255, Math.Max(lightColor.G, (byte)50), Math.Max(lightColor.B, (byte)50));
 
                 return true;
             }
         }
 
-        if (dynamicVisibilityTypes.HasFlag(DynamicTileVisibilityListener.VisibilityType.Spelunker)) {
-            if (Main.LocalPlayer.findTreasure && Main.IsTileSpelunkable(x, y, tile.TileType, tile.TileFrameX, tile.TileFrameY)) {
-                color = new(Math.Max(lightColor.R, (byte)200), Math.Max(lightColor.G, (byte)170), lightColor.B);
+        if (dynamicVisibilityTypes.HasFlag(DynamicTileVisibilityListener.VisibilityType.Spelunker))
+        {
+            if (Main.LocalPlayer.findTreasure && Main.IsTileSpelunkable(x, y, tile.TileType, tile.TileFrameX, tile.TileFrameY))
+            {
+                color = new Color(Math.Max(lightColor.R, (byte)200), Math.Max(lightColor.G, (byte)170), lightColor.B);
 
                 return true;
             }
         }
 
-        if (dynamicVisibilityTypes.HasFlag(DynamicTileVisibilityListener.VisibilityType.BiomeSight)) {
+        if (dynamicVisibilityTypes.HasFlag(DynamicTileVisibilityListener.VisibilityType.BiomeSight))
+        {
             var sightColor = Color.White;
 
-            if (Main.IsTileBiomeSightable(x, y, tile.TileType, tile.TileFrameX, tile.TileFrameY, ref sightColor)) {
-                color = new(Math.Max(lightColor.R, sightColor.R), Math.Max(lightColor.G, sightColor.G), Math.Max(lightColor.B, sightColor.B));
+            if (Main.IsTileBiomeSightable(x, y, tile.TileType, tile.TileFrameX, tile.TileFrameY, ref sightColor))
+            {
+                color = new Color(Math.Max(lightColor.R, sightColor.R), Math.Max(lightColor.G, sightColor.G), Math.Max(lightColor.B, sightColor.B));
 
                 return true;
             }

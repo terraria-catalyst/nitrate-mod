@@ -14,8 +14,10 @@ namespace Nitrate.Optimizations.UI;
 ///     Replaces the default laser ruler rendering system with a much more optimized one.
 /// </summary>
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
-internal sealed class NewLaserRulerRenderSystem : ModSystem {
-    public override void OnModLoad() {
+internal sealed class NewLaserRulerRenderSystem : ModSystem
+{
+    public override void OnModLoad()
+    {
         base.OnModLoad();
 
         IL_Main.DrawInterface_3_LaserRuler += RenderLaserRuler;
@@ -25,23 +27,26 @@ internal sealed class NewLaserRulerRenderSystem : ModSystem {
     /// <summary>
     ///     The vanilla laser ruler UI renderer renders every tile individually.
     ///     For a full-screen game, this means upwards of 14,000
-    ///     <see cref="Main.Draw"/> calls.
-    /// <br />
+    ///     <see cref="Main.Draw" /> calls.
+    ///     <br />
     ///     Instead of rendering every tile individually, this renders the ruler
     ///     as a sequence of large shapes.
     ///     <br />
     ///     In the same screen size, this reduces the Draw calls to ~200.
     /// </summary>
-    private static void RenderLaserRuler(ILContext il) {
+    private static void RenderLaserRuler(ILContext il)
+    {
         ILCursor cursor = new(il);
 
-        cursor.GotoNext(MoveType.After, instr => instr.MatchBrfalse(out var _));
-        cursor.GotoNext(MoveType.After, instr => instr.MatchBrfalse(out var _));
+        cursor.GotoNext(MoveType.After, instr => instr.MatchBrfalse(out _));
+        cursor.GotoNext(MoveType.After, instr => instr.MatchBrfalse(out _));
         cursor.Index += 2; // Skip 'ret' and 'ldsfld' instructions.
 
         cursor.EmitDelegate<Func<bool>>(
-            () => {
-                if (!Configuration.UsesNewLaserRulerRendering) {
+            () =>
+            {
+                if (!Configuration.UsesNewLaserRulerRendering)
+                {
                     return false;
                 }
 
@@ -63,7 +68,8 @@ internal sealed class NewLaserRulerRenderSystem : ModSystem {
                 vec = vec.ToTileCoordinates().ToVector2() * 16f;
 
                 // Draw lines across X axis.
-                for (var x = 0; x < screenTileWidth; x++) {
+                for (var x = 0; x < screenTileWidth; x++)
+                {
                     Main.spriteBatch.Draw(
                         TextureAssets.BlackTile.Value,
                         Main.ReverseGravitySupport(new Vector2(x, 0) * 16F - Main.screenPosition + vec - Vector2.One, 16F),
@@ -78,7 +84,8 @@ internal sealed class NewLaserRulerRenderSystem : ModSystem {
                 }
 
                 // Draw lines across Y axis.
-                for (var y = 0; y < screenTileHeight; y++) {
+                for (var y = 0; y < screenTileHeight; y++)
+                {
                     Main.spriteBatch.Draw(
                         TextureAssets.BlackTile.Value,
                         Main.ReverseGravitySupport(new Vector2(0, y) * 16F - Main.screenPosition + vec - Vector2.One, 16F),

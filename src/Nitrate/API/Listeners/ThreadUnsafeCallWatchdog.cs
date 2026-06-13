@@ -10,18 +10,23 @@ namespace Nitrate.API.Listeners;
 ///     A static, toggleable watchdog that hooks into various unsafe methods to
 ///     suspend their execution until the watchdog is disabled.
 /// </summary>
-public static class ThreadUnsafeCallWatchdog {
+public static class ThreadUnsafeCallWatchdog
+{
     [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
-    private sealed class ThreadUnsafeCallWatchdogImpl : ModSystem {
-        public override void Load() {
+    private sealed class ThreadUnsafeCallWatchdogImpl : ModSystem
+    {
+        public override void Load()
+        {
             base.Load();
 
             On_Lighting.AddLight_int_int_int_float += On_LightingOnAddLight_int_int_int_float;
             On_Lighting.AddLight_int_int_float_float_float += AddLight_int_int_float_float_float;
         }
 
-        private static void On_LightingOnAddLight_int_int_int_float(On_Lighting.orig_AddLight_int_int_int_float orig, int i, int j, int torchId, float lightAmount) {
-            if (Enabled) {
+        private static void On_LightingOnAddLight_int_int_int_float(On_Lighting.orig_AddLight_int_int_int_float orig, int i, int j, int torchId, float lightAmount)
+        {
+            if (Enabled)
+            {
                 actions.Add(() => orig(i, j, torchId, lightAmount));
 
                 return;
@@ -30,8 +35,10 @@ public static class ThreadUnsafeCallWatchdog {
             orig(i, j, torchId, lightAmount);
         }
 
-        private static void AddLight_int_int_float_float_float(On_Lighting.orig_AddLight_int_int_float_float_float orig, int i, int j, float r, float g, float b) {
-            if (Enabled) {
+        private static void AddLight_int_int_float_float_float(On_Lighting.orig_AddLight_int_int_float_float_float orig, int i, int j, float r, float g, float b)
+        {
+            if (Enabled)
+            {
                 actions.Add(() => orig(i, j, r, g, b));
 
                 return;
@@ -41,17 +48,18 @@ public static class ThreadUnsafeCallWatchdog {
         }
     }
 
+    private static readonly ConcurrentBag<Action> actions = new();
+
     /// <summary>
     ///     Whether the watchdog is currently enabled.
     /// </summary>
     public static bool Enabled { get; private set; }
 
-    private static readonly ConcurrentBag<Action> actions = new();
-
     /// <summary>
     ///     Enables the watchdog.
     /// </summary>
-    public static void Enable() {
+    public static void Enable()
+    {
         Enabled = true;
         actions.Clear();
     }
@@ -59,11 +67,14 @@ public static class ThreadUnsafeCallWatchdog {
     /// <summary>
     ///     Disables the watchdog and executes all pending actions.
     /// </summary>
-    public static void Disable() {
+    public static void Disable()
+    {
         Enabled = false;
 
         foreach (var action in actions)
+        {
             action();
+        }
 
         actions.Clear();
     }

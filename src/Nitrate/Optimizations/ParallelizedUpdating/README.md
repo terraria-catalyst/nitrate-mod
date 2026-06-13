@@ -24,6 +24,7 @@ By default, the metrics are updated once every 4 frames. From my experimentation
 ### The Solution
 
 Since these metrics are only updated once every 4 frames, if we lay out the execution like so:
+
 ```
 FRAME 0 - SceneMetrics Update
 FRAME 1 - Skip
@@ -31,7 +32,9 @@ FRAME 2 - Skip
 FRAME 3 - Skip
 FRAME 4 - SceneMetrics Update
 ```
+
 We can parallelize this process by starting the process of collecting new metrics every `4n + 1`th frame. For example:
+
 ```
 FRAME 5 - Begin SceneMetrics Collection Async
 FRAME 6 - Skip
@@ -39,6 +42,7 @@ FRAME 7 - Skip
 FRAME 8 - Process Async SceneMetrics
 FRAME 9 - Begin SceneMetrics Collection Async
 ```
+
 On the frames we would normally scan the scene again, we simply process the data that was collected async 3 frames ago.
 
 Note that due to some mod hooks such as `TileLoader.NearbyEffects`, we still need to process some of the data on the main thread.

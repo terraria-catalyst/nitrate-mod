@@ -10,19 +10,24 @@ namespace Nitrate.Optimizations.GameLogic;
 ///     Optimizes internal code for pylons.
 /// </summary>
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
-internal sealed class FasterPylonSystem : ModSystem {
-    public override void OnModLoad() {
+internal sealed class FasterPylonSystem : ModSystem
+{
+    public override void OnModLoad()
+    {
         base.OnModLoad();
 
         On_TeleportPylonsSystem.IsPlayerNearAPylon += On_IsPlayerNearAPylon;
     }
 
-    private static bool On_IsPlayerNearAPylon(On_TeleportPylonsSystem.orig_IsPlayerNearAPylon original, Player player) {
-        if (!Configuration.UsesFasterPylonSystem) {
+    private static bool On_IsPlayerNearAPylon(On_TeleportPylonsSystem.orig_IsPlayerNearAPylon original, Player player)
+    {
+        if (!Configuration.UsesFasterPylonSystem)
+        {
             return original(player);
         }
-        
-        foreach (var info in Main.PylonSystem.Pylons) {
+
+        foreach (var info in Main.PylonSystem.Pylons)
+        {
             var pos = info.PositionInTiles;
             Point16 lowerRightPylonPoint = new(pos.X + 2, pos.Y + 3);
 
@@ -34,7 +39,8 @@ internal sealed class FasterPylonSystem : ModSystem {
             var minRangeY = Utils.Clamp(pos.Y - y - 1, 0, Main.maxTilesY - 1);
             var maxRangeY = Utils.Clamp(lowerRightPylonPoint.Y + y - 1, 0, Main.maxTilesY - 1);
 
-            if (playerPos.X >= minRangeX && playerPos.X <= maxRangeX && playerPos.Y >= minRangeY && playerPos.Y <= maxRangeY) {
+            if (playerPos.X >= minRangeX && playerPos.X <= maxRangeX && playerPos.Y >= minRangeY && playerPos.Y <= maxRangeY)
+            {
                 return true;
             }
         }

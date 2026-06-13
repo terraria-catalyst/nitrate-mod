@@ -16,37 +16,44 @@ using Terraria.ModLoader;
 namespace Nitrate.Optimizations.ParticleRendering.Dust;
 
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
-internal sealed class InstancedDustRenderer : AbstractInstancedParticleRenderer<ParticleInstance> {
+internal sealed class InstancedDustRenderer : AbstractInstancedParticleRenderer<ParticleInstance>
+{
     private const string dust_target = "DustTarget";
 
-    protected override Lazy<Effect> InstanceParticleRenderer { get; }
-
-    public InstancedDustRenderer() : base(Main.maxDust, dust_target) {
+    public InstancedDustRenderer() : base(Main.maxDust, dust_target)
+    {
         InstanceParticleRenderer = new Lazy<Effect>(() => Mod.Assets.Request<Effect>("Assets/Effects/InstancedParticleRenderer", AssetRequestMode.ImmediateLoad).Value);
     }
 
-    public override void Load() {
+    protected override Lazy<Effect> InstanceParticleRenderer { get; }
+
+    public override void Load()
+    {
         base.Load();
 
         // Prevent the original DrawDust method from running; we use an IL edit
         // instead of a detour to allow mods' detours to still run while
         // cancelling vanilla behavior.
-        IL_Main.DrawDust += il => {
+        IL_Main.DrawDust += il =>
+        {
             ILCursor c = new(il);
             c.Emit(OpCodes.Ret);
         };
     }
 
-    protected override Texture2D MakeAtlas() {
+    protected override Texture2D MakeAtlas()
+    {
         return TextureAssets.Dust.Value;
     }
 
-    public override void PreUpdateDusts() {
+    public override void PreUpdateDusts()
+    {
         base.PreUpdateDusts();
 
         ActionableRenderTargetSystem.QueueRenderAction(
             dust_target,
-            () => {
+            () =>
+            {
                 var device = Main.graphics.GraphicsDevice;
 
                 device.RasterizerState = RasterizerState.CullNone;
@@ -59,7 +66,8 @@ internal sealed class InstancedDustRenderer : AbstractInstancedParticleRenderer<
                 SetInstanceData();
 
                 // Something has gone seriously wrong.
-                if (VertexBuffer is null || IndexBuffer is null) {
+                if (VertexBuffer is null || IndexBuffer is null)
+                {
                     return;
                 }
 
@@ -67,7 +75,8 @@ internal sealed class InstancedDustRenderer : AbstractInstancedParticleRenderer<
                 device.SetVertexBuffers(VertexBuffer, new VertexBufferBinding(InstanceBuffer, 0, 1));
                 device.Indices = IndexBuffer;
 
-                foreach (var pass in InstanceParticleRenderer.Value.CurrentTechnique.Passes) {
+                foreach (var pass in InstanceParticleRenderer.Value.CurrentTechnique.Passes)
+                {
                     pass.Apply();
                     device.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, VertexBuffer.VertexCount, 0, IndexBuffer.IndexCount / 3, Particles.Length);
                 }
@@ -75,16 +84,20 @@ internal sealed class InstancedDustRenderer : AbstractInstancedParticleRenderer<
         );
     }
 
-    private void SetInstanceData() {
+    private void SetInstanceData()
+    {
         FasterParallel.For(
             0,
             Particles.Length,
-            (inclusive, exclusive, _) => {
-                for (var i = inclusive; i < exclusive; i++) {
+            (inclusive, exclusive, _) =>
+            {
+                for (var i = inclusive; i < exclusive; i++)
+                {
                     var dust = Main.dust[i];
 
                     // Something has gone seriously wrong if the atlas is null.
-                    if (dust.type <= DustID.Count && dust.active && ParticleAtlas is not null) {
+                    if (dust.type <= DustID.Count && dust.active && ParticleAtlas is not null)
+                    {
                         float halfWidth = (int)(dust.frame.Width / 2f);
                         float halfHeight = (int)(dust.frame.Height / 2f);
 
@@ -98,8 +111,8 @@ internal sealed class InstancedDustRenderer : AbstractInstancedParticleRenderer<
 
                         var world =
                             SimdMatrix.CreateScale(dust.scale * dust.frame.Width, dust.scale * dust.frame.Height, 1)
-                            * rotationMatrix
-                            * SimdMatrix.CreateTranslation(
+                          * rotationMatrix
+                          * SimdMatrix.CreateTranslation(
                                 (int)(dust.position.X - Main.screenPosition.X + initialOffset.X),
                                 (int)(dust.position.Y - Main.screenPosition.Y + initialOffset.Y),
                                 0
@@ -116,34 +129,42 @@ internal sealed class InstancedDustRenderer : AbstractInstancedParticleRenderer<
 
                         Particles[i] = new ParticleInstance(world, new Vector4(uvX, uvY, uvW, uvZ), dustColor.ToVector4());
                     }
-                    else {
+                    else
+                    {
                         Particles[i] = new ParticleInstance();
                     }
                 }
             }
         );
         InstanceBuffer?.SetData(Particles, 0, Particles.Length, SetDataOptions.None);
-        
-        Rectangle rectangle = new Rectangle((int)Main.screenPosition.X - 1000, (int)Main.screenPosition.Y - 1050, Main.screenWidth + 2000, Main.screenHeight + 2100);
+
+        var rectangle = new Rectangle((int)Main.screenPosition.X - 1000, (int)Main.screenPosition.Y - 1050, Main.screenWidth + 2000, Main.screenHeight + 2100);
         Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, null, Main.Transform);
-        for (var i = 0; i < Particles.Length; i++) {
+        for (var i = 0; i < Particles.Length; i++)
+        {
             var dust = Main.dust[i];
 
-            if (dust.active && dust.type >= DustID.Count) {
-                if (new Rectangle((int)dust.position.X, (int)dust.position.Y, 4, 4).Intersects(rectangle)) {
-                    Color alpha = dust.GetAlpha(Lighting.GetColor((int)(dust.position.X + 4.0) / 16, (int)(dust.position.Y + 4.0) / 16));
-                    ModDust modDust = DustLoader.GetDust(dust.type);
-                    if (modDust != null) {
-                        if (modDust.PreDraw(dust)) {
+            if (dust.active && dust.type >= DustID.Count)
+            {
+                if (new Rectangle((int)dust.position.X, (int)dust.position.Y, 4, 4).Intersects(rectangle))
+                {
+                    var alpha = dust.GetAlpha(Lighting.GetColor((int)(dust.position.X + 4.0) / 16, (int)(dust.position.Y + 4.0) / 16));
+                    var modDust = DustLoader.GetDust(dust.type);
+                    if (modDust != null)
+                    {
+                        if (modDust.PreDraw(dust))
+                        {
                             modDust.Draw(dust, alpha, dust.GetVisualScale());
                         }
 
-                        if (alpha == Color.Black) {
+                        if (alpha == Color.Black)
+                        {
                             dust.active = false;
                         }
                     }
-                } 
-                else {
+                }
+                else
+                {
                     dust.active = false;
                 }
             }

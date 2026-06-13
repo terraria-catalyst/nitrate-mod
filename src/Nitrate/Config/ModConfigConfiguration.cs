@@ -6,13 +6,15 @@ using Terraria.ModLoader.Config;
 
 namespace Nitrate.Config;
 
-internal sealed class ModConfigConfiguration : IConfiguration {
+internal sealed class ModConfigConfiguration : IConfiguration
+{
     /// <summary>
-    ///     The <see cref="ModConfig"/> implementation of Nitrate's
-    ///     <see cref="IConfiguration"/>.
+    ///     The <see cref="ModConfig" /> implementation of Nitrate's
+    ///     <see cref="IConfiguration" />.
     /// </summary>
     [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
-    private sealed class NitrateConfig : ModConfig {
+    private sealed class NitrateConfig : ModConfig
+    {
         public override ConfigScope Mode => ConfigScope.ClientSide;
 
         [ReloadRequired]
@@ -27,11 +29,11 @@ internal sealed class ModConfigConfiguration : IConfiguration {
         [DefaultValue(true)]
         [UsedImplicitly(ImplicitUseKindFlags.Access | ImplicitUseKindFlags.Assign)]
         public bool UsesNewLaserRulerRendering { get; set; }
-        
+
         [DefaultValue(true)]
         [UsedImplicitly(ImplicitUseKindFlags.Access | ImplicitUseKindFlags.Assign)]
         public bool UsesAsyncSceneMetrics { get; set; }
-        
+
         [DefaultValue(true)]
         [UsedImplicitly(ImplicitUseKindFlags.Access | ImplicitUseKindFlags.Assign)]
         public bool UsesFasterPylonSystem { get; set; }
@@ -43,27 +45,32 @@ internal sealed class ModConfigConfiguration : IConfiguration {
 
     private static NitrateConfig Config => ModContent.GetInstance<NitrateConfig>();
 
-    bool IConfiguration.UsesExperimentalTileRenderer {
+    bool IConfiguration.UsesExperimentalTileRenderer
+    {
         get => Config.ExperimentalTileRenderer;
         set => Config.ExperimentalTileRenderer = value;
     }
 
-    bool IConfiguration.DisabledExperimentalTileRendererWarning {
+    bool IConfiguration.DisabledExperimentalTileRendererWarning
+    {
         get => Config.ExperimentalTileRendererWarning;
         set => Config.ExperimentalTileRendererWarning = value;
     }
 
-    bool IConfiguration.UsesNewLaserRulerRendering {
+    bool IConfiguration.UsesNewLaserRulerRendering
+    {
         get => Config.UsesNewLaserRulerRendering;
         set => Config.UsesNewLaserRulerRendering = value;
     }
 
-    bool IConfiguration.UsesAsyncSceneMetrics {
+    bool IConfiguration.UsesAsyncSceneMetrics
+    {
         get => Config.UsesAsyncSceneMetrics;
         set => Config.UsesAsyncSceneMetrics = value;
     }
 
-    bool IConfiguration.UsesFasterPylonSystem {
+    bool IConfiguration.UsesFasterPylonSystem
+    {
         get => Config.UsesFasterPylonSystem;
         set => Config.UsesFasterPylonSystem = value;
     }

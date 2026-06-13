@@ -12,29 +12,35 @@ using Terraria.GameContent;
 namespace Nitrate.Optimizations.ParticleRendering.Rain;
 
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
-internal class InstancedRainRenderer : AbstractInstancedParticleRenderer<ParticleInstance> {
+internal class InstancedRainRenderer : AbstractInstancedParticleRenderer<ParticleInstance>
+{
     private const string dust_target = "DustTarget";
 
-    protected override Lazy<Effect> InstanceParticleRenderer { get; }
-
-    public InstancedRainRenderer() : base(Main.maxRain, dust_target) {
+    public InstancedRainRenderer() : base(Main.maxRain, dust_target)
+    {
         InstanceParticleRenderer = new Lazy<Effect>(() => Mod.Assets.Request<Effect>("Assets/Effects/InstancedParticleRenderer", AssetRequestMode.ImmediateLoad).Value);
     }
 
-    protected override Texture2D MakeAtlas() {
+    protected override Lazy<Effect> InstanceParticleRenderer { get; }
+
+    protected override Texture2D MakeAtlas()
+    {
         return TextureAssets.Rain.Value;
     }
 
-    public override void PreUpdateDusts() {
+    public override void PreUpdateDusts()
+    {
         base.PreUpdateDusts();
 
-        if (!Main.raining) {
+        if (!Main.raining)
+        {
             return;
         }
 
         ActionableRenderTargetSystem.QueueRenderAction(
             dust_target,
-            () => {
+            () =>
+            {
                 var device = Main.graphics.GraphicsDevice;
 
                 device.RasterizerState = RasterizerState.CullNone;
@@ -47,7 +53,8 @@ internal class InstancedRainRenderer : AbstractInstancedParticleRenderer<Particl
                 SetInstanceData();
 
                 // Something has gone seriously wrong.
-                if (VertexBuffer is null || IndexBuffer is null) {
+                if (VertexBuffer is null || IndexBuffer is null)
+                {
                     return;
                 }
 
@@ -55,7 +62,8 @@ internal class InstancedRainRenderer : AbstractInstancedParticleRenderer<Particl
                 device.SetVertexBuffers(VertexBuffer, new VertexBufferBinding(InstanceBuffer, 0, 1));
                 device.Indices = IndexBuffer;
 
-                foreach (var pass in InstanceParticleRenderer.Value.CurrentTechnique.Passes) {
+                foreach (var pass in InstanceParticleRenderer.Value.CurrentTechnique.Passes)
+                {
                     pass.Apply();
                     device.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, VertexBuffer.VertexCount, 0, IndexBuffer.IndexCount / 3, Particles.Length);
                 }
@@ -63,16 +71,20 @@ internal class InstancedRainRenderer : AbstractInstancedParticleRenderer<Particl
         );
     }
 
-    private void SetInstanceData() {
+    private void SetInstanceData()
+    {
         FasterParallel.For(
             0,
             Particles.Length,
-            (inclusive, exclusive, _) => {
-                for (var i = inclusive; i < exclusive; i++) {
+            (inclusive, exclusive, _) =>
+            {
+                for (var i = inclusive; i < exclusive; i++)
+                {
                     var rain = Main.rain[i];
 
                     // Something has gone seriously wrong if the atlas is null.
-                    if (rain.active && ParticleAtlas is not null) {
+                    if (rain.active && ParticleAtlas is not null)
+                    {
                         Rectangle frame = new(rain.type * 4, 0, 2, 40);
 
                         float halfWidth = (int)(frame.Width / 2f);
@@ -88,8 +100,8 @@ internal class InstancedRainRenderer : AbstractInstancedParticleRenderer<Particl
 
                         var world =
                             SimdMatrix.CreateScale(rain.scale * frame.Width, rain.scale * frame.Height, 1)
-                            * rotationMatrix
-                            * SimdMatrix.CreateTranslation(
+                          * rotationMatrix
+                          * SimdMatrix.CreateTranslation(
                                 (int)(rain.position.X - Main.screenPosition.X + initialOffset.X),
                                 (int)(rain.position.Y - Main.screenPosition.Y + initialOffset.Y),
                                 0
@@ -102,13 +114,15 @@ internal class InstancedRainRenderer : AbstractInstancedParticleRenderer<Particl
 
                         var color = Lighting.GetColor((int)(rain.position.X + 4) / 16, (int)(rain.position.Y + 4) / 16) * 0.85f;
 
-                        if (Main.shimmerAlpha > 0f) {
+                        if (Main.shimmerAlpha > 0f)
+                        {
                             color *= 1f - Main.shimmerAlpha;
                         }
 
                         Particles[i] = new ParticleInstance(world, new Vector4(uvX, uvY, uvW, uvZ), color.ToVector4());
                     }
-                    else {
+                    else
+                    {
                         Particles[i] = new ParticleInstance();
                     }
                 }

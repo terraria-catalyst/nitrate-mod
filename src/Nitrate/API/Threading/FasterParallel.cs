@@ -5,17 +5,55 @@ using ReLogic.Threading;
 namespace Nitrate.API.Threading;
 
 /// <summary>
-///     A faster reimplementation of <see cref="FastParallel"/>.
+///     A faster reimplementation of <see cref="FastParallel" />.
 /// </summary>
-/// <seealso cref="FastParallel"/>
-public static class FasterParallel {
+/// <seealso cref="FastParallel" />
+public static class FasterParallel
+{
+    private class RangeTask
+    {
+        private readonly ParallelForAction action;
+        private readonly object? context;
+        private readonly CountdownEvent countdownEvent;
+        private readonly int fromInclusive;
+        private readonly int toExclusive;
+
+        public RangeTask(ParallelForAction action, int fromInclusive, int toExclusive, object? context, CountdownEvent countdownEvent)
+        {
+            this.action = action;
+            this.fromInclusive = fromInclusive;
+            this.toExclusive = toExclusive;
+            this.context = context;
+            this.countdownEvent = countdownEvent;
+        }
+
+        public void Invoke()
+        {
+            try
+            {
+                if (fromInclusive == toExclusive)
+                {
+                    return;
+                }
+
+                action(fromInclusive, toExclusive, context);
+            }
+            finally
+            {
+                countdownEvent.Signal();
+            }
+        }
+    }
+
     /// <summary>
-    ///     A faster reimplementation of <see cref="FastParallel.For"/>.
+    ///     A faster reimplementation of <see cref="FastParallel.For" />.
     /// </summary>
-    public static void For(int fromInclusive, int toExclusive, ParallelForAction callback, object? context = null) {
+    public static void For(int fromInclusive, int toExclusive, ParallelForAction callback, object? context = null)
+    {
         var rangeLength = toExclusive - fromInclusive;
 
-        if (rangeLength == 0) {
+        if (rangeLength == 0)
+        {
             return;
         }
 
@@ -25,10 +63,12 @@ public static class FasterParallel {
         CountdownEvent countdownEvent = new(initialCount);
         var currentRangeStart = toExclusive;
 
-        for (var i = initialCount - 1; i >= 0; --i) {
+        for (var i = initialCount - 1; i >= 0; --i)
+        {
             var rangeLengthForTask = rangeLengthPerTask;
 
-            if (i < remainder) {
+            if (i < remainder)
+            {
                 rangeLengthForTask++;
             }
 
@@ -37,10 +77,12 @@ public static class FasterParallel {
             var rangeEnd = rangeStart + rangeLengthForTask;
             RangeTask rangeTask = new(callback, rangeStart, rangeEnd, context, countdownEvent);
 
-            if (i < 1) {
+            if (i < 1)
+            {
                 InvokeTask(rangeTask);
             }
-            else {
+            else
+            {
                 ThreadPool.QueueUserWorkItem(InvokeTask, rangeTask);
             }
         }
@@ -48,36 +90,8 @@ public static class FasterParallel {
         countdownEvent.Wait();
     }
 
-    private static void InvokeTask(object? context) {
+    private static void InvokeTask(object? context)
+    {
         (context as RangeTask)?.Invoke();
-    }
-
-    private class RangeTask {
-        private readonly ParallelForAction action;
-        private readonly int fromInclusive;
-        private readonly int toExclusive;
-        private readonly object? context;
-        private readonly CountdownEvent countdownEvent;
-
-        public RangeTask(ParallelForAction action, int fromInclusive, int toExclusive, object? context, CountdownEvent countdownEvent) {
-            this.action = action;
-            this.fromInclusive = fromInclusive;
-            this.toExclusive = toExclusive;
-            this.context = context;
-            this.countdownEvent = countdownEvent;
-        }
-
-        public void Invoke() {
-            try {
-                if (fromInclusive == toExclusive) {
-                    return;
-                }
-
-                action(fromInclusive, toExclusive, context);
-            }
-            finally {
-                countdownEvent.Signal();
-            }
-        }
     }
 }

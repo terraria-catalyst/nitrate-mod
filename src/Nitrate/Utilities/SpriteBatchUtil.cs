@@ -4,8 +4,10 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Nitrate.Utilities;
 
-internal static class SpriteBatchUtil {
-    public readonly struct SpriteBatchSnapshot {
+internal static class SpriteBatchUtil
+{
+    public readonly struct SpriteBatchSnapshot
+    {
         public SpriteSortMode SortMode { get; }
 
         public BlendState BlendState { get; }
@@ -20,7 +22,8 @@ internal static class SpriteBatchUtil {
 
         public FnaMatrix TransformMatrix { get; }
 
-        public SpriteBatchSnapshot(SpriteSortMode sortMode, BlendState blendState, SamplerState samplerState, DepthStencilState depthStencilState, RasterizerState rasterizerState, Effect? effect, FnaMatrix transformMatrix) {
+        public SpriteBatchSnapshot(SpriteSortMode sortMode, BlendState blendState, SamplerState samplerState, DepthStencilState depthStencilState, RasterizerState rasterizerState, Effect? effect, FnaMatrix transformMatrix)
+        {
             SortMode = sortMode;
             BlendState = blendState;
             SamplerState = samplerState;
@@ -31,18 +34,21 @@ internal static class SpriteBatchUtil {
         }
     }
 
-    private sealed class TemporaryRestartContext : IDisposable {
-        private readonly SpriteBatch spriteBatch;
+    private sealed class TemporaryRestartContext : IDisposable
+    {
         private readonly GraphicsDevice graphicsDevice;
         private readonly SpriteBatchSnapshot snapshot;
+        private readonly SpriteBatch spriteBatch;
 
-        public TemporaryRestartContext(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice, SpriteBatchSnapshot snapshot) {
+        public TemporaryRestartContext(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice, SpriteBatchSnapshot snapshot)
+        {
             this.spriteBatch = spriteBatch;
             this.graphicsDevice = graphicsDevice;
             this.snapshot = snapshot;
         }
 
-        public void Dispose() {
+        public void Dispose()
+        {
             spriteBatch.End();
             graphicsDevice.SetRenderTarget(null);
 
@@ -58,9 +64,11 @@ internal static class SpriteBatchUtil {
         }
     }
 
-    public static bool TryEnd(this SpriteBatch spriteBatch, out SpriteBatchSnapshot snapshot) {
-        if (!spriteBatch.beginCalled) {
-            snapshot = default;
+    public static bool TryEnd(this SpriteBatch spriteBatch, out SpriteBatchSnapshot snapshot)
+    {
+        if (!spriteBatch.beginCalled)
+        {
+            snapshot = default(SpriteBatchSnapshot);
 
             return false;
         }
@@ -80,7 +88,8 @@ internal static class SpriteBatchUtil {
         return true;
     }
 
-    public static IDisposable BeginDrawingToRenderTarget(this SpriteBatch spriteBatch, GraphicsDevice graphicsDevice, RenderTarget2D renderTarget2D) {
+    public static IDisposable BeginDrawingToRenderTarget(this SpriteBatch spriteBatch, GraphicsDevice graphicsDevice, RenderTarget2D renderTarget2D)
+    {
         spriteBatch.TryEnd(out var snapshot);
 
         graphicsDevice.SetRenderTarget(renderTarget2D);
@@ -99,7 +108,8 @@ internal static class SpriteBatchUtil {
         return new TemporaryRestartContext(spriteBatch, graphicsDevice, snapshot);
     }
 
-    public static void BeginWithSnapshot(this SpriteBatch spriteBatch, SpriteBatchSnapshot snapshot) {
+    public static void BeginWithSnapshot(this SpriteBatch spriteBatch, SpriteBatchSnapshot snapshot)
+    {
         spriteBatch.Begin(
             snapshot.SortMode,
             snapshot.BlendState,

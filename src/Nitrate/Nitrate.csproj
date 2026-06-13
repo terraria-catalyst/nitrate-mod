@@ -1,5 +1,5 @@
 <Project Sdk="Tomat.Terraria.ModLoader.Sdk">
-    
+
     <ItemGroup>
         <PackageReference Include="Fody" Version="6.8.0" PrivateAssets="all"/>
         <PackageReference Include="InfoOf.Fody" Version="2.1.1"/>
