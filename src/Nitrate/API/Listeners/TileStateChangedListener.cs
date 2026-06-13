@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
 using JetBrains.Annotations;
 using Terraria;
 using Terraria.ModLoader;
@@ -36,6 +37,7 @@ public static class TileStateChangedListener
             On_Player.TileInteractionsUse += TileInteractionsUse;
         }
 
+        [StackTraceHidden]
         private static bool PlaceTile(On_WorldGen.orig_PlaceTile orig, int i, int j, int type, bool mute, bool forced, int plr, int style)
         {
             var result = orig(i, j, type, mute, forced, plr, style);
@@ -44,18 +46,21 @@ public static class TileStateChangedListener
             return result;
         }
 
+        [StackTraceHidden]
         private static void KillTile(On_WorldGen.orig_KillTile orig, int i, int j, bool fail, bool effectOnly, bool noItem)
         {
             orig(i, j, fail, effectOnly, noItem);
             OnTileSingleStateChange?.Invoke(i, j);
         }
 
+        [StackTraceHidden]
         private static void TileFrame(On_WorldGen.orig_TileFrame orig, int i, int j, bool resetFrame, bool noBreak)
         {
             orig(i, j, resetFrame, noBreak);
             OnTileSingleStateChange?.Invoke(i, j);
         }
 
+        [StackTraceHidden]
         private static bool PaintTile(On_WorldGen.orig_paintTile orig, int x, int y, byte color, bool broadcast)
         {
             var result = orig(x, y, color, broadcast);
@@ -64,6 +69,7 @@ public static class TileStateChangedListener
             return result;
         }
 
+        [StackTraceHidden]
         private static bool CoatTile(On_WorldGen.orig_paintCoatTile orig, int x, int y, byte paintCoatId, bool broadcast)
         {
             var result = orig(x, y, paintCoatId, broadcast);
@@ -72,24 +78,28 @@ public static class TileStateChangedListener
             return result;
         }
 
+        [StackTraceHidden]
         private static void PlaceWall(On_WorldGen.orig_PlaceWall orig, int i, int j, int type, bool mute)
         {
             orig(i, j, type, mute);
             OnWallSingleStateChange?.Invoke(i, j);
         }
 
+        [StackTraceHidden]
         private static void KillWall(On_WorldGen.orig_KillWall orig, int i, int j, bool fail)
         {
             orig(i, j, fail);
             OnWallSingleStateChange?.Invoke(i, j);
         }
 
+        [StackTraceHidden]
         private static void WallFrame(On_Framing.orig_WallFrame orig, int i, int j, bool resetFrame)
         {
             orig(i, j, resetFrame);
             OnWallSingleStateChange?.Invoke(i, j);
         }
 
+        [StackTraceHidden]
         private static bool PaintWall(On_WorldGen.orig_paintWall orig, int x, int y, byte color, bool broadcast)
         {
             var result = orig(x, y, color, broadcast);
@@ -98,6 +108,7 @@ public static class TileStateChangedListener
             return result;
         }
 
+        [StackTraceHidden]
         private static bool CoatWall(On_WorldGen.orig_paintCoatTile orig, int x, int y, byte paintCoatId, bool broadcast)
         {
             var result = orig(x, y, paintCoatId, broadcast);
@@ -106,6 +117,7 @@ public static class TileStateChangedListener
             return result;
         }
 
+        [StackTraceHidden]
         private static void DecompressTileBlock(On_NetMessage.orig_DecompressTileBlock_Inner orig, BinaryReader reader, int xStart, int yStart, int width, int height)
         {
             orig(reader, xStart, yStart, width, height);
@@ -119,12 +131,14 @@ public static class TileStateChangedListener
             }
         }
 
+        [StackTraceHidden]
         private static void DoActualReplacement(On_WorldGen.orig_ReplaceTIle_DoActualReplacement orig, ushort targetType, int targetStyle, int topLeftX, int topLeftY, Tile t)
         {
             orig(targetType, targetStyle, topLeftX, topLeftY, t);
             OnTileSingleStateChange?.Invoke(topLeftX, topLeftY);
         }
 
+        [StackTraceHidden]
         private static void TileInteractionsUse(On_Player.orig_TileInteractionsUse orig, Player self, int myX, int myY)
         {
             orig(self, myX, myY);
