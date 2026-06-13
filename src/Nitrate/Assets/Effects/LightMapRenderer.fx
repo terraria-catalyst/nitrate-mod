@@ -11,8 +11,6 @@ static float4 c[9];
 
 bool applyOverride;
 
-matrix gameViewMatrix;
-
 sampler2D LightSampler = sampler_state
 {
     Texture = (lightMap);
@@ -33,8 +31,12 @@ sampler2D OverrideSampler = sampler_state
     Mipfilter = POINT;
 };
 
-float4 PixelShaderFunction(float2 TexCoord : TEXCOORD0) : COLOR0
+float4 PixelShaderFunction(float2 TexCoord : TEXCOORD0, float2 svPos : SV_POSITION) : COLOR0
 {
+    return tex2D(chunkTexture, TexCoord) * tex2D(LightSampler, TexCoord);
+    float2 screenPosTiles = (svPos + offset / 1.) / 16.;
+    float2 lightUv = screenPosTiles / size;
+
     float4 override = tex2D(OverrideSampler, TexCoord);
 
     if (applyOverride && any(override)) {

@@ -42,8 +42,9 @@ internal sealed class ChunkSystem : ModSystem
     // The number of layers of additional chunks that stay loaded off-screen around the player. Could help improve performance when moving around in one location.
     private const int chunk_offscreen_buffer = 1;
 
-    private const int lighting_buffer_offscreen_range_tiles = 1;
     private const int edge_threshold = 3;
+    private static int offscreenWidthTiles;
+    private static int offscreenHeightTiles;
 
     private static readonly TileChunkCollection solid_tiles = new() { SolidLayer = true };
     private static readonly TileChunkCollection non_solid_tiles = new() { SolidLayer = false };
@@ -98,7 +99,7 @@ internal sealed class ChunkSystem : ModSystem
                 () =>
                 {
                     PopulateLightingBuffer();
-                    TransferTileSpaceBufferToScreenSpaceBuffer(Main.graphics.GraphicsDevice);
+                    // TransferTileSpaceBufferToScreenSpaceBuffer(Main.graphics.GraphicsDevice);
                 }
             );
         };
@@ -114,14 +115,14 @@ internal sealed class ChunkSystem : ModSystem
             {
                 lightingBuffer = new RenderTarget2D(
                     Main.graphics.GraphicsDevice,
-                    (int)Math.Ceiling(Main.screenWidth / 16f) + lighting_buffer_offscreen_range_tiles * 2,
-                    (int)Math.Ceiling(Main.screenHeight / 16f) + lighting_buffer_offscreen_range_tiles * 2
+                    (int)Math.Ceiling(Main.instance.tileTarget.Width / 16f),
+                    (int)Math.Ceiling(Main.instance.tileTarget.Height / 16f)
                 );
 
                 overrideBuffer = new RenderTarget2D(
                     Main.graphics.GraphicsDevice,
-                    (int)Math.Ceiling(Main.screenWidth / 16f) + lighting_buffer_offscreen_range_tiles * 2,
-                    (int)Math.Ceiling(Main.screenHeight / 16f) + lighting_buffer_offscreen_range_tiles * 2
+                    (int)Math.Ceiling(Main.instance.tileTarget.Width / 16f),
+                    (int)Math.Ceiling(Main.instance.tileTarget.Height / 16f)
                 );
 
                 colorBuffer = new Color[lightingBuffer.Width * lightingBuffer.Height];
@@ -129,15 +130,17 @@ internal sealed class ChunkSystem : ModSystem
 
                 foreach (var chunkCollection in chunk_collections)
                 {
-                    chunkCollection.ScreenTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
+                    chunkCollection.ScreenTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.instance.tileTarget.Width, Main.instance.tileTarget.Width);
                 }
 
-                screenSizeLightingBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
-                screenSizeOverrideBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
+                // screenSizeLightingBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.instance.tileTarget.Width, Main.instance.tileTarget.Width);
+                // screenSizeOverrideBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.instance.tileTarget.Width, Main.instance.tileTarget.Width);
 
                 // By default, Terraria has this set to DiscardContents. This means that switching RTs erases the contents of the backbuffer if done mid-draw.
                 Main.graphics.GraphicsDevice.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
                 Main.graphics.ApplyChanges();
+
+                FindOffsets();
             }
         );
 
@@ -147,33 +150,41 @@ internal sealed class ChunkSystem : ModSystem
 
             lightingBuffer = new RenderTarget2D(
                 Main.graphics.GraphicsDevice,
-                (int)Math.Ceiling(Main.screenWidth / 16f) + lighting_buffer_offscreen_range_tiles * 2,
-                (int)Math.Ceiling(Main.screenHeight / 16f) + lighting_buffer_offscreen_range_tiles * 2
+                (int)Math.Ceiling(Main.instance.tileTarget.Width / 16f),
+                (int)Math.Ceiling(Main.instance.tileTarget.Height / 16f)
             );
 
             overrideBuffer?.Dispose();
 
             overrideBuffer = new RenderTarget2D(
                 Main.graphics.GraphicsDevice,
-                (int)Math.Ceiling(Main.screenWidth / 16f) + lighting_buffer_offscreen_range_tiles * 2,
-                (int)Math.Ceiling(Main.screenHeight / 16f) + lighting_buffer_offscreen_range_tiles * 2
+                (int)Math.Ceiling(Main.instance.tileTarget.Width / 16f),
+                (int)Math.Ceiling(Main.instance.tileTarget.Height / 16f)
             );
 
             foreach (var chunkCollection in chunk_collections)
             {
                 chunkCollection.ScreenTarget?.Dispose();
-                chunkCollection.ScreenTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
+                chunkCollection.ScreenTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.instance.tileTarget.Width, Main.instance.tileTarget.Height);
             }
 
-            screenSizeLightingBuffer?.Dispose();
-            screenSizeLightingBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
+            // screenSizeLightingBuffer?.Dispose();
+            // screenSizeLightingBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
 
-            screenSizeOverrideBuffer?.Dispose();
-            screenSizeOverrideBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
+            // screenSizeOverrideBuffer?.Dispose();
+            // screenSizeOverrideBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
 
             colorBuffer = new Color[lightingBuffer.Width * lightingBuffer.Height];
             overrideColorBuffer = new Color[lightingBuffer.Width * lightingBuffer.Height];
+
+            FindOffsets();
         };
+    }
+
+    private static void FindOffsets()
+    {
+        offscreenWidthTiles = Main.offScreenRange / 16;
+        offscreenHeightTiles = Main.offScreenRange / 16;
     }
 
     public override void OnWorldUnload()
@@ -229,11 +240,11 @@ internal sealed class ChunkSystem : ModSystem
                 overrideBuffer?.Dispose();
                 overrideBuffer = null;
 
-                screenSizeLightingBuffer?.Dispose();
-                screenSizeLightingBuffer = null;
+                // screenSizeLightingBuffer?.Dispose();
+                // screenSizeLightingBuffer = null;
 
-                screenSizeOverrideBuffer?.Dispose();
-                screenSizeOverrideBuffer = null;
+                // screenSizeOverrideBuffer?.Dispose();
+                // screenSizeOverrideBuffer = null;
             }
         );
     }
@@ -271,7 +282,7 @@ internal sealed class ChunkSystem : ModSystem
 
         Rectangle screenArea = new((int)Main.screenPosition.X, (int)Main.screenPosition.Y, Main.screenWidth, Main.screenHeight);
         {
-            screenArea.Inflate(40, 40);
+            screenArea.Inflate(40 * 16, 40 * 16);
         }
 
         // Chunk coordinates are incremented by 1 in each direction per chunk; 1 unit in chunk coordinates is equal to CHUNK_SIZE.
@@ -325,8 +336,8 @@ internal sealed class ChunkSystem : ModSystem
                     var x = i % lightingBuffer.Width;
                     var y = i / lightingBuffer.Width;
 
-                    var tileX = (int)(Main.screenPosition.X / 16) + x - lighting_buffer_offscreen_range_tiles;
-                    var tileY = (int)(Main.screenPosition.Y / 16) + y - lighting_buffer_offscreen_range_tiles;
+                    var tileX = (int)(Main.screenPosition.X / 16) + x;
+                    var tileY = (int)(Main.screenPosition.Y / 16) + y;
 
                     colorBuffer[i] = Lighting.GetColor(tileX, tileY);
 
@@ -362,6 +373,7 @@ internal sealed class ChunkSystem : ModSystem
         }
     }
 
+    /*
     private static void TransferTileSpaceBufferToScreenSpaceBuffer(GraphicsDevice device)
     {
         if (screenSizeLightingBuffer is null || screenSizeOverrideBuffer is null)
@@ -400,6 +412,7 @@ internal sealed class ChunkSystem : ModSystem
             transfer(overrideBuffer, screenSizeOverrideBuffer);
         }
     }
+    */
 
     private static void TileStateChanged(int i, int j)
     {
@@ -600,10 +613,12 @@ internal sealed class ChunkSystem : ModSystem
                 }
             }
 
+            /*
             if (debugLightMap)
             {
                 Main.spriteBatch.Draw(screenSizeLightingBuffer, Vector2.Zero, Color.White);
             }
+            */
 
             sb.End();
         }
