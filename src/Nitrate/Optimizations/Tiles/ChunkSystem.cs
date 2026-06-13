@@ -34,7 +34,7 @@ internal sealed class ChunkSystem : ModSystem
 
             if (Configuration is { UsesExperimentalTileRenderer: true, DisabledExperimentalTileRendererWarning: false })
             {
-                Main.NewText("StartupMessages.ExperimentalTileRendererWarning".LocalizeNitrate(), Color.PaleVioletRed);
+                Main.NewText(Mods.Nitrate.StartupMessages.ExperimentalTileRendererWarning.GetText(), Color.PaleVioletRed);
             }
         }
     }
