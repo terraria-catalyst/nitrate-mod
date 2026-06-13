@@ -3,7 +3,7 @@ using Daybreak.Common.Rendering;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Nitrate.API.Tiles;
-using Nitrate.Utilities;
+using Nitrate.Core;
 using Terraria;
 
 namespace Nitrate.Optimizations;
@@ -121,7 +121,7 @@ internal sealed class WallChunkCollection : ChunkCollection
         }
     }
 
-    public void DoRenderWalls(GraphicsDevice graphicsDevice, RenderTarget2D? screenSizeLightingBuffer, RenderTarget2D? screenSizeOverrideBuffer, Lazy<Effect> lightMapRenderer)
+    public void DoRenderWalls(GraphicsDevice graphicsDevice, RenderTarget2D? screenSizeLightingBuffer, RenderTarget2D? screenSizeOverrideBuffer, WrapperShaderData<Assets.Effects.LightMapRenderer.Parameters> lightMapShader)
     {
         var offscreenRange = new Vector2(Main.drawToScreen ? 0 : Main.offScreenRange);
 
@@ -129,7 +129,7 @@ internal sealed class WallChunkCollection : ChunkCollection
         using (Main.spriteBatch.Scope())
         {
             DrawChunksToChunkTarget(graphicsDevice);
-            RenderChunksWithLighting(screenSizeLightingBuffer, screenSizeOverrideBuffer, lightMapRenderer, offscreenRange);
+            RenderChunksWithLighting(screenSizeLightingBuffer, screenSizeOverrideBuffer, lightMapShader, offscreenRange);
         }
 
         Main.tileBatch.Begin();

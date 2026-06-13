@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Nitrate.Core;
 using Terraria;
 
 namespace Nitrate.Optimizations;
@@ -51,36 +52,37 @@ internal abstract class ChunkCollection
 
     public abstract void DrawChunksToChunkTarget(GraphicsDevice device);
 
-    public virtual void RenderChunksWithLighting(RenderTarget2D? screenSizeLightingBuffer, RenderTarget2D? screenSizeOverrideBuffer, Lazy<Effect> lightMapRenderer, Vector2 offscreenRange)
+    public virtual void RenderChunksWithLighting(RenderTarget2D? screenSizeLightingBuffer, RenderTarget2D? screenSizeOverrideBuffer, WrapperShaderData<Assets.Effects.LightMapRenderer.Parameters> lightMapShader, Vector2 offscreenRange)
     {
         if (ScreenTarget is null || screenSizeLightingBuffer is null)
         {
             return;
         }
 
+        lightMapShader.Parameters.lightMap = screenSizeLightingBuffer;
+        lightMapShader.Parameters.applyOverride = ApplyOverride;
+
+        // If not set it will default to being empty which will not apply any override colors.
+        if (screenSizeOverrideBuffer is not null)
+        {
+            lightMapShader.Parameters.overrideMap = screenSizeOverrideBuffer;
+        }
+
+        lightMapShader.Parameters.size = new Vector2(screenSizeLightingBuffer.Width, screenSizeLightingBuffer.Height);
+
+        // The offset vector is the amount of pixels from the corner the first tile is.
+        lightMapShader.Parameters.offset = new Vector2(16) - new Vector2(Main.screenPosition.X % 16, Main.screenPosition.Y % 16);
+        
+        lightMapShader.Apply();
+        
         Main.spriteBatch.Begin(
             SpriteSortMode.Immediate,
             BlendState.AlphaBlend,
             SamplerState.PointClamp,
             DepthStencilState.None,
             RasterizerState.CullNone,
-            lightMapRenderer.Value
+            lightMapShader.Shader
         );
-
-        lightMapRenderer.Value.Parameters["lightMap"].SetValue(screenSizeLightingBuffer);
-
-        lightMapRenderer.Value.Parameters["applyOverride"].SetValue(ApplyOverride);
-
-        // If not set it will default to being empty which will not apply any override colors.
-        if (screenSizeOverrideBuffer is not null)
-        {
-            lightMapRenderer.Value.Parameters["overrideMap"].SetValue(screenSizeOverrideBuffer);
-        }
-
-        lightMapRenderer.Value.Parameters["size"].SetValue(new Vector2(screenSizeLightingBuffer.Width, screenSizeLightingBuffer.Height));
-
-        // The offset vector is the amount of pixels from the corner the first tile is.
-        lightMapRenderer.Value.Parameters["offset"].SetValue(new Vector2(16) - new Vector2(Main.screenPosition.X % 16, Main.screenPosition.Y % 16));
 
         Main.spriteBatch.Draw(ScreenTarget, offscreenRange, Color.White);
         Main.spriteBatch.End();

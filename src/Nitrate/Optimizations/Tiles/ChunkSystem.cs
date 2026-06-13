@@ -8,8 +8,7 @@ using Microsoft.Xna.Framework.Input;
 using MonoMod.Cil;
 using Nitrate.API.Listeners;
 using Nitrate.API.Threading;
-using Nitrate.Utilities;
-using ReLogic.Content;
+using Nitrate.Core;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
@@ -50,7 +49,6 @@ internal sealed class ChunkSystem : ModSystem
     private static readonly TileChunkCollection non_solid_tiles = new() { SolidLayer = false };
     private static readonly WallChunkCollection walls = new();
     private static readonly ChunkCollection[] chunk_collections = { solid_tiles, non_solid_tiles, walls };
-    private static readonly Lazy<Effect> light_map_renderer = new(() => ModContent.Request<Effect>("Nitrate/Assets/Effects/LightMapRenderer", AssetRequestMode.ImmediateLoad).Value);
     private static RenderTarget2D? lightingBuffer;
     private static RenderTarget2D? overrideBuffer;
     private static Color[] colorBuffer = Array.Empty<Color>();
@@ -60,10 +58,18 @@ internal sealed class ChunkSystem : ModSystem
     private static bool enabled;
     private static bool debugChunkBorders;
     private static bool debugLightMap;
+    private static WrapperShaderData<Assets.Effects.LightMapRenderer.Parameters> lightMapShader;
 
     public override void OnModLoad()
     {
         base.OnModLoad();
+
+        Main.RunOnMainThread(
+            () =>
+            {
+                lightMapShader = Assets.Effects.LightMapRenderer.CreateLightMapRendererPass();
+            }
+        );
 
         enabled = Configuration.UsesExperimentalTileRenderer;
 
@@ -506,7 +512,7 @@ internal sealed class ChunkSystem : ModSystem
                         return;
                     }
 
-                    walls.DoRenderWalls(Main.graphics.GraphicsDevice, screenSizeLightingBuffer, screenSizeOverrideBuffer, light_map_renderer);
+                    walls.DoRenderWalls(Main.graphics.GraphicsDevice, screenSizeLightingBuffer, screenSizeOverrideBuffer, lightMapShader);
                 }
             );
         }
@@ -528,7 +534,7 @@ internal sealed class ChunkSystem : ModSystem
                         return;
                     }
 
-                    non_solid_tiles.DoRenderTiles(Main.graphics.GraphicsDevice, screenSizeLightingBuffer, screenSizeOverrideBuffer, light_map_renderer);
+                    non_solid_tiles.DoRenderTiles(Main.graphics.GraphicsDevice, screenSizeLightingBuffer, screenSizeOverrideBuffer, lightMapShader);
                 }
             );
         }
@@ -550,7 +556,7 @@ internal sealed class ChunkSystem : ModSystem
                         return;
                     }
 
-                    solid_tiles.DoRenderTiles(Main.graphics.GraphicsDevice, screenSizeLightingBuffer, screenSizeOverrideBuffer, light_map_renderer);
+                    solid_tiles.DoRenderTiles(Main.graphics.GraphicsDevice, screenSizeLightingBuffer, screenSizeOverrideBuffer, lightMapShader);
                 }
             );
         }
