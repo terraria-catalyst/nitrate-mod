@@ -1,0 +1,5 @@
+{
+  "msbuild-sdks": {
+    "Tomat.Terraria.ModLoader.Sdk": "2.1.0"
+  }
+}
