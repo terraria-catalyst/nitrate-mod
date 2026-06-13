@@ -1,4 +1,9 @@
 <Solution>
+  <Folder Name="/daybreak-mod/">
+    <Project Path="daybreak-mod/src/Daybreak.CodeAnalysis/Daybreak.CodeAnalysis.csproj" />
+    <Project Path="daybreak-mod/src/Daybreak.SourceGen/Daybreak.SourceGen.csproj" />
+    <Project Path="daybreak-mod/src/Daybreak/Daybreak.csproj" />
+  </Folder>
   <Project Path="Nitrate/Nitrate.csproj" />
   <Project Path="NotQuiteNitrate/NotQuiteNitrate.csproj" />
 </Solution>

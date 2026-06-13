@@ -1,12 +1,18 @@
 <Project Sdk="Tomat.Terraria.ModLoader.Sdk">
 
     <ItemGroup>
-        <PackageReference Include="Fody" Version="6.8.0" PrivateAssets="all"/>
-        <PackageReference Include="InfoOf.Fody" Version="2.1.1"/>
+        <ProjectReference Include="..\daybreak-mod\src\Daybreak\Daybreak.csproj" />
+        <ProjectReference Include="..\daybreak-mod\src\Daybreak.CodeAnalysis\Daybreak.CodeAnalysis.csproj" PrivateAssets="All" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
+        <ProjectReference Include="..\daybreak-mod\src\Daybreak.SourceGen\Daybreak.SourceGen.csproj" PrivateAssets="All" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
+
+        <PackageReference Include="Fody" Version="6.8.0" PrivateAssets="all" />
+        <PackageReference Include="InfoOf.Fody" Version="2.1.1" />
+
+        <Publicize Include="FNA" IncludeCompilerGeneratedMembers="false" IncludeVirtualMembers="false" />
     </ItemGroup>
 
     <ItemGroup>
-        <Publicize Include="FNA" IncludeCompilerGeneratedMembers="false" IncludeVirtualMembers="false"/>
+      <Folder Include="Properties\" />
     </ItemGroup>
 
 </Project>

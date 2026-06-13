@@ -1,28 +1,16 @@
 {
   "profiles": {
-    "Terraria (Client) (dotnet)": {
+    "Terraria Client": {
       "commandName": "Executable",
-      "executablePath": "dotnet",
-      "commandLineArgs": "$(tMLPath) -unsafe true",
-      "workingDirectory": "$(tMLSteamPath)"
+      "executablePath": "$(DotNetName)",
+      "commandLineArgs": "Tomat.TML.ClientBootstrap.dll --working-directory \"$(tMLSteamPath).\" --binary \"$(tMLPath)\" --mode client --mod $(AssemblyName) --sdk-natives-directory \"$(TmlBuildNativeRoot).\" --tml-build-version $(TmlBuildSdkVersion) --tml-version $(TmlVersion) --tml-version-resolved $(TmlVersionResolved) --features \"$(TmlBuildBootstrapFeatures)\"",
+      "workingDirectory": "$(TmlBuildBootstrapRoot)"
     },
-    "Terraria (Server) (dotnet)": {
+    "Terraria Server": {
       "commandName": "Executable",
-      "executablePath": "dotnet",
-      "commandLineArgs": "$(tMLServerPath) -unsafe true",
-      "workingDirectory": "$(tMLSteamPath)"
-    },
-    "Terraria (Client) (dotnet.exe)": {
-      "commandName": "Executable",
-      "executablePath": "dotnet.exe",
-      "commandLineArgs": "$(tMLPath) -unsafe true",
-      "workingDirectory": "$(tMLSteamPath)"
-    },
-    "Terraria (Server) (dotnet.exe)": {
-      "commandName": "Executable",
-      "executablePath": "dotnet.exe",
-      "commandLineArgs": "$(tMLServerPath) -unsafe true",
-      "workingDirectory": "$(tMLSteamPath)"
+      "executablePath": "$(DotNetName)",
+      "commandLineArgs": "Tomat.TML.ClientBootstrap.dll --working-directory \"$(tMLSteamPath).\" --binary \"$(tMLPath)\" --mode server --mod $(AssemblyName) --sdk-natives-directory \"$(TmlBuildNativeRoot).\" --tml-build-version $(TmlBuildSdkVersion) --tml-version $(TmlVersion) --tml-version-resolved $(TmlVersionResolved) --features \"$(TmlBuildBootstrapFeatures)\"",
+      "workingDirectory": "$(TmlBuildBootstrapRoot)"
     }
   }
 }

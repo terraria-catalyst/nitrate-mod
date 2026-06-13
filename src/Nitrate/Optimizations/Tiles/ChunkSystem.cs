@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Daybreak.Common.Rendering;
 using JetBrains.Annotations;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -12,6 +13,7 @@ using Nitrate.Utilities;
 using ReLogic.Content;
 using Terraria;
 using Terraria.GameContent;
+using Terraria.GameContent.Liquid;
 using Terraria.Graphics.Effects;
 using Terraria.ModLoader;
 
@@ -82,15 +84,19 @@ internal sealed class ChunkSystem : ModSystem
 
         // Disable RenderX methods in relation to tile rendering. These methods
         // are responsible for drawing the tile render target in vanilla.
+        /*
         IL_Main.RenderTiles += CancelVanillaRendering;
         IL_Main.RenderTiles2 += CancelVanillaRendering;
         IL_Main.RenderWalls += CancelVanillaRendering;
+        */
 
         // Hijack the methods responsible for actually drawing to the vanilla
         // tile render target.
+        /*
         IL_Main.DoDraw_WallsAndBlacks += NewDrawWalls;
         IL_Main.DoDraw_Tiles_NonSolid += NewDrawNonSolidTiles;
         IL_Main.DoDraw_Tiles_Solid += NewDrawSolidTiles;
+        */
         On_Main.DoDraw_WallsTilesNPCs += HookBeforeDrawingToPopulateLightingBufferAndHandleStuffThatShouldHappenWhenDrawingToScreen;
 
         Main.RunOnMainThread(
@@ -350,41 +356,26 @@ internal sealed class ChunkSystem : ModSystem
             return;
         }
 
-        var bindings = device.GetRenderTargets();
-
-        foreach (var binding in bindings)
-        {
-            ((RenderTarget2D)binding.RenderTarget).RenderTargetUsage = RenderTargetUsage.PreserveContents;
-        }
-
         void transfer(RenderTarget2D? buffer, RenderTarget2D screenSize)
         {
-            device.SetRenderTarget(screenSize);
-            device.Clear(Color.Transparent);
-
-            var ended = Main.spriteBatch.TryEnd(out var snapshot);
-
-            Main.spriteBatch.Begin(
-                SpriteSortMode.Immediate,
-                BlendState.AlphaBlend,
-                SamplerState.PointClamp,
-                DepthStencilState.None,
-                RasterizerState.CullNone,
-                null,
-                Main.GameViewMatrix.TransformationMatrix
-            );
-
-            FnaVector2 offset = new(Main.screenPosition.X % 16, Main.screenPosition.Y % 16);
-
-            // Account for tile padding around the screen.
-            Main.spriteBatch.Draw(buffer, new Vector2(-lighting_buffer_offscreen_range_tiles * 16) - offset, null, Color.White, 0, Vector2.Zero, 16, SpriteEffects.None, 0);
-            Main.spriteBatch.End();
-
-            device.SetRenderTargets(bindings);
-
-            if (ended)
+            using (Main.spriteBatch.Scope())
+            using (screenSize.Scope(clearColor: Color.Transparent))
             {
-                Main.spriteBatch.BeginWithSnapshot(snapshot);
+                Main.spriteBatch.Begin(
+                    SpriteSortMode.Immediate,
+                    BlendState.AlphaBlend,
+                    SamplerState.PointClamp,
+                    DepthStencilState.None,
+                    RasterizerState.CullNone,
+                    null,
+                    Main.GameViewMatrix.TransformationMatrix
+                );
+
+                FnaVector2 offset = new(Main.screenPosition.X % 16, Main.screenPosition.Y % 16);
+
+                // Account for tile padding around the screen.
+                Main.spriteBatch.Draw(buffer, new Vector2(-lighting_buffer_offscreen_range_tiles * 16) - offset, null, Color.White, 0, Vector2.Zero, 16, SpriteEffects.None, 0);
+                Main.spriteBatch.End();
             }
         }
 
@@ -561,8 +552,8 @@ internal sealed class ChunkSystem : ModSystem
 
                 try
                 {
-                    Main.player[Main.myPlayer].hitReplace.DrawFreshAnimations(Main.spriteBatch);
-                    Main.player[Main.myPlayer].hitTile.DrawFreshAnimations(Main.spriteBatch);
+                    Main.LocalPlayer.hitReplace.DrawFreshAnimations(Main.spriteBatch);
+                    Main.LocalPlayer.hitTile.DrawFreshAnimations(Main.spriteBatch);
                 }
                 catch (Exception e2)
                 {
@@ -613,20 +604,24 @@ internal sealed class ChunkSystem : ModSystem
 
     private static void HookBeforeDrawingToPopulateLightingBufferAndHandleStuffThatShouldHappenWhenDrawingToScreen(On_Main.orig_DoDraw_WallsTilesNPCs orig, Main self)
     {
+        /*
         var old = Main.drawToScreen;
+        var oldRange = Main.offScreenRange;
+        Main.offScreenRange = 0;
         Main.drawToScreen = true;
+        Main.spriteBatch.Begin();
         Main.tileBatch.Begin();
         Main.instance.DrawWaters(true);
         Main.tileBatch.End();
+        Main.spriteBatch.End();
 
         Main.drawToScreen = false;
-        var oldRange = Main.offScreenRange;
-        Main.offScreenRange = 0;
         Main.tileBatch.Begin();
         Main.instance.DrawBackground();
         Main.tileBatch.End();
         Main.drawToScreen = old;
         Main.offScreenRange = oldRange;
+        */
 
         PopulateLightingBuffer();
         TransferTileSpaceBufferToScreenSpaceBuffer(Main.graphics.GraphicsDevice);

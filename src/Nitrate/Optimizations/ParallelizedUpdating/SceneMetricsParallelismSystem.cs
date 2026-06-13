@@ -319,12 +319,13 @@ internal class SceneMetricsParallelismSystem : ModSystem
         // Update the metrics
         if (self._state == LightingEngine.EngineState.ExportMetrics)
         {
+            Main.renderCount = (Main.renderCount + 1) % 4;
+
             if (loadedMetrics != null)
             {
                 self._timer.Start();
                 TimeLogger.LightingTime(0, 0.0);
                 loadedMetrics.FlushPendingTileUpdates();
-                Main.renderCount = (Main.renderCount + 1) % 4;
 
                 Main.SceneMetrics = loadedMetrics;
                 SystemLoader.ResetNearbyTileEffects();
@@ -345,11 +346,11 @@ internal class SceneMetricsParallelismSystem : ModSystem
         // Start processing new metrics
         if (self._state == LightingEngine.EngineState.Scan)
         {
+            Main.renderCount = (Main.renderCount + 1) % 4;
+
             // Run profiling timer as normal
             self._timer.Start();
             TimeLogger.LightingTime(0, 0.0);
-
-            Main.renderCount = (Main.renderCount + 1) % 4;
 
             // Start a lookup for the scene.
             Rectangle copy = new(area.X, area.Y, area.Width, area.Height);

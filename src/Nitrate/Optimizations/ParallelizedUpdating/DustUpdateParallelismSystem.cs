@@ -22,8 +22,8 @@ namespace Nitrate.Optimizations;
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class DustUpdateParallelismSystem : ModSystem
 {
-    private static readonly MethodInfo update_dust_filler = Info.OfMethod("Nitrate", "TeamCatalyst.Nitrate.Optimizations.ParallelizedUpdating.DustUpdateParallelismSystem", "UpdateDustFiller");
-    private static readonly MethodInfo inner_update_dust = Info.OfMethod("Nitrate", "TeamCatalyst.Nitrate.Optimizations.ParallelizedUpdating.DustUpdateParallelismSystem", "InnerUpdateDust");
+    private static readonly MethodInfo update_dust_filler = Info.OfMethod("Nitrate", "Nitrate.Optimizations.DustUpdateParallelismSystem", "UpdateDustFiller");
+    private static readonly MethodInfo inner_update_dust = Info.OfMethod("Nitrate", "Nitrate.Optimizations.DustUpdateParallelismSystem", "InnerUpdateDust");
     private static MethodBody? updateDustBody;
 
     private ILHook? updateDustFillerHook;
