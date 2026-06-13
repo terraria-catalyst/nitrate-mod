@@ -84,19 +84,15 @@ internal sealed class ChunkSystem : ModSystem
 
         // Disable RenderX methods in relation to tile rendering. These methods
         // are responsible for drawing the tile render target in vanilla.
-        /*
         IL_Main.RenderTiles += CancelVanillaRendering;
         IL_Main.RenderTiles2 += CancelVanillaRendering;
         IL_Main.RenderWalls += CancelVanillaRendering;
-        */
 
         // Hijack the methods responsible for actually drawing to the vanilla
         // tile render target.
-        /*
         IL_Main.DoDraw_WallsAndBlacks += NewDrawWalls;
         IL_Main.DoDraw_Tiles_NonSolid += NewDrawNonSolidTiles;
         IL_Main.DoDraw_Tiles_Solid += NewDrawSolidTiles;
-        */
         On_Main.DoDraw_WallsTilesNPCs += HookBeforeDrawingToPopulateLightingBufferAndHandleStuffThatShouldHappenWhenDrawingToScreen;
 
         Main.RunOnMainThread(
@@ -604,25 +600,6 @@ internal sealed class ChunkSystem : ModSystem
 
     private static void HookBeforeDrawingToPopulateLightingBufferAndHandleStuffThatShouldHappenWhenDrawingToScreen(On_Main.orig_DoDraw_WallsTilesNPCs orig, Main self)
     {
-        /*
-        var old = Main.drawToScreen;
-        var oldRange = Main.offScreenRange;
-        Main.offScreenRange = 0;
-        Main.drawToScreen = true;
-        Main.spriteBatch.Begin();
-        Main.tileBatch.Begin();
-        Main.instance.DrawWaters(true);
-        Main.tileBatch.End();
-        Main.spriteBatch.End();
-
-        Main.drawToScreen = false;
-        Main.tileBatch.Begin();
-        Main.instance.DrawBackground();
-        Main.tileBatch.End();
-        Main.drawToScreen = old;
-        Main.offScreenRange = oldRange;
-        */
-
         PopulateLightingBuffer();
         TransferTileSpaceBufferToScreenSpaceBuffer(Main.graphics.GraphicsDevice);
         orig(self);
