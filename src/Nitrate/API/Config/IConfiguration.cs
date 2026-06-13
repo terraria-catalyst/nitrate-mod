@@ -1,6 +1,6 @@
-﻿using TeamCatalyst.Nitrate.Config;
+﻿using Nitrate.Config;
 
-namespace TeamCatalyst.Nitrate.API.Config;
+namespace Nitrate.API.Config;
 
 /// <summary>
 ///     <see cref="NitrateMod"/> configuration.

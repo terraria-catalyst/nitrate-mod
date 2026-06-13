@@ -11,7 +11,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.Utilities;
 
-namespace TeamCatalyst.Nitrate.Optimizations.Tiles;
+namespace Nitrate.Optimizations.Tiles;
 
 internal static class ModifiedTileDrawing {
     private static bool IsActiveAndNotPaused => Main.instance.IsActive && !Main.gamePaused;

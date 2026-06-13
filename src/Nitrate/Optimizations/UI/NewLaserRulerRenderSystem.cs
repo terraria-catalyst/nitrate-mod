@@ -8,7 +8,7 @@ using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
 
-namespace TeamCatalyst.Nitrate.Optimizations.UI;
+namespace Nitrate.Optimizations.UI;
 
 /// <summary>
 ///     Replaces the default laser ruler rendering system with a much more optimized one.

@@ -1,6 +1,6 @@
-﻿using TeamCatalyst.Nitrate.API.Config;
+﻿using Nitrate.API.Config;
 
-namespace TeamCatalyst.Nitrate.Config;
+namespace Nitrate.Config;
 
 internal sealed class NullConfiguration : IConfiguration {
     bool IConfiguration.UsesExperimentalTileRenderer {

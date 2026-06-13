@@ -1,15 +1,15 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using TeamCatalyst.Nitrate.API.Listeners;
-using TeamCatalyst.Nitrate.API.Tiles;
-using TeamCatalyst.Nitrate.Utilities;
+using Nitrate.API.Listeners;
+using Nitrate.API.Tiles;
+using Nitrate.Utilities;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.GameContent.Drawing;
 using Terraria.Graphics.Capture;
 
-namespace TeamCatalyst.Nitrate.Optimizations.Tiles;
+namespace Nitrate.Optimizations.Tiles;
 
 internal sealed class TileChunkCollection : ChunkCollection {
     public bool SolidLayer { get; init; }

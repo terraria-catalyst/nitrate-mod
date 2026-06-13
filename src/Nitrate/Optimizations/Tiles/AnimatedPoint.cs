@@ -1,4 +1,4 @@
-﻿namespace TeamCatalyst.Nitrate.Optimizations.Tiles;
+﻿namespace Nitrate.Optimizations.Tiles;
 
 public struct AnimatedPoint {
     public int X { get; set; }

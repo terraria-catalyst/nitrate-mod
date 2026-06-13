@@ -3,9 +3,9 @@ using System.Reflection;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using TeamCatalyst.Nitrate.API.SIMD;
+using Nitrate.API.SIMD;
 
-namespace TeamCatalyst.Nitrate.SIMD;
+namespace Nitrate.SIMD;
 
 internal abstract class AbstractSimdifier : ISimdifier {
     private readonly Dictionary<string, MethodInfo> instanceRemap = new();

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace TeamCatalyst.Nitrate.Optimizations.Tiles;
+namespace Nitrate.Optimizations.Tiles;
 
 internal sealed class Chunk : IDisposable {
     public Chunk(RenderTarget2D renderTarget) {

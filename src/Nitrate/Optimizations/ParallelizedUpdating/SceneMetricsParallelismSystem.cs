@@ -3,16 +3,13 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
-using MonoMod.Cil;
 using Terraria;
 using Terraria.Graphics.Light;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.Utilities;
 using Terraria.WorldBuilding;
 
-namespace TeamCatalyst.Nitrate.Optimizations.ParallelizedUpdating;
+namespace Nitrate.Optimizations.ParallelizedUpdating;
 
 /// <summary>
 ///        Makes the lighting engine's SceneMetrics run async.

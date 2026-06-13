@@ -4,7 +4,7 @@ using JetBrains.Annotations;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace TeamCatalyst.Nitrate.API.Listeners;
+namespace Nitrate.API.Listeners;
 
 /// <summary>
 ///     A static, toggleable watchdog that hooks into various unsafe methods to

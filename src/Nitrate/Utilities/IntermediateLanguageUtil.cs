@@ -4,7 +4,7 @@ using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.Utils;
 
-namespace TeamCatalyst.Nitrate.Utilities;
+namespace Nitrate.Utilities;
 
 /// <summary>
 ///     Basic utilities for dealing with IL.

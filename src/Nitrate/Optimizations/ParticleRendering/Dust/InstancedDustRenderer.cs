@@ -4,16 +4,16 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using Nitrate.API.Rendering;
+using Nitrate.API.Threading;
+using Nitrate.Utilities;
 using ReLogic.Content;
-using TeamCatalyst.Nitrate.API.Rendering;
-using TeamCatalyst.Nitrate.API.Threading;
-using TeamCatalyst.Nitrate.Utilities;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace TeamCatalyst.Nitrate.Optimizations.ParticleRendering.Dust;
+namespace Nitrate.Optimizations.ParticleRendering.Dust;
 
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class InstancedDustRenderer : AbstractInstancedParticleRenderer<ParticleInstance> {

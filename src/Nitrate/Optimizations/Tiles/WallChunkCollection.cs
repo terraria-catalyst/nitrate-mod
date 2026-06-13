@@ -1,11 +1,11 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using TeamCatalyst.Nitrate.API.Tiles;
-using TeamCatalyst.Nitrate.Utilities;
+using Nitrate.API.Tiles;
+using Nitrate.Utilities;
 using Terraria;
 
-namespace TeamCatalyst.Nitrate.Optimizations.Tiles;
+namespace Nitrate.Optimizations.Tiles;
 
 internal sealed class WallChunkCollection : ChunkCollection {
     public override bool ApplyOverride => false;

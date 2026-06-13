@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace TeamCatalyst.Nitrate.API.Rendering;
+namespace Nitrate.API.Rendering;
 
 /// <summary>
 ///     Handles the registration of and rendering of render targets that deal

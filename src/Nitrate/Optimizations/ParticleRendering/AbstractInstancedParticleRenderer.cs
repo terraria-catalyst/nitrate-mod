@@ -1,11 +1,11 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using TeamCatalyst.Nitrate.API.Rendering;
+using Nitrate.API.Rendering;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace TeamCatalyst.Nitrate.Optimizations.ParticleRendering;
+namespace Nitrate.Optimizations.ParticleRendering;
 
 internal abstract class AbstractInstancedParticleRenderer<TParticle> : ModSystem where TParticle : unmanaged {
     protected VertexBuffer? VertexBuffer;

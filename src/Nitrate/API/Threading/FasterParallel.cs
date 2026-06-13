@@ -2,7 +2,7 @@
 using System.Threading;
 using ReLogic.Threading;
 
-namespace TeamCatalyst.Nitrate.API.Threading;
+namespace Nitrate.API.Threading;
 
 /// <summary>
 ///     A faster reimplementation of <see cref="FastParallel"/>.

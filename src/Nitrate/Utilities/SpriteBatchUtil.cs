@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace TeamCatalyst.Nitrate.Utilities;
+namespace Nitrate.Utilities;
 
 internal static class SpriteBatchUtil {
     public readonly struct SpriteBatchSnapshot {

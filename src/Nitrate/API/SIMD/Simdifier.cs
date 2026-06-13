@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using MonoMod.Cil;
-using TeamCatalyst.Nitrate.SIMD;
+using Nitrate.SIMD;
 
-namespace TeamCatalyst.Nitrate.API.SIMD;
+namespace Nitrate.API.SIMD;
 
 public static class Simdifier {
     private static readonly List<ISimdifier> simdifiers = new() {

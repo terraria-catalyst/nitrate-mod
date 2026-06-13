@@ -5,15 +5,15 @@ using JetBrains.Annotations;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
-using TeamCatalyst.Nitrate.API.Listeners;
-using TeamCatalyst.Nitrate.API.SIMD;
-using TeamCatalyst.Nitrate.API.Threading;
-using TeamCatalyst.Nitrate.Utilities;
+using Nitrate.API.Listeners;
+using Nitrate.API.SIMD;
+using Nitrate.API.Threading;
+using Nitrate.Utilities;
 using Terraria;
 using Terraria.ModLoader;
 using MethodBody = Mono.Cecil.Cil.MethodBody;
 
-namespace TeamCatalyst.Nitrate.Optimizations.ParallelizedUpdating;
+namespace Nitrate.Optimizations.ParallelizedUpdating;
 
 /// <summary>
 ///     Rewrites the dust update method to use parallelism since dust updating

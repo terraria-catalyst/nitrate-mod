@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace TeamCatalyst.Nitrate.API.Rendering;
+namespace Nitrate.API.Rendering;
 
 /// <summary>
 ///     An actionable render target used in the

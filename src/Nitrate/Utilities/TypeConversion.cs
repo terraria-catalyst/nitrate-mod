@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace TeamCatalyst.Nitrate.Utilities;
+namespace Nitrate.Utilities;
 
 /// <summary>
 ///     Basic type conversion utilities.
