@@ -7,7 +7,7 @@ using Terraria;
 using Terraria.GameContent.Drawing;
 using Terraria.ModLoader;
 
-namespace Nitrate.Optimizations.Tiles;
+namespace Nitrate.Optimizations;
 
 // TODO: Make sure this doesn't mess with mods.
 /// <summary>

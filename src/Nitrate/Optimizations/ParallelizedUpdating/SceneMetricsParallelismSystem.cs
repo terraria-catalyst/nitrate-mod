@@ -9,7 +9,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.WorldBuilding;
 
-namespace Nitrate.Optimizations.ParallelizedUpdating;
+namespace Nitrate.Optimizations;
 
 /// <summary>
 ///     Makes the lighting engine's SceneMetrics run async.

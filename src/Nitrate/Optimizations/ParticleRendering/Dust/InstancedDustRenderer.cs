@@ -13,7 +13,7 @@ using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace Nitrate.Optimizations.ParticleRendering.Dust;
+namespace Nitrate.Optimizations;
 
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class InstancedDustRenderer : AbstractInstancedParticleRenderer<ParticleInstance>

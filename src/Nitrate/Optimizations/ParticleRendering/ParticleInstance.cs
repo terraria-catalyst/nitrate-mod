@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework;
 
-namespace Nitrate.Optimizations.ParticleRendering;
+namespace Nitrate.Optimizations;
 
 /// <summary>
 ///     Instance data for a dust particle. Contains a world transformation

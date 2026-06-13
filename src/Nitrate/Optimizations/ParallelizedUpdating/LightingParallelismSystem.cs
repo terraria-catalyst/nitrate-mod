@@ -9,7 +9,7 @@ using Terraria;
 using Terraria.Graphics.Light;
 using Terraria.ModLoader;
 
-namespace Nitrate.Optimizations.ParallelizedUpdating;
+namespace Nitrate.Optimizations;
 
 /// <summary>
 ///     Minor optimisation that makes some aspects of lighting use this mod's

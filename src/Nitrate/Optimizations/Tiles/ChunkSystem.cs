@@ -15,7 +15,7 @@ using Terraria.GameContent;
 using Terraria.Graphics.Effects;
 using Terraria.ModLoader;
 
-namespace Nitrate.Optimizations.Tiles;
+namespace Nitrate.Optimizations;
 
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class ChunkSystem : ModSystem

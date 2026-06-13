@@ -9,7 +9,7 @@ using Terraria.GameContent;
 using Terraria.GameContent.Drawing;
 using Terraria.Graphics.Capture;
 
-namespace Nitrate.Optimizations.Tiles;
+namespace Nitrate.Optimizations;
 
 internal sealed class TileChunkCollection : ChunkCollection
 {

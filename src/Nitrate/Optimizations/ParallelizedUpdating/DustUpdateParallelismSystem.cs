@@ -13,7 +13,7 @@ using Terraria;
 using Terraria.ModLoader;
 using MethodBody = Mono.Cecil.Cil.MethodBody;
 
-namespace Nitrate.Optimizations.ParallelizedUpdating;
+namespace Nitrate.Optimizations;
 
 /// <summary>
 ///     Rewrites the dust update method to use parallelism since dust updating

@@ -5,7 +5,7 @@ using Nitrate.API.Tiles;
 using Nitrate.Utilities;
 using Terraria;
 
-namespace Nitrate.Optimizations.Tiles;
+namespace Nitrate.Optimizations;
 
 internal sealed class WallChunkCollection : ChunkCollection
 {

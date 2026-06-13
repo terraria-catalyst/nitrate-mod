@@ -1,4 +1,4 @@
-﻿namespace Nitrate.Optimizations.Tiles;
+﻿namespace Nitrate.Optimizations;
 
 public struct AnimatedPoint
 {

@@ -408,11 +408,7 @@ public static class AnimatedTileRegistry
 
     public static void RegisterTile(int tileId, TileAnimatedType type)
     {
-        if (!tiles.ContainsKey(tileId))
-        {
-            tiles.Add(tileId, type);
-        }
-        else
+        if (!tiles.TryAdd(tileId, type))
         {
             tiles[tileId] |= type;
         }
@@ -420,11 +416,7 @@ public static class AnimatedTileRegistry
 
     public static void RegisterWall(int wallId, TileAnimatedType type)
     {
-        if (!walls.ContainsKey(wallId))
-        {
-            walls.Add(wallId, type);
-        }
-        else
+        if (!walls.TryAdd(wallId, type))
         {
             walls[wallId] |= type;
         }

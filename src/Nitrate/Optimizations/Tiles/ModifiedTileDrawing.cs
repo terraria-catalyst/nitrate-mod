@@ -11,7 +11,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.Utilities;
 
-namespace Nitrate.Optimizations.Tiles;
+namespace Nitrate.Optimizations;
 
 internal static class ModifiedTileDrawing
 {
