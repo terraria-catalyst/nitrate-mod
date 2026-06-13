@@ -1,4 +1,5 @@
 ﻿using System;
+using Daybreak.Common.Rendering;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Nitrate.API.Listeners;
@@ -7,6 +8,7 @@ using Nitrate.Utilities;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.GameContent.Drawing;
+using Terraria.GameContent.Liquid;
 using Terraria.Graphics.Capture;
 
 namespace Nitrate.Optimizations;
@@ -117,62 +119,52 @@ internal sealed class TileChunkCollection : ChunkCollection
             return;
         }
 
-        var bindings = device.GetRenderTargets();
-
-        foreach (var binding in bindings)
+        using (ScreenTarget.Scope(clearColor: Color.Transparent))
         {
-            ((RenderTarget2D)binding.RenderTarget).RenderTargetUsage = RenderTargetUsage.PreserveContents;
-        }
+            Main.spriteBatch.Begin(
+                SpriteSortMode.Deferred,
+                BlendState.AlphaBlend,
+                SamplerState.PointClamp,
+                DepthStencilState.None,
+                RasterizerState.CullNone,
+                null
+            );
 
-        device.SetRenderTarget(ScreenTarget);
-        device.Clear(Color.Transparent);
+            var screenPosition = Main.screenPosition;
 
-        Main.spriteBatch.Begin(
-            SpriteSortMode.Deferred,
-            BlendState.AlphaBlend,
-            SamplerState.PointClamp,
-            DepthStencilState.None,
-            RasterizerState.CullNone,
-            null,
-            Main.GameViewMatrix.TransformationMatrix
-        );
+            Rectangle screenArea = new((int)screenPosition.X, (int)screenPosition.Y, Main.screenWidth, Main.screenHeight);
 
-        var screenPosition = Main.screenPosition;
-
-        Rectangle screenArea = new((int)screenPosition.X, (int)screenPosition.Y, Main.screenWidth, Main.screenHeight);
-
-        foreach (var key in Loaded.Keys)
-        {
-            var chunk = Loaded[key];
-            var target = chunk.RenderTarget;
-
-            Rectangle chunkArea = new(key.X * ChunkSystem.CHUNK_SIZE, key.Y * ChunkSystem.CHUNK_SIZE, target.Width, target.Height);
-
-            if (!chunkArea.Intersects(screenArea))
+            foreach (var key in Loaded.Keys)
             {
-                continue;
+                var chunk = Loaded[key];
+                var target = chunk.RenderTarget;
+
+                Rectangle chunkArea = new(key.X * ChunkSystem.CHUNK_SIZE, key.Y * ChunkSystem.CHUNK_SIZE, target.Width, target.Height);
+
+                if (!chunkArea.Intersects(screenArea))
+                {
+                    continue;
+                }
+
+                // This should never happen, something catastrophic happened if it did.
+                // The check here is because rendering disposed targets generally has strange behaviour and doesn't always throw exceptions.
+                // Therefore this check needs to be made as it's more robust.
+                if (target.IsDisposed)
+                {
+                    throw new Exception("Attempted to render a disposed chunk.");
+                }
+
+                Main.spriteBatch.Draw(target, new Vector2(chunkArea.X, chunkArea.Y) - screenPosition, Color.White);
             }
 
-            // This should never happen, something catastrophic happened if it did.
-            // The check here is because rendering disposed targets generally has strange behaviour and doesn't always throw exceptions.
-            // Therefore this check needs to be made as it's more robust.
-            if (target.IsDisposed)
-            {
-                throw new Exception("Attempted to render a disposed chunk.");
-            }
-
-            Main.spriteBatch.Draw(target, new Vector2(chunkArea.X, chunkArea.Y) - screenPosition, Color.White);
+            Main.spriteBatch.End();
         }
-
-        Main.spriteBatch.End();
-
-        device.SetRenderTargets(bindings);
     }
 
-    public void DoRenderTiles(GraphicsDevice graphicsDevice, RenderTarget2D? screenSizeLightingBuffer, RenderTarget2D? screenSizeOverrideBuffer, Lazy<Effect> lightMapRenderer, SpriteBatchUtil.SpriteBatchSnapshot? snapshot)
+    public void DoRenderTiles(GraphicsDevice graphicsDevice, RenderTarget2D? screenSizeLightingBuffer, RenderTarget2D? screenSizeOverrideBuffer, Lazy<Effect> lightMapRenderer)
     {
         var unscaledPosition = Main.Camera.UnscaledPosition;
-        var offscreenRange = Vector2.Zero; /*new(Main.offScreenRange, Main.offScreenRange);*/
+        var offscreenRange = new Vector2(Main.drawToScreen ? 0 : Main.offScreenRange);
 
         if (!SolidLayer)
         {
@@ -187,17 +179,18 @@ internal sealed class TileChunkCollection : ChunkCollection
         var martianWhite = (byte)(100f + 150f * Main.martianLight);
         Main.instance.TilesRenderer._martianGlow = new Color(martianWhite, martianWhite, martianWhite, 0);
 
-        Main.tileBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
-        ModifiedTileDrawing.DrawLiquidBehindTiles();
-        Main.tileBatch.End();
-
-        DrawChunksToChunkTarget(graphicsDevice);
-        RenderChunksWithLighting(screenSizeLightingBuffer, screenSizeOverrideBuffer, lightMapRenderer);
-
-        if (snapshot.HasValue)
+        if (SolidLayer && !LiquidEdgeRenderer.Active)
         {
-            Main.spriteBatch.BeginWithSnapshot(snapshot.Value);
+            ModifiedTileDrawing.DrawLiquidBehindTiles();
         }
+
+        Main.tileBatch.End();
+        using (Main.spriteBatch.Scope())
+        {
+            DrawChunksToChunkTarget(graphicsDevice);
+            RenderChunksWithLighting(screenSizeLightingBuffer, screenSizeOverrideBuffer, lightMapRenderer, offscreenRange);
+        }
+        Main.tileBatch.Begin();
 
         foreach (var key in Loaded.Keys)
         {
@@ -219,33 +212,28 @@ internal sealed class TileChunkCollection : ChunkCollection
                         Main.instance.LoadTiles(tile.type);
                     }
 
-                    ModifiedTileDrawing.DrawSingleTile(true, SolidLayer, tilePoint.X, tilePoint.Y, Main.screenPosition);
+                    ModifiedTileDrawing.DrawSingleTile(true, SolidLayer, tilePoint.X, tilePoint.Y, Main.screenPosition - offscreenRange);
                 }
             }
         }
 
         if (SolidLayer)
         {
-            var drawToScreen = Main.drawToScreen;
-            Main.drawToScreen = true;
+            // var drawToScreen = Main.drawToScreen;
+            // Main.drawToScreen = true;
             Main.instance.DrawTileCracks(1, Main.LocalPlayer.hitReplace);
             Main.instance.DrawTileCracks(1, Main.LocalPlayer.hitTile);
-            Main.drawToScreen = drawToScreen;
+            // Main.drawToScreen = drawToScreen;
         }
 
-        Main.screenPosition += new Vector2(Main.offScreenRange, Main.offScreenRange);
+        // Main.screenPosition += new Vector2(Main.offScreenRange, Main.offScreenRange);
         Main.instance.TilesRenderer.DrawSpecialTilesLegacy(unscaledPosition, offscreenRange);
-        Main.screenPosition -= new Vector2(Main.offScreenRange, Main.offScreenRange);
+        // Main.screenPosition -= new Vector2(Main.offScreenRange, Main.offScreenRange);
 
         if (TileObject.objectPreview.Active && Main.LocalPlayer.cursorItemIconEnabled && Main.placementPreview && !CaptureManager.Instance.Active)
         {
             Main.instance.LoadTiles(TileObject.objectPreview.Type);
             TileObject.DrawPreview(Main.spriteBatch, TileObject.objectPreview, unscaledPosition - offscreenRange);
-        }
-
-        if (snapshot.HasValue)
-        {
-            Main.spriteBatch.TryEnd(out _);
         }
     }
 

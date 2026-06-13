@@ -51,7 +51,7 @@ internal abstract class ChunkCollection
 
     public abstract void DrawChunksToChunkTarget(GraphicsDevice device);
 
-    public virtual void RenderChunksWithLighting(RenderTarget2D? screenSizeLightingBuffer, RenderTarget2D? screenSizeOverrideBuffer, Lazy<Effect> lightMapRenderer)
+    public virtual void RenderChunksWithLighting(RenderTarget2D? screenSizeLightingBuffer, RenderTarget2D? screenSizeOverrideBuffer, Lazy<Effect> lightMapRenderer, Vector2 offscreenRange)
     {
         if (ScreenTarget is null || screenSizeLightingBuffer is null)
         {
@@ -71,8 +71,6 @@ internal abstract class ChunkCollection
 
         lightMapRenderer.Value.Parameters["applyOverride"].SetValue(ApplyOverride);
 
-        lightMapRenderer.Value.Parameters["gameViewMatrix"].SetValue(Main.GameViewMatrix.TransformationMatrix);
-
         // If not set it will default to being empty which will not apply any override colors.
         if (screenSizeOverrideBuffer is not null)
         {
@@ -84,7 +82,7 @@ internal abstract class ChunkCollection
         // The offset vector is the amount of pixels from the corner the first tile is.
         lightMapRenderer.Value.Parameters["offset"].SetValue(new Vector2(16) - new Vector2(Main.screenPosition.X % 16, Main.screenPosition.Y % 16));
 
-        Main.spriteBatch.Draw(ScreenTarget, Vector2.Zero, Color.White);
+        Main.spriteBatch.Draw(ScreenTarget, offscreenRange, Color.White);
         Main.spriteBatch.End();
     }
 

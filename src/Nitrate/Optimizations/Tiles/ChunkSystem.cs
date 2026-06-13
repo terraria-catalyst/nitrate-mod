@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Daybreak.Common.Rendering;
-using JetBrains.Annotations;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using Nitrate.API.Listeners;
 using Nitrate.API.Threading;
@@ -13,16 +12,12 @@ using Nitrate.Utilities;
 using ReLogic.Content;
 using Terraria;
 using Terraria.GameContent;
-using Terraria.GameContent.Liquid;
-using Terraria.Graphics.Effects;
 using Terraria.ModLoader;
 
 namespace Nitrate.Optimizations;
 
-[UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
 internal sealed class ChunkSystem : ModSystem
 {
-    [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
     private sealed class WarningSystem : ModPlayer
     {
         public override void OnEnterWorld()
@@ -84,16 +79,29 @@ internal sealed class ChunkSystem : ModSystem
 
         // Disable RenderX methods in relation to tile rendering. These methods
         // are responsible for drawing the tile render target in vanilla.
-        IL_Main.RenderTiles += CancelVanillaRendering;
-        IL_Main.RenderTiles2 += CancelVanillaRendering;
-        IL_Main.RenderWalls += CancelVanillaRendering;
+        IL_Main.RenderTiles += RenderSolidTiles;
+        IL_Main.RenderTiles2 += RenderNonSolid;
+        IL_Main.RenderWalls += RenderWalls;
 
-        // Hijack the methods responsible for actually drawing to the vanilla
-        // tile render target.
-        IL_Main.DoDraw_WallsAndBlacks += NewDrawWalls;
-        IL_Main.DoDraw_Tiles_NonSolid += NewDrawNonSolidTiles;
-        IL_Main.DoDraw_Tiles_Solid += NewDrawSolidTiles;
-        On_Main.DoDraw_WallsTilesNPCs += HookBeforeDrawingToPopulateLightingBufferAndHandleStuffThatShouldHappenWhenDrawingToScreen;
+        IL_Main.DoDraw += il =>
+        {
+            var c = new ILCursor(il);
+
+            c.GotoNext(MoveType.After, x => x.MatchCallOrCallvirt<Main>(nameof(Main.DoLightTiles)));
+            c.EmitDelegate(
+                () =>
+                {
+                    PopulateLightingBuffer();
+                    TransferTileSpaceBufferToScreenSpaceBuffer(Main.graphics.GraphicsDevice);
+                }
+            );
+        };
+
+        On_Main.DoDraw_Tiles_Solid += [StackTraceHidden](orig, self) =>
+        {
+            orig(self);
+            DebugDrawLightmap();
+        };
 
         Main.RunOnMainThread(
             () =>
@@ -482,126 +490,113 @@ internal sealed class ChunkSystem : ModSystem
         }
     }
 
-    private static void CancelVanillaRendering(ILContext il)
+    private static void RenderWalls(ILContext il)
     {
-        ILCursor c = new(il);
+        var c = new ILCursor(il);
 
-        c.Emit(OpCodes.Ret);
-    }
-
-    private static void NewDrawWalls(ILContext il)
-    {
-        ILCursor c = new(il);
-
-        c.EmitDelegate(
-            () =>
-            {
-                walls.DoRenderWalls(Main.graphics.GraphicsDevice, screenSizeLightingBuffer, screenSizeOverrideBuffer, light_map_renderer, Main.spriteBatch.TryEnd(out var s) ? s : null);
-
-                Main.instance.DrawTileCracks(2, Main.LocalPlayer.hitReplace);
-                Main.instance.DrawTileCracks(2, Main.LocalPlayer.hitTile);
-
-                Overlays.Scene.Draw(Main.spriteBatch, RenderLayers.Walls);
-            }
-        );
-
-        c.Emit(OpCodes.Ret);
-    }
-
-    private static void NewDrawNonSolidTiles(ILContext il)
-    {
-        ILCursor c = new(il);
-
-        c.EmitDelegate(
-            () =>
-            {
-                // FIX: Last parameter (intoRenderTargets) is TRUE because it is
-                // required for special counts to actually clear.
-                Main.instance.TilesRenderer.PreDrawTiles(false, false, true);
-
-                non_solid_tiles.DoRenderTiles(Main.graphics.GraphicsDevice, screenSizeLightingBuffer, screenSizeOverrideBuffer, light_map_renderer, Main.spriteBatch.TryEnd(out var snapshot) ? snapshot : null);
-
-                Main.instance.DrawTileEntities(false, false, false);
-
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.Transform);
-            }
-        );
-
-        c.Emit(OpCodes.Ret);
-    }
-
-    private static void NewDrawSolidTiles(ILContext il)
-    {
-        ILCursor c = new(il);
-
-        c.EmitDelegate(
-            () =>
-            {
-                Main.instance.TilesRenderer.PreDrawTiles(true, false, false);
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.Transform);
-
-                solid_tiles.DoRenderTiles(Main.graphics.GraphicsDevice, screenSizeLightingBuffer, screenSizeOverrideBuffer, light_map_renderer, Main.spriteBatch.TryEnd(out var snapshot) ? snapshot : null);
-
-                Main.instance.DrawTileEntities(true, true, false);
-
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.Transform);
-
-                try
+        while (c.TryGotoNext(MoveType.Before, x => x.MatchCallOrCallvirt<Main>(nameof(Main.DrawWalls))))
+        {
+            c.Remove();
+            c.EmitDelegate(
+                (Main self) =>
                 {
-                    Main.LocalPlayer.hitReplace.DrawFreshAnimations(Main.spriteBatch);
-                    Main.LocalPlayer.hitTile.DrawFreshAnimations(Main.spriteBatch);
-                }
-                catch (Exception e2)
-                {
-                    TimeLogger.DrawException(e2);
-                }
-
-                Main.spriteBatch.End();
-
-                if (debugChunkBorders || debugLightMap)
-                {
-                    Main.spriteBatch.Begin(
-                        SpriteSortMode.Deferred,
-                        BlendState.AlphaBlend,
-                        SamplerState.PointClamp,
-                        DepthStencilState.None,
-                        RasterizerState.CullNone
-                    );
-
-                    if (debugChunkBorders)
+                    if (!enabled)
                     {
-                        const int line_width = 2;
-                        const int offset = line_width / 2;
-
-                        foreach (var chunkKey in solid_tiles.Loaded.Keys)
-                        {
-                            var chunkX = chunkKey.X * CHUNK_SIZE - (int)Main.screenPosition.X;
-                            var chunkY = chunkKey.Y * CHUNK_SIZE - (int)Main.screenPosition.Y;
-
-                            Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX - offset, chunkY - offset, CHUNK_SIZE + offset, line_width), Color.Yellow);
-                            Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX + CHUNK_SIZE - offset, chunkY - offset, line_width, CHUNK_SIZE + offset), Color.Yellow);
-                            Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX - offset, chunkY + CHUNK_SIZE - offset, CHUNK_SIZE + offset, line_width), Color.Yellow);
-                            Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX - offset, chunkY - offset, line_width, CHUNK_SIZE + offset), Color.Yellow);
-                        }
+                        self.DrawWalls();
+                        return;
                     }
 
-                    if (debugLightMap)
-                    {
-                        Main.spriteBatch.Draw(screenSizeLightingBuffer, Vector2.Zero, Color.White);
-                    }
-
-                    Main.spriteBatch.End();
+                    walls.DoRenderWalls(Main.graphics.GraphicsDevice, screenSizeLightingBuffer, screenSizeOverrideBuffer, light_map_renderer);
                 }
-            }
-        );
-
-        c.Emit(OpCodes.Ret);
+            );
+        }
     }
 
-    private static void HookBeforeDrawingToPopulateLightingBufferAndHandleStuffThatShouldHappenWhenDrawingToScreen(On_Main.orig_DoDraw_WallsTilesNPCs orig, Main self)
+    private static void RenderNonSolid(ILContext il)
     {
-        PopulateLightingBuffer();
-        TransferTileSpaceBufferToScreenSpaceBuffer(Main.graphics.GraphicsDevice);
-        orig(self);
+        var c = new ILCursor(il);
+
+        while (c.TryGotoNext(MoveType.Before, x => x.MatchCallOrCallvirt<Main>(nameof(Main.DrawTiles))))
+        {
+            c.Remove();
+            c.EmitDelegate(
+                (Main self, bool solidLayer, bool forRenderTargets, bool intoRenderTargets, int waterStyleOverride) =>
+                {
+                    if (!enabled)
+                    {
+                        self.DrawTiles(solidLayer, forRenderTargets, intoRenderTargets, waterStyleOverride);
+                        return;
+                    }
+
+                    non_solid_tiles.DoRenderTiles(Main.graphics.GraphicsDevice, screenSizeLightingBuffer, screenSizeOverrideBuffer, light_map_renderer);
+                }
+            );
+        }
+    }
+
+    private static void RenderSolidTiles(ILContext il)
+    {
+        var c = new ILCursor(il);
+
+        while (c.TryGotoNext(MoveType.Before, x => x.MatchCallOrCallvirt<Main>(nameof(Main.DrawTiles))))
+        {
+            c.Remove();
+            c.EmitDelegate(
+                (Main self, bool solidLayer, bool forRenderTargets, bool intoRenderTargets, int waterStyleOverride) =>
+                {
+                    if (!enabled)
+                    {
+                        self.DrawTiles(solidLayer, forRenderTargets, intoRenderTargets, waterStyleOverride);
+                        return;
+                    }
+
+                    solid_tiles.DoRenderTiles(Main.graphics.GraphicsDevice, screenSizeLightingBuffer, screenSizeOverrideBuffer, light_map_renderer);
+                }
+            );
+        }
+    }
+
+    private static void DebugDrawLightmap()
+    {
+        if (!debugChunkBorders && !debugLightMap)
+        {
+            return;
+        }
+
+        var sb = Main.spriteBatch;
+        using (sb.Scope())
+        {
+            sb.Begin(
+                SpriteSortMode.Deferred,
+                BlendState.AlphaBlend,
+                SamplerState.PointClamp,
+                DepthStencilState.None,
+                RasterizerState.CullNone
+            );
+
+            if (debugChunkBorders)
+            {
+                const int line_width = 2;
+                const int offset = line_width / 2;
+
+                foreach (var chunkKey in solid_tiles.Loaded.Keys)
+                {
+                    var chunkX = chunkKey.X * CHUNK_SIZE - (int)Main.screenPosition.X;
+                    var chunkY = chunkKey.Y * CHUNK_SIZE - (int)Main.screenPosition.Y;
+
+                    Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX - offset, chunkY - offset, CHUNK_SIZE + offset, line_width), Color.Yellow);
+                    Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX + CHUNK_SIZE - offset, chunkY - offset, line_width, CHUNK_SIZE + offset), Color.Yellow);
+                    Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX - offset, chunkY + CHUNK_SIZE - offset, CHUNK_SIZE + offset, line_width), Color.Yellow);
+                    Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX - offset, chunkY - offset, line_width, CHUNK_SIZE + offset), Color.Yellow);
+                }
+            }
+
+            if (debugLightMap)
+            {
+                Main.spriteBatch.Draw(screenSizeLightingBuffer, Vector2.Zero, Color.White);
+            }
+
+            sb.End();
+        }
     }
 }

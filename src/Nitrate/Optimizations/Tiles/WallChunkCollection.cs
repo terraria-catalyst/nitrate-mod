@@ -1,4 +1,5 @@
 ﻿using System;
+using Daybreak.Common.Rendering;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Nitrate.API.Tiles;
@@ -78,68 +79,60 @@ internal sealed class WallChunkCollection : ChunkCollection
             return;
         }
 
-        var bindings = device.GetRenderTargets();
-
-        foreach (var binding in bindings)
+        using (ScreenTarget.Scope(clearColor: Color.Transparent))
         {
-            ((RenderTarget2D)binding.RenderTarget).RenderTargetUsage = RenderTargetUsage.PreserveContents;
-        }
+            Main.spriteBatch.Begin(
+                SpriteSortMode.Deferred,
+                BlendState.AlphaBlend,
+                SamplerState.PointClamp,
+                DepthStencilState.None,
+                RasterizerState.CullNone,
+                null
+            );
 
-        device.SetRenderTarget(ScreenTarget);
-        device.Clear(Color.Transparent);
+            var screenPosition = Main.screenPosition;
 
-        Main.spriteBatch.Begin(
-            SpriteSortMode.Deferred,
-            BlendState.AlphaBlend,
-            SamplerState.PointClamp,
-            DepthStencilState.None,
-            RasterizerState.CullNone,
-            null,
-            Main.GameViewMatrix.TransformationMatrix
-        );
+            Rectangle screenArea = new((int)screenPosition.X, (int)screenPosition.Y, Main.screenWidth, Main.screenHeight);
 
-        var screenPosition = Main.screenPosition;
-
-        Rectangle screenArea = new((int)screenPosition.X, (int)screenPosition.Y, Main.screenWidth, Main.screenHeight);
-
-        foreach (var key in Loaded.Keys)
-        {
-            var chunk = Loaded[key];
-            var target = chunk.RenderTarget;
-
-            Rectangle chunkArea = new(key.X * ChunkSystem.CHUNK_SIZE, key.Y * ChunkSystem.CHUNK_SIZE, target.Width, target.Height);
-
-            if (!chunkArea.Intersects(screenArea))
+            foreach (var key in Loaded.Keys)
             {
-                continue;
+                var chunk = Loaded[key];
+                var target = chunk.RenderTarget;
+
+                Rectangle chunkArea = new(key.X * ChunkSystem.CHUNK_SIZE, key.Y * ChunkSystem.CHUNK_SIZE, target.Width, target.Height);
+
+                if (!chunkArea.Intersects(screenArea))
+                {
+                    continue;
+                }
+
+                // This should never happen, something catastrophic happened if it did.
+                // The check here is because rendering disposed targets generally has strange behaviour and doesn't always throw exceptions.
+                // Therefore this check needs to be made as it's more robust.
+                if (target.IsDisposed)
+                {
+                    throw new Exception("Attempted to render a disposed chunk.");
+                }
+
+                Main.spriteBatch.Draw(target, new Vector2(chunkArea.X, chunkArea.Y) - screenPosition, Color.White);
             }
 
-            // This should never happen, something catastrophic happened if it did.
-            // The check here is because rendering disposed targets generally has strange behaviour and doesn't always throw exceptions.
-            // Therefore this check needs to be made as it's more robust.
-            if (target.IsDisposed)
-            {
-                throw new Exception("Attempted to render a disposed chunk.");
-            }
-
-            Main.spriteBatch.Draw(target, new Vector2(chunkArea.X, chunkArea.Y) - screenPosition, Color.White);
+            Main.spriteBatch.End();
         }
-
-        Main.spriteBatch.End();
-
-        device.SetRenderTargets(bindings);
     }
 
-    public void DoRenderWalls(GraphicsDevice graphicsDevice, RenderTarget2D? screenSizeLightingBuffer, RenderTarget2D? screenSizeOverrideBuffer, Lazy<Effect> lightMapRenderer, SpriteBatchUtil.SpriteBatchSnapshot? snapshot)
+    public void DoRenderWalls(GraphicsDevice graphicsDevice, RenderTarget2D? screenSizeLightingBuffer, RenderTarget2D? screenSizeOverrideBuffer, Lazy<Effect> lightMapRenderer)
     {
-        DrawChunksToChunkTarget(graphicsDevice);
-        RenderChunksWithLighting(screenSizeLightingBuffer, screenSizeOverrideBuffer, lightMapRenderer);
+        var offscreenRange = new Vector2(Main.drawToScreen ? 0 : Main.offScreenRange);
 
-        if (snapshot.HasValue)
+        Main.tileBatch.End();
+        using (Main.spriteBatch.Scope())
         {
-            Main.tileBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
-            Main.spriteBatch.BeginWithSnapshot(snapshot.Value);
+            DrawChunksToChunkTarget(graphicsDevice);
+            RenderChunksWithLighting(screenSizeLightingBuffer, screenSizeOverrideBuffer, lightMapRenderer, offscreenRange);
         }
+
+        Main.tileBatch.Begin();
 
         foreach (var key in Loaded.Keys)
         {
@@ -156,13 +149,6 @@ internal sealed class WallChunkCollection : ChunkCollection
                 // Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(wallPoint.X * 16 - (int)Main.screenPosition.X, wallPoint.Y * 16 - (int)Main.screenPosition.Y, 16, 16), Color.Red);
                 ModifiedTileDrawing.DrawSingleWall(true, wallPoint.X, wallPoint.Y, Main.screenPosition);
             }
-        }
-
-        if (snapshot.HasValue)
-        {
-            Main.tileBatch.End();
-            Main.spriteBatch.End();
-            Main.spriteBatch.BeginWithSnapshot(snapshot.Value);
         }
     }
 }
