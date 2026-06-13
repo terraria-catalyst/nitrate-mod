@@ -1,0 +1,12 @@
+﻿<Project Sdk="Tomat.Terraria.ModLoader.Sdk">
+
+    <PropertyGroup>
+        <TmlBuildUseDefaultModImpl>true</TmlBuildUseDefaultModImpl>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Publicize Include="FNA" IncludeCompilerGeneratedMembers="false" IncludeVirtualMembers="false"/>
+        <Publicize Include="FNA:Microsoft.Xna.Framework.Graphics.GraphicsResource.Dispose" IncludeCompilerGeneratedMembers="false" IncludeVirtualMembers="true"/>
+    </ItemGroup>
+
+</Project>

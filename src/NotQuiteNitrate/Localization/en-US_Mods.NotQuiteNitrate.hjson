@@ -1,0 +1,20 @@
+Configs: {
+	Config: {
+		DisplayName: NQN Config
+
+		BetterLiquidSlopes: {
+			Label: Better Liquid Slopes
+			Tooltip:
+				'''
+				Render liquid slopes a second time over tiles, fixing the infamous
+				bug where standing on sloped tiles under liquids doesn't tint entities correctly.
+				This also renders the tile a second time, meaning the tile will be effected by the liquid shaders.
+				I think it makes for a neat effect, but doing so comes with nuanced issues:
+				- Hit progress will not show on tiles directly next to liquids.
+				- There are slight issues with lighting on slopes in some cases.
+
+				Does nothing if Nitrate is enabled due to an incompatibility.
+				'''
+		}
+	}
+}

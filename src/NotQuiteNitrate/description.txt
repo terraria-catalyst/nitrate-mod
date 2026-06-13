@@ -1,0 +1,24 @@
+Implements simpler, compatible performance tweaks: it's *not quite* Nitrate. Also includes configurable bug fixes.
+
+Made by me, Tomat, 50% of Nitrate.
+
+Should work fine with Nitrate.
+
+Join the homepage for support: https://discord.gg/vPTUZcvXjg
+Send me money to support me: https://ko-fi.com/steviegt6
+
+Below is a brief summary of performance patches made by this mod and their impact on their respective targets.
+
+BetterGetColorSlice: Makes GetColor4Slice and GetColor9Slice ~8x faster from limited testing. Small general performance boost during tile rendering.
+
+FasterAssetLoading: Currently just rewrites certain cases of image loading to reduce generated garbage which results in an admirable speed-up. Won't be too noticeable typically since the work is threaded.
+
+FasterBfsPlotTile: Makes PlotTileArea ~25x faster. Massive performance boost to Fairy Glowsticks and Dirt Bombs; allows 1000 Fairy Glowsticks to consume <4% of frame time (vs 89% in vanilla).
+
+FasterRenderBlack: Makes DrawBlack ~3x faster for me, depends on your logical processor count. Offloads work to multiple cores.
+
+IgnoreAssemblyJit: Disables JITing of mod assemblies on load to speed up load times. Unfortunately may increase initial micro-stutter in-game, may become configurable eventually.
+
+Configurable bug fixes:
+
+"Better Liquid Slopes": (disabled by default) See the in-game config option for more information.
