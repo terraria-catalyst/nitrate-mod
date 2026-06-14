@@ -241,7 +241,7 @@ internal static class ModifiedTileDrawing
 
         // bool flag = drawData.tileLight.R >= 1 || drawData.tileLight.G >= 1 || drawData.tileLight.B >= 1 || drawData.tileCache.wall > 0 && (drawData.tileCache.wall == 318 || drawData.tileCache.fullbrightWall());
         // flag &= TileDrawing.IsVisible(drawData.tileCache);
-        const bool flag = true;
+        var flag = TileDrawing.IsVisible(drawData.tileCache);
 
         Main.instance.TilesRenderer.CacheSpecialDraws_Part1(x, y, drawData.typeCache, drawData.tileFrameX, drawData.tileFrameY, !flag);
         Main.instance.TilesRenderer.CacheSpecialDraws_Part2(x, y, drawData, !flag);
@@ -262,10 +262,10 @@ internal static class ModifiedTileDrawing
         var vector = new Vector2(x * 16 - (int)screenPosition.X - (drawData.tileWidth - 16f) / 2f, y * 16 - (int)screenPosition.Y + drawData.tileTop + drawData.halfBrickHeight) + screenOffset;
         TileLoader.DrawEffects(x, y, drawData.typeCache, Main.spriteBatch, ref drawData);
 
-        /*if (!flag)
+        if (!flag)
         {
             return;
-        }*/
+        }
 
         drawData.colorTint = Color.White;
         drawData.finalColor = vanilla ? TileDrawing.GetFinalLight(drawData.tileCache, drawData.typeCache, drawData.tileLight, drawData.colorTint) : GetFinalLightWithoutLighting(drawData.tileCache, drawData.typeCache, drawData.tileLight, drawData.colorTint);
