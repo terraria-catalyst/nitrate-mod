@@ -40,7 +40,7 @@ float4 PixelShaderFunction(float2 TexCoord : TEXCOORD0, float2 svPos : SV_POSITI
     lightmapUvInPixels += (difference / 32.) + offset;
     float2 lightmapUv = lightmapUvInPixels / lightingTargetSizeInPixels;
 
-    return tex2D(chunkTexture, TexCoord) * tex2D(LightSampler, lightmapUv);
+    // return tex2D(chunkTexture, TexCoord) * tex2D(LightSampler, lightmapUv);
     
     float4 override = tex2D(OverrideSampler, TexCoord);
 
@@ -49,16 +49,16 @@ float4 PixelShaderFunction(float2 TexCoord : TEXCOORD0, float2 svPos : SV_POSITI
     }
 
     // 2D vector containing normalised values (0..1) for the dimensions of one pixel.
-    float2 onePixel = 1 / size;
+    float2 onePixel = 16. / size;
 
     // Scale up by 16 for the dimensions of one tile.
-    float2 oneTile = onePixel;
+    float2 oneTile = onePixel / 16.;
 
     // Represents the offset of the screen tile grid from the lighting buffer grid, to fix desync.
     float2 offsetUV = float2(onePixel.x * offset.x, onePixel.y * offset.y);
 
     // Distance (0..1) from the current pixel to the corner of the tile.
-    float2 tileUV = frac((TexCoord) / oneTile);
+    float2 tileUV = frac((lightmapUv) / oneTile);
 
     float dx = tileUV.x;
     float dy = tileUV.y;
@@ -71,7 +71,7 @@ float4 PixelShaderFunction(float2 TexCoord : TEXCOORD0, float2 svPos : SV_POSITI
         int x = (i % 3) - 1;
         int y = (i / 3) - 1;
 
-        c[i] = tex2D(LightSampler, TexCoord + float2(x * oneTile.x, y * oneTile.y));
+        c[i] = tex2D(LightSampler, lightmapUv + float2(x * oneTile.x, y * oneTile.y));
     }
 
     int indexX = 0;
