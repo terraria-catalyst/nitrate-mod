@@ -70,12 +70,16 @@ internal abstract class ChunkCollection
 
         lightMapShader.Parameters.size = new Vector2(screenSizeLightingBuffer.Width, screenSizeLightingBuffer.Height);
 
-        // The offset vector is the amount of pixels from the corner the first tile is.
-        lightMapShader.Parameters.offset = new Vector2(Main.screenPosition.X % 16, Main.screenPosition.Y % 16) - new Vector2(Main.offScreenRange);
-        
-        lightMapShader.Apply();
-        
-        Main.spriteBatch.Begin(
+        var targetSizeDiff = ScreenTarget.Size() - screenSizeLightingBuffer.Size() * 16;
+
+        var scenePosOffset = Main.sceneTilePos + offscreenRange;
+        scenePosOffset = (scenePosOffset / 16f).Floor() * 16;
+
+		lightMapShader.Parameters.offset = -(scenePosOffset - Main.screenPosition) + targetSizeDiff / 2;
+
+		lightMapShader.Apply();
+
+		Main.spriteBatch.Begin(
             SpriteSortMode.Immediate,
             BlendState.AlphaBlend,
             SamplerState.PointClamp,
