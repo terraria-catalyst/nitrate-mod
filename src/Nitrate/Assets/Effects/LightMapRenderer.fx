@@ -4,6 +4,7 @@ texture lightMap;
 texture overrideMap;
 
 float2 size;
+float2 tileTargetSize;
 float2 offset;
 
 // Color matrix for the 3x3 tile area.
@@ -33,7 +34,11 @@ sampler2D OverrideSampler = sampler_state
 
 float4 PixelShaderFunction(float2 TexCoord : TEXCOORD0, float2 svPos : SV_POSITION) : COLOR0
 {
-    float2 lightmapUv = TexCoord + (offset / (size * 16));
+    float2 lightingTargetSizeInPixels = size * 16.;
+    float2 difference = tileTargetSize - lightingTargetSizeInPixels;
+    float2 lightmapUvInPixels = TexCoord * lightingTargetSizeInPixels;
+    lightmapUvInPixels += (difference / 32.) + offset;
+    float2 lightmapUv = lightmapUvInPixels / lightingTargetSizeInPixels;
 
     return tex2D(chunkTexture, TexCoord) * tex2D(LightSampler, lightmapUv);
     

@@ -130,7 +130,7 @@ internal sealed class ChunkSystem : ModSystem
 
                 foreach (var chunkCollection in chunk_collections)
                 {
-                    chunkCollection.ScreenTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.instance.tileTarget.Width, Main.instance.tileTarget.Width);
+                    chunkCollection.ScreenTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.instance.tileTarget.Width, Main.instance.tileTarget.Height);
                 }
 
                 // screenSizeLightingBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.instance.tileTarget.Width, Main.instance.tileTarget.Width);
@@ -142,39 +142,41 @@ internal sealed class ChunkSystem : ModSystem
             }
         );
 
-        Main.OnResolutionChanged += _ =>
+        Main.OnRenderTargetsInitialized += ResizeBuffers;
+    }
+
+    private static void ResizeBuffers(int width, int height)
+    {
+        lightingBuffer?.Dispose();
+
+        lightingBuffer = new RenderTarget2D(
+            Main.graphics.GraphicsDevice,
+            (int)Math.Ceiling(Main.instance.tileTarget.Width / 16f),
+            (int)Math.Ceiling(Main.instance.tileTarget.Height / 16f)
+        );
+
+        overrideBuffer?.Dispose();
+
+        overrideBuffer = new RenderTarget2D(
+            Main.graphics.GraphicsDevice,
+            (int)Math.Ceiling(Main.instance.tileTarget.Width / 16f),
+            (int)Math.Ceiling(Main.instance.tileTarget.Height / 16f)
+        );
+
+        foreach (var chunkCollection in chunk_collections)
         {
-            lightingBuffer?.Dispose();
+            chunkCollection.ScreenTarget?.Dispose();
+            chunkCollection.ScreenTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.instance.tileTarget.Width, Main.instance.tileTarget.Height);
+        }
 
-            lightingBuffer = new RenderTarget2D(
-                Main.graphics.GraphicsDevice,
-                (int)Math.Ceiling(Main.instance.tileTarget.Width / 16f),
-                (int)Math.Ceiling(Main.instance.tileTarget.Height / 16f)
-            );
+        // screenSizeLightingBuffer?.Dispose();
+        // screenSizeLightingBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
 
-            overrideBuffer?.Dispose();
+        // screenSizeOverrideBuffer?.Dispose();
+        // screenSizeOverrideBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
 
-            overrideBuffer = new RenderTarget2D(
-                Main.graphics.GraphicsDevice,
-                (int)Math.Ceiling(Main.instance.tileTarget.Width / 16f),
-                (int)Math.Ceiling(Main.instance.tileTarget.Height / 16f)
-            );
-
-            foreach (var chunkCollection in chunk_collections)
-            {
-                chunkCollection.ScreenTarget?.Dispose();
-                chunkCollection.ScreenTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.instance.tileTarget.Width, Main.instance.tileTarget.Height);
-            }
-
-            // screenSizeLightingBuffer?.Dispose();
-            // screenSizeLightingBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
-
-            // screenSizeOverrideBuffer?.Dispose();
-            // screenSizeOverrideBuffer = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
-
-            colorBuffer = new Color[lightingBuffer.Width * lightingBuffer.Height];
-            overrideColorBuffer = new Color[lightingBuffer.Width * lightingBuffer.Height];
-        };
+        colorBuffer = new Color[lightingBuffer.Width * lightingBuffer.Height];
+        overrideColorBuffer = new Color[lightingBuffer.Width * lightingBuffer.Height];
     }
 
     public override void OnWorldUnload()
@@ -204,6 +206,8 @@ internal sealed class ChunkSystem : ModSystem
                 }
             }
         );
+
+        Main.OnRenderTargetsInitialized -= ResizeBuffers;
 
         foreach (var chunkCollection in chunk_collections)
         {

@@ -69,6 +69,7 @@ internal abstract class ChunkCollection
         }
 
         lightMapShader.Parameters.size = new Vector2(screenSizeLightingBuffer.Width, screenSizeLightingBuffer.Height);
+        lightMapShader.Parameters.tileTargetSize = new Vector2(Main.instance.tileTarget.Width, Main.instance.tileTarget.Height);
 
         var targetSizeDiff = ScreenTarget.Size() - screenSizeLightingBuffer.Size() * 16;
 
