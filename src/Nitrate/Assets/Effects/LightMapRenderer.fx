@@ -35,10 +35,11 @@ sampler2D OverrideSampler = sampler_state
 float4 PixelShaderFunction(float2 TexCoord : TEXCOORD0, float2 svPos : SV_POSITION) : COLOR0
 {
     float2 lightingTargetSizeInPixels = size * 16.;
-    float2 difference = tileTargetSize - lightingTargetSizeInPixels;
     float2 lightmapUvInPixels = TexCoord * lightingTargetSizeInPixels;
-    lightmapUvInPixels += (difference / 32.) + offset;
+    lightmapUvInPixels += offset;
     float2 lightmapUv = lightmapUvInPixels / lightingTargetSizeInPixels;
+    float2 ratio = tileTargetSize / lightingTargetSizeInPixels;
+    lightmapUv *= ratio;
 
     // return tex2D(chunkTexture, TexCoord) * tex2D(LightSampler, lightmapUv);
     
