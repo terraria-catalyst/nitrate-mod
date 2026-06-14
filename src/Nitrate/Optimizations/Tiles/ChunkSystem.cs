@@ -269,7 +269,6 @@ internal sealed class ChunkSystem : ModSystem
         }
 
         var checkDynamicLighting = Main.LocalPlayer.dangerSense || Main.LocalPlayer.findTreasure || Main.LocalPlayer.biomeSight;
-
         FasterParallel.For(
             0,
             colorBuffer.Length,
@@ -280,8 +279,9 @@ internal sealed class ChunkSystem : ModSystem
                     var x = i % lightingBuffer.Width;
                     var y = i / lightingBuffer.Width;
 
-                    var tileX = (int)(Main.screenPosition.X / 16) + x;
-                    var tileY = (int)(Main.screenPosition.Y / 16) + y;
+                    // FIXME?
+                    var tileX = (int)Math.Floor(Main.sceneTilePos.X / 16f) + x;
+                    var tileY = (int)Math.Floor(Main.sceneTilePos.Y / 16f) + y;
 
                     colorBuffer[i] = Lighting.GetColor(tileX, tileY);
 
