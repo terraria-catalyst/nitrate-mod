@@ -134,6 +134,9 @@ internal sealed class TileChunkCollection : ChunkCollection
             var screenPosition = Main.screenPosition;
 
             Rectangle screenArea = new((int)screenPosition.X, (int)screenPosition.Y, Main.screenWidth, Main.screenHeight);
+            {
+                screenArea.Inflate(40 * 16, 40 * 16);
+            }
 
             foreach (var key in Loaded.Keys)
             {
