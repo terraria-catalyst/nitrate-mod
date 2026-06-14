@@ -29,8 +29,8 @@ internal abstract class ChunkCollection
 
         RenderTarget2D target = new(
             Main.graphics.GraphicsDevice,
-            ChunkSystem.CHUNK_SIZE,
-            ChunkSystem.CHUNK_SIZE,
+            ChunkSystem.ChunkSize,
+            ChunkSystem.ChunkSize,
             false,
             SurfaceFormat.Color,
             DepthFormat.None,
@@ -71,7 +71,7 @@ internal abstract class ChunkCollection
         lightMapShader.Parameters.size = new Vector2(screenSizeLightingBuffer.Width, screenSizeLightingBuffer.Height);
 
         // The offset vector is the amount of pixels from the corner the first tile is.
-        lightMapShader.Parameters.offset = new Vector2(Main.screenPosition.X % 16, Main.screenPosition.Y % 16);
+        lightMapShader.Parameters.offset = new Vector2(Main.screenPosition.X % 16, Main.screenPosition.Y % 16) - new Vector2(Main.offScreenRange);
         
         lightMapShader.Apply();
         
@@ -84,7 +84,7 @@ internal abstract class ChunkCollection
             lightMapShader.Shader
         );
 
-        Main.spriteBatch.Draw(ScreenTarget, offscreenRange, Color.White);
+        Main.spriteBatch.Draw(ScreenTarget, Vector2.Zero, Color.White);
         Main.spriteBatch.End();
     }
 
@@ -110,6 +110,39 @@ internal abstract class ChunkCollection
         NeedsPopulating.Clear();
     }
 
+    public virtual void RemoveOutOfBoundsAndPopulate()
+    {
+        Rectangle screenArea = new((int)Main.screenPosition.X, (int)Main.screenPosition.Y, Main.screenWidth, Main.screenHeight);
+        {
+            screenArea.Inflate(40 * 16, 40 * 16);
+        }
+
+        // Chunk coordinates are incremented by 1 in each direction per chunk; 1 unit in chunk coordinates is equal to CHUNK_SIZE.
+        // Chunk coordinates of the top-leftmost visible chunk.
+        var topX = (int)Math.Floor((double)screenArea.X / ChunkSystem.ChunkSize) - ChunkSystem.ChunkOffscreenBuffer;
+        var topY = (int)Math.Floor((double)screenArea.Y / ChunkSystem.ChunkSize) - ChunkSystem.ChunkOffscreenBuffer;
+
+        // Chunk coordinates of the bottom-rightmost visible chunk.
+        var bottomX = (int)Math.Floor((double)(screenArea.X + screenArea.Width) / ChunkSystem.ChunkSize) + ChunkSystem.ChunkOffscreenBuffer;
+        var bottomY = (int)Math.Floor((double)(screenArea.Y + screenArea.Height) / ChunkSystem.ChunkSize) + ChunkSystem.ChunkOffscreenBuffer;
+
+        // Make sure all chunks onscreen as well as the buffer are loaded.
+        for (var x = topX; x <= bottomX; x++)
+        {
+            for (var y = topY; y <= bottomY; y++)
+            {
+                Point chunkKey = new(x, y);
+
+                if (!Loaded.ContainsKey(chunkKey))
+                {
+                    LoadChunk(chunkKey);
+                }
+            }
+        }
+
+        RemoveOutOfBoundsAndPopulate(topX, bottomX, topY, bottomY);
+    }
+
     public virtual void RemoveOutOfBoundsAndPopulate(int topX, int bottomX, int topY, int bottomY)
     {
         var copy = Loaded;
@@ -125,25 +158,21 @@ internal abstract class ChunkCollection
             FailedPopulations.Remove(key);
         }
 
-        // Only repopulate chunks once every 4 frames, like vanilla does with tiles.
-        if (Main.GameUpdateCount % 4 == 0)
+        foreach (var key in NeedsPopulating)
         {
-            foreach (var key in NeedsPopulating)
-            {
-                PopulateChunk(key);
-            }
-
-            foreach (var key in NeedsPopulating.Except(NeedsRePopulating))
-            {
-                if (!FailedPopulations.TryAdd(key, 6))
-                {
-                    FailedPopulations[key] = 6;
-                }
-            }
-
-            NeedsPopulating.Clear();
-            NeedsPopulating.AddRange(NeedsRePopulating);
-            NeedsRePopulating.Clear();
+            PopulateChunk(key);
         }
+
+        foreach (var key in NeedsPopulating.Except(NeedsRePopulating))
+        {
+            if (!FailedPopulations.TryAdd(key, 6))
+            {
+                FailedPopulations[key] = 6;
+            }
+        }
+
+        NeedsPopulating.Clear();
+        NeedsPopulating.AddRange(NeedsRePopulating);
+        NeedsRePopulating.Clear();
     }
 }

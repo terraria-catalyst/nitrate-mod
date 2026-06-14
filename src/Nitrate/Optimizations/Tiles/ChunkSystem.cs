@@ -37,14 +37,14 @@ internal sealed class ChunkSystem : ModSystem
 
     // Good sizes include 20, 25, 40, 50, and 100 tiles, as these sizes all multiply evenly into every single default world size's width and height.
     // Smaller chunks are likely better performance-wise as not as many tiles need to be redrawn.
-    internal const int CHUNK_SIZE = 20 * 16;
+    internal static int ChunkSize => 20 * 16;
 
     // The number of layers of additional chunks that stay loaded off-screen around the player. Could help improve performance when moving around in one location.
-    private const int chunk_offscreen_buffer = 1;
+    internal static int ChunkOffscreenBuffer => 1;
 
     private const int edge_threshold = 3;
-    private static int offscreenWidthTiles;
-    private static int offscreenHeightTiles;
+    private static int OffscreenWidthTiles => Main.offScreenRange / 16;
+    private static int OffscreenHeightTiles => Main.offScreenRange / 16;
 
     private static readonly TileChunkCollection solid_tiles = new() { SolidLayer = true };
     private static readonly TileChunkCollection non_solid_tiles = new() { SolidLayer = false };
@@ -54,12 +54,12 @@ internal sealed class ChunkSystem : ModSystem
     private static RenderTarget2D? overrideBuffer;
     private static Color[] colorBuffer = Array.Empty<Color>();
     private static Color[] overrideColorBuffer = Array.Empty<Color>();
-    private static RenderTarget2D? screenSizeLightingBuffer;
-    private static RenderTarget2D? screenSizeOverrideBuffer;
+    // private static RenderTarget2D? screenSizeLightingBuffer;
+    // private static RenderTarget2D? screenSizeOverrideBuffer;
     private static bool enabled;
     private static bool debugChunkBorders;
     private static bool debugLightMap;
-    private static WrapperShaderData<Assets.Effects.LightMapRenderer.Parameters> lightMapShader;
+    private static WrapperShaderData<Assets.Effects.LightMapRenderer.Parameters> lightMapShader = null!;
 
     public override void OnModLoad()
     {
@@ -139,8 +139,6 @@ internal sealed class ChunkSystem : ModSystem
                 // By default, Terraria has this set to DiscardContents. This means that switching RTs erases the contents of the backbuffer if done mid-draw.
                 Main.graphics.GraphicsDevice.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
                 Main.graphics.ApplyChanges();
-
-                FindOffsets();
             }
         );
 
@@ -176,15 +174,7 @@ internal sealed class ChunkSystem : ModSystem
 
             colorBuffer = new Color[lightingBuffer.Width * lightingBuffer.Height];
             overrideColorBuffer = new Color[lightingBuffer.Width * lightingBuffer.Height];
-
-            FindOffsets();
         };
-    }
-
-    private static void FindOffsets()
-    {
-        offscreenWidthTiles = Main.offScreenRange / 16;
-        offscreenHeightTiles = Main.offScreenRange / 16;
     }
 
     public override void OnWorldUnload()
@@ -268,52 +258,6 @@ internal sealed class ChunkSystem : ModSystem
             debugLightMap = !debugLightMap;
 
             Main.NewText($"Light Map ({light_map_key}): " + (debugLightMap ? "Shown" : "Hidden"), debugLightMap ? Color.Green : Color.Red);
-        }
-    }
-
-    public override void PostUpdateEverything()
-    {
-        base.PostUpdateEverything();
-
-        if (!enabled)
-        {
-            return;
-        }
-
-        Rectangle screenArea = new((int)Main.screenPosition.X, (int)Main.screenPosition.Y, Main.screenWidth, Main.screenHeight);
-        {
-            screenArea.Inflate(40 * 16, 40 * 16);
-        }
-
-        // Chunk coordinates are incremented by 1 in each direction per chunk; 1 unit in chunk coordinates is equal to CHUNK_SIZE.
-        // Chunk coordinates of the top-leftmost visible chunk.
-        var topX = (int)Math.Floor((double)screenArea.X / CHUNK_SIZE) - chunk_offscreen_buffer;
-        var topY = (int)Math.Floor((double)screenArea.Y / CHUNK_SIZE) - chunk_offscreen_buffer;
-
-        // Chunk coordinates of the bottom-rightmost visible chunk.
-        var bottomX = (int)Math.Floor((double)(screenArea.X + screenArea.Width) / CHUNK_SIZE) + chunk_offscreen_buffer;
-        var bottomY = (int)Math.Floor((double)(screenArea.Y + screenArea.Height) / CHUNK_SIZE) + chunk_offscreen_buffer;
-
-        // Make sure all chunks onscreen as well as the buffer are loaded.
-        for (var x = topX; x <= bottomX; x++)
-        {
-            for (var y = topY; y <= bottomY; y++)
-            {
-                Point chunkKey = new(x, y);
-
-                foreach (var chunkCollection in chunk_collections)
-                {
-                    if (!chunkCollection.Loaded.ContainsKey(chunkKey))
-                    {
-                        chunkCollection.LoadChunk(chunkKey);
-                    }
-                }
-            }
-        }
-
-        foreach (var chunkCollection in chunk_collections)
-        {
-            chunkCollection.RemoveOutOfBoundsAndPopulate(topX, bottomX, topY, bottomY);
         }
     }
 
@@ -416,28 +360,28 @@ internal sealed class ChunkSystem : ModSystem
 
     private static void TileStateChanged(int i, int j)
     {
-        var chunkX = (int)Math.Floor(i / (CHUNK_SIZE / 16.0));
-        var chunkY = (int)Math.Floor(j / (CHUNK_SIZE / 16.0));
+        var chunkX = (int)Math.Floor(i / (ChunkSize / 16.0));
+        var chunkY = (int)Math.Floor(j / (ChunkSize / 16.0));
 
         List<Point> chunkKeys = new()
         {
             new Point(chunkX, chunkY),
         };
 
-        if (i % CHUNK_SIZE < edge_threshold)
+        if (i % ChunkSize < edge_threshold)
         {
             chunkKeys.Add(new Point(chunkX - 1, chunkY));
         }
-        else if (i % CHUNK_SIZE > CHUNK_SIZE - edge_threshold)
+        else if (i % ChunkSize > ChunkSize - edge_threshold)
         {
             chunkKeys.Add(new Point(chunkX + 1, chunkY));
         }
 
-        if (j % CHUNK_SIZE < edge_threshold)
+        if (j % ChunkSize < edge_threshold)
         {
             chunkKeys.Add(new Point(chunkX, chunkY - 1));
         }
-        else if (j % CHUNK_SIZE > CHUNK_SIZE - edge_threshold)
+        else if (j % ChunkSize > ChunkSize - edge_threshold)
         {
             chunkKeys.Add(new Point(chunkX, chunkY + 1));
         }
@@ -461,28 +405,28 @@ internal sealed class ChunkSystem : ModSystem
 
     private static void WallStateChanged(int i, int j)
     {
-        var chunkX = (int)Math.Floor(i / (CHUNK_SIZE / 16.0));
-        var chunkY = (int)Math.Floor(j / (CHUNK_SIZE / 16.0));
+        var chunkX = (int)Math.Floor(i / (ChunkSize / 16.0));
+        var chunkY = (int)Math.Floor(j / (ChunkSize / 16.0));
 
         List<Point> chunkKeys = new()
         {
             new Point(chunkX, chunkY),
         };
 
-        if (i % CHUNK_SIZE < edge_threshold)
+        if (i % ChunkSize < edge_threshold)
         {
             chunkKeys.Add(new Point(chunkX - 1, chunkY));
         }
-        else if (i % CHUNK_SIZE > CHUNK_SIZE - edge_threshold)
+        else if (i % ChunkSize > ChunkSize - edge_threshold)
         {
             chunkKeys.Add(new Point(chunkX + 1, chunkY));
         }
 
-        if (j % CHUNK_SIZE < edge_threshold)
+        if (j % ChunkSize < edge_threshold)
         {
             chunkKeys.Add(new Point(chunkX, chunkY - 1));
         }
-        else if (j % CHUNK_SIZE > CHUNK_SIZE - edge_threshold)
+        else if (j % ChunkSize > ChunkSize - edge_threshold)
         {
             chunkKeys.Add(new Point(chunkX, chunkY + 1));
         }
@@ -603,13 +547,13 @@ internal sealed class ChunkSystem : ModSystem
 
                 foreach (var chunkKey in solid_tiles.Loaded.Keys)
                 {
-                    var chunkX = chunkKey.X * CHUNK_SIZE - (int)Main.screenPosition.X;
-                    var chunkY = chunkKey.Y * CHUNK_SIZE - (int)Main.screenPosition.Y;
+                    var chunkX = chunkKey.X * ChunkSize - (int)Main.screenPosition.X;
+                    var chunkY = chunkKey.Y * ChunkSize - (int)Main.screenPosition.Y;
 
-                    Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX - offset, chunkY - offset, CHUNK_SIZE + offset, line_width), Color.Yellow);
-                    Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX + CHUNK_SIZE - offset, chunkY - offset, line_width, CHUNK_SIZE + offset), Color.Yellow);
-                    Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX - offset, chunkY + CHUNK_SIZE - offset, CHUNK_SIZE + offset, line_width), Color.Yellow);
-                    Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX - offset, chunkY - offset, line_width, CHUNK_SIZE + offset), Color.Yellow);
+                    Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX - offset, chunkY - offset, ChunkSize + offset, line_width), Color.Yellow);
+                    Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX + ChunkSize - offset, chunkY - offset, line_width, ChunkSize + offset), Color.Yellow);
+                    Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX - offset, chunkY + ChunkSize - offset, ChunkSize + offset, line_width), Color.Yellow);
+                    Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(chunkX - offset, chunkY - offset, line_width, ChunkSize + offset), Color.Yellow);
                 }
             }
 

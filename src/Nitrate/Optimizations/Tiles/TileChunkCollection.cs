@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using Daybreak.Common.Rendering;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -32,85 +33,77 @@ internal sealed class TileChunkCollection : ChunkCollection
 
         chunk.AnimatedPoints.Clear();
 
-        var device = Main.graphics.GraphicsDevice;
-
-        device.SetRenderTarget(target);
-        device.Clear(Color.Transparent);
-
-        Vector2 chunkPositionWorld = new(key.X * ChunkSystem.CHUNK_SIZE, key.Y * ChunkSystem.CHUNK_SIZE);
-
-        const int size_tiles = ChunkSystem.CHUNK_SIZE / 16;
-
-        Point chunkPositionTile = new((int)chunkPositionWorld.X / 16, (int)chunkPositionWorld.Y / 16);
-
-        Main.tileBatch.Begin();
-
-        Main.spriteBatch.Begin(
-            SpriteSortMode.Deferred,
-            BlendState.AlphaBlend,
-            SamplerState.PointClamp,
-            DepthStencilState.None,
-            RasterizerState.CullNone
-        );
-
-        for (var i = 0; i < size_tiles; i++)
+        using (target.Scope(clearColor: Color.Transparent))
         {
-            for (var j = 0; j < size_tiles; j++)
+            Vector2 chunkPositionWorld = new(key.X * ChunkSystem.ChunkSize, key.Y * ChunkSystem.ChunkSize);
+
+            var sizeTiles = ChunkSystem.ChunkSize / 16;
+
+            Point chunkPositionTile = new((int)chunkPositionWorld.X / 16, (int)chunkPositionWorld.Y / 16);
+
+            Main.tileBatch.Begin();
+
+            Main.spriteBatch.Begin(
+                SpriteSortMode.Deferred,
+                BlendState.AlphaBlend,
+                SamplerState.PointClamp,
+                DepthStencilState.None,
+                RasterizerState.CullNone
+            );
+
+            for (var i = 0; i < sizeTiles; i++)
             {
-                var tileX = chunkPositionTile.X + i;
-                var tileY = chunkPositionTile.Y + j;
-
-                if (!WorldGen.InWorld(tileX, tileY))
+                for (var j = 0; j < sizeTiles; j++)
                 {
-                    continue;
-                }
+                    var tileX = chunkPositionTile.X + i;
+                    var tileY = chunkPositionTile.Y + j;
 
-                var tile = Framing.GetTileSafely(tileX, tileY);
-
-                if (tile.frameX == -1)
-                {
-                    if (!FailedPopulations.TryAdd(key, 0))
+                    if (!WorldGen.InWorld(tileX, tileY))
                     {
-                        FailedPopulations[key]++;
+                        continue;
+                    }
+
+                    var tile = Framing.GetTileSafely(tileX, tileY);
+
+                    if (tile.frameX == -1)
+                    {
+                        if (!FailedPopulations.TryAdd(key, 0))
+                        {
+                            FailedPopulations[key]++;
+                        }
+                    }
+
+                    if (FailedPopulations.TryGetValue(key, out var value) && value < 6 && tile.frameX == -1)
+                    {
+                        Main.tileBatch.End();
+                        Main.spriteBatch.End();
+                        NeedsRePopulating.Add(key);
+                        return;
+                    }
+
+                    if (!tile.HasTile || Main.instance.TilesRenderer.IsTileDrawLayerSolid(tile.type) != SolidLayer)
+                    {
+                        continue;
+                    }
+
+                    if (AnimatedTileRegistry.IsTilePossiblyAnimated(tile.TileType))
+                    {
+                        chunk.AnimatedPoints.Add(new AnimatedPoint(tileX, tileY, AnimatedPointType.AnimatedTile));
+                    }
+                    /*else if (IsTileDynamic(tile, tileX, tileY))
+                    {
+                        chunk.AnimatedPoints.Add(new AnimatedPoint(tileX, tileY, AnimatedPointType.AnimatedTile));
+                    }*/
+                    else
+                    {
+                        ModifiedTileDrawing.DrawSingleTile(false, SolidLayer, tileX, tileY, chunkPositionWorld);
                     }
                 }
-
-                if (FailedPopulations.TryGetValue(key, out var value) && value < 6 && tile.frameX == -1)
-                {
-                    StopRender(device);
-                    NeedsRePopulating.Add(key);
-                    return;
-                }
-
-                if (!tile.HasTile || Main.instance.TilesRenderer.IsTileDrawLayerSolid(tile.type) != SolidLayer)
-                {
-                    continue;
-                }
-
-                if (AnimatedTileRegistry.IsTilePossiblyAnimated(tile.TileType))
-                {
-                    chunk.AnimatedPoints.Add(new AnimatedPoint(tileX, tileY, AnimatedPointType.AnimatedTile));
-                }
-                /*else if (IsTileDynamic(tile, tileX, tileY))
-                {
-                    chunk.AnimatedPoints.Add(new AnimatedPoint(tileX, tileY, AnimatedPointType.AnimatedTile));
-                }*/
-                else
-                {
-                    ModifiedTileDrawing.DrawSingleTile(false, SolidLayer, tileX, tileY, chunkPositionWorld);
-                }
             }
+
+            Main.tileBatch.End();
+            Main.spriteBatch.End();
         }
-
-        StopRender(device);
-    }
-
-    private void StopRender(GraphicsDevice device)
-    {
-        Main.tileBatch.End();
-        Main.spriteBatch.End();
-
-        device.SetRenderTargets(null);
     }
 
     public override void DrawChunksToChunkTarget(GraphicsDevice device)
@@ -143,7 +136,7 @@ internal sealed class TileChunkCollection : ChunkCollection
                 var chunk = Loaded[key];
                 var target = chunk.RenderTarget;
 
-                Rectangle chunkArea = new(key.X * ChunkSystem.CHUNK_SIZE, key.Y * ChunkSystem.CHUNK_SIZE, target.Width, target.Height);
+                Rectangle chunkArea = new(key.X * ChunkSystem.ChunkSize, key.Y * ChunkSystem.ChunkSize, target.Width, target.Height);
 
                 if (!chunkArea.Intersects(screenArea))
                 {
@@ -158,7 +151,7 @@ internal sealed class TileChunkCollection : ChunkCollection
                     throw new Exception("Attempted to render a disposed chunk.");
                 }
 
-                Main.spriteBatch.Draw(target, new Vector2(chunkArea.X, chunkArea.Y) - screenPosition, Color.White);
+                Main.spriteBatch.Draw(target, new Vector2(chunkArea.X, chunkArea.Y) - screenPosition + new Vector2(Main.offScreenRange), Color.White);
             }
 
             Main.spriteBatch.End();
@@ -167,6 +160,8 @@ internal sealed class TileChunkCollection : ChunkCollection
 
     public void DoRenderTiles(GraphicsDevice graphicsDevice, RenderTarget2D? screenSizeLightingBuffer, RenderTarget2D? screenSizeOverrideBuffer, WrapperShaderData<Assets.Effects.LightMapRenderer.Parameters> lightMapShader)
     {
+        var stopwatch = Stopwatch.StartNew();
+
         var unscaledPosition = Main.Camera.UnscaledPosition;
         var offscreenRange = new Vector2(Main.drawToScreen ? 0 : Main.offScreenRange);
 
@@ -191,6 +186,7 @@ internal sealed class TileChunkCollection : ChunkCollection
         Main.tileBatch.End();
         using (Main.spriteBatch.Scope())
         {
+            RemoveOutOfBoundsAndPopulate();
             DrawChunksToChunkTarget(graphicsDevice);
             RenderChunksWithLighting(screenSizeLightingBuffer, screenSizeOverrideBuffer, lightMapShader, offscreenRange);
         }
@@ -239,6 +235,8 @@ internal sealed class TileChunkCollection : ChunkCollection
             Main.instance.LoadTiles(TileObject.objectPreview.Type);
             TileObject.DrawPreview(Main.spriteBatch, TileObject.objectPreview, unscaledPosition - offscreenRange);
         }
+
+        TimeLogger.DrawTime(SolidLayer ? 0 : 1, stopwatch.Elapsed.TotalMilliseconds);
     }
 
     private void TrackTileVisibility(DynamicTileVisibilityListener.VisibilityType types)

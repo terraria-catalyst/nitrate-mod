@@ -36,8 +36,6 @@ float4 PixelShaderFunction(float2 TexCoord : TEXCOORD0, float2 svPos : SV_POSITI
     float2 lightmapUv = TexCoord + (offset / (size * 16));
 
     return tex2D(chunkTexture, TexCoord) * tex2D(LightSampler, lightmapUv);
-    float2 screenPosTiles = (svPos + offset / 1.) / 16.;
-    float2 lightUv = screenPosTiles / size;
     
     float4 override = tex2D(OverrideSampler, TexCoord);
 
@@ -49,7 +47,7 @@ float4 PixelShaderFunction(float2 TexCoord : TEXCOORD0, float2 svPos : SV_POSITI
     float2 onePixel = 1 / size;
 
     // Scale up by 16 for the dimensions of one tile.
-    float2 oneTile = onePixel * 16;
+    float2 oneTile = onePixel;
 
     // Represents the offset of the screen tile grid from the lighting buffer grid, to fix desync.
     float2 offsetUV = float2(onePixel.x * offset.x, onePixel.y * offset.y);

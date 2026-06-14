@@ -268,7 +268,7 @@ internal static class ModifiedTileDrawing
         }*/
 
         drawData.colorTint = Color.White;
-        drawData.finalColor = vanilla ? TileDrawing.GetFinalLight(drawData.tileCache, drawData.typeCache, drawData.tileLight, drawData.colorTint) : Color.White;
+        drawData.finalColor = vanilla ? TileDrawing.GetFinalLight(drawData.tileCache, drawData.typeCache, drawData.tileLight, drawData.colorTint) : GetFinalLightWithoutLighting(drawData.tileCache, drawData.typeCache, drawData.tileLight, drawData.colorTint);
 
         switch (drawData.typeCache)
         {
@@ -673,6 +673,12 @@ internal static class ModifiedTileDrawing
                 );
             }
         }
+    }
+
+    private static Color GetFinalLightWithoutLighting(Tile tileCache, ushort typeCache, Color tileLight, Color tint)
+    {
+        // TODO: tint, tileShine
+        return tileCache.IsActuated ? tileCache.actColor(Color.White) : Color.White;
     }
 
     private static void DrawBasicTile(bool vanilla, FnaVector2 screenPosition, FnaVector2 screenOffset, int tileX, int tileY, TileDrawInfo drawData, Rectangle normalTileRect, FnaVector2 normalTilePosition)

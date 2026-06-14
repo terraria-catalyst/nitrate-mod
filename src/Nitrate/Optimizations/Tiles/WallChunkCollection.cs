@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using Daybreak.Common.Rendering;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -21,55 +22,53 @@ internal sealed class WallChunkCollection : ChunkCollection
 
         var device = Main.graphics.GraphicsDevice;
 
-        device.SetRenderTarget(target);
-        device.Clear(Color.Transparent);
-
-        Vector2 chunkPositionWorld = new(key.X * ChunkSystem.CHUNK_SIZE, key.Y * ChunkSystem.CHUNK_SIZE);
-
-        const int size_tiles = ChunkSystem.CHUNK_SIZE / 16;
-
-        Point chunkPositionTile = new((int)chunkPositionWorld.X / 16, (int)chunkPositionWorld.Y / 16);
-
-        Main.tileBatch.Begin();
-
-        Main.spriteBatch.Begin(
-            SpriteSortMode.Deferred,
-            BlendState.AlphaBlend,
-            SamplerState.PointClamp,
-            DepthStencilState.None,
-            RasterizerState.CullNone
-        );
-
-        for (var i = -1; i < size_tiles + 1; i++)
+        using (target.Scope(clearColor: Color.Transparent))
         {
-            for (var j = -1; j < size_tiles + 1; j++)
+            Vector2 chunkPositionWorld = new(key.X * ChunkSystem.ChunkSize, key.Y * ChunkSystem.ChunkSize);
+
+            var sizeTiles = ChunkSystem.ChunkSize / 16;
+
+            Point chunkPositionTile = new((int)chunkPositionWorld.X / 16, (int)chunkPositionWorld.Y / 16);
+
+            Main.tileBatch.Begin();
+
+            Main.spriteBatch.Begin(
+                SpriteSortMode.Deferred,
+                BlendState.AlphaBlend,
+                SamplerState.PointClamp,
+                DepthStencilState.None,
+                RasterizerState.CullNone
+            );
+
+            for (var i = -1; i < sizeTiles + 1; i++)
             {
-                var tileX = chunkPositionTile.X + i;
-                var tileY = chunkPositionTile.Y + j;
-
-                if (!WorldGen.InWorld(tileX, tileY))
+                for (var j = -1; j < sizeTiles + 1; j++)
                 {
-                    continue;
-                }
+                    var tileX = chunkPositionTile.X + i;
+                    var tileY = chunkPositionTile.Y + j;
 
-                var tile = Framing.GetTileSafely(tileX, tileY);
+                    if (!WorldGen.InWorld(tileX, tileY))
+                    {
+                        continue;
+                    }
 
-                if (AnimatedTileRegistry.IsWallPossiblyAnimated(tile.WallType))
-                {
-                    chunk.AnimatedPoints.Add(new AnimatedPoint(tileX, tileY, AnimatedPointType.AnimatedTile));
-                }
-                else
-                {
-                    // Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(tileX * 16 - (int)chunkPositionWorld.X, tileY * 16 - (int)chunkPositionWorld.Y, 16, 16), Color.Yellow);
-                    ModifiedTileDrawing.DrawSingleWall(false, tileX, tileY, chunkPositionWorld);
+                    var tile = Framing.GetTileSafely(tileX, tileY);
+
+                    if (AnimatedTileRegistry.IsWallPossiblyAnimated(tile.WallType))
+                    {
+                        chunk.AnimatedPoints.Add(new AnimatedPoint(tileX, tileY, AnimatedPointType.AnimatedTile));
+                    }
+                    else
+                    {
+                        // Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(tileX * 16 - (int)chunkPositionWorld.X, tileY * 16 - (int)chunkPositionWorld.Y, 16, 16), Color.Yellow);
+                        ModifiedTileDrawing.DrawSingleWall(false, tileX, tileY, chunkPositionWorld);
+                    }
                 }
             }
+
+            Main.tileBatch.End();
+            Main.spriteBatch.End();
         }
-
-        Main.tileBatch.End();
-        Main.spriteBatch.End();
-
-        device.SetRenderTargets(null);
     }
 
     public override void DrawChunksToChunkTarget(GraphicsDevice device)
@@ -102,7 +101,7 @@ internal sealed class WallChunkCollection : ChunkCollection
                 var chunk = Loaded[key];
                 var target = chunk.RenderTarget;
 
-                Rectangle chunkArea = new(key.X * ChunkSystem.CHUNK_SIZE, key.Y * ChunkSystem.CHUNK_SIZE, target.Width, target.Height);
+                Rectangle chunkArea = new(key.X * ChunkSystem.ChunkSize, key.Y * ChunkSystem.ChunkSize, target.Width, target.Height);
 
                 if (!chunkArea.Intersects(screenArea))
                 {
@@ -117,7 +116,7 @@ internal sealed class WallChunkCollection : ChunkCollection
                     throw new Exception("Attempted to render a disposed chunk.");
                 }
 
-                Main.spriteBatch.Draw(target, new Vector2(chunkArea.X, chunkArea.Y) - screenPosition, Color.White);
+                Main.spriteBatch.Draw(target, new Vector2(chunkArea.X, chunkArea.Y) - screenPosition + new Vector2(Main.offScreenRange), Color.White);
             }
 
             Main.spriteBatch.End();
@@ -126,11 +125,14 @@ internal sealed class WallChunkCollection : ChunkCollection
 
     public void DoRenderWalls(GraphicsDevice graphicsDevice, RenderTarget2D? screenSizeLightingBuffer, RenderTarget2D? screenSizeOverrideBuffer, WrapperShaderData<Assets.Effects.LightMapRenderer.Parameters> lightMapShader)
     {
+        var stopwatch = Stopwatch.StartNew();
+
         var offscreenRange = new Vector2(Main.drawToScreen ? 0 : Main.offScreenRange);
 
         Main.tileBatch.End();
         using (Main.spriteBatch.Scope())
         {
+            RemoveOutOfBoundsAndPopulate();
             DrawChunksToChunkTarget(graphicsDevice);
             RenderChunksWithLighting(screenSizeLightingBuffer, screenSizeOverrideBuffer, lightMapShader, offscreenRange);
         }
@@ -153,5 +155,7 @@ internal sealed class WallChunkCollection : ChunkCollection
                 ModifiedTileDrawing.DrawSingleWall(true, wallPoint.X, wallPoint.Y, Main.screenPosition);
             }
         }
+
+        TimeLogger.DrawTime(2, stopwatch.Elapsed.TotalMilliseconds);
     }
 }
