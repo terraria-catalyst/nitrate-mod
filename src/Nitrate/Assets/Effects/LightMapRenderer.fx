@@ -33,10 +33,12 @@ sampler2D OverrideSampler = sampler_state
 
 float4 PixelShaderFunction(float2 TexCoord : TEXCOORD0, float2 svPos : SV_POSITION) : COLOR0
 {
-    return tex2D(chunkTexture, TexCoord) * tex2D(LightSampler, TexCoord);
+    float2 lightmapUv = TexCoord + (offset / (size * 16));
+
+    return tex2D(chunkTexture, TexCoord) * tex2D(LightSampler, lightmapUv);
     float2 screenPosTiles = (svPos + offset / 1.) / 16.;
     float2 lightUv = screenPosTiles / size;
-
+    
     float4 override = tex2D(OverrideSampler, TexCoord);
 
     if (applyOverride && any(override)) {
@@ -53,7 +55,7 @@ float4 PixelShaderFunction(float2 TexCoord : TEXCOORD0, float2 svPos : SV_POSITI
     float2 offsetUV = float2(onePixel.x * offset.x, onePixel.y * offset.y);
 
     // Distance (0..1) from the current pixel to the corner of the tile.
-    float2 tileUV = frac((TexCoord - offsetUV) / oneTile);
+    float2 tileUV = frac((TexCoord) / oneTile);
 
     float dx = tileUV.x;
     float dy = tileUV.y;
