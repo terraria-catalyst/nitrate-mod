@@ -219,16 +219,11 @@ internal sealed class TileChunkCollection : ChunkCollection
 
         if (SolidLayer)
         {
-            // var drawToScreen = Main.drawToScreen;
-            // Main.drawToScreen = true;
             Main.instance.DrawTileCracks(1, Main.LocalPlayer.hitReplace);
             Main.instance.DrawTileCracks(1, Main.LocalPlayer.hitTile);
-            // Main.drawToScreen = drawToScreen;
         }
 
-        // Main.screenPosition += new Vector2(Main.offScreenRange, Main.offScreenRange);
         Main.instance.TilesRenderer.DrawSpecialTilesLegacy(unscaledPosition, offscreenRange);
-        // Main.screenPosition -= new Vector2(Main.offScreenRange, Main.offScreenRange);
 
         if (TileObject.objectPreview.Active && Main.LocalPlayer.cursorItemIconEnabled && Main.placementPreview && !CaptureManager.Instance.Active)
         {

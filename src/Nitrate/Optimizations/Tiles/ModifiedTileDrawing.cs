@@ -67,12 +67,6 @@ internal static class ModifiedTileDrawing
             Main.instance.LoadTiles(type);
         }
 
-        // In tML and vanilla, certain walls/tiles automatically include a draw offset of Main.offScreenRange if drawToScreen is false.
-        // This is because of the buffer zone around the world, although the offset is not needed with RTs.
-        // This fixes the behaviour of this offset with Nitrate, by forcing it to always be zero in line with Nitrate's new drawing system.
-        //bool oldDrawToScreen = Main.drawToScreen;
-        //Main.drawToScreen = true;
-
         if (vanilla)
         {
             Main.screenPosition += new Vector2(Main.offScreenRange);
@@ -92,8 +86,6 @@ internal static class ModifiedTileDrawing
         {
             DrawSingleTile_Inner(vanilla, solid, x, y, screenPosition, Vector2.Zero, tile, type);
         }
-
-        //Main.drawToScreen = oldDrawToScreen;
     }
 
     private static void DrawSingleTile_Inner(bool vanilla, bool solid, int x, int y, FnaVector2 screenPosition, FnaVector2 screenOffset, Tile tile, ushort type)
@@ -1538,12 +1530,6 @@ internal static class ModifiedTileDrawing
             return;
         }
 
-        // In tML and vanilla, certain walls/tiles automatically include a draw offset of Main.offScreenRange if drawToScreen is false.
-        // This is because of the buffer zone around the world, although the offset is not needed with RTs.
-        // This fixes the behaviour of this offset with Nitrate, by forcing it to always be zero in line with Nitrate's new drawing system.
-        var oldDrawToScreen = Main.drawToScreen;
-        Main.drawToScreen = true;
-
         if (!vanilla || WallLoader.PreDraw(x, y, wall, Main.spriteBatch))
         {
             var color = vanilla ? Lighting.GetColor(x, y) : Color.White;
@@ -1683,8 +1669,6 @@ internal static class ModifiedTileDrawing
         {
             WallLoader.PostDraw(x, y, wall, Main.spriteBatch);
         }
-
-        Main.drawToScreen = oldDrawToScreen;
     }
 
     public static void DrawLiquidBehindTiles()
