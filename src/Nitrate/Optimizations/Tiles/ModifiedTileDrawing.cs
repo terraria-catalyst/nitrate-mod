@@ -1654,7 +1654,7 @@ internal static class ModifiedTileDrawing
             }
         }
 
-        if (!vanilla)
+        if (vanilla)
         {
             WallLoader.PostDraw(x, y, wall, Main.spriteBatch);
         }

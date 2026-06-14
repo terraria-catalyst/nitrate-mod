@@ -152,7 +152,7 @@ internal sealed class WallChunkCollection : ChunkCollection
 
                 // ModifiedWallDrawing.DrawSingleWallMostlyUnmodified(wallPoint.X, wallPoint.Y, new Vector2(key.X * ChunkSystem.CHUNK_SIZE, key.Y * ChunkSystem.CHUNK_SIZE));
                 // Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(wallPoint.X * 16 - (int)Main.screenPosition.X, wallPoint.Y * 16 - (int)Main.screenPosition.Y, 16, 16), Color.Red);
-                ModifiedTileDrawing.DrawSingleWall(true, wallPoint.X, wallPoint.Y, Main.screenPosition);
+                ModifiedTileDrawing.DrawSingleWall(true, wallPoint.X, wallPoint.Y, Main.screenPosition - offscreenRange);
             }
         }
 
