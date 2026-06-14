@@ -43,15 +43,9 @@ internal static class ModifiedTileDrawing
         // Currently, occasional crashes occur in methods like
         // EmitLivingTreeLeaf_Below because of an IOOB exception due to stupid,
         // direct indexing of Main::tile instead of using Framing.GetTileSafely.
-        for (var xx = x - 2; xx <= x + 2; xx++)
+        if (!WorldGen.InWorld(x, y, fluff: 2))
         {
-            for (var yy = y - 2; yy <= y + 2; yy++)
-            {
-                if (!WorldGen.InWorld(xx, yy))
-                {
-                    return;
-                }
-            }
+            return;
         }
 
         var tile = Framing.GetTileSafely(x, y);
@@ -69,18 +63,13 @@ internal static class ModifiedTileDrawing
 
         if (vanilla)
         {
-            Main.screenPosition += new Vector2(Main.offScreenRange);
-
             if (TileLoader.PreDraw(j, i, type, Main.spriteBatch))
             {
-                Main.screenPosition -= new Vector2(Main.offScreenRange);
                 AddSpecialPointsForTile(tile, x, y);
                 DrawSingleTile_Inner(vanilla, solid, x, y, screenPosition, Vector2.Zero, tile, type);
-                Main.screenPosition += new Vector2(Main.offScreenRange);
             }
 
             TileLoader.PostDraw(j, i, type, Main.spriteBatch);
-            Main.screenPosition -= new Vector2(Main.offScreenRange);
         }
         else
         {
