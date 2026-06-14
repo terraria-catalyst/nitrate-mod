@@ -1,5 +1,6 @@
 displayName = Not Quite Nitrate (Performance and Bug Fixes)
 author = Tomat
-version = 1.0.8
-homepage = https://discord.gg/vPTUZcvXjg
+version = 1.0.9.1
+homepage = https://discord.gg/yog
 side = NoSync
+modReferences = Daybreak

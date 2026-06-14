@@ -1,6 +1,6 @@
 displayName = Nitrate
 author = Oli & tomat
-version = 0.4.0
+version = 0.4.1
 side = Client
-homepage = https://discord.gg/vPTUZcvXjg/
+homepage = https://discord.gg/yog
 modReferences = Daybreak
