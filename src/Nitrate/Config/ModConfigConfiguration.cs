@@ -17,7 +17,6 @@ internal sealed class ModConfigConfiguration : IConfiguration
     {
         public override ConfigScope Mode => ConfigScope.ClientSide;
 
-        [ReloadRequired]
         [DefaultValue(true)]
         [UsedImplicitly(ImplicitUseKindFlags.Access | ImplicitUseKindFlags.Assign)]
         public bool ExperimentalTileRenderer { get; set; }

@@ -43,8 +43,6 @@ internal sealed class ChunkSystem : ModSystem
     internal static int ChunkOffscreenBuffer => 1;
 
     private const int edge_threshold = 3;
-    private static int OffscreenWidthTiles => Main.offScreenRange / 16;
-    private static int OffscreenHeightTiles => Main.offScreenRange / 16;
 
     private static readonly TileChunkCollection solid_tiles = new() { SolidLayer = true };
     private static readonly TileChunkCollection non_solid_tiles = new() { SolidLayer = false };
@@ -56,7 +54,7 @@ internal sealed class ChunkSystem : ModSystem
     private static Color[] overrideColorBuffer = Array.Empty<Color>();
     // private static RenderTarget2D? screenSizeLightingBuffer;
     // private static RenderTarget2D? screenSizeOverrideBuffer;
-    private static bool enabled;
+    private static bool Enabled => Configuration.UsesExperimentalTileRenderer;
     private static bool debugChunkBorders;
     private static bool debugLightMap;
     private static WrapperShaderData<Assets.Effects.LightMapRenderer.Parameters> lightMapShader = null!;
@@ -71,13 +69,6 @@ internal sealed class ChunkSystem : ModSystem
                 lightMapShader = Assets.Effects.LightMapRenderer.CreateLightMapRendererPass();
             }
         );
-
-        enabled = Configuration.UsesExperimentalTileRenderer;
-
-        if (!enabled)
-        {
-            return;
-        }
 
         TileStateChangedListener.OnTileSingleStateChange += TileStateChanged;
         TileStateChangedListener.OnWallSingleStateChange += WallStateChanged;
@@ -182,11 +173,6 @@ internal sealed class ChunkSystem : ModSystem
     public override void OnWorldUnload()
     {
         base.OnWorldUnload();
-
-        if (!enabled)
-        {
-            return;
-        }
 
         // Clone these outside of the delegate to ensure the delegate captures
         // an uncleared collection. This probably prevents a memory leak.
@@ -470,7 +456,7 @@ internal sealed class ChunkSystem : ModSystem
             c.EmitDelegate(
                 (Main self) =>
                 {
-                    if (!enabled)
+                    if (!Enabled)
                     {
                         self.DrawWalls();
                         return;
@@ -492,7 +478,7 @@ internal sealed class ChunkSystem : ModSystem
             c.EmitDelegate(
                 (Main self, bool solidLayer, bool forRenderTargets, bool intoRenderTargets, int waterStyleOverride) =>
                 {
-                    if (!enabled)
+                    if (!Enabled)
                     {
                         self.DrawTiles(solidLayer, forRenderTargets, intoRenderTargets, waterStyleOverride);
                         return;
@@ -514,7 +500,7 @@ internal sealed class ChunkSystem : ModSystem
             c.EmitDelegate(
                 (Main self, bool solidLayer, bool forRenderTargets, bool intoRenderTargets, int waterStyleOverride) =>
                 {
-                    if (!enabled)
+                    if (!Enabled)
                     {
                         self.DrawTiles(solidLayer, forRenderTargets, intoRenderTargets, waterStyleOverride);
                         return;
