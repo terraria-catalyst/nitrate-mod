@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Linq;
 using Daybreak.Common.Rendering;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Nitrate.API.Listeners;
 using Nitrate.API.Tiles;
 using Nitrate.Core;
-using Nitrate.Utilities;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.GameContent.Drawing;
@@ -26,6 +24,14 @@ internal sealed class TileChunkCollection : ChunkCollection
     }
 
     public bool SolidLayer { get; init; }
+
+    private static bool ContainsTooManyAnimatedPoints { get; set; }
+
+    private static int CheckAnimatedPointsTimer { get; set; } = CheckAnimatedPointsDefaultTime;
+
+    private static int CheckAnimatedPointsDefaultTime => 60 * 3 / 4;
+
+    private static int ArbitraryAnimatedTileThreshold => 4096;
 
     public override void PopulateChunk(Point key)
     {
@@ -159,20 +165,43 @@ internal sealed class TileChunkCollection : ChunkCollection
         }
     }
 
-    private bool DetermineIfThereAreTooManyAnimatedPointsInView()
+    private static bool DetermineIfThereAreTooManyAnimatedPointsInView()
     {
+        var a = Stopwatch.StartNew();
         /*
         var totalPoints = Loaded.Values.Sum(x => x.AnimatedPoints.Count);
         // Main.NewText(totalPoints);
         ContainsTooManyAnimatedPoints = totalPoints > ArbitraryAnimatedTileThreshold;
         */
+        Main.instance.TilesRenderer.GetScreenDrawArea(Main.screenPosition, new Vector2(Main.offScreenRange) + (Main.Camera.UnscaledPosition - Main.Camera.ScaledPosition), out var firstTileX, out var lastTileX, out var firstTileY, out var lastTileY);
+
+        var animatedCount = 0;
+        for (var x = firstTileX - 2; x <= lastTileX + 2; x++)
+        {
+            for (var y = firstTileY; y <= lastTileY + 4; y++)
+            {
+                var tile = Main.tile[x, y];
+
+                // Normally should check HasTile, but it's usually zero'd out which
+                // returns false here, so I think it's fine.
+                // I'd rather it just flag too many animated tiles.
+                if (AnimatedTileRegistry.IsTilePossiblyAnimated(tile.TileType))
+                {
+                    animatedCount++;
+                }
+            }
+        }
+
+        // Main.NewText(animatedCount);
+        Main.NewText(a.Elapsed.TotalMilliseconds);
+        return animatedCount > ArbitraryAnimatedTileThreshold;
     }
 
     public void DoRenderTiles(GraphicsDevice graphicsDevice, RenderTarget2D? screenSizeLightingBuffer, RenderTarget2D? screenSizeOverrideBuffer, WrapperShaderData<Assets.Effects.LightMapRenderer.Parameters> lightMapShader)
     {
         var stopwatch = Stopwatch.StartNew();
 
-        if (CheckAnimatedPointsTimer-- <= 0)
+        if (SolidLayer && CheckAnimatedPointsTimer-- <= 0)
         {
             ContainsTooManyAnimatedPoints = DetermineIfThereAreTooManyAnimatedPointsInView();
             CheckAnimatedPointsTimer = CheckAnimatedPointsDefaultTime;

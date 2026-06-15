@@ -20,14 +20,6 @@ internal abstract class ChunkCollection
 
     public virtual bool ApplyOverride => Main.LocalPlayer.dangerSense || Main.LocalPlayer.findTreasure || Main.LocalPlayer.biomeSight;
 
-    public bool ContainsTooManyAnimatedPoints { get; set; }
-
-    public int CheckAnimatedPointsTimer { get; set; } = CheckAnimatedPointsDefaultTime;
-
-    public static int CheckAnimatedPointsDefaultTime => 60 * 3 / 4;
-
-    public static int ArbitraryAnimatedTileThreshold => 4096;
-
     public virtual void LoadChunk(Point key)
     {
         if (NeedsPopulating.Contains(key))
