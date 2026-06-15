@@ -217,7 +217,7 @@ internal static class ModifiedTileDrawing
                 Main.instance.TilesRenderer.DrawTiles_EmitParticles(y, x, drawData.tileCache, drawData.typeCache, drawData.tileFrameX, drawData.tileFrameY, drawData.tileLight);
             }
 
-            drawData.tileLight = Main.instance.TilesRenderer.DrawTiles_GetLightOverride(x, y, drawData.tileCache, drawData.typeCache, drawData.tileFrameX, drawData.tileFrameY, drawData.tileLight);
+            drawData.tileLight = Main.instance.TilesRenderer.DrawTiles_GetLightOverride(y, x, drawData.tileCache, drawData.typeCache, drawData.tileFrameX, drawData.tileFrameY, drawData.tileLight);
         }
 
         // bool flag = drawData.tileLight.R >= 1 || drawData.tileLight.G >= 1 || drawData.tileLight.B >= 1 || drawData.tileCache.wall > 0 && (drawData.tileCache.wall == 318 || drawData.tileCache.fullbrightWall());
