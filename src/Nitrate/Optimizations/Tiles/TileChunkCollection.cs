@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using Daybreak.Common.Rendering;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -162,73 +163,100 @@ internal sealed class TileChunkCollection : ChunkCollection
     {
         var stopwatch = Stopwatch.StartNew();
 
-        var unscaledPosition = Main.Camera.UnscaledPosition;
-        var offscreenRange = new Vector2(Main.drawToScreen ? 0 : Main.offScreenRange);
-
-        if (!SolidLayer)
+        if (CheckAnimatedPointsTimer-- <= 0)
         {
-            Main.critterCage = true;
+            ContainsTooManyAnimatedPoints = false;
         }
 
-        Main.instance.TilesRenderer.EnsureWindGridSize();
-        Main.instance.TilesRenderer.ClearLegacyCachedDraws();
-
-        Main.instance.TilesRenderer.ClearCachedTileDraws(SolidLayer);
-
-        var martianWhite = (byte)(100f + 150f * Main.martianLight);
-        Main.instance.TilesRenderer._martianGlow = new Color(martianWhite, martianWhite, martianWhite, 0);
-
-        if (SolidLayer && !LiquidEdgeRenderer.Active)
+        if (ContainsTooManyAnimatedPoints)
         {
-            ModifiedTileDrawing.DrawLiquidBehindTiles();
-        }
-
-        Main.tileBatch.End();
-        using (Main.spriteBatch.Scope())
-        {
-            RemoveOutOfBoundsAndPopulate();
-            DrawChunksToChunkTarget(graphicsDevice);
-            RenderChunksWithLighting(screenSizeLightingBuffer, screenSizeOverrideBuffer, lightMapShader, offscreenRange);
-        }
-        Main.tileBatch.Begin();
-
-        foreach (var key in Loaded.Keys)
-        {
-            var chunk = Loaded[key];
-
-            foreach (var tilePoint in chunk.AnimatedPoints)
+            if (SolidLayer)
             {
-                var tile = Framing.GetTileSafely(tilePoint.X, tilePoint.Y);
+                Main.instance.DrawTiles(solidLayer: true, forRenderTargets: false, intoRenderTargets: true);
+            }
+            else
+            {
+                Main.instance.DrawTiles(solidLayer: false, forRenderTargets: false, intoRenderTargets: true);
+            }
+        }
+        else
+        {
+            var unscaledPosition = Main.Camera.UnscaledPosition;
+            var offscreenRange = new Vector2(Main.drawToScreen ? 0 : Main.offScreenRange);
 
-                if (tilePoint.Type == AnimatedPointType.AnimatedTile)
+            if (!SolidLayer)
+            {
+                Main.critterCage = true;
+            }
+
+            Main.instance.TilesRenderer.EnsureWindGridSize();
+            Main.instance.TilesRenderer.ClearLegacyCachedDraws();
+
+            Main.instance.TilesRenderer.ClearCachedTileDraws(SolidLayer);
+
+            var martianWhite = (byte)(100f + 150f * Main.martianLight);
+            Main.instance.TilesRenderer._martianGlow = new Color(martianWhite, martianWhite, martianWhite, 0);
+
+            if (SolidLayer && !LiquidEdgeRenderer.Active)
+            {
+                ModifiedTileDrawing.DrawLiquidBehindTiles();
+            }
+
+            Main.tileBatch.End();
+            using (Main.spriteBatch.Scope())
+            {
+                RemoveOutOfBoundsAndPopulate();
+                DrawChunksToChunkTarget(graphicsDevice);
+                RenderChunksWithLighting(screenSizeLightingBuffer, screenSizeOverrideBuffer, lightMapShader, offscreenRange);
+            }
+            Main.tileBatch.Begin();
+
+            foreach (var key in Loaded.Keys)
+            {
+                var chunk = Loaded[key];
+
+                foreach (var tilePoint in chunk.AnimatedPoints)
                 {
-                    if (!tile.HasTile)
-                    {
-                        continue;
-                    }
+                    var tile = Framing.GetTileSafely(tilePoint.X, tilePoint.Y);
 
-                    if (!TextureAssets.Tile[tile.type].IsLoaded)
+                    if (tilePoint.Type == AnimatedPointType.AnimatedTile)
                     {
-                        Main.instance.LoadTiles(tile.type);
-                    }
+                        if (!tile.HasTile)
+                        {
+                            continue;
+                        }
 
-                    ModifiedTileDrawing.DrawSingleTile(true, SolidLayer, tilePoint.X, tilePoint.Y, Main.screenPosition - offscreenRange);
+                        if (!TextureAssets.Tile[tile.type].IsLoaded)
+                        {
+                            Main.instance.LoadTiles(tile.type);
+                        }
+
+                        ModifiedTileDrawing.DrawSingleTile(true, SolidLayer, tilePoint.X, tilePoint.Y, Main.screenPosition - offscreenRange);
+                    }
                 }
+            }
+
+            if (SolidLayer)
+            {
+                Main.instance.DrawTileCracks(1, Main.LocalPlayer.hitReplace);
+                Main.instance.DrawTileCracks(1, Main.LocalPlayer.hitTile);
+            }
+
+            Main.instance.TilesRenderer.DrawSpecialTilesLegacy(unscaledPosition, offscreenRange);
+
+            if (TileObject.objectPreview.Active && Main.LocalPlayer.cursorItemIconEnabled && Main.placementPreview && !CaptureManager.Instance.Active)
+            {
+                Main.instance.LoadTiles(TileObject.objectPreview.Type);
+                TileObject.DrawPreview(Main.spriteBatch, TileObject.objectPreview, unscaledPosition - offscreenRange);
             }
         }
 
-        if (SolidLayer)
+        if (CheckAnimatedPointsTimer < 0)
         {
-            Main.instance.DrawTileCracks(1, Main.LocalPlayer.hitReplace);
-            Main.instance.DrawTileCracks(1, Main.LocalPlayer.hitTile);
-        }
-
-        Main.instance.TilesRenderer.DrawSpecialTilesLegacy(unscaledPosition, offscreenRange);
-
-        if (TileObject.objectPreview.Active && Main.LocalPlayer.cursorItemIconEnabled && Main.placementPreview && !CaptureManager.Instance.Active)
-        {
-            Main.instance.LoadTiles(TileObject.objectPreview.Type);
-            TileObject.DrawPreview(Main.spriteBatch, TileObject.objectPreview, unscaledPosition - offscreenRange);
+            var totalPoints = Loaded.Values.Sum(x => x.AnimatedPoints.Count);
+            // Main.NewText(totalPoints);
+            ContainsTooManyAnimatedPoints = totalPoints > ArbitraryAnimatedTileThreshold;
+            CheckAnimatedPointsTimer = CheckAnimatedPointsDefaultTime;
         }
 
         TimeLogger.DrawTime(SolidLayer ? 0 : 1, stopwatch.Elapsed.TotalMilliseconds);

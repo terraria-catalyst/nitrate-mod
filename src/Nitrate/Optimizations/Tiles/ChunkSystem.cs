@@ -307,47 +307,6 @@ internal sealed class ChunkSystem : ModSystem
         }
     }
 
-    /*
-    private static void TransferTileSpaceBufferToScreenSpaceBuffer(GraphicsDevice device)
-    {
-        if (screenSizeLightingBuffer is null || screenSizeOverrideBuffer is null)
-        {
-            return;
-        }
-
-        void transfer(RenderTarget2D? buffer, RenderTarget2D screenSize)
-        {
-            using (Main.spriteBatch.Scope())
-            using (screenSize.Scope(clearColor: Color.Transparent))
-            {
-                Main.spriteBatch.Begin(
-                    SpriteSortMode.Immediate,
-                    BlendState.AlphaBlend,
-                    SamplerState.PointClamp,
-                    DepthStencilState.None,
-                    RasterizerState.CullNone,
-                    null,
-                    Main.GameViewMatrix.TransformationMatrix
-                );
-
-                FnaVector2 offset = new(Main.screenPosition.X % 16, Main.screenPosition.Y % 16);
-
-                // Account for tile padding around the screen.
-                Main.spriteBatch.Draw(buffer, new Vector2(-lighting_buffer_offscreen_range_tiles * 16) - offset, null, Color.White, 0, Vector2.Zero, 16, SpriteEffects.None, 0);
-                Main.spriteBatch.End();
-            }
-        }
-
-        transfer(lightingBuffer, screenSizeLightingBuffer);
-
-        // Could probably abstract the conditions required to use color overrides.
-        if (Main.LocalPlayer.dangerSense || Main.LocalPlayer.findTreasure || Main.LocalPlayer.biomeSight)
-        {
-            transfer(overrideBuffer, screenSizeOverrideBuffer);
-        }
-    }
-    */
-
     private static void TileStateChanged(int i, int j)
     {
         var chunkX = (int)Math.Floor(i / (ChunkSize / 16.0));
