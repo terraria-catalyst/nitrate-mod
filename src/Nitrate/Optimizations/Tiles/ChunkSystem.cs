@@ -193,8 +193,6 @@ internal sealed class ChunkSystem : ModSystem
             }
         );
 
-        Main.OnRenderTargetsInitialized -= ResizeBuffers;
-
         foreach (var chunkCollection in chunk_collections)
         {
             chunkCollection.Loaded.Clear();
@@ -210,6 +208,8 @@ internal sealed class ChunkSystem : ModSystem
         {
             chunkCollection.DisposeAllChunks();
         }
+
+        Main.OnRenderTargetsInitialized -= ResizeBuffers;
 
         Main.RunOnMainThread(
             () =>
