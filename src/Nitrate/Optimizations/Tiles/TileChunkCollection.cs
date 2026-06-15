@@ -189,15 +189,12 @@ internal sealed class TileChunkCollection : ChunkCollection
                 {
                     if (++animatedCount > ArbitraryAnimatedTileThreshold)
                     {
-        Main.NewText(a.Elapsed.TotalMilliseconds);
                         return true;
                     }
                 }
             }
         }
 
-        // Main.NewText(animatedCount);
-        Main.NewText(a.Elapsed.TotalMilliseconds);
         return false;
     }
 
