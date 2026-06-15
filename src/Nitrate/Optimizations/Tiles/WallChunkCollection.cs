@@ -135,9 +135,6 @@ internal sealed class WallChunkCollection : ChunkCollection
             RemoveOutOfBoundsAndPopulate();
             DrawChunksToChunkTarget(graphicsDevice);
             RenderChunksWithLighting(screenSizeLightingBuffer, screenSizeOverrideBuffer, lightMapShader, offscreenRange);
-
-            // Allow DrawWalls detours to run.
-            Main.instance.DrawWalls();
         }
 
         Main.tileBatch.Begin();

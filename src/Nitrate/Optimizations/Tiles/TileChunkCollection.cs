@@ -210,22 +210,13 @@ internal sealed class TileChunkCollection : ChunkCollection
 
         if (ContainsTooManyAnimatedPoints)
         {
-            try
+            if (SolidLayer)
             {
-                ChunkSystem.OverrideAllowVanillaDrawing = true;
-
-                if (SolidLayer)
-                {
-                    Main.instance.DrawTiles(solidLayer: true, forRenderTargets: false, intoRenderTargets: true);
-                }
-                else
-                {
-                    Main.instance.DrawTiles(solidLayer: false, forRenderTargets: false, intoRenderTargets: true);
-                }
+                Main.instance.DrawTiles(solidLayer: true, forRenderTargets: false, intoRenderTargets: true);
             }
-            finally
+            else
             {
-                ChunkSystem.OverrideAllowVanillaDrawing = false;
+                Main.instance.DrawTiles(solidLayer: false, forRenderTargets: false, intoRenderTargets: true);
             }
         }
         else
@@ -257,16 +248,6 @@ internal sealed class TileChunkCollection : ChunkCollection
                 RemoveOutOfBoundsAndPopulate();
                 DrawChunksToChunkTarget(graphicsDevice);
                 RenderChunksWithLighting(screenSizeLightingBuffer, screenSizeOverrideBuffer, lightMapShader, offscreenRange);
-
-                // Allow DrawTiles detours to run.
-                if (SolidLayer)
-                {
-                    Main.instance.DrawTiles(solidLayer: true, forRenderTargets: false, intoRenderTargets: true);
-                }
-                else
-                {
-                    Main.instance.DrawTiles(solidLayer: false, forRenderTargets: false, intoRenderTargets: true);
-                }
             }
             Main.tileBatch.Begin();
 
