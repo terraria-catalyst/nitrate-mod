@@ -187,14 +187,18 @@ internal sealed class TileChunkCollection : ChunkCollection
                 // I'd rather it just flag too many animated tiles.
                 if (AnimatedTileRegistry.IsTilePossiblyAnimated(tile.TileType))
                 {
-                    animatedCount++;
+                    if (++animatedCount > ArbitraryAnimatedTileThreshold)
+                    {
+        Main.NewText(a.Elapsed.TotalMilliseconds);
+                        return true;
+                    }
                 }
             }
         }
 
         // Main.NewText(animatedCount);
         Main.NewText(a.Elapsed.TotalMilliseconds);
-        return animatedCount > ArbitraryAnimatedTileThreshold;
+        return false;
     }
 
     public void DoRenderTiles(GraphicsDevice graphicsDevice, RenderTarget2D? screenSizeLightingBuffer, RenderTarget2D? screenSizeOverrideBuffer, WrapperShaderData<Assets.Effects.LightMapRenderer.Parameters> lightMapShader)
