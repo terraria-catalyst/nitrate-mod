@@ -159,13 +159,23 @@ internal sealed class TileChunkCollection : ChunkCollection
         }
     }
 
+    private bool DetermineIfThereAreTooManyAnimatedPointsInView()
+    {
+        /*
+        var totalPoints = Loaded.Values.Sum(x => x.AnimatedPoints.Count);
+        // Main.NewText(totalPoints);
+        ContainsTooManyAnimatedPoints = totalPoints > ArbitraryAnimatedTileThreshold;
+        */
+    }
+
     public void DoRenderTiles(GraphicsDevice graphicsDevice, RenderTarget2D? screenSizeLightingBuffer, RenderTarget2D? screenSizeOverrideBuffer, WrapperShaderData<Assets.Effects.LightMapRenderer.Parameters> lightMapShader)
     {
         var stopwatch = Stopwatch.StartNew();
 
         if (CheckAnimatedPointsTimer-- <= 0)
         {
-            ContainsTooManyAnimatedPoints = false;
+            ContainsTooManyAnimatedPoints = DetermineIfThereAreTooManyAnimatedPointsInView();
+            CheckAnimatedPointsTimer = CheckAnimatedPointsDefaultTime;
         }
 
         if (ContainsTooManyAnimatedPoints)
@@ -249,14 +259,6 @@ internal sealed class TileChunkCollection : ChunkCollection
                 Main.instance.LoadTiles(TileObject.objectPreview.Type);
                 TileObject.DrawPreview(Main.spriteBatch, TileObject.objectPreview, unscaledPosition - offscreenRange);
             }
-        }
-
-        if (CheckAnimatedPointsTimer < 0)
-        {
-            var totalPoints = Loaded.Values.Sum(x => x.AnimatedPoints.Count);
-            // Main.NewText(totalPoints);
-            ContainsTooManyAnimatedPoints = totalPoints > ArbitraryAnimatedTileThreshold;
-            CheckAnimatedPointsTimer = CheckAnimatedPointsDefaultTime;
         }
 
         TimeLogger.DrawTime(SolidLayer ? 0 : 1, stopwatch.Elapsed.TotalMilliseconds);

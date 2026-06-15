@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.ModLoader.IO;
 
 namespace Nitrate.API.Tiles;
 
@@ -112,6 +114,36 @@ public static class AnimatedTileRegistry
                     walls[wall.Type] |= TileAnimatedType.ModdedAutoDetect;
                 }
             }
+
+            for (var i = 0; i < TileLoader.TileCount; i++)
+            {
+                isTilePossiblyAnimated[i] = tiles.ContainsKey(i)
+                    || ShouldSwayInWind(i)
+                    || TileID.Sets.GetsCheckedForLeaves[i]
+                    || TileID.Sets.CommonSapling[i]
+                    || TileID.Sets.IsVine[i]
+                    || TileID.Sets.VineThreads[i]
+                    || TileID.Sets.ReverseVineThreads[i]
+                    || TileID.Sets.BasicChest[i]
+                    || TileID.Sets.BasicChestFake[i]
+                    || TileID.Sets.Torch[i]
+                    || TileID.Sets.Campfire[i]
+                    || TileID.Sets.TreeSapling[i]
+                    || IsTileDynamicallyAnimated(i);
+            }
+
+            for (var i = 0; i < WallLoader.WallCount; i++)
+            {
+                isWallPossiblyAnimated[i] = walls.ContainsKey(i);
+            }
+        }
+
+        public override void ResizeArrays()
+        {
+            base.ResizeArrays();
+
+            isTilePossiblyAnimated = TileID.Sets.Factory.CreateNamedSet("PossiblyAnimated").RegisterBoolSet(false);
+            isWallPossiblyAnimated = WallID.Sets.Factory.CreateNamedSet("PossiblyAnimated").RegisterBoolSet(false);
         }
     }
 
@@ -406,6 +438,9 @@ public static class AnimatedTileRegistry
     private static readonly Dictionary<int, TileAnimatedType> tiles = new();
     private static readonly Dictionary<int, TileAnimatedType> walls = new();
 
+    private static bool[] isTilePossiblyAnimated = [];
+    private static bool[] isWallPossiblyAnimated = [];
+
     public static void RegisterTile(int tileId, TileAnimatedType type)
     {
         if (!tiles.TryAdd(tileId, type))
@@ -425,7 +460,7 @@ public static class AnimatedTileRegistry
     // Also keep DontDrawTileSliced in mind?
     public static bool IsTilePossiblyAnimated(int tileId)
     {
-        return tiles.ContainsKey(tileId) || ShouldSwayInWind(tileId) || TileID.Sets.GetsCheckedForLeaves[tileId] || TileID.Sets.CommonSapling[tileId] || TileID.Sets.IsVine[tileId] || TileID.Sets.VineThreads[tileId] || TileID.Sets.ReverseVineThreads[tileId] || TileID.Sets.BasicChest[tileId] || TileID.Sets.BasicChestFake[tileId] || TileID.Sets.Torch[tileId] || TileID.Sets.Campfire[tileId] || TileID.Sets.TreeSapling[tileId] || IsTileDynamicallyAnimated(tileId);
+        return isTilePossiblyAnimated[tileId];
     }
 
     // TODO: TEMPORARY: Disable support for these dynamically animated tiles until we figure out a better way to handle them.
@@ -441,9 +476,9 @@ public static class AnimatedTileRegistry
         return TileID.Sets.Boulders[tileId] || /*Minecart.IsPressurePlate()*/ tileId == TileID.MinecartTrack || tileId == TileID.CrispyHoneyBlock || tileId == TileID.Cactus || tileId == 32 || tileId == 69 || tileId == 48 || tileId == 232 || tileId == 352 || tileId == 483 || tileId == 482 || tileId == 481 || tileId == 51 || tileId == 229 || tileId == 37 || tileId == 58 || tileId == 76 || tileId == 162;
     }
 
-    public static bool IsWallPossiblyAnimated(int tileId)
+    public static bool IsWallPossiblyAnimated(int wallId)
     {
-        return walls.ContainsKey(tileId);
+        return isWallPossiblyAnimated[wallId];
     }
 
     // ReSharper disable once SuggestBaseTypeForParameter
