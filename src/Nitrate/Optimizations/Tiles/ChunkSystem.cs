@@ -59,6 +59,10 @@ internal sealed class ChunkSystem : ModSystem
     private static bool debugLightMap;
     private static WrapperShaderData<Assets.Effects.LightMapRenderer.Parameters> lightMapShader = null!;
 
+    private static bool AllowVanillaDrawing => !Enabled || OverrideAllowVanillaDrawing;
+
+    internal static bool OverrideAllowVanillaDrawing { get; set; }
+
     public override void OnModLoad()
     {
         base.OnModLoad();
@@ -80,6 +84,9 @@ internal sealed class ChunkSystem : ModSystem
         IL_Main.RenderTiles += RenderSolidTiles;
         IL_Main.RenderTiles2 += RenderNonSolid;
         IL_Main.RenderWalls += RenderWalls;
+
+        IL_Main.DrawTiles += AllowRunningDetoursOnThisMethodWithoutRunningIt;
+        IL_Main.DrawWalls += AllowRunningDetoursOnThisMethodWithoutRunningIt;
 
         IL_Main.DoDraw += il =>
         {
@@ -134,6 +141,16 @@ internal sealed class ChunkSystem : ModSystem
         );
 
         Main.OnRenderTargetsInitialized += ResizeBuffers;
+    }
+
+    private static void AllowRunningDetoursOnThisMethodWithoutRunningIt(ILContext il)
+    {
+        var c = new ILCursor(il);
+
+        var actualMethodLabel = c.DefineLabel();
+        c.EmitDelegate(() => AllowVanillaDrawing);
+        c.EmitBrtrue(actualMethodLabel);
+        c.MarkLabel(actualMethodLabel);
     }
 
     private static void ResizeBuffers(int width, int height)

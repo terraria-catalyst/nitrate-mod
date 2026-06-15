@@ -38,12 +38,14 @@ float4 PixelShaderFunction(float2 TexCoord : TEXCOORD0, float2 svPos : SV_POSITI
     float2 lightmapUvInPixels = TexCoord * lightingTargetSizeInPixels;
     lightmapUvInPixels += offset;
     float2 lightmapUv = lightmapUvInPixels / lightingTargetSizeInPixels;
+    float2 probablySlightlyMoreCorrectRatioButLooksUglySoOnlyUseItForSpelunker = (tileTargetSize + (lightingTargetSizeInPixels - tileTargetSize) / 2.) / lightingTargetSizeInPixels;
     float2 ratio = tileTargetSize / lightingTargetSizeInPixels;
+    float2 lightmapOverrideUv = lightmapUv * probablySlightlyMoreCorrectRatioButLooksUglySoOnlyUseItForSpelunker;
     lightmapUv *= ratio;
 
     // return tex2D(chunkTexture, TexCoord) * tex2D(LightSampler, lightmapUv);
     
-    float4 override = tex2D(OverrideSampler, TexCoord);
+    float4 override = tex2D(OverrideSampler, lightmapOverrideUv);
 
     if (applyOverride && any(override)) {
         return tex2D(chunkTexture, TexCoord) * override;
