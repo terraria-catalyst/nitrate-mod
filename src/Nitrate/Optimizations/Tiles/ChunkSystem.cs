@@ -11,7 +11,6 @@ using Nitrate.API.Threading;
 using Nitrate.Core;
 using Terraria;
 using Terraria.GameContent;
-using Terraria.GameContent.Drawing;
 using Terraria.ModLoader;
 
 namespace Nitrate.Optimizations;
@@ -86,8 +85,8 @@ internal sealed class ChunkSystem : ModSystem
         IL_Main.RenderTiles2 += RenderNonSolid;
         IL_Main.RenderWalls += RenderWalls;
 
-        IL_TileDrawing.Draw += AllowRunningDetoursOnThisMethodWithoutRunningIt;
-        IL_WallDrawing.DrawWalls += AllowRunningDetoursOnThisMethodWithoutRunningIt;
+        IL_Main.DrawTiles += AllowRunningDetoursOnThisMethodWithoutRunningIt;
+        IL_Main.DrawWalls += AllowRunningDetoursOnThisMethodWithoutRunningIt;
 
         IL_Main.DoDraw += il =>
         {
@@ -151,7 +150,6 @@ internal sealed class ChunkSystem : ModSystem
         var actualMethodLabel = c.DefineLabel();
         c.EmitDelegate(() => AllowVanillaDrawing);
         c.EmitBrtrue(actualMethodLabel);
-        c.EmitRet();
         c.MarkLabel(actualMethodLabel);
     }
 
